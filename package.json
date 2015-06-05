@@ -1,0 +1,16 @@
+{
+  "name": "gh-board",
+  "version": "0.0.0",
+  "description": "kanban board using just GitHub",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^10.2.3",
+    "octokat": "^0.4.10",
+    "react": "^0.13.3"
+  }
+}
