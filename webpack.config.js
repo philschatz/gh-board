@@ -7,7 +7,7 @@ module.exports = {
     context: path.resolve(__dirname),
     entry: [
       'webpack/hot/dev-server', // 'webpack/hot/only-dev-server',
-      "./src/index.jsx"
+      "./src/index.js"
     ],
     output: {
         path: './dist',
