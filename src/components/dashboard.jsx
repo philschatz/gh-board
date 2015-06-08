@@ -39,6 +39,7 @@ const DashboardShell = React.createClass({
       <Loadable
         promise={Client.getOcto().user.repos.fetch()}
         renderLoaded={(data) => { return (<Dashboard data={data}/>); } }
+        renderError={(err) => { return <span>Are you logged in?</span>; }}
       />
     );
   }

@@ -1,4 +1,18 @@
 .kanban-board td { vertical-align: top; }
+.kanban-board th,
+.kanban-board td {
+  width: 40rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
 
-.panel.issue .issue-number::before { content: '#'; }
-.panel.issue .issue-number { font-size: 200%; }
+.kanban-board .panel.issue { cursor: pointer; }
+.kanban-board .panel.issue .issue-number::before { content: '#'; }
+.kanban-board .panel.issue .issue-number { font-size: 200%; }
+
+
+.modal.issue-edit .body-avatar,
+.modal.issue-edit .body-avatar .avatar-image {
+  vertical-align: top;
+  width: 5rem;
+}

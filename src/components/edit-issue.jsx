@@ -82,13 +82,27 @@ export default React.createClass({
 
     return (
       <BS.Modal {...this.props}
-        title={title}>
+        title={title}
+        className="issue-edit">
         <div className="modal-body">
-          <GithubFlavoredMarkdown
-            text={issue.body}
-            repoOwner={repoOwner}
-            repoName={repoName}
-          />
+          <table>
+            <tbody>
+              <tr>
+                <td className="body-avatar">
+                  <a target="_blank" href={issue.user.html.url}>
+                    <img className="avatar-image" src={issue.user.avatar.url}/>
+                  </a>
+                </td>
+                <td className="body-markup">
+                  <GithubFlavoredMarkdown
+                    text={issue.body}
+                    repoOwner={repoOwner}
+                    repoName={repoName}
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
         <div className="modal-footer">
           {footer}
