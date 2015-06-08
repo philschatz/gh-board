@@ -1,18 +1,16 @@
 import React from "react";
-import Octo from "octokat";
-
-const octo = new Octo();
+import Client from "../github-client";
 
 let cachedPromise = null;
 
-const GitHubMessage = React.createClass({
+export default React.createClass({
   displayName: "GitHubMessage",
   getInitialState() {
     return {msg: ""};
   },
   componentDidMount() {
     if (!cachedPromise) {
-      cachedPromise = octo.zen.read();
+      cachedPromise = Client.readMessage();
     }
     cachedPromise.then((msg)=> this.setState({msg}));
   },
@@ -24,5 +22,3 @@ const GitHubMessage = React.createClass({
     );
   }
 });
-
-export default GitHubMessage;

@@ -20,5 +20,10 @@
     "react-router": "^0.13.3",
     "webpack": "^1.9.10",
     "webpack-dev-server": "^1.9.0"
+  },
+  "dependencies": {
+    "bootstrap": "^3.3.4",
+    "react-bootstrap": "^0.23.1",
+    "underscore": "^1.8.3"
   }
 }
