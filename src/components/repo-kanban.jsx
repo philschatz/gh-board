@@ -5,7 +5,7 @@ import BS from "react-bootstrap";
 
 import Client from "../github-client";
 import Loadable from "./loadable.jsx";
-import EditIssue from "./edit-issue.jsx";
+import KanbanIssue from "./kanban-issue.jsx";
 
 // Of the form `# - ...`
 const KANBAN_LABEL = /^\d+\ -\ /;
@@ -17,37 +17,6 @@ const filterKanbanLabels = (labels) => {
 };
 
 const kanbanLabelName = (label) => label.name.slice(label.name.indexOf("-") + 2);
-
-const KanbanIssue = React.createClass({
-  displayName: "KanbanIssue",
-  render() {
-    let {issue, repoOwner, repoName} = this.props;
-    let assignedAvatar = null;
-    if (issue.assignee) {
-      assignedAvatar = (
-        <img src={issue.assignee.avatar_url}/>
-      );
-    }
-    let footer = [
-      assignedAvatar,
-      <a className="issue-number" target="_window" href={issue.htmlUrl}>{issue.number}</a>
-    ];
-    let modal = (
-      <EditIssue
-        issue={issue}
-        repoOwner={repoOwner}
-        repoName={repoName}
-      />
-    );
-    return (
-      <BS.ModalTrigger modal={modal}>
-        <BS.Panel className="issue" bsStyle="default" footer={footer}>
-          {issue.title}
-        </BS.Panel>
-      </BS.ModalTrigger>
-    );
-  }
-});
 
 const KanbanIssues = React.createClass({
   displayName: "KanbanIssues",
