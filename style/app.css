@@ -1,0 +1,4 @@
+.kanban-board td { vertical-align: top; }
+
+.panel.issue .issue-number::before { content: '#'; }
+.panel.issue .issue-number { font-size: 200%; }
