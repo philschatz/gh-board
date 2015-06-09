@@ -1,18 +1,18 @@
-import React from "react";
-import {Link, RouteHandler} from "react-router";
-import BS from "react-bootstrap";
-import HTML5Backend from "react-dnd/modules/backends/HTML5";
-import { DragDropContext } from "react-dnd";
+import React from 'react';
+import {Link, RouteHandler} from 'react-router';
+import BS from 'react-bootstrap';
+import HTML5Backend from 'react-dnd/modules/backends/HTML5';
+import { DragDropContext } from 'react-dnd';
 
-import LoginModal from "./login-modal.jsx";
+import LoginModal from './login-modal.jsx';
 
 const App = React.createClass({
   render: () => {
     const brand = (
-      <Link to="viewDashboard">Dashboard</Link>
+      <Link to='viewDashboard'>Dashboard</Link>
     );
     return (
-      <div className="app">
+      <div className='app'>
         <BS.Navbar brand={brand} toggleNavKey={0}>
           <BS.Nav right eventKey={0}>
             <BS.ModalTrigger modal={<LoginModal/>}>

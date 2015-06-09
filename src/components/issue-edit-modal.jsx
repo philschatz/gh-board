@@ -1,8 +1,8 @@
-import React from "react";
-import BS from "react-bootstrap";
+import React from 'react';
+import BS from 'react-bootstrap';
 
-import Client from "../github-client";
-import IssueComment from "./issue-comment.jsx";
+import Client from '../github-client';
+import IssueComment from './issue-comment.jsx';
 
 const IssueTitle = React.createClass({
   getInitialState() {
@@ -26,18 +26,18 @@ const IssueTitle = React.createClass({
 
     if (isEditing) {
       return (
-        <span className="issue-title is-editing">
+        <span className='issue-title is-editing'>
           <BS.Input
-            ref="title"
-            type="text"
+            ref='title'
+            type='text'
             value={issue.title}
           />
           <BS.Button
-            bsStyle="primary"
+            bsStyle='primary'
             onClick={this.onSave}>Save
           </BS.Button>
           <BS.Button
-            bsStyle="default"
+            bsStyle='default'
             onClick={this.onCancel}>Cancel
           </BS.Button>
         </span>
@@ -45,10 +45,10 @@ const IssueTitle = React.createClass({
 
     } else {
       return (
-        <h2 className="issue-title">
-          <span className="issue-title-text" onClick={this.onEdit}>{issue.title}</span>
+        <h2 className='issue-title'>
+          <span className='issue-title-text' onClick={this.onEdit}>{issue.title}</span>
           <BS.Button
-            bsStyle="default"
+            bsStyle='default'
             onClick={this.onEdit}>Edit
           </BS.Button>
         </h2>
@@ -58,7 +58,7 @@ const IssueTitle = React.createClass({
 });
 
 export default React.createClass({
-  displayName: "IssueEditModal",
+  displayName: 'IssueEditModal',
   onClose() {
     this.props.onRequestHide();
   },
@@ -67,7 +67,7 @@ export default React.createClass({
 
     const footer = (
       <span>
-        <BS.Button bsStyle="default" onClick={this.onClose}>Close</BS.Button>
+        <BS.Button bsStyle='default' onClick={this.onClose}>Close</BS.Button>
       </span>
     );
 
@@ -82,15 +82,15 @@ export default React.createClass({
     return (
       <BS.Modal {...this.props}
         title={title}
-        className="issue-edit">
-        <div className="modal-body">
+        className='issue-edit'>
+        <div className='modal-body'>
           <IssueComment
             issue={issue}
             repoOwner={repoOwner}
             repoName={repoName}
           />
         </div>
-        <div className="modal-footer">
+        <div className='modal-footer'>
           {footer}
         </div>
     </BS.Modal>

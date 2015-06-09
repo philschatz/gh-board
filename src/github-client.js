@@ -1,11 +1,11 @@
-import Octo from "octokat";
+import Octo from 'octokat';
 
 class Client {
   getCredentials() {
     return {
-      token: window.localStorage.getItem("gh-token"),
-      username: window.localStorage.getItem("gh-username"),
-      password: window.localStorage.getItem("gh-password")
+      token: window.localStorage.getItem('gh-token'),
+      username: window.localStorage.getItem('gh-username'),
+      password: window.localStorage.getItem('gh-password')
     };
   }
   hasCredentials() {
@@ -22,9 +22,9 @@ class Client {
 
   setToken(token) {
     if (token) {
-      window.localStorage.setItem("gh-token", token);
+      window.localStorage.setItem('gh-token', token);
     } else {
-      window.localStorage.removeItem("gh-token");
+      window.localStorage.removeItem('gh-token');
     }
   }
 }

@@ -1,11 +1,11 @@
-import React from "react";
-import BS from "react-bootstrap";
-import { DragSource } from "react-dnd";
+import React from 'react';
+import BS from 'react-bootstrap';
+import { DragSource } from 'react-dnd';
 
-import IssueEditModal from "./issue-edit-modal.jsx";
+import IssueEditModal from './issue-edit-modal.jsx';
 
 const ItemTypes = {
-  CARD: "card"
+  CARD: 'card'
 };
 
 const issueSource = {
@@ -24,7 +24,7 @@ const issueSource = {
     const item = monitor.getItem();
     const dropResult = monitor.getDropResult();
     // CardActions.moveCardToList(item.id, dropResult.listId);
-    console.log("Dropped!", item, dropResult);
+    console.log('Dropped!', item, dropResult);
   }
 };
 
@@ -42,7 +42,7 @@ function collect(connect, monitor) {
 
 
 const Issue = React.createClass({
-  displayName: "Issue",
+  displayName: 'Issue',
   render() {
     const {issue, repoOwner, repoName} = this.props;
 
@@ -57,7 +57,7 @@ const Issue = React.createClass({
     }
     const footer = [
       assignedAvatar,
-      <a className="issue-number" target="_window" href={issue.htmlUrl}>{issue.number}</a>
+      <a className='issue-number' target='_window' href={issue.htmlUrl}>{issue.number}</a>
     ];
     const modal = (
       <IssueEditModal
@@ -68,7 +68,7 @@ const Issue = React.createClass({
     );
     return connectDragSource(
       <BS.ModalTrigger modal={modal}>
-        <BS.Panel className={{"issue": true, "is-dragging": isDragging}} bsStyle="default" footer={footer}>
+        <BS.Panel className={{'issue': true, 'is-dragging': isDragging}} bsStyle='default' footer={footer}>
           {issue.title}
         </BS.Panel>
       </BS.ModalTrigger>

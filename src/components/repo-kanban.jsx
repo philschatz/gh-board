@@ -1,9 +1,9 @@
-import React from "react";
-import _ from "underscore";
+import React from 'react';
+import _ from 'underscore';
 
-import Client from "../github-client";
-import Loadable from "./loadable.jsx";
-import IssueList from "./issue-list.jsx";
+import Client from '../github-client';
+import Loadable from './loadable.jsx';
+import IssueList from './issue-list.jsx';
 
 // Of the form `# - ...`
 const KANBAN_LABEL = /^\d+\ -\ /;
@@ -14,11 +14,11 @@ const filterKanbanLabels = (labels) => {
   return kanbanLabels.sort();
 };
 
-const kanbanLabelName = (label) => label.name.slice(label.name.indexOf("-") + 2);
+const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2);
 
 
 const KanbanRepo = React.createClass({
-  displayName: "KanbanRepo",
+  displayName: 'KanbanRepo',
   renderHeadings(labels) {
     return _.map(labels, (label) => {
       const name = kanbanLabelName(label);
@@ -49,7 +49,7 @@ const KanbanRepo = React.createClass({
     const workflowStateIssues = this.renderIssues(kanbanLabels);
 
     return (
-      <table className="kanban-board">
+      <table className='kanban-board'>
         <thead>
           {workflowStateHeadings}
         </thead>
@@ -64,13 +64,13 @@ const KanbanRepo = React.createClass({
 });
 
 const Repo = React.createClass({
-  displayName: "Repo",
+  displayName: 'Repo',
   render() {
     const {repoOwner, repoName, data} = this.props;
 
     // Get all the issue labels first
     const renderLoaded = (labels) => {
-      // If there are at least 2 "special" kanban labels then consider it valid
+      // If there are at least 2 'special' kanban labels then consider it valid
       const kanbanLabels = filterKanbanLabels(labels);
 
       if (kanbanLabels.length > 1) {
@@ -99,7 +99,7 @@ const Repo = React.createClass({
 });
 
 const RepoKanbanShell = React.createClass({
-  displayName: "RepoKanbanShell",
+  displayName: 'RepoKanbanShell',
   contextTypes: {
     router: React.PropTypes.func
   },

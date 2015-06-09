@@ -1,22 +1,22 @@
-import React from "react";
-import _ from "underscore";
+import React from 'react';
+import _ from 'underscore';
 
-import Client from "../github-client";
-import Loadable from "./loadable.jsx";
+import Client from '../github-client';
+import Loadable from './loadable.jsx';
 
 export default React.createClass({
-  displayName: "GithubFlavoredMarkdown",
+  displayName: 'GithubFlavoredMarkdown',
   getPromise() {
     const {text, repoOwner, repoName} = this.props;
-    const context = repoOwner + "/" + repoName;
+    const context = repoOwner + '/' + repoName;
     const isRaw = true;
-    const HACK = JSON.stringify({text: text, context: context, mode: "gfm"});
+    const HACK = JSON.stringify({text: text, context: context, mode: 'gfm'});
     return Client.getOcto().markdown.create(HACK, isRaw);
   },
   updateLinks() {
-    const links = this.getDOMNode().querySelectorAll("a");
+    const links = this.getDOMNode().querySelectorAll('a');
     _.each(links, (link) => {
-      link.setAttribute("target", "_window");
+      link.setAttribute('target', '_window');
     });
   },
   componentDidMount() {
@@ -31,7 +31,7 @@ export default React.createClass({
         promise={this.getPromise()}
         renderLoaded={(html) => {
           return (
-            <div className="rendered-markdown" dangerouslySetInnerHTML={{__html: html}} />
+            <div className='rendered-markdown' dangerouslySetInnerHTML={{__html: html}} />
           );
         }}
       />

@@ -17,6 +17,7 @@
     "react/jsx-uses-vars": 1,
     "no-var": 2,
     "new-cap": 0,
+    "quotes": [1, "single", "avoid-escape"],
     "no-console": 1,
     "semi": 1
   }

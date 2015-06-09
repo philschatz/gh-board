@@ -1,9 +1,9 @@
-import React from "react";
-import Client from "../github-client";
-import BS from "react-bootstrap";
+import React from 'react';
+import Client from '../github-client';
+import BS from 'react-bootstrap';
 
 export default React.createClass({
-  displayName: "Login",
+  displayName: 'Login',
   onSave() {
     const {token} = this.refs;
     const tokenVal = token.getValue();
@@ -24,25 +24,25 @@ export default React.createClass({
 
     const footer = (
       <span>
-        <BS.Button bsStyle="primary" onClick={this.onSave}>Save</BS.Button>
-        <BS.Button bsStyle="default" onClick={this.onClear}>Clear</BS.Button>
-        <BS.Button bsStyle="default" onClick={this.onCancel}>Cancel</BS.Button>
+        <BS.Button bsStyle='primary' onClick={this.onSave}>Save</BS.Button>
+        <BS.Button bsStyle='default' onClick={this.onClear}>Clear</BS.Button>
+        <BS.Button bsStyle='default' onClick={this.onCancel}>Cancel</BS.Button>
       </span>
     );
 
     return (
       <BS.Modal {...this.props}
-        title="GitHub Credentials">
-        <div className="modal-body">
+        title='GitHub Credentials'>
+        <div className='modal-body'>
           <BS.Input
-            type="text"
+            type='text'
             value={token}
             disabled={!!token}
-            placeholder="Enter GitHub token"
-            ref="token"
+            placeholder='Enter GitHub token'
+            ref='token'
           />
         </div>
-        <div className="modal-footer">
+        <div className='modal-footer'>
           {footer}
         </div>
     </BS.Modal>

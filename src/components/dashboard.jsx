@@ -1,12 +1,12 @@
-import React from "react";
-import _ from "underscore";
-import {Link} from "react-router";
+import React from 'react';
+import _ from 'underscore';
+import {Link} from 'react-router';
 
-import Client from "../github-client";
-import Loadable from "./loadable.jsx";
+import Client from '../github-client';
+import Loadable from './loadable.jsx';
 
 const Dashboard = React.createClass({
-  displayName: "Dashboard",
+  displayName: 'Dashboard',
   render() {
     const {data} = this.props;
 
@@ -17,13 +17,13 @@ const Dashboard = React.createClass({
       return (
         <div key={repo.id}>
           {repoOwner} /
-          <Link to="viewRepo" params={{repoOwner, repoName}}>{repoName}</Link>
+          <Link to='viewRepo' params={{repoOwner, repoName}}>{repoName}</Link>
         </div>
       );
     });
 
     return (
-      <div className="dashboard">
+      <div className='dashboard'>
         {items}
       </div>
     );
@@ -31,7 +31,7 @@ const Dashboard = React.createClass({
 });
 
 const DashboardShell = React.createClass({
-  displayName: "DashboardShell",
+  displayName: 'DashboardShell',
   render() {
     return (
       <Loadable

@@ -1,3 +1,3 @@
-import startRouter from "./components/router.jsx";
+import startRouter from './components/router.jsx';
 
 startRouter();

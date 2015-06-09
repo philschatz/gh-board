@@ -1,12 +1,12 @@
-import React from "react";
-import _ from "underscore";
-import { DropTarget } from "react-dnd";
+import React from 'react';
+import _ from 'underscore';
+import { DropTarget } from 'react-dnd';
 
-import Issue from "./issue.jsx";
+import Issue from './issue.jsx';
 
 
 const ItemTypes = {
-  CARD: "card"
+  CARD: 'card'
 };
 
 const cardListTarget = {
@@ -25,7 +25,7 @@ function collect(connect, monitor) {
 
 
 const IssueList = React.createClass({
-  displayName: "IssueList",
+  displayName: 'IssueList',
   render() {
     const {issues, repoOwner, repoName} = this.props;
     const {connectDropTarget} = this.props;
@@ -43,7 +43,7 @@ const IssueList = React.createClass({
     });
 
     return connectDropTarget(
-      <div className="kanban-issues">{isOver && "Release to move here"}{kanbanIssues}</div>
+      <div className='kanban-issues'>{isOver && 'Release to move here'}{kanbanIssues}</div>
     );
   }
 });
