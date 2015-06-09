@@ -1,8 +1,10 @@
 import React from 'react';
+import _ from 'underscore';
 import BS from 'react-bootstrap';
 
 import Client from '../github-client';
 import IssueComment from './issue-comment.jsx';
+import Loadable from './loadable.jsx';
 
 const IssueTitle = React.createClass({
   getInitialState() {
@@ -79,16 +81,43 @@ export default React.createClass({
       />
     );
 
+    const renderComments = (comments) => {
+      const commentsWrapper = _.map(comments, (comment) => {
+        return (
+          <IssueComment
+            user={comment.user}
+            body={comment.body}
+            repoOwner={repoOwner}
+            repoName={repoName}
+          />
+        );
+      });
+
+      return (
+        <div className='issue-comments'>
+          <h2>Activity</h2>
+          {commentsWrapper}
+        </div>
+      );
+    };
+
     return (
       <BS.Modal {...this.props}
         title={title}
         className='issue-edit'>
         <div className='modal-body'>
           <IssueComment
-            issue={issue}
+            user={issue.user}
+            body={issue.body}
             repoOwner={repoOwner}
             repoName={repoName}
           />
+          <Loadable
+            promise={Client.getOcto().repos(repoOwner, repoName).issues(issue.number).comments.fetch()}
+            renderLoaded={renderComments}
+            renderLoading={() => <span>Loading comments...</span>}
+          />
+
         </div>
         <div className='modal-footer'>
           {footer}
