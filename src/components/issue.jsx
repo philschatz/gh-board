@@ -3,13 +3,13 @@ import React from "react";
 import BS from "react-bootstrap";
 import { DragSource } from "react-dnd";
 
-import EditIssue from "./edit-issue.jsx";
+import IssueEditModal from "./issue-edit-modal.jsx";
 
-const Types = {
+const ItemTypes = {
   CARD: "card"
 };
 
-const cardSource = {
+const issueSource = {
   beginDrag(props) {
     // Return the data describing the dragged item
     const item = props;
@@ -42,8 +42,8 @@ function collect(connect, monitor) {
 
 
 
-const KanbanIssue = React.createClass({
-  displayName: "KanbanIssue",
+const Issue = React.createClass({
+  displayName: "Issue",
   render() {
     let {issue, repoOwner, repoName} = this.props;
 
@@ -61,7 +61,7 @@ const KanbanIssue = React.createClass({
       <a className="issue-number" target="_window" href={issue.htmlUrl}>{issue.number}</a>
     ];
     let modal = (
-      <EditIssue
+      <IssueEditModal
         issue={issue}
         repoOwner={repoOwner}
         repoName={repoName}
@@ -78,4 +78,4 @@ const KanbanIssue = React.createClass({
 });
 
 // Export the wrapped version
-export default DragSource(Types.CARD, cardSource, collect)(KanbanIssue);
+export default DragSource(ItemTypes.CARD, issueSource, collect)(Issue);

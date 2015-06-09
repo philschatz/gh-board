@@ -60,7 +60,7 @@ const IssueTitle = React.createClass({
 });
 
 export default React.createClass({
-  displayName: "EditIssue",
+  displayName: "IssueEditModal",
   onClose() {
     this.props.onRequestHide();
   },

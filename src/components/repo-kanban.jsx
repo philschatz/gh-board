@@ -5,7 +5,7 @@ import BS from "react-bootstrap";
 
 import Client from "../github-client";
 import Loadable from "./loadable.jsx";
-import KanbanIssues from "./kanban-issues.jsx";
+import IssueList from "./issue-list.jsx";
 
 // Of the form `# - ...`
 const KANBAN_LABEL = /^\d+\ -\ /;
@@ -37,7 +37,7 @@ const KanbanRepo = React.createClass({
         <td>
           <Loadable
             promise={Client.getOcto().repos(repoOwner, repoName).issues.fetch({labels: label.name})}
-            renderLoaded={(issues) => <KanbanIssues issues={issues} repoOwner={repoOwner} repoName={repoName} label={label}/>}
+            renderLoaded={(issues) => <IssueList issues={issues} repoOwner={repoOwner} repoName={repoName} label={label}/>}
           />
         </td>
       );
