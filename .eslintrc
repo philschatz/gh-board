@@ -1,4 +1,6 @@
 {
+  "parser": "babel-eslint",
+  "plugins": [ "react" ],
   "env": {
     "es6": true,
     "browser": true,
@@ -12,6 +14,7 @@
     "jsx": true
   },
   "rules": {
+    "react/jsx-uses-vars": 1,
     "new-cap": 0,
     "no-console": 1,
     "semi": 1

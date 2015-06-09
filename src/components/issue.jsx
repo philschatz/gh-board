@@ -1,4 +1,3 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
 import BS from "react-bootstrap";
 import { DragSource } from "react-dnd";
@@ -16,7 +15,7 @@ const issueSource = {
     return item;
   },
 
-  endDrag(props, monitor, component) {
+  endDrag(props, monitor) {
     if (!monitor.didDrop()) {
       return;
     }
@@ -25,7 +24,7 @@ const issueSource = {
     const item = monitor.getItem();
     const dropResult = monitor.getDropResult();
     // CardActions.moveCardToList(item.id, dropResult.listId);
-    console.log("Dropped!");
+    console.log("Dropped!", item, dropResult);
   }
 };
 

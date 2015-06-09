@@ -1,4 +1,3 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
 import _ from "underscore";
 import { DropTarget } from "react-dnd";

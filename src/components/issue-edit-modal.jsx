@@ -1,10 +1,8 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
 import BS from "react-bootstrap";
 
 import Client from "../github-client";
 import IssueComment from "./issue-comment.jsx";
-import GithubFlavoredMarkdown from "./gfm.jsx";
 
 const IssueTitle = React.createClass({
   getInitialState() {

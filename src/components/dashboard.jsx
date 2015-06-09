@@ -1,8 +1,6 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
 import _ from "underscore";
 import {Link} from "react-router";
-import BS from "react-bootstrap";
 
 import Client from "../github-client";
 import Loadable from "./loadable.jsx";
@@ -39,7 +37,7 @@ const DashboardShell = React.createClass({
       <Loadable
         promise={Client.getOcto().user.repos.fetch()}
         renderLoaded={(data) => { return (<Dashboard data={data}/>); } }
-        renderError={(err) => { return <span>Are you logged in?</span>; }}
+        renderError={() => { return <span>Are you logged in?</span>; }}
       />
     );
   }

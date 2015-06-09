@@ -1,4 +1,3 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
 import Client from "../github-client";
 import BS from "react-bootstrap";

@@ -1,8 +1,5 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
-import BS from "react-bootstrap";
 
-import Client from "../github-client";
 import GithubFlavoredMarkdown from "./gfm.jsx";
 
 export default React.createClass({

@@ -1,7 +1,5 @@
-/*eslint no-unused-vars:0*/
 import React from "react";
 import _ from "underscore";
-import BS from "react-bootstrap";
 
 import Client from "../github-client";
 import Loadable from "./loadable.jsx";
@@ -118,7 +116,7 @@ const RepoKanbanShell = React.createClass({
       );
     };
 
-    let renderError = (err) => {
+    let renderError = () => {
       return (
         <div>Problem loading repo. Is it a valid repo? And are you connected to the internet?</div>
       );
