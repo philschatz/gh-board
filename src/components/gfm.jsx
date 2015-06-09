@@ -7,14 +7,14 @@ import Loadable from "./loadable.jsx";
 export default React.createClass({
   displayName: "GithubFlavoredMarkdown",
   getPromise() {
-    let {text, repoOwner, repoName} = this.props;
-    let context = repoOwner + "/" + repoName;
+    const {text, repoOwner, repoName} = this.props;
+    const context = repoOwner + "/" + repoName;
     const isRaw = true;
     const HACK = JSON.stringify({text: text, context: context, mode: "gfm"});
     return Client.getOcto().markdown.create(HACK, isRaw);
   },
   updateLinks() {
-    let links = this.getDOMNode().querySelectorAll("a");
+    const links = this.getDOMNode().querySelectorAll("a");
     _.each(links, (link) => {
       link.setAttribute("target", "_window");
     });

@@ -8,7 +8,7 @@ import LoginModal from "./login-modal.jsx";
 
 const App = React.createClass({
   render: () => {
-    let brand = (
+    const brand = (
       <Link to="viewDashboard">Dashboard</Link>
     );
     return (

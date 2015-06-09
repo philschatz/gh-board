@@ -5,9 +5,9 @@ import BS from "react-bootstrap";
 export default React.createClass({
   displayName: "Login",
   onSave() {
-    let {token} = this.refs;
-    token = token.getValue();
-    Client.setToken(token);
+    const {token} = this.refs;
+    const tokenVal = token.getValue();
+    Client.setToken(tokenVal);
     // Close the modal
     this.onCancel();
   },
@@ -20,9 +20,9 @@ export default React.createClass({
     this.props.onRequestHide();
   },
   render() {
-    let {token, username, password} = Client.getCredentials();
+    const {token, username, password} = Client.getCredentials();
 
-    let footer = (
+    const footer = (
       <span>
         <BS.Button bsStyle="primary" onClick={this.onSave}>Save</BS.Button>
         <BS.Button bsStyle="default" onClick={this.onClear}>Clear</BS.Button>

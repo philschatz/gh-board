@@ -21,8 +21,8 @@ const IssueTitle = React.createClass({
     Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({title: newTitle});
   },
   render() {
-    let {issue} = this.props;
-    let {isEditing} = this.state;
+    const {issue} = this.props;
+    const {isEditing} = this.state;
 
     if (isEditing) {
       return (
@@ -63,15 +63,15 @@ export default React.createClass({
     this.props.onRequestHide();
   },
   render() {
-    let {issue, repoOwner, repoName} = this.props;
+    const {issue, repoOwner, repoName} = this.props;
 
-    let footer = (
+    const footer = (
       <span>
         <BS.Button bsStyle="default" onClick={this.onClose}>Close</BS.Button>
       </span>
     );
 
-    let title = (
+    const title = (
       <IssueTitle
         issue={issue}
         repoOwner={repoOwner}

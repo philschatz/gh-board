@@ -9,7 +9,7 @@ const ItemTypes = {
   CARD: "card"
 };
 
-var cardListTarget = {
+const cardListTarget = {
   drop: function (props) {
     // TODO: Do something simpler than just props
     return props;
@@ -27,11 +27,11 @@ function collect(connect, monitor) {
 const IssueList = React.createClass({
   displayName: "IssueList",
   render() {
-    let {issues, repoOwner, repoName} = this.props;
-    let {connectDropTarget} = this.props;
-    let {isOver} = this.props; // from the collector
+    const {issues, repoOwner, repoName} = this.props;
+    const {connectDropTarget} = this.props;
+    const {isOver} = this.props; // from the collector
 
-    let kanbanIssues = _.map(issues, (issue) => {
+    const kanbanIssues = _.map(issues, (issue) => {
       return (
         <Issue
           key={issue.id}

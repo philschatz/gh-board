@@ -9,7 +9,7 @@ import IssueList from "./issue-list.jsx";
 const KANBAN_LABEL = /^\d+\ -\ /;
 
 const filterKanbanLabels = (labels) => {
-  let kanbanLabels = _.filter(labels, (label) => KANBAN_LABEL.test(label.name));
+  const kanbanLabels = _.filter(labels, (label) => KANBAN_LABEL.test(label.name));
   // TODO: Handle more than 10 workflow states
   return kanbanLabels.sort();
 };
@@ -21,14 +21,14 @@ const KanbanRepo = React.createClass({
   displayName: "KanbanRepo",
   renderHeadings(labels) {
     return _.map(labels, (label) => {
-      let name = kanbanLabelName(label);
+      const name = kanbanLabelName(label);
       return (
         <th>{name}</th>
       );
     });
   },
   renderIssues(labels) {
-    let {repoOwner, repoName} = this.props;
+    const {repoOwner, repoName} = this.props;
 
     return _.map(labels, (label) => {
       return (
@@ -42,11 +42,11 @@ const KanbanRepo = React.createClass({
     });
   },
   render() {
-    let {labels} = this.props;
-    let kanbanLabels = filterKanbanLabels(labels);
+    const {labels} = this.props;
+    const kanbanLabels = filterKanbanLabels(labels);
 
-    let workflowStateHeadings = this.renderHeadings(kanbanLabels);
-    let workflowStateIssues = this.renderIssues(kanbanLabels);
+    const workflowStateHeadings = this.renderHeadings(kanbanLabels);
+    const workflowStateIssues = this.renderIssues(kanbanLabels);
 
     return (
       <table className="kanban-board">
@@ -66,12 +66,12 @@ const KanbanRepo = React.createClass({
 const Repo = React.createClass({
   displayName: "Repo",
   render() {
-    let {repoOwner, repoName, data} = this.props;
+    const {repoOwner, repoName, data} = this.props;
 
     // Get all the issue labels first
-    let renderLoaded = (labels) => {
+    const renderLoaded = (labels) => {
       // If there are at least 2 "special" kanban labels then consider it valid
-      let kanbanLabels = filterKanbanLabels(labels);
+      const kanbanLabels = filterKanbanLabels(labels);
 
       if (kanbanLabels.length > 1) {
         return (
@@ -104,9 +104,9 @@ const RepoKanbanShell = React.createClass({
     router: React.PropTypes.func
   },
   render() {
-    let {repoOwner, repoName} = this.context.router.getCurrentParams();
+    const {repoOwner, repoName} = this.context.router.getCurrentParams();
 
-    let renderLoaded = (data) => {
+    const renderLoaded = (data) => {
       return (
         <Repo {...this.props}
           repoOwner={repoOwner}
@@ -116,7 +116,7 @@ const RepoKanbanShell = React.createClass({
       );
     };
 
-    let renderError = () => {
+    const renderError = () => {
       return (
         <div>Problem loading repo. Is it a valid repo? And are you connected to the internet?</div>
       );

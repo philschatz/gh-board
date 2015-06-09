@@ -4,7 +4,7 @@ import GithubFlavoredMarkdown from "./gfm.jsx";
 
 export default React.createClass({
   render() {
-    let {issue, repoOwner, repoName} = this.props;
+    const {issue, repoOwner, repoName} = this.props;
 
     return (
       <table>

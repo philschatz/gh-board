@@ -8,11 +8,11 @@ import Loadable from "./loadable.jsx";
 const Dashboard = React.createClass({
   displayName: "Dashboard",
   render() {
-    let {data} = this.props;
+    const {data} = this.props;
 
-    let items = _.map(data, (repo) => {
-      let repoOwner = repo.owner.login;
-      let repoName = repo.name;
+    const items = _.map(data, (repo) => {
+      const repoOwner = repo.owner.login;
+      const repoName = repo.name;
 
       return (
         <div key={repo.id}>

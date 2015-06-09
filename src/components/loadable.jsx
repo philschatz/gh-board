@@ -17,7 +17,7 @@ export default React.createClass({
     };
   },
   componentDidMount() {
-    let {promise} = this.props;
+    const {promise} = this.props;
     promise.then(this.onResolve, this.onError);
   },
   // componentDidUpdate() {
@@ -37,8 +37,8 @@ export default React.createClass({
     }
   },
   render() {
-    let {status, value} = this.state;
-    let {renderLoaded, renderError} = this.props;
+    const {status, value} = this.state;
+    const {renderLoaded, renderError} = this.props;
 
     if (status === STATUS.INITIAL) {
       return (

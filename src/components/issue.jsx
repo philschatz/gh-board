@@ -44,7 +44,7 @@ function collect(connect, monitor) {
 const Issue = React.createClass({
   displayName: "Issue",
   render() {
-    let {issue, repoOwner, repoName} = this.props;
+    const {issue, repoOwner, repoName} = this.props;
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -55,11 +55,11 @@ const Issue = React.createClass({
         <img src={issue.assignee.avatar_url}/>
       );
     }
-    let footer = [
+    const footer = [
       assignedAvatar,
       <a className="issue-number" target="_window" href={issue.htmlUrl}>{issue.number}</a>
     ];
-    let modal = (
+    const modal = (
       <IssueEditModal
         issue={issue}
         repoOwner={repoOwner}
