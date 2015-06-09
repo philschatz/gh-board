@@ -42,10 +42,15 @@ const IssueList = React.createClass({
       );
     });
 
+    // DnD placeholder element
+    const placeholder = (
+      <div className="dnd-placeholder"/>
+    );
+
     return connectDropTarget(
       <div className='kanban-issues'>
-        <div className='title'>{title}</div>
-        {isOver && 'Release to move here'}
+        <h2 className='title'>{title}</h2>
+        {isOver && placeholder}
         {kanbanIssues}
       </div>
     );
