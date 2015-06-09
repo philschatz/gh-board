@@ -27,7 +27,7 @@ function collect(connect, monitor) {
 const IssueList = React.createClass({
   displayName: 'IssueList',
   render() {
-    const {issues, repoOwner, repoName} = this.props;
+    const {issues, title, repoOwner, repoName} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
 
@@ -43,7 +43,11 @@ const IssueList = React.createClass({
     });
 
     return connectDropTarget(
-      <div className='kanban-issues'>{isOver && 'Release to move here'}{kanbanIssues}</div>
+      <div className='kanban-issues'>
+        <div className='title'>{title}</div>
+        {isOver && 'Release to move here'}
+        {kanbanIssues}
+      </div>
     );
   }
 });
