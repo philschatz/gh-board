@@ -30,6 +30,7 @@ const IssueList = React.createClass({
   render() {
     let {issues, repoOwner, repoName} = this.props;
     let {connectDropTarget} = this.props;
+    let {isOver} = this.props; // from the collector
 
     let kanbanIssues = _.map(issues, (issue) => {
       return (
@@ -43,7 +44,7 @@ const IssueList = React.createClass({
     });
 
     return connectDropTarget(
-      <div className="kanban-issues">{kanbanIssues}</div>
+      <div className="kanban-issues">{isOver && "Release to move here"}{kanbanIssues}</div>
     );
   }
 });

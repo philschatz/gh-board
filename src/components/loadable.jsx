@@ -11,6 +11,11 @@ export default React.createClass({
   getInitialState() {
     return {status: STATUS.INITIAL, value: null};
   },
+  getDefaultProps() {
+    return {
+      renderError: () => <div className="loadable is-error">Error Loading. Is the repo URL correct? are you connected to the internet? Are you logged in?</div>
+    };
+  },
   componentDidMount() {
     let {promise} = this.props;
     promise.then(this.onResolve, this.onError);
@@ -37,7 +42,7 @@ export default React.createClass({
 
     if (status === STATUS.INITIAL) {
       return (
-        <span className="loadable-loading">Loading...</span>
+        <span className="loadable is-loading">Loading...</span>
       );
     } else if (status === STATUS.RESOLVED) {
       return renderLoaded(value);

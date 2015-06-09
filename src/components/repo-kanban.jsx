@@ -118,10 +118,17 @@ const RepoKanbanShell = React.createClass({
       );
     };
 
+    let renderError = (err) => {
+      return (
+        <div>Problem loading repo. Is it a valid repo? And are you connected to the internet?</div>
+      );
+    };
+
     return (
       <Loadable
         promise={Client.getOcto().repos(repoOwner, repoName).fetch()}
         renderLoaded={renderLoaded}
+        renderError={renderError}
       />
     );
   }
