@@ -5,7 +5,7 @@ import BS from "react-bootstrap";
 
 import Client from "../github-client";
 import Loadable from "./loadable.jsx";
-import KanbanIssue from "./kanban-issue.jsx";
+import KanbanIssues from "./kanban-issues.jsx";
 
 // Of the form `# - ...`
 const KANBAN_LABEL = /^\d+\ -\ /;
@@ -18,27 +18,6 @@ const filterKanbanLabels = (labels) => {
 
 const kanbanLabelName = (label) => label.name.slice(label.name.indexOf("-") + 2);
 
-const KanbanIssues = React.createClass({
-  displayName: "KanbanIssues",
-  render() {
-    let {issues, repoOwner, repoName} = this.props;
-
-    let kanbanIssues = _.map(issues, (issue) => {
-      return (
-        <KanbanIssue
-          key={issue.id}
-          issue={issue}
-          repoOwner={repoOwner}
-          repoName={repoName}
-        />
-      );
-    });
-
-    return (
-      <div>{kanbanIssues}</div>
-    );
-  }
-});
 
 const KanbanRepo = React.createClass({
   displayName: "KanbanRepo",
@@ -58,7 +37,7 @@ const KanbanRepo = React.createClass({
         <td>
           <Loadable
             promise={Client.getOcto().repos(repoOwner, repoName).issues.fetch({labels: label.name})}
-            renderLoaded={(issues) => <KanbanIssues issues={issues} repoOwner={repoOwner} repoName={repoName}/>}
+            renderLoaded={(issues) => <KanbanIssues issues={issues} repoOwner={repoOwner} repoName={repoName} label={label}/>}
           />
         </td>
       );

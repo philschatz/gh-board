@@ -1,13 +1,55 @@
 /*eslint no-unused-vars:0*/
 import React from "react";
 import BS from "react-bootstrap";
+import { DragSource } from "react-dnd";
 
 import EditIssue from "./edit-issue.jsx";
 
-export default React.createClass({
+const Types = {
+  CARD: "card"
+};
+
+const cardSource = {
+  beginDrag(props) {
+    // Return the data describing the dragged item
+    const item = props;
+    return item;
+  },
+
+  endDrag(props, monitor, component) {
+    if (!monitor.didDrop()) {
+      return;
+    }
+
+    // When dropped on a compatible target, do something
+    const item = monitor.getItem();
+    const dropResult = monitor.getDropResult();
+    // CardActions.moveCardToList(item.id, dropResult.listId);
+    console.log("Dropped!");
+  }
+};
+
+
+function collect(connect, monitor) {
+  return {
+    // Call this function inside render()
+    // to let React DnD handle the drag events:
+    connectDragSource: connect.dragSource(),
+    // You can ask the monitor about the current drag state:
+    isDragging: monitor.isDragging()
+  };
+}
+
+
+
+const KanbanIssue = React.createClass({
   displayName: "KanbanIssue",
   render() {
     let {issue, repoOwner, repoName} = this.props;
+
+    // Defined by the collector
+    const { isDragging, connectDragSource } = this.props;
+
     let assignedAvatar = null;
     if (issue.assignee) {
       assignedAvatar = (
@@ -25,12 +67,15 @@ export default React.createClass({
         repoName={repoName}
       />
     );
-    return (
+    return connectDragSource(
       <BS.ModalTrigger modal={modal}>
-        <BS.Panel className="issue" bsStyle="default" footer={footer}>
+        <BS.Panel className={{"issue": true, "is-dragging": isDragging}} bsStyle="default" footer={footer}>
           {issue.title}
         </BS.Panel>
       </BS.ModalTrigger>
     );
   }
 });
+
+// Export the wrapped version
+export default DragSource(Types.CARD, cardSource, collect)(KanbanIssue);

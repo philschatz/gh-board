@@ -2,6 +2,8 @@
 import React from "react";
 import {Link, RouteHandler} from "react-router";
 import BS from "react-bootstrap";
+import HTML5Backend from "react-dnd/modules/backends/HTML5";
+import { DragDropContext } from "react-dnd";
 
 import LoginModal from "./login-modal.jsx";
 
@@ -27,4 +29,4 @@ const App = React.createClass({
   }
 });
 
-export default App;
+export default DragDropContext(HTML5Backend)(App);

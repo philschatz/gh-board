@@ -28,3 +28,10 @@
 
 .comment-content { }
 .comment-body { }
+
+
+/* Just make it gray so it is clear we are dragging this element */
+.is-dragging {
+  color: #ccc !important;
+  background-color: #ccc !important;
+}
