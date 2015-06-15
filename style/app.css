@@ -43,3 +43,6 @@
 }
 
 .dnd-placeholder::before { content: 'Release to drop me in this list'; }
+
+
+.topbar-nav .logoff .avatar { max-height: 40px; }

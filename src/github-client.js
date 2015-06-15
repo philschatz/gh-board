@@ -1,6 +1,9 @@
+import EventEmitter from 'events';
 import Octo from 'octokat';
 
-class Client {
+let cachedClient = null;
+
+class Client extends EventEmitter {
   getCredentials() {
     return {
       token: window.localStorage.getItem('gh-token'),
@@ -13,19 +16,24 @@ class Client {
     return !!token || !!password;
   }
   getOcto() {
-    let credentials = this.getCredentials();
-    return new Octo(credentials);
+    if (!cachedClient) {
+      let credentials = this.getCredentials();
+      cachedClient = new Octo(credentials);
+    }
+    return cachedClient;
   }
   readMessage() {
     return this.getOcto().zen.read();
   }
 
   setToken(token) {
+    cachedClient = null;
     if (token) {
       window.localStorage.setItem('gh-token', token);
     } else {
       window.localStorage.removeItem('gh-token');
     }
+    this.emit('changeToken');
   }
 }
 
