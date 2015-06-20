@@ -57,7 +57,7 @@ const Issue = React.createClass({
     }
     const footer = [
       assignedAvatar,
-      <a className='issue-number' target='_blank' href={issue.htmlUrl}>{issue.number}</a>
+      <a className='issue-number' target='_blank' href={issue.html.url}>{issue.number}</a>
     ];
     const modal = (
       <IssueEditModal
