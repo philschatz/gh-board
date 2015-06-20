@@ -13,6 +13,18 @@ const InnerMarkdown = React.createClass({
     _.each(links, (link) => {
       link.setAttribute('target', '_blank');
     });
+    // Wrap images with a link that opens them in a new tab
+    const images = this.getDOMNode().querySelectorAll('img');
+    _.each(images, (img) => {
+      const parent = img.parentNode;
+      const href = img.getAttribute('src');
+      const link = document.createElement('a');
+      parent.replaceChild(link, img);
+      link.appendChild(img);
+      link.setAttribute('href', href);
+      link.setAttribute('target', '_blank');
+    });
+
   },
   componentDidMount() {
     this.updateLinks();

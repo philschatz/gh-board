@@ -46,3 +46,6 @@
 
 
 .topbar-nav .logoff .avatar { max-height: 40px; }
+
+/* Make sure images are scaled to fit in the modal */
+.rendered-markdown img { max-width: 100%; }
