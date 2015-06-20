@@ -29,7 +29,7 @@ const KarmaWarning = React.createClass({
       return (
         <BS.Navbar fixedBottom>
           <BS.Nav>
-            <BS.Button>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in</BS.Button>
+            <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in</BS.Button>
           </BS.Nav>
         </BS.Navbar>
       );

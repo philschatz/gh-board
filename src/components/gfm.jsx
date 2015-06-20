@@ -1,8 +1,10 @@
 import React from 'react';
 import _ from 'underscore';
+import ultramarked from 'ultramarked';
+import linkify from 'gfm-linkify';
 
-import Client from '../github-client';
-import Loadable from './loadable.jsx';
+// import Client from '../github-client';
+// import Loadable from './loadable.jsx';
 
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',
@@ -19,7 +21,10 @@ const InnerMarkdown = React.createClass({
     this.updateLinks();
   },
   render() {
-    const {html} = this.props;
+    const {text, repoOwner, repoName} = this.props;
+    const context = repoOwner + '/' + repoName;
+    const textStripped = text.replace(/<!--[\s\S]*?-->/g, '');
+    const html = ultramarked(linkify(textStripped, context));
 
     return (
       <div className='rendered-markdown' dangerouslySetInnerHTML={{__html: html}} />
@@ -28,25 +33,27 @@ const InnerMarkdown = React.createClass({
 
 });
 
-export default React.createClass({
-  displayName: 'GithubFlavoredMarkdown',
-  getPromise() {
-    const {text, repoOwner, repoName} = this.props;
-    const context = repoOwner + '/' + repoName;
-    const isRaw = true;
-    const HACK = JSON.stringify({text: text, context: context, mode: 'gfm'});
-    return Client.getOcto().markdown.create(HACK, isRaw);
-  },
-  render() {
-    return (
-      <Loadable
-        promise={this.getPromise()}
-        renderLoaded={(html) => {
-          return (
-            <InnerMarkdown html={html} />
-          );
-        }}
-      />
-    );
-  }
-});
+export default InnerMarkdown;
+
+// export default React.createClass({
+//   displayName: 'GithubFlavoredMarkdown',
+//   getPromise() {
+//     const {text, repoOwner, repoName} = this.props;
+//     const context = repoOwner + '/' + repoName;
+//     const isRaw = true;
+//     const HACK = JSON.stringify({text: text, context: context, mode: 'gfm'});
+//     return Client.getOcto().markdown.create(HACK, isRaw);
+//   },
+//   render() {
+//     return (
+//       <Loadable
+//         promise={this.getPromise()}
+//         renderLoaded={(html) => {
+//           return (
+//             <InnerMarkdown html={html} />
+//           );
+//         }}
+//       />
+//     );
+//   }
+// });
