@@ -20,10 +20,13 @@ export default React.createClass({
     const {promise} = this.props;
     promise.then(this.onResolve, this.onError);
   },
-  // componentDidUpdate() {
-  //   this.setState({status: STATUS.INITIAL});
-  //   this.componentDidMount();
-  // },
+  componentDidUpdate(prevProps) {
+    if (this.props.promise !== prevProps.promise) {
+      this.setState({status: STATUS.INITIAL});
+      const {promise} = this.props;
+      promise.then(this.onResolve, this.onError);
+    }
+  },
   onResolve(value) {
     // TODO: Find out why this is being called multiple times
     if (this.state.status !== STATUS.RESOLVED) {

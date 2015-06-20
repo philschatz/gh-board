@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
+import BS from 'react-bootstrap';
 
 import {fetchAll, contains} from '../helpers';
 import Client from '../github-client';
@@ -56,17 +57,55 @@ const KanbanRepo = React.createClass({
       return this.renderColumn(label, allIssues);
     });
   },
+  onAddCardList() {
+    const {onLabelsChanged} = this.props;
+    const {labels} = this.props;
+    const {repoOwner, repoName} = this.props;
+
+    const kanbanLabels = filterKanbanLabels(labels);
+
+    let lastId = '-1';
+
+    const lastLabel = kanbanLabels[kanbanLabels.length - 1];
+    if (lastLabel.name === ICEBOX_NAME) {
+      lastId = '-1';
+    } else {
+      lastId = lastLabel.name.match(/^\d+/)[0];
+    }
+    const newId = parseInt(lastId) + 1;
+
+    const labelName = prompt('Name of new CardList');
+    if (labelName) {
+      const name = newId + ' - ' + labelName;
+      const color = 'cccccc';
+
+      // Add the label and re-render
+      Client.getOcto().repos(repoOwner, repoName).labels.create({name, color}).then(() => {
+        // Shortcut: Add the label to the list locally w/o refetching
+        onLabelsChanged();
+      });
+    }
+  },
   renderBoard(allIssues) {
     const {labels} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
     const workflowStateIssues = this.renderColumns(kanbanLabels, allIssues);
 
+    const addCardList = (
+      <td>
+        <BS.Button
+          alt='Add a new Cardlist to Board'
+          onClick={this.onAddCardList}>+</BS.Button>
+      </td>
+    );
+
     return (
       <table className='kanban-board'>
         <tbody>
           <tr>
             {workflowStateIssues}
+            {addCardList}
           </tr>
         </tbody>
       </table>
@@ -87,15 +126,18 @@ const KanbanRepo = React.createClass({
 
 const Repo = React.createClass({
   displayName: 'Repo',
+  onLabelsChanged() {
+    this.setState({});
+  },
   render() {
     const {repoOwner, repoName, data} = this.props;
 
     // Get all the issue labels first
     const renderLoaded = (labels) => {
-      // If there are at least 2 'special' kanban labels then consider it valid
-      const kanbanLabels = filterKanbanLabels(labels);
       const icebox = [{name: ICEBOX_NAME}];
 
+      // If there are at least 2 'special' kanban labels then consider it valid
+      // const kanbanLabels = filterKanbanLabels(labels);
       // const isValidKanbanRepo = kanbanLabels.length > 1;
 
       return (
@@ -104,6 +146,7 @@ const Repo = React.createClass({
           repoName={repoName}
           labels={icebox.concat(labels)}
           data={data}
+          onLabelsChanged={this.onLabelsChanged}
         />
       );
     };
