@@ -1,6 +1,7 @@
 import React from 'react';
 import BS from 'react-bootstrap';
 
+import AsyncButton from './async-button.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
 
 const EditableComment = React.createClass({
@@ -20,7 +21,7 @@ const EditableComment = React.createClass({
     const newText = content.getValue();
 
     if (text !== newText) {
-      onEdit(newText).then(this.onCancel()); // Close editing when save completes
+      return onEdit(newText).then(this.onCancel()); // Close editing when save completes
     } else {
       this.onCancel();
     }
@@ -38,7 +39,12 @@ const EditableComment = React.createClass({
       footer = (
         <span>
           <BS.Button onClick={this.onCancel}>Cancel</BS.Button>
-          <BS.Button bsStyle='primary' onClick={this.onSave}>Update Comment</BS.Button>
+          <AsyncButton
+            bsStyle='primary'
+            action={this.onSave}
+            renderError={() => 'Error Saving. Refresh'}
+            >Update Comment
+          </AsyncButton>
         </span>
       );
       body = (

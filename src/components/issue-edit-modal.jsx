@@ -5,6 +5,7 @@ import BS from 'react-bootstrap';
 import Client from '../github-client';
 import IssueComment from './issue-comment.jsx';
 import Loadable from './loadable.jsx';
+import AsyncButton from './async-button.jsx';
 
 const IssueTitle = React.createClass({
   getInitialState() {
@@ -20,7 +21,11 @@ const IssueTitle = React.createClass({
     let {issue, repoOwner, repoName} = this.props;
     let newTitle = this.refs.title.getValue();
 
-    Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({title: newTitle});
+    return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({title: newTitle}).then((val) => {
+      // HACK
+      _.extend(this.props.issue, val);
+      this.onCancel();
+    }); // close editing when successful
   },
   render() {
     const {issue} = this.props;
@@ -34,10 +39,12 @@ const IssueTitle = React.createClass({
             type='text'
             defaultValue={issue.title}
           />
-          <BS.Button
+          <AsyncButton
             bsStyle='primary'
-            onClick={this.onSave}>Save
-          </BS.Button>
+            action={this.onSave}
+            renderError={() => 'Error Saving. Refresh'}
+            >Save
+          </AsyncButton>
           <BS.Button
             bsStyle='default'
             onClick={this.onCancel}>Cancel
