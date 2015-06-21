@@ -20,7 +20,7 @@ const EditableComment = React.createClass({
     const newText = content.getValue();
 
     if (text !== newText) {
-      onEdit(newText);
+      onEdit(newText).then(this.onCancel()); // Close editing when save completes
     } else {
       this.onCancel();
     }
@@ -82,11 +82,8 @@ const EditableComment = React.createClass({
 });
 
 export default React.createClass({
-  onEditText(text) {
-    alert(text);
-  },
   render() {
-    const {user, text, repoOwner, repoName, canEdit} = this.props;
+    const {user, text, repoOwner, repoName, canEdit, onEditText} = this.props;
 
     return (
       <div className='media'>
@@ -104,10 +101,10 @@ export default React.createClass({
              text={text}
              repoOwner={repoOwner}
              repoName={repoName}
-             onEdit={this.onEditText}
+             onEdit={onEditText}
            />
         </div>
       </div>
-    )
+    );
   }
 });

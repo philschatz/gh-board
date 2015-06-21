@@ -64,8 +64,13 @@ export default React.createClass({
   onClose() {
     this.props.onRequestHide();
   },
-  onEditBody(text) {
-    alert(text);
+  onEditBody(body) {
+    const {repoOwner, repoName, issue} = this.props;
+    return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({body}).then((val) => {
+      // HACK
+      _.extend(this.props.issue, val);
+      this.setState({});
+    });
   },
   render() {
     const {issue, repoOwner, repoName} = this.props;
@@ -122,7 +127,7 @@ export default React.createClass({
             repoOwner={repoOwner}
             repoName={repoName}
             canEdit={true}
-            onEdit={this.onEditBody}
+            onEditText={this.onEditBody}
           />
           <Loadable
             promise={Client.getOcto().repos(repoOwner, repoName).issues(issue.number).comments.fetch()}
