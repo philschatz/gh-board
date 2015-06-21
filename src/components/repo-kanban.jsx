@@ -2,15 +2,12 @@ import React from 'react';
 import _ from 'underscore';
 import BS from 'react-bootstrap';
 
-import {contains} from '../helpers';
+import {contains, KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
 import {Store} from '../issue-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
 
-// Of the form `# - ...`
-const KANBAN_LABEL = /^\d+\ -\ /;
-const ICEBOX_NAME = '999 - Icebox';
 
 const filterKanbanLabels = (labels) => {
   const kanbanLabels = _.filter(labels, (label) => KANBAN_LABEL.test(label.name));

@@ -24,8 +24,7 @@ const issueSource = {
     // When dropped on a compatible target, do something
     const item = monitor.getItem();
     const dropResult = monitor.getDropResult();
-    // CardActions.moveCardToList(item.id, dropResult.listId);
-    console.log('Dropped!', item, dropResult);
+    Store.move(item.repoOwner, item.repoName, item.issue.number, dropResult.label);
   }
 };
 

@@ -1,6 +1,7 @@
+import _ from 'underscore';
 import {EventEmitter} from 'events';
 import Client from './github-client';
-import {fetchAll} from './helpers';
+import {fetchAll, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
 const issueListKey = (repoOwner, repoName) => {
   return repoOwner + '/' + repoName + '/issues';
@@ -63,6 +64,34 @@ class IssueStore extends EventEmitter {
       // this.emit('change', issueListKey(repoOwner, repoName));
       // this.emit('change', key, val);
       this.emit('change:' + key, val);
+    });
+  }
+  move(repoOwner, repoName, issueNumber, newLabel) {
+    // Find all the labels, remove the kanbanLabel, and add the new label
+    const key = issueKey(repoOwner, repoName, issueNumber);
+    const listKey = issueListKey(repoOwner, repoName);
+    const issue = cacheIssues[key];
+    // Exclude Kanban labels
+    const labels = _.filter(issue.labels, (label) => {
+      if (ICEBOX_NAME === label.name || KANBAN_LABEL.test(label.name)) {
+        return false;
+      }
+      return true;
+    });
+    const labelNames = _.map(labels);
+    // When moving back to icebox do not add a new label
+    if (ICEBOX_NAME !== newLabel.name) {
+      labelNames.push(newLabel.name);
+    }
+
+    return Client.getOcto().repos(repoOwner, repoName).issues(issueNumber).update({labels: labelNames})
+    .then(() => {
+
+      // invalidate the issues list
+      delete cacheIssues[listKey];
+      this.emit('change');
+      this.emit('change:' + key);
+      this.emit('change:' + listKey);
     });
   }
 }

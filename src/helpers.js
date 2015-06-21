@@ -25,3 +25,9 @@ export function contains(arr, condition) {
   }
   return false;
 }
+
+// Of the form `# - ...`
+const KANBAN_LABEL = /^\d+\ -\ /;
+const ICEBOX_NAME = '999 - Icebox';
+
+export {KANBAN_LABEL, ICEBOX_NAME};
