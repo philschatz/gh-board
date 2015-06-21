@@ -4,6 +4,7 @@ import BS from 'react-bootstrap';
 
 import Client from '../github-client';
 import {Store} from '../issue-store';
+import {CurrentUserStore} from '../user-store';
 import IssueComment from './issue-comment.jsx';
 import Loadable from './loadable.jsx';
 import AsyncButton from './async-button.jsx';
@@ -121,6 +122,25 @@ export default React.createClass({
       }
     };
 
+    let newComment = null;
+    if (CurrentUserStore.getUser()) {
+      newComment = (
+        <IssueComment
+          user={CurrentUserStore.getUser()}
+          text=''
+          repoOwner={repoOwner}
+          repoName={repoName}
+          canEdit={true}
+          isEditing={true}
+          onEditText={this.onNewComment}
+        />
+      );
+    } else {
+      newComment = (
+        <span>Sign in to add comments.</span>
+      );
+    }
+
     return (
       <BS.Modal {...this.props}
         title={title}
@@ -139,7 +159,7 @@ export default React.createClass({
             renderLoaded={renderComments}
             renderLoading={() => <span>Loading comments...</span>}
           />
-
+        {newComment}
         </div>
         <div className='modal-footer'>
           {footer}

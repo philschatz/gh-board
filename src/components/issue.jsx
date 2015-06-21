@@ -99,7 +99,6 @@ const Issue = React.createClass({
     return connectDragSource(
       <BS.ModalTrigger modal={modal}>
         <BS.Panel
-          key={issue.id}
           className={{'issue': true, 'is-dragging': isDragging}}
           bsStyle='default'
           footer={footer}>

@@ -6,6 +6,7 @@ import { DragDropContext } from 'react-dnd';
 
 import Client from '../github-client';
 import LoginModal from './login-modal.jsx';
+import {CurrentUserStore} from '../user-store';
 
 const KarmaWarning = React.createClass({
   getInitialState() {
@@ -58,18 +59,16 @@ const LoginButton = React.createClass({
     Client.off('changeToken', this.onChangeToken);
   },
   onChangeToken() {
-    if (Client.hasCredentials()) {
-      Client.getOcto().me.fetch().then((info) => {
-        this.setState({info});
-      }).catch(() => {
-        this.setState({info: null});
-      });
-    } else {
+    CurrentUserStore.fetch()
+    .then((info) => {
+      this.setState({info});
+    }).catch(() => {
       this.setState({info: null});
-    }
+    });
   },
   onSignOut() {
     Client.setToken(null);
+    CurrentUserStore.clear();
   },
   render() {
     const {info} = this.state;

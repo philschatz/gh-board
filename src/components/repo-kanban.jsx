@@ -91,7 +91,7 @@ const KanbanRepo = React.createClass({
     const workflowStateIssues = this.renderColumns(kanbanLabels, allIssues);
 
     const addCardList = (
-      <td>
+      <td key='add-cardlist'>
         <BS.Button
           alt='Add a new Cardlist to Board'
           onClick={this.onAddCardList}>+</BS.Button>

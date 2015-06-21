@@ -7,7 +7,7 @@ import GithubFlavoredMarkdown from './gfm.jsx';
 const EditableComment = React.createClass({
 
   getInitialState() {
-    return {isEditing: false};
+    return {isEditing: this.props.isEditing};
   },
   onEditStart() {
     this.setState({isEditing: true});
@@ -35,7 +35,7 @@ const EditableComment = React.createClass({
     let body;
 
     if (isEditing) {
-      header = user.login + ' commented';
+      header = null;
       footer = (
         <span>
           <BS.Button onClick={this.onCancel}>Cancel</BS.Button>
@@ -89,7 +89,7 @@ const EditableComment = React.createClass({
 
 export default React.createClass({
   render() {
-    const {user, text, repoOwner, repoName, canEdit, onEditText} = this.props;
+    const {user, text, repoOwner, repoName, canEdit, onEditText, isEditing} = this.props;
 
     return (
       <div className='media'>
@@ -108,6 +108,7 @@ export default React.createClass({
              repoOwner={repoOwner}
              repoName={repoName}
              onEdit={onEditText}
+             isEditing={isEditing}
            />
         </div>
       </div>
