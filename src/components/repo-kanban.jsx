@@ -3,6 +3,7 @@ import _ from 'underscore';
 import BS from 'react-bootstrap';
 
 import {fetchAll, contains} from '../helpers';
+import Store from '../issue-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
@@ -126,6 +127,15 @@ const KanbanRepo = React.createClass({
 
 const Repo = React.createClass({
   displayName: 'Repo',
+  componentDidMount() {
+    Store.on('change', this.onChange);
+  },
+  componentDidUnmount() {
+    Store.off('change', this.onChange);
+  },
+  onChange() {
+    this.setState({});
+  },
   onLabelsChanged() {
     this.setState({});
   },

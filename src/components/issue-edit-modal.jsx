@@ -3,6 +3,7 @@ import _ from 'underscore';
 import BS from 'react-bootstrap';
 
 import Client from '../github-client';
+import Store from '../issue-store';
 import IssueComment from './issue-comment.jsx';
 import Loadable from './loadable.jsx';
 import AsyncButton from './async-button.jsx';
@@ -21,11 +22,9 @@ const IssueTitle = React.createClass({
     let {issue, repoOwner, repoName} = this.props;
     let newTitle = this.refs.title.getValue();
 
-    return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({title: newTitle}).then((val) => {
-      // HACK
-      _.extend(this.props.issue, val);
-      this.onCancel();
-    }); // close editing when successful
+    return Store.update(repoOwner, repoName, issue.number, {title: newTitle})
+    // close editing when successful
+    .then(this.onCancel);
   },
   render() {
     const {issue} = this.props;
@@ -73,9 +72,8 @@ export default React.createClass({
   },
   onEditBody(body) {
     const {repoOwner, repoName, issue} = this.props;
-    return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({body}).then((val) => {
-      // HACK
-      _.extend(this.props.issue, val);
+    return Store.update(repoOwner, repoName, issue.number, {body})
+    .then(() => {
       this.setState({});
     });
   },
