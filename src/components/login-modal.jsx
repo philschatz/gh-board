@@ -36,7 +36,7 @@ export default React.createClass({
         <div className='modal-body'>
           <BS.Input
             type='text'
-            value={token}
+            defaultValue={token}
             disabled={!!token}
             placeholder='Enter GitHub token'
             ref='token'

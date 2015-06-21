@@ -16,18 +16,19 @@
     "eslint-loader": "^0.12.0",
     "eslint-plugin-react": "^2.5.0",
     "node-libs-browser": "^0.5.2",
-    "octokat": "^0.4.10",
-    "react": "^0.13.3",
     "react-hot-loader": "^1.2.7",
-    "react-router": "^0.13.3",
     "webpack": "^1.9.10",
     "webpack-dev-server": "^1.9.0"
   },
   "dependencies": {
     "bootstrap": "^3.3.4",
+    "font-awesome": "^4.3.0",
     "gfm-linkify": "^0.1.0",
+    "octokat": "^0.4.10",
+    "react": "^0.13.3",
     "react-bootstrap": "^0.23.1",
     "react-dnd": "^1.1.2",
+    "react-router": "^0.13.3",
     "ultramarked": "^1.7.0",
     "underscore": "^1.8.3"
   }

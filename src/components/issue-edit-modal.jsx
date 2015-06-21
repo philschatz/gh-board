@@ -32,7 +32,7 @@ const IssueTitle = React.createClass({
           <BS.Input
             ref='title'
             type='text'
-            value={issue.title}
+            defaultValue={issue.title}
           />
           <BS.Button
             bsStyle='primary'
@@ -64,6 +64,9 @@ export default React.createClass({
   onClose() {
     this.props.onRequestHide();
   },
+  onEditBody(text) {
+    alert(text);
+  },
   render() {
     const {issue, repoOwner, repoName} = this.props;
 
@@ -82,23 +85,30 @@ export default React.createClass({
     );
 
     const renderComments = (comments) => {
-      const commentsWrapper = _.map(comments, (comment) => {
-        return (
-          <IssueComment
-            user={comment.user}
-            body={comment.body}
-            repoOwner={repoOwner}
-            repoName={repoName}
-          />
-        );
-      });
 
-      return (
-        <div className='issue-comments'>
-          <h2>Activity</h2>
-          {commentsWrapper}
-        </div>
-      );
+      if (comments.length > 0) {
+        const commentsWrapper = _.map(comments, (comment) => {
+          return (
+            <IssueComment
+              user={comment.user}
+              text={comment.body}
+              repoOwner={repoOwner}
+              repoName={repoName}
+            />
+          );
+        });
+
+        return (
+          <div className='issue-comments'>
+            <h2>Activity</h2>
+            {commentsWrapper}
+          </div>
+        );
+      } else {
+        return (
+          <div className='issue-comments is-empty'></div>
+        );
+      }
     };
 
     return (
@@ -108,9 +118,11 @@ export default React.createClass({
         <div className='modal-body'>
           <IssueComment
             user={issue.user}
-            body={issue.body}
+            text={issue.body}
             repoOwner={repoOwner}
             repoName={repoName}
+            canEdit={true}
+            onEdit={this.onEditBody}
           />
           <Loadable
             promise={Client.getOcto().repos(repoOwner, repoName).issues(issue.number).comments.fetch()}

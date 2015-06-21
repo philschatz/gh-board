@@ -38,9 +38,16 @@ const InnerMarkdown = React.createClass({
     const textStripped = text.replace(/<!--[\s\S]*?-->/g, '');
     const html = ultramarked(linkify(textStripped, context));
 
-    return (
-      <div className='rendered-markdown' dangerouslySetInnerHTML={{__html: html}} />
-    );
+    if (html) {
+      return (
+        <div className='rendered-markdown' dangerouslySetInnerHTML={{__html: html}} />
+      );
+    } else {
+      return (
+        <div className='rendered-markdown is-empty'></div>
+      );
+    }
+
   }
 
 });

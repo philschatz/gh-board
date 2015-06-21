@@ -25,19 +25,23 @@ const KarmaWarning = React.createClass({
   },
   render() {
     const {remaining, limit} = this.state;
+    let karmaText;
     if (remaining / limit < .2) {
-      return (
-        <BS.Navbar fixedBottom>
-          <BS.Nav>
-            <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in</BS.Button>
-          </BS.Nav>
-        </BS.Navbar>
+      karmaText = (
+        <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in</BS.Button>
       );
     } else {
-      return (
-        <div className='lots-of-karma-left'>GitHub Karma: {remaining} / {limit}</div>
+      karmaText = (
+        <span className='lots-of-karma'>GitHub Karma: {remaining} / {limit}</span>
       );
     }
+    return (
+      <BS.Navbar fixedBottom>
+        <BS.Nav>
+          {karmaText}
+        </BS.Nav>
+      </BS.Navbar>
+    );
   }
 });
 

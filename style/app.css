@@ -1,3 +1,5 @@
+@import '../node_modules/font-awesome/css/font-awesome.css';
+
 .kanban-board td { vertical-align: top; }
 .kanban-board th,
 .kanban-board td {
@@ -12,15 +14,14 @@
 
 
 .modal.issue-edit .body-avatar,
-.modal.issue-edit .body-avatar .avatar-image {
-  vertical-align: top;
+.modal.issue-edit .avatar-image {
   width: 5rem;
 }
 
 .markdown-format { }
 
 .issue-comment-wrapper { }
-.issue-comment { }
+.issue-comment { width: 100%; }
 .issue-comment-avatar { }
 
 .issue-comment-header { }
@@ -49,3 +50,11 @@
 
 /* Make sure images are scaled to fit in the modal */
 .rendered-markdown img { max-width: 100%; }
+
+.rendered-markdown.is-empty { color: #ccc; font-style: italic; }
+.rendered-markdown.is-empty::before { content: 'No Content provided.'; }
+
+.issue-comments.is-empty { color: #ccc; font-style: italic; }
+.issue-comments.is-empty::before { content: 'No Comments'; }
+
+textarea.edit-text { min-height: 5rem; max-height: 100rem; }
