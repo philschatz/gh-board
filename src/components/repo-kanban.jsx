@@ -2,8 +2,8 @@ import React from 'react';
 import _ from 'underscore';
 import BS from 'react-bootstrap';
 
-import {fetchAll, contains} from '../helpers';
-import Store from '../issue-store';
+import {contains} from '../helpers';
+import {Store} from '../issue-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
@@ -41,7 +41,7 @@ const KanbanRepo = React.createClass({
       }
     });
     return (
-      <td>
+      <td key={label.name}>
         <IssueList
           title={kanbanLabelName(label)}
           issues={issues}
@@ -114,8 +114,7 @@ const KanbanRepo = React.createClass({
   },
   render() {
     const {repoOwner, repoName} = this.props;
-    const promise = fetchAll(Client.getOcto().repos(repoOwner, repoName).issues.fetch);
-
+    const promise = Store.fetchAll(repoOwner, repoName);
     return (
       <Loadable
         promise={promise}

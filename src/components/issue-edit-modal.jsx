@@ -3,7 +3,7 @@ import _ from 'underscore';
 import BS from 'react-bootstrap';
 
 import Client from '../github-client';
-import Store from '../issue-store';
+import {Store} from '../issue-store';
 import IssueComment from './issue-comment.jsx';
 import Loadable from './loadable.jsx';
 import AsyncButton from './async-button.jsx';
@@ -41,7 +41,7 @@ const IssueTitle = React.createClass({
           <AsyncButton
             bsStyle='primary'
             action={this.onSave}
-            renderError={() => 'Error Saving. Refresh'}
+            renderError={() => (<span className='error'>Error Saving. Refresh</span>)}
             >Save
           </AsyncButton>
           <BS.Button

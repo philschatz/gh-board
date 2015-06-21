@@ -12,7 +12,8 @@ const KarmaWarning = React.createClass({
     return {timer: null, limit: null, remaining: null};
   },
   componentDidMount() {
-    this.setState({timer: setInterval(this.pollKarma, 10000)});
+    this.setState({timer: setInterval(this.pollKarma, 60000)});
+    this.pollKarma();
   },
   componentDidUnmount() {
     clearInterval(this.pollKarma);

@@ -2,6 +2,7 @@ import React from 'react';
 import BS from 'react-bootstrap';
 import { DragSource } from 'react-dnd';
 
+import {Store, issueKey} from '../issue-store';
 import IssueEditModal from './issue-edit-modal.jsx';
 
 const ItemTypes = {
@@ -43,8 +44,38 @@ function collect(connect, monitor) {
 
 const Issue = React.createClass({
   displayName: 'Issue',
+  getInitialState() {
+    const {issue} = this.props;
+    return {issue};
+  },
+  update(issue) {
+    this.setState({issue});
+  },
+  getKey(props) {
+    const {repoOwner, repoName, issue} = props;
+    const issueNumber = issue.number;
+    const key = issueKey(repoOwner, repoName, issueNumber);
+    return key;
+  },
+  componentDidMount() {
+    const key = this.getKey(this.props);
+    Store.on('change:' + key, this.update);
+  },
+  componentDidUpdate(oldProps) {
+    const newKey = this.getKey(this.props);
+    const oldKey = this.getKey(oldProps);
+    if (newKey !== oldKey) {
+      Store.on('change:' + newKey, this.update);
+      Store.off('change:' + oldKey, this.update);
+    }
+  },
+  componentDidUnmount() {
+    const key = this.getKey(this.props);
+    Store.off('change:' + key, this.update);
+  },
   render() {
-    const {issue, repoOwner, repoName} = this.props;
+    const {repoOwner, repoName} = this.props;
+    const {issue} = this.state;
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -68,7 +99,11 @@ const Issue = React.createClass({
     );
     return connectDragSource(
       <BS.ModalTrigger modal={modal}>
-        <BS.Panel className={{'issue': true, 'is-dragging': isDragging}} bsStyle='default' footer={footer}>
+        <BS.Panel
+          key={issue.id}
+          className={{'issue': true, 'is-dragging': isDragging}}
+          bsStyle='default'
+          footer={footer}>
           {issue.title}
         </BS.Panel>
       </BS.ModalTrigger>

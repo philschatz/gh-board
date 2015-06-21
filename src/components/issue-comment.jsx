@@ -42,7 +42,7 @@ const EditableComment = React.createClass({
           <AsyncButton
             bsStyle='primary'
             action={this.onSave}
-            renderError={() => 'Error Saving. Refresh'}
+            renderError={() => (<span className='error'>Error Saving. Refresh</span>)}
             >Update Comment
           </AsyncButton>
         </span>
