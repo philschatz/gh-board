@@ -4,6 +4,7 @@ import BS from 'react-bootstrap';
 
 import {contains, KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
 import {Store} from '../issue-store';
+import {FilterStore} from '../filter-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
@@ -141,17 +142,22 @@ const Repo = React.createClass({
 
     // Get all the issue labels first
     const renderLoaded = (labels) => {
-      const icebox = [{name: ICEBOX_NAME}];
-
       // If there are at least 2 'special' kanban labels then consider it valid
       // const kanbanLabels = filterKanbanLabels(labels);
       // const isValidKanbanRepo = kanbanLabels.length > 1;
+      let allLabels;
+      if (FilterStore.getShowIcebox()) {
+        const icebox = [{name: ICEBOX_NAME}];
+        allLabels = icebox.concat(labels);
+      } else {
+        allLabels = labels;
+      }
 
       return (
         <KanbanRepo
           repoOwner={repoOwner}
           repoName={repoName}
-          labels={icebox.concat(labels)}
+          labels={allLabels}
           data={data}
           onLabelsChanged={this.onLabelsChanged}
         />

@@ -7,6 +7,7 @@ import { DragDropContext } from 'react-dnd';
 import Client from '../github-client';
 import LoginModal from './login-modal.jsx';
 import {CurrentUserStore} from '../user-store';
+import {FilterStore} from '../filter-store';
 
 const KarmaWarning = React.createClass({
   getInitialState() {
@@ -92,6 +93,18 @@ const LoginButton = React.createClass({
 });
 
 const App = React.createClass({
+  componentDidMount() {
+    FilterStore.on('change', this.update);
+  },
+  componentDidUnmount() {
+    FilterStore.off('change', this.update);
+  },
+  changeShowIcebox() {
+    FilterStore.setShowIcebox(!FilterStore.getShowIcebox());
+  },
+  update() {
+    this.setState({});
+  },
   render() {
     const brand = (
       <Link to='viewDashboard'>Dashboard</Link>
@@ -99,6 +112,13 @@ const App = React.createClass({
     return (
       <div className='app'>
         <BS.Navbar className='topbar-nav' brand={brand} toggleNavKey={0}>
+          <BS.Nav>
+            <BS.Input
+              type='checkbox'
+              label='Show Icebox'
+              onChange={this.changeShowIcebox}
+              checked={FilterStore.getShowIcebox()}/>
+          </BS.Nav>
           <BS.Nav right eventKey={0}>
             <LoginButton/>
           </BS.Nav>
