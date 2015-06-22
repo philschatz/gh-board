@@ -2,7 +2,7 @@ import React from 'react';
 import BS from 'react-bootstrap';
 import { DragSource } from 'react-dnd';
 
-import {Store, issueKey} from '../issue-store';
+import {Store, toIssueKey} from '../issue-store';
 import IssueEditModal from './issue-edit-modal.jsx';
 
 const ItemTypes = {
@@ -53,7 +53,7 @@ const Issue = React.createClass({
   getKey(props) {
     const {repoOwner, repoName, issue} = props;
     const issueNumber = issue.number;
-    const key = issueKey(repoOwner, repoName, issueNumber);
+    const key = toIssueKey(repoOwner, repoName, issueNumber);
     return key;
   },
   componentDidMount() {

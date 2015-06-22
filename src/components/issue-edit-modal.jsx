@@ -78,6 +78,13 @@ export default React.createClass({
       this.setState({});
     });
   },
+  onNewComment(body) {
+    const {repoOwner, repoName, issue} = this.props;
+    return Store.createComment(repoOwner, repoName, issue.number, {body})
+    .then(() => {
+      this.setState({});
+    })
+  },
   render() {
     const {issue, repoOwner, repoName} = this.props;
 
@@ -132,7 +139,9 @@ export default React.createClass({
           repoName={repoName}
           canEdit={true}
           isEditing={true}
-          onEditText={this.onNewComment}
+          onEdit={this.onNewComment}
+          cancelText={null}
+          saveText='Create Comment'
         />
       );
     } else {
@@ -152,7 +161,9 @@ export default React.createClass({
             repoOwner={repoOwner}
             repoName={repoName}
             canEdit={true}
-            onEditText={this.onEditBody}
+            onEdit={this.onEditBody}
+            cancelText='Cancel'
+            saveText='Update Description'
           />
           <Loadable
             promise={Client.getOcto().repos(repoOwner, repoName).issues(issue.number).comments.fetch()}

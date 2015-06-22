@@ -3,11 +3,17 @@ import {EventEmitter} from 'events';
 import Client from './github-client';
 import {fetchAll, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
-const issueListKey = (repoOwner, repoName) => {
+const toIssueListKey = (repoOwner, repoName) => {
   return repoOwner + '/' + repoName + '/issues';
 };
-const issueKey = (repoOwner, repoName, issueNumber) => {
+const toIssueKey = (repoOwner, repoName, issueNumber) => {
   return repoOwner + '/' + repoName + '/issues/' + issueNumber;
+};
+const toCommentListKey = (repoOwner, repoName, issueNumber) => {
+  return repoOwner + '/' + repoName + '/issues/' + issueNumber + '/comments';
+};
+const toCommentKey = (repoOwner, repoName, issueNumber, commentId) => {
+  return repoOwner + '/' + repoName + '/issues/' + issueNumber + '/comments/' + commentId;
 };
 
 let cacheIssues = {};
@@ -20,7 +26,7 @@ class IssueStore extends EventEmitter {
   }
   fetch(repoOwner, repoName, issueNumber) {
     const issue = Client.getOcto().repos(repoOwner, repoName).issues(issueNumber);
-    const key = issueKey(repoOwner, repoName, issueNumber);
+    const key = toIssueKey(repoOwner, repoName, issueNumber);
     if (cacheIssues[key]) {
       return Promise.resolve(cacheIssues[key]);
     } else {
@@ -34,7 +40,7 @@ class IssueStore extends EventEmitter {
     }
   }
   fetchAll(repoOwner, repoName) {
-    const listKey = issueListKey(repoOwner, repoName);
+    const listKey = toIssueListKey(repoOwner, repoName);
     if (cacheIssues[listKey]) {
       return Promise.resolve(cacheIssues[listKey]);
     } else {
@@ -44,7 +50,7 @@ class IssueStore extends EventEmitter {
         cacheIssues[listKey] = vals;
         for (let issue of vals) {
           const issueNumber = issue.number;
-          const key = issueKey(repoOwner, repoName, issueNumber);
+          const key = toIssueKey(repoOwner, repoName, issueNumber);
           cacheIssues[key] = issue;
         }
         this.emit('change:' + listKey, vals);
@@ -54,22 +60,22 @@ class IssueStore extends EventEmitter {
   }
   update(repoOwner, repoName, issueNumber, opts) {
     const issue = Client.getOcto().repos(repoOwner, repoName).issues(issueNumber);
-    const listKey = issueListKey(repoOwner, repoName);
-    const key = issueKey(repoOwner, repoName, issueNumber);
+    const listKey = toIssueListKey(repoOwner, repoName);
+    const key = toIssueKey(repoOwner, repoName, issueNumber);
     return issue.update(opts)
     .then((val) => {
       cacheIssues[key] = val;
       // invalidate the issues list
       delete cacheIssues[listKey];
-      // this.emit('change', issueListKey(repoOwner, repoName));
+      // this.emit('change', toIssueListKey(repoOwner, repoName));
       // this.emit('change', key, val);
       this.emit('change:' + key, val);
     });
   }
   move(repoOwner, repoName, issueNumber, newLabel) {
     // Find all the labels, remove the kanbanLabel, and add the new label
-    const key = issueKey(repoOwner, repoName, issueNumber);
-    const listKey = issueListKey(repoOwner, repoName);
+    const key = toIssueKey(repoOwner, repoName, issueNumber);
+    const listKey = toIssueListKey(repoOwner, repoName);
     const issue = cacheIssues[key];
     // Exclude Kanban labels
     const labels = _.filter(issue.labels, (label) => {
@@ -94,7 +100,24 @@ class IssueStore extends EventEmitter {
       this.emit('change:' + listKey);
     });
   }
+  createComment(repoOwner, repoName, issueNumber, opts) {
+    const listKey = toCommentListKey(repoOwner, repoName, issueNumber);
+    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
+    const issue = Client.getOcto().repos(repoOwner, repoName).issues(issueNumber);
+    return issue.comments.create(opts)
+    .then((val) => {
+      const commentNumber = val.id;
+      const key = toCommentKey(repoOwner, repoName, issueNumber, commentNumber);
+      cacheIssues[key] = val;
+      // invalidate the issues list
+      delete cacheIssues[listKey];
+      delete cacheIssues[issueKey];
+      this.emit('change', issueKey);
+      // this.emit('change', key, val);
+      this.emit('change:' + key, val);
+    });
+  }
 }
 
 const Store = new IssueStore();
-export {issueKey, Store};
+export {toIssueKey, Store};

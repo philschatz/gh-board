@@ -27,7 +27,7 @@ const EditableComment = React.createClass({
     }
   },
   render() {
-    const {user, text, repoOwner, repoName} = this.props;
+    const {user, text, repoOwner, repoName, cancelText, saveText} = this.props;
     const {isEditing} = this.state;
 
     let header;
@@ -35,15 +35,22 @@ const EditableComment = React.createClass({
     let body;
 
     if (isEditing) {
+      let cancelButton;
+      if (cancelText) {
+        cancelButton = (
+          <BS.Button onClick={this.onCancel}>{cancelText}</BS.Button>
+        );
+      }
+
       header = null;
       footer = (
         <span>
-          <BS.Button onClick={this.onCancel}>Cancel</BS.Button>
+          {cancelButton}
           <AsyncButton
             bsStyle='primary'
             action={this.onSave}
             renderError={() => (<span className='error'>Error Saving. Refresh</span>)}
-            >Update Comment
+            >{saveText}
           </AsyncButton>
         </span>
       );
@@ -89,7 +96,7 @@ const EditableComment = React.createClass({
 
 export default React.createClass({
   render() {
-    const {user, text, repoOwner, repoName, canEdit, onEditText, isEditing} = this.props;
+    const {user, text, repoOwner, repoName, canEdit, onEdit, isEditing} = this.props;
 
     return (
       <div className='media'>
@@ -102,14 +109,7 @@ export default React.createClass({
           </a>
         </div>
         <div className='media-body'>
-          <EditableComment
-             user={user}
-             text={text}
-             repoOwner={repoOwner}
-             repoName={repoName}
-             onEdit={onEditText}
-             isEditing={isEditing}
-           />
+          <EditableComment {...this.props} />
         </div>
       </div>
     );
