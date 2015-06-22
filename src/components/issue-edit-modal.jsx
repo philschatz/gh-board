@@ -2,7 +2,6 @@ import React from 'react';
 import _ from 'underscore';
 import BS from 'react-bootstrap';
 
-import Client from '../github-client';
 import {Store} from '../issue-store';
 import {CurrentUserStore} from '../user-store';
 import IssueComment from './issue-comment.jsx';
@@ -112,6 +111,9 @@ export default React.createClass({
               text={comment.body}
               repoOwner={repoOwner}
               repoName={repoName}
+              canEdit={true}
+              cancelText='Cancel'
+              saveText='Update Comment'
             />
           );
         });
@@ -166,7 +168,7 @@ export default React.createClass({
             saveText='Update Description'
           />
           <Loadable
-            promise={Client.getOcto().repos(repoOwner, repoName).issues(issue.number).comments.fetch()}
+            promise={Store.fetchComments(repoOwner, repoName, issue.number)}
             renderLoaded={renderComments}
             renderLoading={() => <span>Loading comments...</span>}
           />

@@ -78,7 +78,8 @@ const KanbanRepo = React.createClass({
       const color = 'cccccc';
 
       // Add the label and re-render
-      Client.getOcto().repos(repoOwner, repoName).labels.create({name, color}).then(() => {
+      Store.createLabel(repoOwner, repoName, {name, color})
+      .then(() => {
         // Shortcut: Add the label to the list locally w/o refetching
         onLabelsChanged();
       });

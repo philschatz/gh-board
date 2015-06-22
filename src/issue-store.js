@@ -100,6 +100,22 @@ class IssueStore extends EventEmitter {
       this.emit('change:' + listKey);
     });
   }
+  createLabel(repoOwner, repoName, opts) {
+    return Client.getOcto().repos(repoOwner, repoName).labels.create(opts);
+  }
+  fetchComments(repoOwner, repoName, issueNumber) {
+    const commentListKey = toCommentListKey(repoOwner, repoName, issueNumber);
+    if (cacheIssues[commentListKey]) {
+      return Promise.resolve(cacheIssues[commentListKey]);
+    } else {
+      return Client.getOcto().repos(repoOwner, repoName).issues(issueNumber).comments.fetch()
+      .then((comments) => {
+        cacheIssues[commentListKey] = comments;
+        this.emit('change:' + commentListKey);
+        return comments;
+      });
+    }
+  }
   createComment(repoOwner, repoName, issueNumber, opts) {
     const listKey = toCommentListKey(repoOwner, repoName, issueNumber);
     const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
