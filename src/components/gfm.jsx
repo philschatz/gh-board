@@ -15,7 +15,7 @@ const InnerMarkdown = React.createClass({
       link.setAttribute('target', '_blank');
     });
     // Wrap images with a link that opens them in a new tab
-    const images = this.getDOMNode().querySelectorAll('img');
+    const images = this.getDOMNode().querySelectorAll('img:not(.emoji)');
     _.each(images, (img) => {
       const parent = img.parentNode;
       const href = img.getAttribute('src');
@@ -37,7 +37,7 @@ const InnerMarkdown = React.createClass({
     const emojisMap = CurrentUserStore.getEmojis() || {};
     for (const emojiName in emojisMap) {
       const emojiUrl = emojisMap[emojiName];
-      text = text.replace(':' + emojiName + ':', '<img class="emoji" src="' + emojiUrl + '"/>');
+      text = text.replace(':' + emojiName + ':', '<img class="emoji" src="' + emojiUrl + '" title=":' + emojiName + ':"/>');
     }
     return text;
   },
