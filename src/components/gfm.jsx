@@ -5,6 +5,7 @@ import linkify from 'gfm-linkify';
 
 // import Client from '../github-client';
 // import Loadable from './loadable.jsx';
+import {CurrentUserStore} from '../user-store';
 
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',
@@ -32,11 +33,20 @@ const InnerMarkdown = React.createClass({
   componentDidUpdate() {
     this.updateLinks();
   },
+  replaceEmojis(text) {
+    const emojisMap = CurrentUserStore.getEmojis() || {};
+    for (const emojiName in emojisMap) {
+      const emojiUrl = emojisMap[emojiName];
+      text = text.replace(':' + emojiName + ':', '<img class="emoji" src="' + emojiUrl + '"/>');
+    }
+    return text;
+  },
   render() {
     const {text, repoOwner, repoName} = this.props;
     const context = repoOwner + '/' + repoName;
     const textStripped = text.replace(/<!--[\s\S]*?-->/g, '');
-    const html = ultramarked(linkify(textStripped, context));
+    const textEmojis = this.replaceEmojis(textStripped);
+    const html = ultramarked(linkify(textEmojis, context));
 
     if (html) {
       return (

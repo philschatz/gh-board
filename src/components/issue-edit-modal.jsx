@@ -83,7 +83,7 @@ export default React.createClass({
     return Store.createComment(repoOwner, repoName, issue.number, {body})
     .then(() => {
       this.setState({});
-    })
+    });
   },
   render() {
     const {issue, repoOwner, repoName} = this.props;

@@ -58,3 +58,5 @@
 .issue-comments.is-empty::before { content: 'No Comments'; }
 
 textarea.edit-text { min-height: 5rem; max-height: 100rem; }
+
+.emoji { width: 20px; height: 20px; }

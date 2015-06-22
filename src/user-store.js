@@ -2,6 +2,7 @@ import {EventEmitter} from 'events';
 import Client from './github-client';
 
 let currentUser = null;
+let emojisMap = null;
 
 class Store extends EventEmitter {
   off() { // EventEmitter has `.on` but no matching `.off`
@@ -29,6 +30,17 @@ class Store extends EventEmitter {
         return Promise.resolve(null);
       }
     }
+  }
+  fetchEmojis() {
+    if (emojisMap) {
+      return Promise.resolve(emojisMap);
+    } else {
+      return Client.getOcto().emojis.fetch()
+      .then((emojis) => emojisMap = emojis);
+    }
+  }
+  getEmojis() {
+    return emojisMap;
   }
 }
 
