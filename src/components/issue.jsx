@@ -86,8 +86,19 @@ const Issue = React.createClass({
         <img src={issue.assignee.avatar_url}/>
       );
     }
+    let icon;
+    if (issue.pullRequest) {
+      icon = (
+        <i className='is-open mega-octicon octicon-git-pull-request'/>
+      );
+    // } else {
+    //   icon = (
+    //     <i className='is-open mega-octicon octicon-issue-opened'/>
+    //   );
+    }
     const footer = [
       assignedAvatar,
+      icon,
       <a className='issue-number' target='_blank' href={issue.html.url}>{issue.number}</a>
     ];
     const modal = (

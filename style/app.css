@@ -1,4 +1,5 @@
 @import '../node_modules/font-awesome/css/font-awesome.css';
+@import '../node_modules/octicons/octicons/octicons.css';
 
 .kanban-board td { vertical-align: top; }
 .kanban-board th,
@@ -63,3 +64,6 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 
 .issue.is-updated { background-color: #ff9; }
 .issue.is-blocked { background-color: #f99; }
+
+.octicon.is-open,
+.mega-octicon.is-open { color: #6cc644; }
