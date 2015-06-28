@@ -7,6 +7,7 @@ import {CurrentUserStore} from '../user-store';
 import IssueComment from './issue-comment.jsx';
 import Loadable from './loadable.jsx';
 import AsyncButton from './async-button.jsx';
+import Time from './time.jsx';
 
 const IssueTitle = React.createClass({
   getInitialState() {
@@ -67,6 +68,16 @@ const IssueTitle = React.createClass({
 
 export default React.createClass({
   displayName: 'IssueEditModal',
+  updateLastViewed() {
+    const {issue, repoOwner, repoName} = this.props;
+    Store.setLastViewed(repoOwner, repoName, issue);
+  },
+  componentDidMount() {
+    this.updateLastViewed();
+  },
+  componentDidUpdate() {
+    this.updateLastViewed();
+  },
   onClose() {
     this.props.onRequestHide();
   },
@@ -86,7 +97,6 @@ export default React.createClass({
   },
   render() {
     const {issue, repoOwner, repoName} = this.props;
-    Store.setLastViewed(repoOwner, repoName, issue.number, new Date());
 
     const footer = (
       <span>
@@ -158,6 +168,7 @@ export default React.createClass({
         title={title}
         className='issue-edit'>
         <div className='modal-body'>
+          <span className='updated-at'>Updated <Time dateTime={issue.updatedAt}/></span>
           <IssueComment
             user={issue.user}
             text={issue.body}
@@ -167,6 +178,7 @@ export default React.createClass({
             onEdit={this.onEditBody}
             cancelText='Cancel'
             saveText='Update Description'
+            timestamp={issue.updatedAt}
           />
           <Loadable
             promise={Store.fetchComments(repoOwner, repoName, issue.number)}

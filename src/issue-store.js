@@ -142,10 +142,14 @@ class IssueStore extends EventEmitter {
       this.emit('change:' + key, val);
     });
   }
-  setLastViewed(repoOwner, repoName, issueNumber, timestamp) {
-    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
-    cacheLastViewed[issueKey] = timestamp;
-    this.emit('change:' + issueKey);
+  setLastViewed(repoOwner, repoName, issue) {
+    const issueKey = toIssueKey(repoOwner, repoName, issue.number);
+    const now = new Date();
+    const isNew = !cacheLastViewed[issueKey] || (now.getTime() - cacheLastViewed[issueKey].getTime() > 10000);
+    cacheLastViewed[issueKey] = now;
+    if (isNew) {
+      this.emit('change:' + issueKey, issue);
+    }
   }
   getLastViewed(repoOwner, repoName, issueNumber) {
     const issueKey = toIssueKey(repoOwner, repoName, issueNumber);

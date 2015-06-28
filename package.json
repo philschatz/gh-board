@@ -24,6 +24,7 @@
     "bootstrap": "^3.3.4",
     "font-awesome": "^4.3.0",
     "gfm-linkify": "^0.1.0",
+    "moment": "2.10.3",
     "octokat": "^0.4.10",
     "react": "^0.13.3",
     "react-bootstrap": "^0.23.1",

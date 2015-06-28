@@ -9,6 +9,8 @@ import LoginModal from './login-modal.jsx';
 import {CurrentUserStore} from '../user-store';
 import {FilterStore} from '../filter-store';
 
+import Time from './time.jsx';
+
 const KarmaWarning = React.createClass({
   getInitialState() {
     return {timer: null, limit: null, remaining: null};
@@ -17,31 +19,38 @@ const KarmaWarning = React.createClass({
     this.setState({timer: setInterval(this.pollKarma, 60000)});
     this.pollKarma();
   },
-  componentDidUnmount() {
+  componentWillUnmount() {
     clearInterval(this.pollKarma);
   },
   pollKarma() {
     Client.getOcto().rateLimit.fetch().then((rates) => {
-      const {remaining, limit} = rates.resources.core;
-      this.setState({remaining, limit});
+      const {remaining, limit, reset} = rates.resources.core;
+      this.setState({remaining, limit, reset});
     });
   },
   render() {
-    const {remaining, limit} = this.state;
+    const {remaining, limit, reset} = this.state;
     let karmaText;
+    let resetText;
     if (remaining / limit < .2) {
       karmaText = (
-        <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in</BS.Button>
+        <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in.</BS.Button>
       );
     } else {
       karmaText = (
-        <span className='lots-of-karma'>GitHub Karma: {remaining} / {limit}</span>
+        <span className='lots-of-karma'>GitHub Karma: {remaining} / {limit}.</span>
+      );
+    }
+    if (reset) {
+      resetText = (
+        <span>Resets <Time dateTime={new Date(reset * 1000)}/></span>
       );
     }
     return (
       <BS.Navbar fixedBottom>
         <BS.Nav>
           {karmaText}
+          {resetText}
         </BS.Nav>
       </BS.Navbar>
     );
@@ -56,7 +65,7 @@ const LoginButton = React.createClass({
     Client.on('changeToken', this.onChangeToken);
     this.onChangeToken();
   },
-  componentDidUnmount() {
+  componentWillUnmount() {
     Client.off('changeToken', this.onChangeToken);
   },
   onChangeToken() {
@@ -96,7 +105,7 @@ const App = React.createClass({
   componentDidMount() {
     FilterStore.on('change', this.update);
   },
-  componentDidUnmount() {
+  componentWillUnmount() {
     FilterStore.off('change', this.update);
   },
   changeShowIcebox() {

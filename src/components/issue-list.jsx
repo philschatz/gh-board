@@ -35,6 +35,8 @@ const IssueList = React.createClass({
     const sortedIssues = _.sortBy(issues, (issue) => {
       return issue.updatedAt;
     });
+    // Reverse so newest ones are on top
+    sortedIssues.reverse();
     const kanbanIssues = _.map(sortedIssues, (issue) => {
       return (
         <Issue

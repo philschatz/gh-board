@@ -130,7 +130,7 @@ const Repo = React.createClass({
     const issueListKey = toIssueListKey(repoOwner, repoName);
     Store.on('change:' + issueListKey, this.onChange);
   },
-  componentDidUnmount() {
+  componentWillUnmount() {
     const {repoOwner, repoName} = this.props;
     const issueListKey = toIssueListKey(repoOwner, repoName);
     Store.off('change:' + issueListKey, this.onChange);

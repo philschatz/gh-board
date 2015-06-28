@@ -1,5 +1,6 @@
 import React from 'react';
 import BS from 'react-bootstrap';
+import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
 import {Store, toIssueKey} from '../issue-store';
@@ -68,7 +69,7 @@ const Issue = React.createClass({
       Store.off('change:' + oldKey, this.update);
     }
   },
-  componentDidUnmount() {
+  componentWillUnmount() {
     const key = this.getKey(this.props);
     Store.off('change:' + key, this.update);
   },
@@ -98,10 +99,13 @@ const Issue = React.createClass({
     );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < issue.updatedAt;
+    const isBlocked = _.contains(issue.labels, (label) => {
+      return label.name.toLowerCase() === 'blocked';
+    });
     return connectDragSource(
       <BS.ModalTrigger modal={modal}>
         <BS.Panel
-          className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated}}
+          className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated, 'is-blocked': isBlocked}}
           bsStyle='default'
           footer={footer}>
           {issue.title}
