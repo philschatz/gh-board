@@ -3,6 +3,7 @@ import BS from 'react-bootstrap';
 
 import AsyncButton from './async-button.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
+import Time from './time.jsx';
 
 const EditableComment = React.createClass({
 
@@ -27,7 +28,7 @@ const EditableComment = React.createClass({
     }
   },
   render() {
-    const {user, text, repoOwner, repoName, cancelText, saveText} = this.props;
+    const {user, text, repoOwner, repoName, cancelText, saveText, dateTime} = this.props;
     const {isEditing} = this.state;
 
     let header;
@@ -64,9 +65,16 @@ const EditableComment = React.createClass({
           />
       );
     } else {
+      let timestamp;
+      if (dateTime) {
+        timestamp = (
+          <Time dateTime={dateTime}/>
+        );
+      }
       header = (
         <span>
           {user.login + ' commented'}
+          {timestamp}
           <BS.Button
             bsSize='xsmall'
             className='pull-right'

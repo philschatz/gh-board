@@ -95,6 +95,12 @@ export default React.createClass({
       this.setState({});
     });
   },
+  onEditComment(comment) {
+    return (body) => {
+      console.log('TODO: Update comment');
+      return Promise.reject();
+    };
+  },
   render() {
     const {issue, repoOwner, repoName} = this.props;
 
@@ -122,6 +128,8 @@ export default React.createClass({
               text={comment.body}
               repoOwner={repoOwner}
               repoName={repoName}
+              dateTime={comment.updatedAt}
+              onEdit={this.onEditComment(comment)}
               canEdit={true}
               cancelText='Cancel'
               saveText='Update Comment'
@@ -178,7 +186,7 @@ export default React.createClass({
             onEdit={this.onEditBody}
             cancelText='Cancel'
             saveText='Update Description'
-            timestamp={issue.updatedAt}
+            dateTime={issue.updatedAt}
           />
           <Loadable
             promise={Store.fetchComments(repoOwner, repoName, issue.number)}
