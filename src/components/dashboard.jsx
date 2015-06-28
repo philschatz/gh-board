@@ -33,11 +33,36 @@ const Dashboard = React.createClass({
 const DashboardShell = React.createClass({
   displayName: 'DashboardShell',
   render() {
+    const sampleRepos = [
+      'react-bootstrap/react-bootstrap',
+      'rauhryan/huboard',
+      'philschatz/gh-board'
+    ];
+    const anonLinks = _.map(sampleRepos, (repo) => {
+      const params = {
+        repoOwner: repo.split('/')[0],
+        repoName: repo.split('/')[1]
+      };
+      return (
+        <li key={repo}>
+          <Link to='viewRepo' params={params}>{repo}</Link>
+        </li>
+      )
+    });
+    const anonymousText = (
+      <span>
+        Are you logged in? You can try these repos:
+
+        <ul>
+          {anonLinks}
+        </ul>
+      </span>
+    );
     return (
       <Loadable
         promise={Client.getOcto().user.repos.fetch()}
         renderLoaded={(data) => { return (<Dashboard data={data}/>); } }
-        renderError={() => { return <span>Are you logged in?</span>; }}
+        renderError={() => { return anonymousText; }}
       />
     );
   }
