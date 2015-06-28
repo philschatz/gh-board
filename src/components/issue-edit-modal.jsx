@@ -86,6 +86,7 @@ export default React.createClass({
   },
   render() {
     const {issue, repoOwner, repoName} = this.props;
+    Store.setLastViewed(repoOwner, repoName, issue.number, new Date());
 
     const footer = (
       <span>

@@ -17,6 +17,8 @@ const toCommentKey = (repoOwner, repoName, issueNumber, commentId) => {
 };
 
 let cacheIssues = {};
+let cacheLastViewed = {};
+const initialTimestamp = new Date();
 
 class IssueStore extends EventEmitter {
   off() { // EventEmitter has `.on` but no matching `.off`
@@ -39,9 +41,16 @@ class IssueStore extends EventEmitter {
       });
     }
   }
-  fetchAll(repoOwner, repoName) {
+  fetchAll(repoOwner, repoName, force) {
     const listKey = toIssueListKey(repoOwner, repoName);
-    if (cacheIssues[listKey]) {
+    // Start polling
+    if (!this.polling) {
+      this.polling = setTimeout(() => {
+        this.polling = null;
+        this.fetchAll(repoOwner, repoName, true);
+      }, 30000);
+    }
+    if (cacheIssues[listKey] && !force) {
       return Promise.resolve(cacheIssues[listKey]);
     } else {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
@@ -133,7 +142,16 @@ class IssueStore extends EventEmitter {
       this.emit('change:' + key, val);
     });
   }
+  setLastViewed(repoOwner, repoName, issueNumber, timestamp) {
+    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
+    cacheLastViewed[issueKey] = timestamp;
+    this.emit('change:' + issueKey);
+  }
+  getLastViewed(repoOwner, repoName, issueNumber) {
+    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
+    return cacheLastViewed[issueKey] || initialTimestamp;
+  }
 }
 
 const Store = new IssueStore();
-export {toIssueKey, Store};
+export {toIssueKey, toIssueListKey, Store};

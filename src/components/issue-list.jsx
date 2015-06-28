@@ -31,7 +31,11 @@ const IssueList = React.createClass({
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
 
-    const kanbanIssues = _.map(issues, (issue) => {
+    // Sort the issues by `updatedAt`
+    const sortedIssues = _.sortBy(issues, (issue) => {
+      return issue.updatedAt;
+    });
+    const kanbanIssues = _.map(sortedIssues, (issue) => {
       return (
         <Issue
           key={issue.id}

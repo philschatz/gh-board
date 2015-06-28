@@ -96,10 +96,12 @@ const Issue = React.createClass({
         repoName={repoName}
       />
     );
+    const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
+    const isUpdated = lastViewed < issue.updatedAt;
     return connectDragSource(
       <BS.ModalTrigger modal={modal}>
         <BS.Panel
-          className={{'issue': true, 'is-dragging': isDragging}}
+          className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated}}
           bsStyle='default'
           footer={footer}>
           {issue.title}
