@@ -75,7 +75,11 @@ const Issue = React.createClass({
     Store.off('change:' + key, this.update);
   },
   onClickNumber(evt) {
+    const {repoOwner, repoName} = this.props;
+    const {issue} = this.state;
+
     evt.stopPropagation();
+    Store.setLastViewed(repoOwner, repoName, issue);
   },
   render() {
     const {repoOwner, repoName} = this.props;
