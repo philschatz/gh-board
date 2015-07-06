@@ -42,6 +42,7 @@ const KanbanRepo = React.createClass({
       <td key={label.name}>
         <IssueList
           title={kanbanLabelName(label)}
+          color={label.color}
           issues={issues}
           repoOwner={repoOwner}
           repoName={repoName}
