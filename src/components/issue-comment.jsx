@@ -104,7 +104,7 @@ const EditableComment = React.createClass({
 
 export default React.createClass({
   render() {
-    const {user, text, repoOwner, repoName, canEdit, onEdit, isEditing} = this.props;
+    const {user} = this.props;
 
     return (
       <div className='media'>
