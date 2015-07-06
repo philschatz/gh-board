@@ -12,7 +12,15 @@
 .kanban-board .panel.issue { cursor: pointer; }
 .kanban-board .panel.issue .issue-number::before { content: '#'; }
 .kanban-board .panel.issue .issue-number { font-size: 200%; }
+.kanban-board .panel.issue:not(:hover) .issue-body { height: 0; overflow-y: hidden; }
 
+.kanban-board .panel.issue .issue-body {
+  height: 100%;
+  overflow-y: auto;
+
+  transition: all 1s ease-in-out 1s;
+  -webkit-transition: all 1s ease-in-out 1s;
+}
 
 .modal.issue-edit .body-avatar,
 .modal.issue-edit .avatar-image {

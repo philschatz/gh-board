@@ -5,6 +5,7 @@ import { DragSource } from 'react-dnd';
 
 import {Store, toIssueKey} from '../issue-store';
 import IssueEditModal from './issue-edit-modal.jsx';
+import GithubFlavoredMarkdown from './gfm.jsx';
 
 const ItemTypes = {
   CARD: 'card'
@@ -73,6 +74,9 @@ const Issue = React.createClass({
     const key = this.getKey(this.props);
     Store.off('change:' + key, this.update);
   },
+  onClickNumber(evt) {
+    evt.stopPropagation();
+  },
   render() {
     const {repoOwner, repoName} = this.props;
     const {issue} = this.state;
@@ -99,7 +103,9 @@ const Issue = React.createClass({
     const footer = [
       assignedAvatar,
       icon,
-      <a className='issue-number' target='_blank' href={issue.html.url}>{issue.number}</a>
+      <a className='issue-number'
+        target='_blank'
+        href={issue.html.url} onClick={this.onClickNumber}>{issue.number}</a>
     ];
     const modal = (
       <IssueEditModal
@@ -110,18 +116,26 @@ const Issue = React.createClass({
     );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < issue.updatedAt;
-    const isBlocked = _.contains(issue.labels, (label) => {
+    const isBlocked = _.filter(issue.labels, (label) => {
       return label.name.toLowerCase() === 'blocked';
-    });
+    }).length > 0;
     return connectDragSource(
-      <BS.ModalTrigger modal={modal}>
-        <BS.Panel
-          className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated, 'is-blocked': isBlocked}}
-          bsStyle='default'
-          footer={footer}>
-          {issue.title}
-        </BS.Panel>
-      </BS.ModalTrigger>
+        <BS.ModalTrigger modal={modal}>
+          <BS.Panel
+            className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated, 'is-blocked': isBlocked}}
+            bsStyle='default'
+            footer={footer}>
+            {issue.title}
+            <div className='issue-body'>
+              <hr/>
+              <GithubFlavoredMarkdown
+                disableLinks={true}
+                repoOwner={repoOwner}
+                repoName={repoName}
+                text={issue.body}/>
+            </div>
+          </BS.Panel>
+        </BS.ModalTrigger>
     );
   }
 });

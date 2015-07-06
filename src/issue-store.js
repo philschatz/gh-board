@@ -3,6 +3,8 @@ import {EventEmitter} from 'events';
 import Client from './github-client';
 import {fetchAll, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
+const RELOAD_TIME = 60 * 1000;
+
 const toIssueListKey = (repoOwner, repoName) => {
   return repoOwner + '/' + repoName + '/issues';
 };
@@ -48,7 +50,7 @@ class IssueStore extends EventEmitter {
       this.polling = setTimeout(() => {
         this.polling = null;
         this.fetchAll(repoOwner, repoName, true);
-      }, 30000);
+      }, RELOAD_TIME);
     }
     if (cacheIssues[listKey] && !force) {
       return Promise.resolve(cacheIssues[listKey]);
