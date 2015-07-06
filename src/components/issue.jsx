@@ -91,7 +91,11 @@ const Issue = React.createClass({
     let assignedAvatar = null;
     if (issue.assignee) {
       assignedAvatar = (
-        <img src={issue.assignee.avatar_url}/>
+        <img className='avatar-image' src={issue.assignee.avatar.url}/>
+      );
+    } else {
+      assignedAvatar = (
+        <img className='avatar-image' src={issue.user.avatar.url}/>
       );
     }
     let icon;
@@ -104,13 +108,16 @@ const Issue = React.createClass({
     //     <i className='is-open mega-octicon octicon-issue-opened'/>
     //   );
     }
-    const footer = [
-      assignedAvatar,
-      icon,
+    const footer = (
       <a className='issue-number'
         target='_blank'
-        href={issue.html.url} onClick={this.onClickNumber}>{issue.number}</a>
-    ];
+        href={issue.html.url}
+        onClick={this.onClickNumber}>
+          {assignedAvatar}
+          {icon}
+          #{issue.number}
+      </a>
+    );
     const modal = (
       <IssueEditModal
         issue={issue}

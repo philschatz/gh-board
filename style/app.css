@@ -10,7 +10,6 @@
 }
 
 .kanban-board .panel.issue { cursor: pointer; }
-.kanban-board .panel.issue .issue-number::before { content: '#'; }
 .kanban-board .panel.issue .issue-number { font-size: 200%; }
 .kanban-board .panel.issue:not(:hover) .issue-body { height: 0; overflow-y: hidden; }
 
@@ -22,9 +21,10 @@
   -webkit-transition: all 1s ease-in-out 1s;
 }
 
+.panel.issue .avatar-image,
 .modal.issue-edit .body-avatar,
 .modal.issue-edit .avatar-image {
-  width: 5rem;
+  width: 4rem;
 }
 
 .markdown-format { }
