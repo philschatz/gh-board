@@ -17,8 +17,8 @@
   height: 100%;
   overflow-y: auto;
 
-  transition: all 1s ease-in-out 1s;
-  -webkit-transition: all 1s ease-in-out 1s;
+  transition: all 1s ease-in-out 3s;
+  -webkit-transition: all 1s ease-in-out 3s;
 }
 
 .panel.issue .avatar-image,

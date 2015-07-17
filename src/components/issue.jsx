@@ -89,6 +89,9 @@ const Issue = React.createClass({
     const { isDragging, connectDragSource } = this.props;
 
     let assignedAvatar = null;
+    if (!issue) {
+      return (<span>Bug? No Issue</span>);
+    }
     if (issue.assignee) {
       assignedAvatar = (
         <img className='avatar-image' src={issue.assignee.avatar.url}/>
