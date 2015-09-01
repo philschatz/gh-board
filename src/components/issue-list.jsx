@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { DropTarget } from 'react-dnd';
+import BS from 'react-bootstrap';
 
 import Issue from './issue.jsx';
 
@@ -57,7 +58,9 @@ const IssueList = React.createClass({
       <div className='kanban-issues'>
         <h2 className='title' style={{'background-color': color}}>{title}</h2>
         {isOver && placeholder}
-        {kanbanIssues}
+        <BS.ListGroup>
+          {kanbanIssues}
+        </BS.ListGroup>
       </div>
     );
   }

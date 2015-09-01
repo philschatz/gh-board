@@ -9,19 +9,20 @@
   padding-right: 1rem;
 }
 
-.kanban-board .panel.issue { cursor: pointer; }
-.kanban-board .panel.issue .issue-number { font-size: 200%; }
-.kanban-board .panel.issue:not(:hover) .issue-body { height: 0; overflow-y: hidden; }
+.kanban-board .list-group-item.issue { cursor: pointer; }
+.kanban-board .list-group-item.issue .issue-number { font-size: 200%; }
 
-.kanban-board .panel.issue .issue-body {
-  height: 100%;
-  overflow-y: auto;
-
-  transition: all 1s ease-in-out 3s;
-  -webkit-transition: all 1s ease-in-out 3s;
+.kanban-board .list-group-item.issue .list-group-item-heading time.updated-at {
+  font-size: 70%;
+  color: #999;
 }
 
-.panel.issue .avatar-image,
+.popover.issue-body {
+  max-width: 500px;
+}
+
+.avatar-image, /* just do it for all avatar images */
+.list-group-item.issue .avatar-image,
 .modal.issue-edit .body-avatar,
 .modal.issue-edit .avatar-image {
   width: 4rem;
@@ -29,6 +30,7 @@
 
 .markdown-format { }
 
+/*
 .issue-comment-wrapper { }
 .issue-comment { width: 100%; }
 .issue-comment-avatar { }
@@ -38,6 +40,7 @@
 
 .comment-content { }
 .comment-body { }
+*/
 
 
 /* Just make it gray so it is clear we are dragging this element */
@@ -63,10 +66,12 @@
 .rendered-markdown.is-empty { color: #ccc; font-style: italic; }
 .rendered-markdown.is-empty::before { content: 'No Content provided.'; }
 
+/*
 .issue-comments.is-empty { color: #ccc; font-style: italic; }
 .issue-comments.is-empty::before { content: 'No Comments'; }
 
 textarea.edit-text { min-height: 5rem; max-height: 100rem; }
+*/
 
 .emoji { width: 20px; height: 20px; }
 

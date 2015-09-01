@@ -6,6 +6,7 @@ import { DragSource } from 'react-dnd';
 import {Store, toIssueKey} from '../issue-store';
 import IssueEditModal from './issue-edit-modal.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
+import Time from './time.jsx';
 
 const ItemTypes = {
   CARD: 'card'
@@ -111,16 +112,22 @@ const Issue = React.createClass({
     //     <i className='is-open mega-octicon octicon-issue-opened'/>
     //   );
     }
-    const footer = (
-      <a className='issue-number'
-        target='_blank'
-        href={issue.html.url}
-        onClick={this.onClickNumber}>
-          {assignedAvatar}
-          {icon}
-          #{issue.number}
-      </a>
+    const bodyPopover = (
+      <BS.Popover className='issue-body' title='Issue Description'>
+        <GithubFlavoredMarkdown
+          disableLinks={true}
+          repoOwner={repoOwner}
+          repoName={repoName}
+          text={issue.body}/>
+      </BS.Popover>
     );
+    const footer = [
+          assignedAvatar,
+          icon,
+          <BS.OverlayTrigger trigger={['click', 'focus']} placement='bottom' overlay={bodyPopover}>
+            <span className='issue-number'>#{issue.number}</span>
+          </BS.OverlayTrigger>
+    ];
     const modal = (
       <IssueEditModal
         issue={issue}
@@ -133,23 +140,24 @@ const Issue = React.createClass({
     const isBlocked = _.filter(issue.labels, (label) => {
       return label.name.toLowerCase() === 'blocked';
     }).length > 0;
+    const header = [
+      <a
+        target='_blank'
+        href={issue.html.url}
+        onClick={this.onClickNumber}>
+          {issue.title}</a>,
+      <Time className='updated-at pull-right' dateTime={issue.updatedAt}/>
+    ];
     return connectDragSource(
-        <BS.ModalTrigger modal={modal}>
-          <BS.Panel
-            className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated, 'is-blocked': isBlocked}}
-            bsStyle='default'
-            footer={footer}>
-            {issue.title}
-            <div className='issue-body'>
-              <hr/>
-              <GithubFlavoredMarkdown
-                disableLinks={true}
-                repoOwner={repoOwner}
-                repoName={repoName}
-                text={issue.body}/>
-            </div>
-          </BS.Panel>
-        </BS.ModalTrigger>
+      <BS.ListGroupItem
+        header={header}
+        className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated, 'is-blocked': isBlocked}}
+        bsStyle='default'
+        target-todo='_blank'
+        href-todo={issue.html.url}
+        onClick-todo={this.onClickNumber}>
+        {footer}
+      </BS.ListGroupItem>
     );
   }
 });
