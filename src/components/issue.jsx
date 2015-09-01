@@ -4,7 +4,6 @@ import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
 import {Store, toIssueKey} from '../issue-store';
-import IssueEditModal from './issue-edit-modal.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
 import Time from './time.jsx';
 
@@ -128,13 +127,6 @@ const Issue = React.createClass({
             <span className='issue-number'>#{issue.number}</span>
           </BS.OverlayTrigger>
     ];
-    const modal = (
-      <IssueEditModal
-        issue={issue}
-        repoOwner={repoOwner}
-        repoName={repoName}
-      />
-    );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < issue.updatedAt;
     const isBlocked = _.filter(issue.labels, (label) => {

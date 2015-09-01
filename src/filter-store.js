@@ -12,7 +12,7 @@ class Store extends EventEmitter {
     showIcebox = !!flag;
     this.emit('change');
   }
-  getShowIcebox(flag) {
+  getShowIcebox() {
     return showIcebox;
   }
 }
