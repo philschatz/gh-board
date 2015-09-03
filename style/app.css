@@ -77,6 +77,7 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 
 .issue.is-updated { background-color: #ff9; }
 .issue.is-blocked { background-color: #f99; }
+.issue.is-pull-request:not(.is-mergeable) { background-color: #eee; }
 
 .octicon.is-open,
 .mega-octicon.is-open { color: #6cc644; }

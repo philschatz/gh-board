@@ -82,7 +82,7 @@ const Issue = React.createClass({
     Store.setLastViewed(repoOwner, repoName, issue);
   },
   render() {
-    const {repoOwner, repoName} = this.props;
+    const {repoOwner, repoName, isPullRequest} = this.props;
     const {issue} = this.state;
 
     // Defined by the collector
@@ -102,7 +102,7 @@ const Issue = React.createClass({
       );
     }
     let icon;
-    if (issue.pullRequest) {
+    if (isPullRequest) {
       icon = (
         <i className='is-open mega-octicon octicon-git-pull-request'/>
       );
@@ -140,10 +140,18 @@ const Issue = React.createClass({
           {issue.title}</a>,
       <Time className='updated-at pull-right' dateTime={issue.updatedAt}/>
     ];
+    const classes = {
+      'issue': true,
+      'is-dragging': isDragging,
+      'is-updated': isUpdated,
+      'is-blocked': isBlocked,
+      'is-pull-request': isPullRequest,
+      'is-mergeable': issue.mergeable
+    };
     return connectDragSource(
       <BS.ListGroupItem
         header={header}
-        className={{'issue': true, 'is-dragging': isDragging, 'is-updated': isUpdated, 'is-blocked': isBlocked}}
+        className={classes}
         bsStyle='default'
         target-todo='_blank'
         href-todo={issue.html.url}

@@ -43,6 +43,17 @@ class IssueStore extends EventEmitter {
       });
     }
   }
+  fetchPullRequest(repoOwner, repoName, issueNumber) {
+    const issue = Client.getOcto().repos(repoOwner, repoName).pulls(issueNumber);
+    const key = toIssueKey(repoOwner, repoName, issueNumber);
+    return issue.fetch()
+    .then((val) => {
+      cacheIssues[key] = val;
+      this.emit('change', key, val);
+      this.emit('change:' + key, val);
+      return val;
+    });
+  }
   fetchAll(repoOwner, repoName, force) {
     const listKey = toIssueListKey(repoOwner, repoName);
     // Start polling

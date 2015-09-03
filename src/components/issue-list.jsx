@@ -3,6 +3,8 @@ import _ from 'underscore';
 import { DropTarget } from 'react-dnd';
 import BS from 'react-bootstrap';
 
+import {Store} from '../issue-store';
+import Loadable from './loadable.jsx';
 import Issue from './issue.jsx';
 
 
@@ -27,6 +29,21 @@ function collect(connect, monitor) {
 
 const IssueList = React.createClass({
   displayName: 'IssueList',
+  // Curried function
+  renderIssue(isPullRequest) {
+    return (issue) => {
+      const {repoOwner, repoName} = this.props;
+      return (
+        <Issue
+          key={issue.id}
+          issue={issue}
+          repoOwner={repoOwner}
+          repoName={repoName}
+          isPullRequest={isPullRequest}
+        />
+      );
+    };
+  },
   render() {
     const {issues, title, color, repoOwner, repoName} = this.props;
     const {connectDropTarget} = this.props;
@@ -39,14 +56,17 @@ const IssueList = React.createClass({
     // Reverse so newest ones are on top
     sortedIssues.reverse();
     const kanbanIssues = _.map(sortedIssues, (issue) => {
-      return (
-        <Issue
-          key={issue.id}
-          issue={issue}
-          repoOwner={repoOwner}
-          repoName={repoName}
-        />
-      );
+      if (issue.pullRequest) {
+        const promise = Store.fetchPullRequest(repoOwner, repoName, issue.number);
+        return (
+          <Loadable
+            promise={promise}
+            renderLoaded={this.renderIssue(true /*isPullRequest*/)}
+          />
+        );
+      } else {
+        return this.renderIssue(false /*isPullRequest*/)(issue);
+      }
     });
 
     // DnD placeholder element
