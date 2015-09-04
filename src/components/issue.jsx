@@ -94,17 +94,17 @@ const Issue = React.createClass({
     }
     if (issue.assignee) {
       assignedAvatar = (
-        <img className='avatar-image' src={issue.assignee.avatar.url}/>
+        <img key='avatar' className='avatar-image' src={issue.assignee.avatar.url}/>
       );
     } else {
       assignedAvatar = (
-        <img className='avatar-image' src={issue.user.avatar.url}/>
+        <img key='avatar' className='avatar-image' src={issue.user.avatar.url}/>
       );
     }
     let icon;
     if (isPullRequest) {
       icon = (
-        <i className='is-open mega-octicon octicon-git-pull-request'/>
+        <i key='pullrequest' className='is-open mega-octicon octicon-git-pull-request'/>
       );
     // } else {
     //   icon = (
@@ -123,7 +123,7 @@ const Issue = React.createClass({
     const footer = [
           assignedAvatar,
           icon,
-          <BS.OverlayTrigger trigger={['click', 'focus']} placement='bottom' overlay={bodyPopover}>
+          <BS.OverlayTrigger key='issue-number' trigger={['click', 'focus']} placement='bottom' overlay={bodyPopover}>
             <span className='issue-number'>#{issue.number}</span>
           </BS.OverlayTrigger>
     ];
@@ -134,11 +134,12 @@ const Issue = React.createClass({
     }).length > 0;
     const header = [
       <a
+        key='link'
         target='_blank'
         href={issue.html.url}
         onClick={this.onClickNumber}>
           {issue.title}</a>,
-      <Time className='updated-at pull-right' dateTime={issue.updatedAt}/>
+      <Time key='time' className='updated-at pull-right' dateTime={issue.updatedAt}/>
     ];
     const classes = {
       'issue': true,
@@ -152,7 +153,6 @@ const Issue = React.createClass({
       <BS.ListGroupItem
         header={header}
         className={classes}
-        bsStyle='default'
         target-todo='_blank'
         href-todo={issue.html.url}
         onClick-todo={this.onClickNumber}>

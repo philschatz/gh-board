@@ -60,6 +60,7 @@ const IssueList = React.createClass({
         const promise = Store.fetchPullRequest(repoOwner, repoName, issue.number);
         return (
           <Loadable
+            key={issue.id}
             promise={promise}
             renderLoaded={this.renderIssue(true /*isPullRequest*/)}
           />
@@ -76,7 +77,7 @@ const IssueList = React.createClass({
 
     return connectDropTarget(
       <div className='kanban-issues'>
-        <h2 className='title' style={{'background-color': color}}>{title}</h2>
+        <h2 className='title' style={{backgroundColor: color}}>{title}</h2>
         {isOver && placeholder}
         <BS.ListGroup>
           {kanbanIssues}

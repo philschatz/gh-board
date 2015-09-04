@@ -59,7 +59,7 @@ const KarmaWarning = React.createClass({
 
 const LoginButton = React.createClass({
   getInitialState() {
-    return {info: null};
+    return {info: null, showModal: false};
   },
   componentDidMount() {
     Client.on('changeToken', this.onChangeToken);
@@ -81,7 +81,9 @@ const LoginButton = React.createClass({
     CurrentUserStore.clear();
   },
   render() {
-    const {info} = this.state;
+    const {info, showModal} = this.state;
+    const close = () => this.setState({ showModal: false});
+
     if (info) {
       const avatar = <img className='avatar' src={info.avatar.url}/>;
       return (
@@ -93,9 +95,10 @@ const LoginButton = React.createClass({
       );
     } else {
       return (
-        <BS.ModalTrigger modal={<LoginModal/>}>
-          <BS.Button eventKey={1}>Sign In</BS.Button>
-        </BS.ModalTrigger>
+        <span className='signin-and-modal'>
+          <BS.Button eventKey={1} onClick={() => this.setState({showModal: true})}>Sign In</BS.Button>
+          <LoginModal show={showModal} container={this} onHide={close}/>
+        </span>
       );
     }
   }

@@ -17,7 +17,7 @@ export default React.createClass({
     this.setState({});
   },
   onCancel() {
-    this.props.onRequestHide();
+    this.props.onHide();
   },
   render() {
     const {token, username, password} = Client.getCredentials();
@@ -31,9 +31,11 @@ export default React.createClass({
     );
 
     return (
-      <BS.Modal {...this.props}
-        title='GitHub Credentials'>
-        <div className='modal-body'>
+      <BS.Modal {...this.props}>
+        <BS.Modal.Header closeButton>
+          <BS.Modal.Title>GitHub Credentials</BS.Modal.Title>
+        </BS.Modal.Header>
+        <BS.Modal.Body className='modal-body'>
           <BS.Input
             type='text'
             defaultValue={token}
@@ -41,10 +43,10 @@ export default React.createClass({
             placeholder='Enter GitHub token'
             ref='token'
           />
-        </div>
-        <div className='modal-footer'>
+        </BS.Modal.Body>
+        <BS.Modal.Footer className='modal-footer'>
           {footer}
-        </div>
+        </BS.Modal.Footer>
     </BS.Modal>
     );
   }

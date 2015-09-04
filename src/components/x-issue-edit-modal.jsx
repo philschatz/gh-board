@@ -79,7 +79,7 @@ export default React.createClass({
     this.updateLastViewed();
   },
   onClose() {
-    this.props.onRequestHide();
+    this.props.onHide();
   },
   onEditBody(body) {
     const {repoOwner, repoName, issue} = this.props;

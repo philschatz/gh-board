@@ -23,7 +23,7 @@ export default React.createClass({
     timeouts[id] = this.forceUpdate.bind(this);
   },
   componentWillUnmount() {
-    const {id} = this.getState();
+    const {id} = this.state;
     delete timeouts[id];
     this.setState({id: null});
   },
