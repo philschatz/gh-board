@@ -87,7 +87,7 @@ const LoginButton = React.createClass({
     if (info) {
       const avatar = <img className='avatar' src={info.avatar.url}/>;
       return (
-        <BS.DropdownButton className='logoff' title={avatar}>
+        <BS.DropdownButton id='signin-dropdown' className='logoff' title={avatar}>
           <BS.MenuItem disabled href='https://github.com'>Signed in as <strong>{info.login}</strong></BS.MenuItem>
           <BS.MenuItem divider/>
           <BS.MenuItem eventKey='1' onClick={this.onSignOut}>Sign Out</BS.MenuItem>

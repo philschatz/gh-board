@@ -112,7 +112,7 @@ const Issue = React.createClass({
     //   );
     }
     const bodyPopover = (
-      <BS.Popover className='issue-body' title='Issue Description'>
+      <BS.Popover id="popover-${issue.id}" className='issue-body' title='Issue Description'>
         <GithubFlavoredMarkdown
           disableLinks={true}
           repoOwner={repoOwner}
@@ -151,6 +151,7 @@ const Issue = React.createClass({
     };
     return connectDragSource(
       <BS.ListGroupItem
+        key={issue.id}
         header={header}
         className={classes}
         target-todo='_blank'
