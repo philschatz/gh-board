@@ -1,5 +1,5 @@
 import React from 'react';
-import BS from 'react-bootstrap';
+import BS from './rbs';
 
 import AsyncButton from './async-button.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';

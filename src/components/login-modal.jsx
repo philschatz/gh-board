@@ -1,6 +1,6 @@
 import React from 'react';
 import Client from '../github-client';
-import BS from 'react-bootstrap';
+import BS from './rbs';
 
 export default React.createClass({
   displayName: 'Login',

@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 import { DropTarget } from 'react-dnd';
-import BS from 'react-bootstrap';
+import BS from './rbs';
 
 import {Store} from '../issue-store';
 import Loadable from './loadable.jsx';

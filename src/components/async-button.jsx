@@ -1,5 +1,5 @@
 import React from 'react';
-import BS from 'react-bootstrap';
+import BS from './rbs';
 
 const ASYNC_UNSTARTED = Symbol('ASYNC_UNSTARTED');
 const ASYNC_RESOLVED = Symbol('ASYNC_RESOLVED');

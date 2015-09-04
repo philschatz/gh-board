@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
-import BS from 'react-bootstrap';
+import BS from './rbs';
 
 import {Store} from '../issue-store';
 import {CurrentUserStore} from '../user-store';
