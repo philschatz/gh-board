@@ -1,31 +1,30 @@
 import React from 'react';
 import Moment from 'moment';
 
-const UPDATE_INTERVAL = 10 * 1000;
+// const UPDATE_INTERVAL = 10 * 1000;
+//
+// const timeouts = {};
+// let counter = 0;
+// const nextId = function() { return 'time-id' + counter++; };
+//
+// const updateAllTimes = function() {
+//   for (const key in timeouts) {
+//     timeouts[key]();
+//   }
+// };
 
-
-const timeouts = {};
-let counter = 0;
-const nextId = function() { return 'time-id' + counter++; };
-
-const updateAllTimes = function() {
-  for (const key in timeouts) {
-    timeouts[key]();
-  }
-};
-
-setInterval(updateAllTimes, UPDATE_INTERVAL);
+// setInterval(updateAllTimes, UPDATE_INTERVAL);
 
 export default React.createClass({
   componentWillMount() {
     const id = nextId();
     this.setState({id});
-    timeouts[id] = this.forceUpdate.bind(this);
+    // timeouts[id] = this.forceUpdate.bind(this);
   },
   componentWillUnmount() {
     const {id} = this.state;
-    delete timeouts[id];
-    this.setState({id: null});
+    // delete timeouts[id];
+    // this.setState({id: null});
   },
   render() {
     const {dateTime, className} = this.props;
