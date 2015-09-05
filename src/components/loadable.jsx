@@ -22,7 +22,6 @@ export default React.createClass({
   },
   componentDidUpdate(prevProps) {
     if (this.props.promise !== prevProps.promise) {
-      this.setState({status: STATUS.INITIAL});
       const {promise} = this.props;
       promise.then(this.onResolve, this.onError);
     }
