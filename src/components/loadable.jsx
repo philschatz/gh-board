@@ -28,9 +28,7 @@ export default React.createClass({
   },
   onResolve(value) {
     // TODO: Find out why this is being called multiple times
-    if (this.state.status !== STATUS.RESOLVED) {
-      this.setState({status: STATUS.RESOLVED, value});
-    }
+    this.setState({status: STATUS.RESOLVED, value});
   },
   onError(value) {
     // TODO: Find out why this is being called multiple times
