@@ -47,7 +47,7 @@ const DashboardShell = React.createClass({
         <li key={repo}>
           <Link to='viewRepo' params={params}>{repo}</Link>
         </li>
-      )
+      );
     });
     const anonymousText = (
       <span>

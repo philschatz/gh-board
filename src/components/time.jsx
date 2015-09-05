@@ -16,16 +16,16 @@ import Moment from 'moment';
 // setInterval(updateAllTimes, UPDATE_INTERVAL);
 
 export default React.createClass({
-  componentWillMount() {
-    const id = nextId();
-    this.setState({id});
-    // timeouts[id] = this.forceUpdate.bind(this);
-  },
-  componentWillUnmount() {
-    const {id} = this.state;
-    // delete timeouts[id];
-    // this.setState({id: null});
-  },
+  // componentWillMount() {
+  //   const id = nextId();
+  //   this.setState({id});
+  //   timeouts[id] = this.forceUpdate.bind(this);
+  // },
+  // componentWillUnmount() {
+  //   const {id} = this.state;
+  //   delete timeouts[id];
+  //   this.setState({id: null});
+  // },
   render() {
     const {dateTime, className} = this.props;
     const humanized = Moment(dateTime).fromNow();
