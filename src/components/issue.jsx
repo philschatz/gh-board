@@ -145,9 +145,6 @@ const Issue = React.createClass({
     ];
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < issue.updatedAt;
-    const isBlocked = _.filter(issue.labels, (label) => {
-      return label.name.toLowerCase() === 'blocked';
-    }).length > 0;
     const header = [
       <a
         key='link'
@@ -161,7 +158,6 @@ const Issue = React.createClass({
       'issue': true,
       'is-dragging': isDragging,
       'is-updated': isUpdated,
-      'is-blocked': isBlocked,
       'is-pull-request': isPullRequest,
       'is-mergeable': isMergeable
     };

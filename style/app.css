@@ -76,7 +76,6 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 .emoji { width: 20px; height: 20px; }
 
 .issue.is-updated { background-color: #ff9; }
-.issue.is-blocked { background-color: #f99; }
 .issue.is-pull-request:not(.is-mergeable) { background-color: #eee; }
 
 .octicon.is-open,
