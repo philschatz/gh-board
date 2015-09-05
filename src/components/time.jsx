@@ -1,31 +1,35 @@
+import {EventEmitter} from 'events';
 import React from 'react';
 import Moment from 'moment';
 
-// const UPDATE_INTERVAL = 10 * 1000;
-//
-// const timeouts = {};
-// let counter = 0;
-// const nextId = function() { return 'time-id' + counter++; };
-//
-// const updateAllTimes = function() {
-//   for (const key in timeouts) {
-//     timeouts[key]();
-//   }
-// };
+const UPDATE_INTERVAL = 20 * 1000;
 
-// setInterval(updateAllTimes, UPDATE_INTERVAL);
+const timer = new class Store extends EventEmitter {
+  off() { // EventEmitter has `.on` but no matching `.off`
+    const slice = [].slice;
+    const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
+    return this.removeListener.apply(this, args);
+  }
+};
+
+// since there can be hundreds of issues, increase the max limit
+timer.setMaxListeners(0);
+
+// `tick` every `UPDATE_INTERVAL`
+setInterval((() => timer.emit('tick')), UPDATE_INTERVAL);
 
 export default React.createClass({
-  // componentWillMount() {
-  //   const id = nextId();
-  //   this.setState({id});
-  //   timeouts[id] = this.forceUpdate.bind(this);
-  // },
-  // componentWillUnmount() {
-  //   const {id} = this.state;
-  //   delete timeouts[id];
-  //   this.setState({id: null});
-  // },
+  getInitialState() {
+    // `this.forceUpdate` is not always bound to `this` react component
+    // so keep one around for the `tick` handler.
+    return {forceUpdate: this.forceUpdate.bind(this)};
+  },
+  componentWillMount() {
+    timer.on('tick', this.state.forceUpdate);
+  },
+  componentWillUnmount() {
+    timer.off('tick', this.state.forceUpdate);
+  },
   render() {
     const {dateTime, className} = this.props;
     const humanized = Moment(dateTime).fromNow();
