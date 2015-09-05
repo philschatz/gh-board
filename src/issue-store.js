@@ -54,7 +54,7 @@ class IssueStore extends EventEmitter {
       return val;
     });
   }
-  fetchAll(repoOwner, repoName, force) {
+  fetchAll(repoOwner, repoName) {
     const listKey = toIssueListKey(repoOwner, repoName);
     // Start polling
     if (!this.polling) {
@@ -63,7 +63,7 @@ class IssueStore extends EventEmitter {
         this.fetchAll(repoOwner, repoName, true);
       }, RELOAD_TIME);
     }
-    if (cacheIssues[listKey] && !force) {
+    if (cacheIssues[listKey]) {
       return Promise.resolve(cacheIssues[listKey]);
     } else {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
