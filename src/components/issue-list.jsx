@@ -31,16 +31,18 @@ function collect(connect, monitor) {
 const IssueList = React.createClass({
   displayName: 'IssueList',
   // Curried function
-  renderIssue(isPullRequest) {
-    return (issue) => {
+  renderIssue(issue) {
+    return (pullRequest) => {
       const {repoOwner, repoName} = this.props;
+      const isMergeable = pullRequest != null ? pullRequest.mergeable : null;
       return (
         <Issue
           key={issue.id}
           issue={issue}
           repoOwner={repoOwner}
           repoName={repoName}
-          isPullRequest={isPullRequest}
+          isPullRequest={!!pullRequest}
+          isMergeable={isMergeable}
         />
       );
     };
@@ -63,11 +65,11 @@ const IssueList = React.createClass({
           <Loadable
             key={issue.id}
             promise={promise}
-            renderLoaded={this.renderIssue(true /*isPullRequest*/)}
+            renderLoaded={this.renderIssue(issue)}
           />
         );
       } else {
-        return this.renderIssue(false /*isPullRequest*/)(issue);
+        return this.renderIssue(issue)();
       }
     });
 

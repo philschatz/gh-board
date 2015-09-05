@@ -3,6 +3,7 @@ import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
+import {KANBAN_LABEL} from '../helpers';
 import {Store, toIssueKey} from '../issue-store';
 import GithubFlavoredMarkdown from './gfm.jsx';
 import Time from './time.jsx';
@@ -82,7 +83,7 @@ const Issue = React.createClass({
     Store.setLastViewed(repoOwner, repoName, issue);
   },
   render() {
-    const {repoOwner, repoName, isPullRequest} = this.props;
+    const {repoOwner, repoName, isPullRequest, isMergeable} = this.props;
     const {issue} = this.state;
 
     // Defined by the collector
@@ -111,6 +112,20 @@ const Issue = React.createClass({
     //     <i className='is-open mega-octicon octicon-issue-opened'/>
     //   );
     }
+    const nonKanbanLabels = _.filter(issue.labels, (label) => {
+      if (!KANBAN_LABEL.test(label.name)) {
+        return label;
+      }
+    });
+    const labels = _.map(nonKanbanLabels, (label) => {
+      return (
+        <BS.Badge
+          key={label.name}
+          style={{backgroundColor: label.color}}>
+          {label.name}
+        </BS.Badge>
+      );
+    });
     const bodyPopover = (
       <BS.Popover id="popover-${issue.id}" className='issue-body' title='Issue Description'>
         <GithubFlavoredMarkdown
@@ -123,6 +138,7 @@ const Issue = React.createClass({
     const footer = [
           assignedAvatar,
           icon,
+          labels,
           <BS.OverlayTrigger key='issue-number' trigger={['click', 'focus']} placement='bottom' overlay={bodyPopover}>
             <span className='issue-number'>#{issue.number}</span>
           </BS.OverlayTrigger>
@@ -147,7 +163,7 @@ const Issue = React.createClass({
       'is-updated': isUpdated,
       'is-blocked': isBlocked,
       'is-pull-request': isPullRequest,
-      'is-mergeable': issue.mergeable
+      'is-mergeable': isMergeable
     };
     return connectDragSource(
       <BS.ListGroupItem
