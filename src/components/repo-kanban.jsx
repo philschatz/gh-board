@@ -19,11 +19,10 @@ const filterKanbanLabels = (labels) => {
 const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2);
 
 
-const KanbanRepo = React.createClass({
-  displayName: 'KanbanRepo',
-  renderColumn(label, allIssues) {
-    const {repoOwner, repoName} = this.props;
-    let issues = _.filter(allIssues, (issue) => {
+const KanbanColumn = React.createClass({
+  render() {
+    const {repoOwner, repoName, label, issues} = this.props;
+    const issueComponents = _.filter(issues, (issue) => {
       const containsLabel = contains(issue.labels, (l) => label.name === l.name);
       if (containsLabel) {
         return true;
@@ -43,20 +42,18 @@ const KanbanRepo = React.createClass({
         <IssueList
           title={kanbanLabelName(label)}
           color={label.color}
-          issues={issues}
+          issues={issueComponents}
           repoOwner={repoOwner}
           repoName={repoName}
           label={label}
         />
       </td>
     );
+  }
+});
 
-  },
-  renderColumns(labels, allIssues) {
-    return _.map(labels, (label) => {
-      return this.renderColumn(label, allIssues);
-    });
-  },
+const KanbanRepo = React.createClass({
+  displayName: 'KanbanRepo',
   onAddCardList() {
     const {onLabelsChanged} = this.props;
     const {labels} = this.props;
@@ -87,11 +84,20 @@ const KanbanRepo = React.createClass({
       });
     }
   },
-  renderBoard(allIssues) {
-    const {labels} = this.props;
+  renderBoard(issues) {
+    const {repoOwner, repoName, labels} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
-    const workflowStateIssues = this.renderColumns(kanbanLabels, allIssues);
+    const workflowStateIssues = _.map(kanbanLabels, (label) => {
+      return (
+        <KanbanColumn
+          repoName={repoName}
+          repoOwner={repoOwner}
+          label={label}
+          issues={issues}
+        />
+      );
+    });
 
     const addCardList = (
       <td key='add-cardlist'>

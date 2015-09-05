@@ -9,6 +9,20 @@
   padding-right: 1rem;
 }
 
+
+/* Move the padding to the title so the color fills up the entire header */
+.kanban-board .kanban-issues .panel-heading { padding: 0; }
+.kanban-board .kanban-issues .panel-heading .panel-title { padding: 10px 15px; }
+
+.kanban-board .kanban-issues:not(.is-over) .dnd-placeholder { display: none; }
+.kanban-board .kanban-issues .dnd-placeholder {
+  background-color: #ccc;
+  height: 15rem;
+  margin: 2rem;
+}
+.kanban-board .kanban-issues .dnd-placeholder::before { content: 'Release to drop me in this list'; }
+
+
 .kanban-board .list-group-item.issue { cursor: pointer; }
 .kanban-board .list-group-item.issue .issue-number { font-size: 200%; }
 
@@ -49,15 +63,6 @@
   background-color: #ccc !important;
 }
 
-.dnd-placeholder {
-  background-color: #ccc;
-  height: 15rem;
-  margin: 2rem;
-}
-
-.dnd-placeholder::before { content: 'Release to drop me in this list'; }
-
-
 .topbar-nav .logoff .avatar { max-height: 40px; }
 
 /* Make sure images are scaled to fit in the modal */
@@ -80,3 +85,10 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 
 .octicon.is-open,
 .mega-octicon.is-open { color: #6cc644; }
+
+
+.badge {
+  max-width: 60px;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+}

@@ -73,19 +73,28 @@ const IssueList = React.createClass({
       }
     });
 
-    // DnD placeholder element
-    const placeholder = (
-      <div className="dnd-placeholder"/>
+    const header = (
+      <h2 className='title' style={{backgroundColor: color}}>{title}</h2>
     );
 
+    // TODO: Always include the placeholder. just hide it most of the time.
+    // const issuesAndDropPlaceholder = [];
+    // if (isOver) {
+    //   issuesAndDropPlaceholder.push(placeholder);
+    // }
+    // issuesAndDropPlaceholder.push(kanbanIssues);
+    const classes = {
+      'kanban-issues': true,
+      'is-over': isOver
+    };
+
     return connectDropTarget(
-      <div className='kanban-issues'>
-        <h2 className='title' style={{backgroundColor: color}}>{title}</h2>
-        {isOver && placeholder}
-        <BS.ListGroup>
+      <BS.Panel className={classes} header={header}>
+        <BS.ListGroup fill>
+          <BS.ListGroupItem className="dnd-placeholder"/>
           {kanbanIssues}
         </BS.ListGroup>
-      </div>
+      </BS.Panel>
     );
   }
 });
