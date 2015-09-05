@@ -1,5 +1,5 @@
 import React from 'react';
-import BS from './rbs';
+import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 

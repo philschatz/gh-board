@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
-import BS from './rbs';
+import * as BS from 'react-bootstrap';
 
 import {contains, KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
 import {Store, toIssueListKey} from '../issue-store';
