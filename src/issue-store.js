@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
 import Client from './github-client';
-import {fetchAll, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
+import {fetchAll, contains, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
 const RELOAD_TIME = 60 * 1000;
 
@@ -17,6 +17,36 @@ const toCommentListKey = (repoOwner, repoName, issueNumber) => {
 const toCommentKey = (repoOwner, repoName, issueNumber, commentId) => {
   return repoOwner + '/' + repoName + '/issues/' + issueNumber + '/comments/' + commentId;
 };
+
+export function filterIssues(issues, labels) {
+  let filtered = issues;
+  // Curry the fn so it is not declared inside a loop
+  const filterFn = (label) => (issue) => {
+    const containsLabel = contains(issue.labels, (issueLabel) => {
+      return issueLabel.name === label.name;
+    });
+    if (containsLabel) {
+      return true;
+    } else if (ICEBOX_NAME === label.name) {
+      // If the issue does not match any list then add it to the backlog
+      for (const l of issue.labels) {
+        if (KANBAN_LABEL.test(l.name)) {
+          return false;
+        }
+      }
+      // no list labels, so include it in the backlog
+      return true;
+    }
+  };
+  for (const i in labels) {
+    const label = labels[i];
+    filtered = _.filter(filtered, filterFn(label));
+    if (filtered.length === 0) {
+      return [];
+    }
+  }
+  return filtered;
+}
 
 let cacheIssues = {};
 let cacheLastViewed = {};

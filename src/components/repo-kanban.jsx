@@ -2,12 +2,13 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
-import {contains, KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
-import {Store, toIssueListKey} from '../issue-store';
+import {KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
+import {Store, toIssueListKey, filterIssues} from '../issue-store';
 import {FilterStore} from '../filter-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
+import Issue from './issue.jsx';
 
 
 const filterKanbanLabels = (labels) => {
@@ -18,35 +19,40 @@ const filterKanbanLabels = (labels) => {
 
 const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2);
 
-
 const KanbanColumn = React.createClass({
   render() {
     const {repoOwner, repoName, label, issues} = this.props;
-    const issueComponents = _.filter(issues, (issue) => {
-      const containsLabel = contains(issue.labels, (l) => label.name === l.name);
-      if (containsLabel) {
-        return true;
-      } else if (ICEBOX_NAME === label.name) {
-        // If the issue does not match any list then add it to the backlog
-        for (const l of issue.labels) {
-          if (KANBAN_LABEL.test(l.name)) {
-            return false;
-          }
-        }
-        // no list labels, so include it in the backlog
-        return true;
-      }
+
+    const filteredIssues = filterIssues(issues, [label]);
+    // Sort the issues by `updatedAt`
+    const sortedIssues = _.sortBy(filteredIssues, (issue) => {
+      return issue.updatedAt;
     });
+    // Reverse so newest ones are on top
+    sortedIssues.reverse();
+
+    const issueComponents = _.map(sortedIssues, (issue) => {
+      return (
+        <Issue
+          repoOwner={repoOwner}
+          repoName={repoName}
+          issue={issue}
+          />
+      );
+    });
+
     return (
       <td key={label.name}>
         <IssueList
           title={kanbanLabelName(label)}
           color={label.color}
-          issues={issueComponents}
+          issues={[]}
           repoOwner={repoOwner}
           repoName={repoName}
           label={label}
-        />
+        >
+          {issueComponents}
+        </IssueList>
       </td>
     );
   }
@@ -88,7 +94,7 @@ const KanbanRepo = React.createClass({
     const {repoOwner, repoName, labels} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
-    const workflowStateIssues = _.map(kanbanLabels, (label) => {
+    const kanbanColumns = _.map(kanbanLabels, (label) => {
       return (
         <KanbanColumn
           repoName={repoName}
@@ -111,7 +117,7 @@ const KanbanRepo = React.createClass({
       <table className='kanban-board'>
         <tbody>
           <tr>
-            {workflowStateIssues}
+            {kanbanColumns}
             {addCardList}
           </tr>
         </tbody>

@@ -24,12 +24,20 @@
 
 
 .kanban-board .list-group-item.issue { cursor: pointer; }
-.kanban-board .list-group-item.issue .issue-number { font-size: 200%; }
 
 .kanban-board .list-group-item.issue .list-group-item-heading time.updated-at {
   font-size: 70%;
   color: #999;
 }
+
+.kanban-board .list-group-item.issue .issue-footer {
+  font-size: 2rem;
+}
+.kanban-board .list-group-item.issue .issue-footer .octicon {
+  /* Override the font size in .octicon */
+  font-size: 100%;
+}
+
 
 .popover.issue-body {
   max-width: 500px;
@@ -82,9 +90,6 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 
 .issue.is-updated { background-color: #ff9; }
 .issue.is-pull-request:not(.is-mergeable) { background-color: #eee; }
-
-.octicon.is-open,
-.mega-octicon.is-open { color: #6cc644; }
 
 
 .badge {
