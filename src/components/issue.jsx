@@ -130,12 +130,20 @@ let Issue = React.createClass({
       }
     });
     const labels = _.map(nonKanbanLabels, (label) => {
+      const tooltip = (
+        <BS.Tooltip>{label.name}</BS.Tooltip>
+      );
       return (
-        <BS.Badge
-          key={label.name}
-          style={{backgroundColor: label.color}}>
-          {label.name}
-        </BS.Badge>
+        <BS.OverlayTrigger
+          placement='top'
+          delayShow={1000}
+          overlay={tooltip}>
+          <BS.Badge
+            key={label.name}
+            style={{backgroundColor: label.color}}>
+            {label.name}
+          </BS.Badge>
+        </BS.OverlayTrigger>
       );
     });
     const bodyPopover = (
@@ -149,9 +157,7 @@ let Issue = React.createClass({
     );
     const footer = (
       <span className='issue-footer'>
-        {assignedAvatar}
         {icon}
-        {labels}
         <BS.OverlayTrigger
           key='issue-number'
           rootClose
@@ -160,18 +166,24 @@ let Issue = React.createClass({
           overlay={bodyPopover}>
           <span className='issue-number'>#{issue.number}</span>
         </BS.OverlayTrigger>
+        <span className='pull-right'>
+          <Time key='time' className='updated-at' dateTime={issue.updatedAt}/>
+          {assignedAvatar}
+        </span>
       </span>
     );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < issue.updatedAt;
     const header = [
+      <div className='issue-labels'>
+        {labels}
+      </div>,
       <a
         key='link'
         target='_blank'
         href={issue.html.url}
         onClick={this.onClickNumber}>
-          {issue.title}</a>,
-      <Time key='time' className='updated-at pull-right' dateTime={issue.updatedAt}/>
+          {issue.title}</a>
     ];
     const classes = {
       'issue': true,

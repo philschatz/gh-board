@@ -42,7 +42,7 @@ const KanbanColumn = React.createClass({
     });
 
     return (
-      <td key={label.name}>
+      <td key={label.name} className='kanban-board-column'>
         <IssueList
           title={kanbanLabelName(label)}
           color={label.color}
@@ -114,7 +114,7 @@ const KanbanRepo = React.createClass({
     );
 
     return (
-      <table className='kanban-board'>
+      <table className='kanban-board' data-column-count={kanbanColumns.length}>
         <tbody>
           <tr>
             {kanbanColumns}

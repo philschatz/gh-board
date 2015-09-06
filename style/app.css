@@ -1,6 +1,22 @@
 @import '../node_modules/font-awesome/css/font-awesome.css';
 @import '../node_modules/octicons/octicons/octicons.css';
 
+.kanban-board .kanban-board-column { min-width: 25%; }
+.kanban-board[data-column-count='1'] .kanban-board-column { width: 100%; }
+.kanban-board[data-column-count='2'] .kanban-board-column { width: 50%; }
+.kanban-board[data-column-count='3'] .kanban-board-column { width: 33%; }
+.kanban-board[data-column-count='4'] .kanban-board-column { width: 25%; }
+.kanban-board[data-column-count='5'] .kanban-board-column { width: 20%; }
+.kanban-board[data-column-count='6'] .kanban-board-column { width: 16%; }
+.kanban-board[data-column-count='7'] .kanban-board-column { width: 14%; }
+.kanban-board[data-column-count='8'] .kanban-board-column { width: 12%; }
+
+.app {
+  background-color: #eee;
+}
+
+/* Allow enough space on bottom of screen for the floating footer */
+.kanban-board { margin-bottom: 3rem; }
 .kanban-board td { vertical-align: top; }
 .kanban-board th,
 .kanban-board td {
@@ -25,9 +41,17 @@
 
 .kanban-board .list-group-item.issue { cursor: pointer; }
 
-.kanban-board .list-group-item.issue .list-group-item-heading time.updated-at {
-  font-size: 70%;
+.kanban-board .list-group-item.issue .issue-footer time.updated-at {
+  font-size: 1.2rem;
   color: #999;
+  padding-right: 1rem;
+
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+  max-width: 9rem;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
 }
 
 .kanban-board .list-group-item.issue .issue-footer {
@@ -47,7 +71,7 @@
 .list-group-item.issue .avatar-image,
 .modal.issue-edit .body-avatar,
 .modal.issue-edit .avatar-image {
-  width: 4rem;
+  width: 2rem;
 }
 
 .markdown-format { }
@@ -89,11 +113,23 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 .emoji { width: 20px; height: 20px; }
 
 .issue.is-updated { background-color: #ff9; }
-.issue.is-pull-request:not(.is-mergeable) { background-color: #eee; }
+/* When a Pull Request is not mergeable then make the background a light gray with slashes */
+.issue.is-pull-request:not(.is-mergeable) {
+  background-color: #eee;
+  background-image: linear-gradient(to bottom left,
+    rgba(255,255,255, .8) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255,255,255, .8) 50%,
+    rgba(255,255,255, .8) 75%,
+    transparent 75%,
+    transparent);
+  background-size: 1pc 1pc;
+}
 
 
 .badge {
-  max-width: 60px;
+  max-width: 10rem;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
