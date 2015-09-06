@@ -70,7 +70,7 @@ export default React.createClass({
   displayName: 'IssueEditModal',
   updateLastViewed() {
     const {issue, repoOwner, repoName} = this.props;
-    Store.setLastViewed(repoOwner, repoName, issue);
+    Store.setLastViewed(repoOwner, repoName, issue.number);
   },
   componentDidMount() {
     this.updateLastViewed();

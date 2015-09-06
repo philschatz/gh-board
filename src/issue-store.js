@@ -3,7 +3,7 @@ import {EventEmitter} from 'events';
 import Client from './github-client';
 import {fetchAll, contains, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
-const RELOAD_TIME = 60 * 1000;
+const RELOAD_TIME = 30 * 1000;
 
 const toIssueListKey = (repoOwner, repoName) => {
   return repoOwner + '/' + repoName + '/issues';
@@ -84,16 +84,16 @@ class IssueStore extends EventEmitter {
     //   return val;
     // });
   }
-  fetchAll(repoOwner, repoName) {
+  fetchAll(repoOwner, repoName, isForced) {
     const listKey = toIssueListKey(repoOwner, repoName);
     // Start polling
     if (!this.polling) {
       this.polling = setTimeout(() => {
         this.polling = null;
-        this.fetchAll(repoOwner, repoName, true);
+        this.fetchAll(repoOwner, repoName, true /*isForced*/);
       }, RELOAD_TIME);
     }
-    if (cacheIssues[listKey]) {
+    if (!isForced && cacheIssues[listKey]) {
       return Promise.resolve(cacheIssues[listKey]);
     } else {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
@@ -145,6 +145,8 @@ class IssueStore extends EventEmitter {
     return Client.getOcto().repos(repoOwner, repoName).issues(issueNumber).update({labels: labelNames})
     .then(() => {
 
+      this.setLastViewed(repoOwner, repoName, issueNumber);
+
       // invalidate the issues list
       delete cacheIssues[listKey];
       this.emit('change');
@@ -185,12 +187,14 @@ class IssueStore extends EventEmitter {
       this.emit('change:' + key, val);
     });
   }
-  setLastViewed(repoOwner, repoName, issue) {
-    const issueKey = toIssueKey(repoOwner, repoName, issue.number);
+  setLastViewed(repoOwner, repoName, issueNumber) {
+    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
     const now = new Date();
     const isNew = !cacheLastViewed[issueKey] || (now.getTime() - cacheLastViewed[issueKey].getTime() > 10000);
     cacheLastViewed[issueKey] = now;
     if (isNew) {
+      const issue = cacheIssues[issueKey];
+      if (!issue) { throw new Error('BUG: Could not find issue'); }
       this.emit('change:' + issueKey, issue);
     }
   }

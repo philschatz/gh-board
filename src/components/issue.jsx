@@ -84,7 +84,7 @@ let Issue = React.createClass({
     const {issue} = this.state;
 
     evt.stopPropagation();
-    Store.setLastViewed(repoOwner, repoName, issue);
+    Store.setLastViewed(repoOwner, repoName, issue.number);
   },
   render() {
     const {repoOwner, repoName, pullRequest} = this.props;
