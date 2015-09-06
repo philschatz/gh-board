@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import React from 'react';
 import {Link, RouteHandler} from 'react-router';
 import * as BS from 'react-bootstrap';
@@ -6,6 +7,7 @@ import { DragDropContext } from 'react-dnd';
 
 import Client from '../github-client';
 import LoginModal from './login-modal.jsx';
+import LabelBadge from './label-badge.jsx';
 import {CurrentUserStore} from '../user-store';
 import {FilterStore} from '../filter-store';
 
@@ -120,6 +122,18 @@ const App = React.createClass({
     const brand = (
       <Link to='viewDashboard'>Dashboard</Link>
     );
+    const filtering = _.map(FilterStore.getLabels(), (label) => {
+      return (
+        <LabelBadge label={label} onClick={() => FilterStore.removeLabel(label)}/>
+      );
+    });
+
+    const filterUser = FilterStore.getUser();
+    if (filterUser) {
+      filtering.push(
+        <BS.Badge key='user' onClick={() => FilterStore.clearUser()}>{filterUser.login}</BS.Badge>
+      );
+    }
     return (
       <div className='app'>
         <BS.Navbar className='topbar-nav navbar-fixed-top' brand={brand} toggleNavKey={0}>
@@ -129,6 +143,9 @@ const App = React.createClass({
               label='Show Icebox'
               onChange={this.changeShowIcebox}
               checked={FilterStore.getShowIcebox()}/>
+            <span className='active-filter'>
+              {filtering}
+            </span>
           </BS.Nav>
           <BS.Nav right eventKey={0}>
             <LoginButton/>

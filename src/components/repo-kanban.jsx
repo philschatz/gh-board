@@ -23,7 +23,18 @@ const KanbanColumn = React.createClass({
   render() {
     const {repoOwner, repoName, label, issues} = this.props;
 
-    const filteredIssues = filterIssues(issues, [label]);
+    let filteredIssues = issues;
+    const userFilter = FilterStore.getUser();
+    if (userFilter) {
+      filteredIssues = _.filter(filteredIssues, (issue) => {
+        if (issue.assignee && issue.assignee.login === userFilter.login) {
+          return true;
+        } else if (issue.user.login === userFilter.login) {
+          return true;
+        }
+      });
+    }
+    filteredIssues = filterIssues(filteredIssues, FilterStore.getLabels().concat(label));
     // Sort the issues by `updatedAt`
     const sortedIssues = _.sortBy(filteredIssues, (issue) => {
       return issue.updatedAt;

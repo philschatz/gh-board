@@ -1,6 +1,9 @@
+import _ from 'underscore';
 import {EventEmitter} from 'events';
 
 let showIcebox = true;
+let userFilter = null;
+let filteredLabels = [];
 
 class Store extends EventEmitter {
   off() { // EventEmitter has `.on` but no matching `.off`
@@ -14,6 +17,35 @@ class Store extends EventEmitter {
   }
   getShowIcebox() {
     return showIcebox;
+  }
+  clearUser() {
+    userFilter = null;
+    this.emit('change');
+    this.emit('change:user', null);
+  }
+  setUser(user) {
+    userFilter = user;
+    this.emit('change');
+    this.emit('change:user', user);
+  }
+  getUser() {
+    return userFilter;
+  }
+  addLabel(label) {
+    // TODO: disallow duplicate labels
+    filteredLabels.push(label);
+    this.emit('change');
+    this.emit('change:labels', filteredLabels);
+  }
+  removeLabel(label) {
+    filteredLabels = _.filter(filteredLabels, (l) => {
+      return label.name !== l.name;
+    });
+    this.emit('change');
+    this.emit('change:labels', filteredLabels);
+  }
+  getLabels() {
+    return filteredLabels;
   }
 }
 

@@ -6,9 +6,11 @@ import { DragSource } from 'react-dnd';
 import {KANBAN_LABEL} from '../helpers';
 import {Store, toIssueKey} from '../issue-store';
 import {CurrentUserStore} from '../user-store';
+import {FilterStore} from '../filter-store';
 import Loadable from './loadable.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
 import Time from './time.jsx';
+import LabelBadge from './label-badge.jsx';
 
 const ItemTypes = {
   CARD: 'card'
@@ -104,6 +106,7 @@ let Issue = React.createClass({
         key='avatar'
         className='avatar-image'
         title={user.login}
+        onClick={() => FilterStore.setUser(user)}
         src={user.avatar.url}/>
     );
     let icon;
@@ -136,11 +139,10 @@ let Issue = React.createClass({
           placement='top'
           delayShow={1000}
           overlay={tooltip}>
-          <BS.Badge
-            key={label.name}
-            style={{backgroundColor: label.color}}>
-            {label.name}
-          </BS.Badge>
+          <LabelBadge
+            label={label}
+            onClick={() => FilterStore.addLabel(label)}
+            />
         </BS.OverlayTrigger>
       );
     });

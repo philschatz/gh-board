@@ -21,6 +21,13 @@ body { background-color: #eee; }
   padding-bottom: 4rem;
 }
 
+.active-filter:not(:empty)::before { content: 'Active Filter: '; }
+.active-filter .badge::after {
+  content: 'x';
+  padding-left: 0.5rem;
+}
+.badge { cursor: pointer; }
+
 .kanban-board {
 }
 .kanban-board td { vertical-align: top; }
@@ -134,7 +141,7 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 }
 
 
-.badge {
+.kanban-board .issue .badge {
   max-width: 10rem;
   overflow-x: hidden;
   text-overflow: ellipsis;
