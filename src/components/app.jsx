@@ -85,9 +85,8 @@ const LoginButton = React.createClass({
     const close = () => this.setState({ showModal: false});
 
     if (info) {
-      const avatar = <img className='avatar' src={info.avatar.url}/>;
       return (
-        <BS.DropdownButton id='signin-dropdown' className='logoff' title={avatar}>
+        <BS.DropdownButton id='signin-dropdown' className='logoff' title={info.login}>
           <BS.MenuItem disabled href='https://github.com'>Signed in as <strong>{info.login}</strong></BS.MenuItem>
           <BS.MenuItem divider/>
           <BS.MenuItem eventKey='1' onClick={this.onSignOut}>Sign Out</BS.MenuItem>
@@ -123,7 +122,7 @@ const App = React.createClass({
     );
     return (
       <div className='app'>
-        <BS.Navbar className='topbar-nav' brand={brand} toggleNavKey={0}>
+        <BS.Navbar className='topbar-nav navbar-fixed-top' brand={brand} toggleNavKey={0}>
           <BS.Nav>
             <BS.Input
               type='checkbox'

@@ -95,19 +95,17 @@ let Issue = React.createClass({
 
     const isMergeable = pullRequest ? pullRequest.mergeable : false;
 
-    let assignedAvatar = null;
     if (!issue) {
       return (<span>Bug? No Issue</span>);
     }
-    if (issue.assignee) {
-      assignedAvatar = (
-        <img key='avatar' className='avatar-image' src={issue.assignee.avatar.url}/>
-      );
-    } else {
-      assignedAvatar = (
-        <img key='avatar' className='avatar-image' src={issue.user.avatar.url}/>
-      );
-    }
+    const user = issue.assignee ? issue.assignee : issue.user;
+    const assignedAvatar = (
+      <img
+        key='avatar'
+        className='avatar-image'
+        title={user.login}
+        src={user.avatar.url}/>
+    );
     let icon;
     if (pullRequest) {
       if (isMergeable) {

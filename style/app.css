@@ -1,7 +1,7 @@
 @import '../node_modules/font-awesome/css/font-awesome.css';
 @import '../node_modules/octicons/octicons/octicons.css';
 
-.kanban-board .kanban-board-column { min-width: 25%; }
+.kanban-board .kanban-board-column { min-width: 20rem; }
 .kanban-board[data-column-count='1'] .kanban-board-column { width: 100%; }
 .kanban-board[data-column-count='2'] .kanban-board-column { width: 50%; }
 .kanban-board[data-column-count='3'] .kanban-board-column { width: 33%; }
@@ -10,13 +10,19 @@
 .kanban-board[data-column-count='6'] .kanban-board-column { width: 16%; }
 .kanban-board[data-column-count='7'] .kanban-board-column { width: 14%; }
 .kanban-board[data-column-count='8'] .kanban-board-column { width: 12%; }
+.kanban-board[data-column-count='9'] .kanban-board-column { width: 11%; }
+.kanban-board[data-column-count='10'] .kanban-board-column { width: 10%; }
+
+body { background-color: #eee; }
 
 .app {
-  background-color: #eee;
+  /* Allow enough space on top/bottom of screen for fixed header/footer */
+  padding-top: 7rem;
+  padding-bottom: 4rem;
 }
 
-/* Allow enough space on bottom of screen for the floating footer */
-.kanban-board { margin-bottom: 3rem; }
+.kanban-board {
+}
 .kanban-board td { vertical-align: top; }
 .kanban-board th,
 .kanban-board td {
