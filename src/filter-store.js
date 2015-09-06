@@ -1,6 +1,8 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
 
+import {contains} from './helpers';
+
 let showIcebox = true;
 let userFilter = null;
 let filteredLabels = [];
@@ -32,10 +34,14 @@ class Store extends EventEmitter {
     return userFilter;
   }
   addLabel(label) {
-    // TODO: disallow duplicate labels
-    filteredLabels.push(label);
-    this.emit('change');
-    this.emit('change:labels', filteredLabels);
+    const containsLabel = contains(filteredLabels, (l) => {
+      return l.name === label.name;
+    });
+    if (!containsLabel) {
+      filteredLabels.push(label);
+      this.emit('change');
+      this.emit('change:labels', filteredLabels);
+    }
   }
   removeLabel(label) {
     filteredLabels = _.filter(filteredLabels, (l) => {

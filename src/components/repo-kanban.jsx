@@ -45,6 +45,7 @@ const KanbanColumn = React.createClass({
     const issueComponents = _.map(sortedIssues, (issue) => {
       return (
         <Issue
+          key={issue.id}
           repoOwner={repoOwner}
           repoName={repoName}
           issue={issue}
@@ -139,7 +140,7 @@ const KanbanRepo = React.createClass({
     const {repoOwner, repoName} = this.props;
     const promise = Store.fetchAll(repoOwner, repoName);
     return (
-      <Loadable
+      <Loadable key="${repoOwner}/${repoName}"
         promise={promise}
         renderLoaded={this.renderBoard}
       />
@@ -193,7 +194,7 @@ const Repo = React.createClass({
     };
 
     return (
-      <Loadable
+      <Loadable key="${repoOwner}/${repoName}"
         promise={Client.getOcto().repos(repoOwner, repoName).labels.fetch()}
         renderLoaded={renderLoaded}
       />
@@ -226,7 +227,7 @@ const RepoKanbanShell = React.createClass({
     };
 
     return (
-      <Loadable
+      <Loadable key="${repoOwner}/${repoName}"
         promise={Client.getOcto().repos(repoOwner, repoName).fetch()}
         renderLoaded={renderLoaded}
         renderError={renderError}

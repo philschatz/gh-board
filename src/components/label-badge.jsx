@@ -3,15 +3,14 @@ import React from 'react';
 
 const LabelBadge = React.createClass({
   render() {
-    const {label, children, onClick} = this.props;
+    const {label} = this.props;
 
     return (
       <BS.Badge
         key={label.name}
-        onClick={onClick}
+        {...this.props}
         style={{backgroundColor: label.color}}>
         {label.name}
-        {children}
       </BS.Badge>
     );
   }

@@ -132,10 +132,11 @@ let Issue = React.createClass({
     });
     const labels = _.map(nonKanbanLabels, (label) => {
       const tooltip = (
-        <BS.Tooltip>{label.name}</BS.Tooltip>
+        <BS.Tooltip id="tooltip-${issue.id}-${label.name}">{label.name}. Click to filter</BS.Tooltip>
       );
       return (
         <BS.OverlayTrigger
+          key={label.name}
           placement='top'
           delayShow={1000}
           overlay={tooltip}>
@@ -156,7 +157,7 @@ let Issue = React.createClass({
       </BS.Popover>
     );
     const footer = (
-      <span className='issue-footer'>
+      <span key='footer' className='issue-footer'>
         {icon}
         <BS.OverlayTrigger
           key='issue-number'
@@ -166,7 +167,7 @@ let Issue = React.createClass({
           overlay={bodyPopover}>
           <span className='issue-number'>#{issue.number}</span>
         </BS.OverlayTrigger>
-        <span className='pull-right'>
+        <span key='right-footer' className='pull-right'>
           <Time key='time' className='updated-at' dateTime={issue.updatedAt}/>
           {assignedAvatar}
         </span>
@@ -196,10 +197,7 @@ let Issue = React.createClass({
       <BS.ListGroupItem
         key={issue.id}
         header={header}
-        className={classes}
-        target-todo='_blank'
-        href-todo={issue.html.url}
-        onClick-todo={this.onClickNumber}>
+        className={classes}>
         {footer}
       </BS.ListGroupItem>
     );
@@ -220,16 +218,15 @@ const IssueShell = React.createClass({
     if (issue.pullRequest && CurrentUserStore.getUser()) {
       const promise = Store.fetchPullRequest(repoOwner, repoName, issue.number);
       return (
-        <Loadable
-          key={issue.id}
+        <Loadable key={issue.id}
           promise={promise}
-          renderLoading={() => <Issue issue={issue} repoOwner={repoOwner} repoName={repoName}/>}
-          renderLoaded={(pullRequest) => <Issue issue={issue} repoOwner={repoOwner} repoName={repoName} pullRequest={pullRequest}/> }
+          renderLoading={() => <Issue key={issue.id} issue={issue} repoOwner={repoOwner} repoName={repoName}/>}
+          renderLoaded={(pullRequest) => <Issue key={issue.id} issue={issue} repoOwner={repoOwner} repoName={repoName} pullRequest={pullRequest}/> }
         />
       );
     } else {
       return (
-        <Issue issue={issue} repoOwner={repoOwner} repoName={repoName}/>
+        <Issue key={issue.id} issue={issue} repoOwner={repoOwner} repoName={repoName}/>
       );
     }
 
