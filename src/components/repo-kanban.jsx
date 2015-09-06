@@ -57,7 +57,7 @@ const KanbanColumn = React.createClass({
       <td key={label.name} className='kanban-board-column'>
         <IssueList
           title={kanbanLabelName(label)}
-          color={label.color}
+          label={label}
           issues={[]}
           repoOwner={repoOwner}
           repoName={repoName}

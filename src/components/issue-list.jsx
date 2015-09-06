@@ -2,6 +2,7 @@ import React from 'react';
 import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 
+import {FilterStore} from '../filter-store';
 
 const ItemTypes = {
   CARD: 'card'
@@ -25,12 +26,14 @@ function collect(connect, monitor) {
 const IssueList = React.createClass({
   displayName: 'IssueList',
   render() {
-    const {title, color} = this.props;
+    const {title, label} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
 
     const header = (
-      <h2 className='title' style={{backgroundColor: color}}>{title}</h2>
+      <h2 style={{backgroundColor: label.color}}>
+        <span className='column-title' onClick={() => FilterStore.addLabel(label)}>{title}</span>
+      </h2>
     );
 
     const classes = {

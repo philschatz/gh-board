@@ -41,7 +41,13 @@ body { background-color: #eee; }
 
 /* Move the padding to the title so the color fills up the entire header */
 .kanban-board .kanban-issues .panel-heading { padding: 0; }
-.kanban-board .kanban-issues .panel-heading .panel-title { padding: 10px 15px; }
+.kanban-board .kanban-issues .panel-heading .panel-title {
+  padding: 10px 15px;
+}
+.kanban-board .kanban-issues .panel-heading .panel-title .column-title {
+  /* Support filtering on a single kanban column */
+  cursor: pointer;
+}
 
 .kanban-board .kanban-issues:not(.is-over) .dnd-placeholder { display: none; }
 .kanban-board .kanban-issues .dnd-placeholder {
