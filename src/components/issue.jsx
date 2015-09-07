@@ -111,7 +111,7 @@ let Issue = React.createClass({
     Store.setLastViewed(repoOwner, repoName, issue.number);
   },
   render() {
-    const {repoOwner, repoName, pullRequest} = this.props;
+    const {repoOwner, repoName, pullRequest, primaryRepoName} = this.props;
     const {issue, taskFinishedCount, taskTotalCount} = this.state;
 
     // Defined by the collector
@@ -188,6 +188,7 @@ let Issue = React.createClass({
       );
     }
 
+    const multipleRepoName = primaryRepoName === repoName ? null : repoName;
     const footer = (
       <span key='footer' className='issue-footer'>
         {icon}
@@ -197,7 +198,7 @@ let Issue = React.createClass({
           trigger={['click', 'focus']}
           placement='bottom'
           overlay={bodyPopover}>
-          <span className='issue-number'>#{issue.number}</span>
+          <span className='issue-number'>{multipleRepoName}#{issue.number}</span>
         </BS.OverlayTrigger>
         {taskCounts}
         <span key='right-footer' className='pull-right'>
@@ -266,13 +267,13 @@ const IssueShell = React.createClass({
       return (
         <Loadable key={issue.id}
           promise={promise}
-          renderLoading={() => <Issue key={issue.id} issue={issue} repoOwner={repoOwner} repoName={repoName}/>}
-          renderLoaded={(pullRequest) => <Issue key={issue.id} issue={issue} repoOwner={repoOwner} repoName={repoName} pullRequest={pullRequest}/> }
+          renderLoading={() => <Issue key={issue.id} {...this.props}/>}
+          renderLoaded={(pullRequest) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest}/> }
         />
       );
     } else {
       return (
-        <Issue key={issue.id} issue={issue} repoOwner={repoOwner} repoName={repoName}/>
+        <Issue key={issue.id} {...this.props}/>
       );
     }
 

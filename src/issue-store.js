@@ -18,18 +18,18 @@ const toCommentKey = (repoOwner, repoName, issueNumber, commentId) => {
   return repoOwner + '/' + repoName + '/issues/' + issueNumber + '/comments/' + commentId;
 };
 
-export function filterIssues(issues, labels) {
-  let filtered = issues;
+export function filterCards(cards, labels) {
+  let filtered = cards;
   // Curry the fn so it is not declared inside a loop
-  const filterFn = (label) => (issue) => {
-    const containsLabel = contains(issue.labels, (issueLabel) => {
-      return issueLabel.name === label.name;
+  const filterFn = (label) => (card) => {
+    const containsLabel = contains(card.issue.labels, (cardLabel) => {
+      return cardLabel.name === label.name;
     });
     if (containsLabel) {
       return true;
     } else if (ICEBOX_NAME === label.name) {
       // If the issue does not match any list then add it to the backlog
-      for (const l of issue.labels) {
+      for (const l of card.issue.labels) {
         if (KANBAN_LABEL.test(l.name)) {
           return false;
         }

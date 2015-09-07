@@ -3,7 +3,7 @@ import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
 import {KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
-import {Store, toIssueListKey, filterIssues} from '../issue-store';
+import {Store, toIssueListKey, filterCards} from '../issue-store';
 import {FilterStore} from '../filter-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
@@ -21,12 +21,13 @@ const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2)
 
 const KanbanColumn = React.createClass({
   render() {
-    const {repoOwner, repoName, label, issues} = this.props;
+    const {label, cards, primaryRepoName} = this.props;
 
-    let filteredIssues = issues;
+    let filteredCards = cards;
     const userFilter = FilterStore.getUser();
     if (userFilter) {
-      filteredIssues = _.filter(filteredIssues, (issue) => {
+      filteredCards = _.filter(filteredCards, (card) => {
+        const issue = card.issue;
         if (issue.assignee && issue.assignee.login === userFilter.login) {
           return true;
         } else if (issue.user.login === userFilter.login) {
@@ -34,21 +35,22 @@ const KanbanColumn = React.createClass({
         }
       });
     }
-    filteredIssues = filterIssues(filteredIssues, FilterStore.getLabels().concat(label));
-    // Sort the issues by `updatedAt`
-    const sortedIssues = _.sortBy(filteredIssues, (issue) => {
-      return issue.updatedAt;
+    filteredCards = filterCards(filteredCards, FilterStore.getLabels().concat(label));
+    // Sort the cards by `updatedAt`
+    const sortedCards = _.sortBy(filteredCards, (card) => {
+      return card.issue.updatedAt;
     });
     // Reverse so newest ones are on top
-    sortedIssues.reverse();
+    sortedCards.reverse();
 
-    const issueComponents = _.map(sortedIssues, (issue) => {
+    const issueComponents = _.map(sortedCards, (card) => {
       return (
         <Issue
-          key={issue.id}
-          repoOwner={repoOwner}
-          repoName={repoName}
-          issue={issue}
+          key={card.issue.id}
+          primaryRepoName={primaryRepoName}
+          repoOwner={card.repoOwner}
+          repoName={card.repoName}
+          issue={card.issue}
           />
       );
     });
@@ -57,10 +59,6 @@ const KanbanColumn = React.createClass({
       <td key={label.name} className='kanban-board-column'>
         <IssueList
           title={kanbanLabelName(label)}
-          label={label}
-          issues={[]}
-          repoOwner={repoOwner}
-          repoName={repoName}
           label={label}
         >
           {issueComponents}
@@ -103,16 +101,15 @@ const KanbanRepo = React.createClass({
     }
   },
   render() {
-    const {repoOwner, repoName, labels, issues} = this.props;
+    const {labels, cards, primaryRepoName} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
     const kanbanColumns = _.map(kanbanLabels, (label) => {
       return (
         <KanbanColumn
-          repoName={repoName}
-          repoOwner={repoOwner}
           label={label}
-          issues={issues}
+          cards={cards}
+          primaryRepoName={primaryRepoName}
         />
       );
     });
@@ -138,8 +135,8 @@ const KanbanRepo = React.createClass({
   }
 });
 
-const Repo = React.createClass({
-  displayName: 'Repo',
+const Repos = React.createClass({
+  displayName: 'Repos',
   componentDidMount() {
     const {repoOwner, repoName} = this.props;
     const issueListKey = toIssueListKey(repoOwner, repoName);
@@ -156,41 +153,54 @@ const Repo = React.createClass({
   onLabelsChanged() {
     this.setState({});
   },
-  renderKanbanRepo(values) {
-    const {repoOwner, repoName} = this.props;
-    const labels = values[0];
-    const issues = values[1];
+  // Curried func to squirrell the primaryRepoName var
+  renderKanbanRepos(primaryRepoName) {
+    return (values) => {
+      const labels = values[0];
+      const cards = values[1];
 
-    // If there are at least 2 'special' kanban labels then consider it valid
-    // const kanbanLabels = filterKanbanLabels(labels);
-    // const isValidKanbanRepo = kanbanLabels.length > 1;
-    let allLabels;
-    if (FilterStore.getShowIcebox()) {
-      const icebox = [{name: ICEBOX_NAME}];
-      allLabels = icebox.concat(labels);
-    } else {
-      allLabels = labels;
-    }
+      // If there are at least 2 'special' kanban labels then consider it valid
+      // const kanbanLabels = filterKanbanLabels(labels);
+      // const isValidKanbanRepo = kanbanLabels.length > 1;
+      let allLabels;
+      if (FilterStore.getShowIcebox()) {
+        const icebox = [{name: ICEBOX_NAME}];
+        allLabels = icebox.concat(labels);
+      } else {
+        allLabels = labels;
+      }
 
-    return (
-      <KanbanRepo
-        repoOwner={repoOwner}
-        repoName={repoName}
-        labels={allLabels}
-        issues={issues}
-        onLabelsChanged={this.onLabelsChanged}
-      />
-    );
+      return (
+        <KanbanRepo
+          labels={allLabels}
+          cards={cards}
+          primaryRepoName={primaryRepoName}
+          onLabelsChanged={this.onLabelsChanged}
+        />
+      );
+
+    };
   },
   render() {
-    const {repoOwner, repoName} = this.props;
-    const labelsPromise = Client.getOcto().repos(repoOwner, repoName).labels.fetch();
-    const issuesPromise = Store.fetchAll(repoOwner, repoName);
+    const {repoOwner, repoNames} = this.props;
+    const primaryRepoName = repoNames[0];
+    const labelsPromise = Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch();
+    const cardPromises = _.map(repoNames, (repoName) => {
+      return Store.fetchAll(repoOwner, repoName).then((issues) => {
+        return _.map(issues, (issue) => {
+          return {repoOwner, repoName, issue};
+        });
+      });
+    });
+
+    const cardsPromise = Promise.all(cardPromises).then((arr) => {
+      return _.flatten(arr, true /*shallow*/);
+    });
 
     return (
-      <Loadable key="${repoOwner}/${repoName}"
-        promise={Promise.all([labelsPromise, issuesPromise])}
-        renderLoaded={this.renderKanbanRepo}
+      <Loadable key="${repoOwner}/${repoNames}"
+        promise={Promise.all([labelsPromise, cardsPromise])}
+        renderLoaded={this.renderKanbanRepos(primaryRepoName)}
       />
     );
   }
@@ -202,18 +212,8 @@ const RepoKanbanShell = React.createClass({
     router: React.PropTypes.func
   },
   render() {
-    const {repoOwner, repoName} = this.context.router.getCurrentParams();
-
-    // Sanity check to make sure the repo is valid
-    const renderLoaded = (repo) => {
-      return (
-        <Repo {...this.props}
-          repoOwner={repoOwner}
-          repoName={repoName}
-          repo={repo}
-        />
-      );
-    };
+    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    repoNames = repoNames.split('|');
 
     const renderError = () => {
       return (
@@ -222,10 +222,9 @@ const RepoKanbanShell = React.createClass({
     };
 
     return (
-      <Loadable key="${repoOwner}/${repoName}"
-        promise={Client.getOcto().repos(repoOwner, repoName).fetch()}
-        renderLoaded={renderLoaded}
-        renderError={renderError}
+      <Repos {...this.props}
+        repoOwner={repoOwner}
+        repoNames={repoNames}
       />
     );
   }
