@@ -152,3 +152,11 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
   overflow-x: hidden;
   text-overflow: ellipsis;
 }
+
+.hidden-tasklist-count { display: none; }
+.issue .task-list {
+  font-size: 1.2rem;
+  color: #ccc;
+  vertical-align: middle;
+  padding: 0 2rem;
+}

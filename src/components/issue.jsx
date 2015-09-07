@@ -65,9 +65,30 @@ let Issue = React.createClass({
     const key = toIssueKey(repoOwner, repoName, issueNumber);
     return key;
   },
+  // Calculates the task list count by rendering the Markdown in the DOM and
+  // then counting the number of `<li>[x] ...</li>` elements
+  calculateTaskListCount() {
+    // Find the task list count
+    const {tasklistHtml} = this.refs;
+    if (!tasklistHtml) { return; }
+    let taskFinishedCount = 0;
+    let taskUnfinishedCount = 0;
+    _.each(tasklistHtml.getDOMNode().querySelectorAll('li'), (listItem) => {
+      if (/^\[x\]\ /.test(listItem.textContent)) {
+        taskFinishedCount++;
+      } else if (/^\[\ \]\ /.test(listItem.textContent)) {
+        taskUnfinishedCount++;
+      }
+    });
+    const taskTotalCount = taskFinishedCount + taskUnfinishedCount;
+    if (taskTotalCount) {
+      this.setState({taskFinishedCount, taskTotalCount});
+    }
+  },
   componentDidMount() {
     const key = this.getKey(this.props);
     Store.on('change:' + key, this.update);
+    this.calculateTaskListCount();
   },
   componentDidUpdate(oldProps) {
     const newKey = this.getKey(this.props);
@@ -76,6 +97,7 @@ let Issue = React.createClass({
       Store.on('change:' + newKey, this.update);
       Store.off('change:' + oldKey, this.update);
     }
+    // this.calculateTaskListCount();
   },
   componentWillUnmount() {
     const key = this.getKey(this.props);
@@ -90,7 +112,7 @@ let Issue = React.createClass({
   },
   render() {
     const {repoOwner, repoName, pullRequest} = this.props;
-    const {issue} = this.state;
+    const {issue, taskFinishedCount, taskTotalCount} = this.state;
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -156,6 +178,16 @@ let Issue = React.createClass({
           text={issue.body}/>
       </BS.Popover>
     );
+    let taskCounts = null;
+    if (taskTotalCount) {
+      taskCounts = (
+        <span className='task-list'>
+          <i className='fa fa-check-square-o'/>
+          {taskFinishedCount}/{taskTotalCount}
+        </span>
+      );
+    }
+
     const footer = (
       <span key='footer' className='issue-footer'>
         {icon}
@@ -167,6 +199,7 @@ let Issue = React.createClass({
           overlay={bodyPopover}>
           <span className='issue-number'>#{issue.number}</span>
         </BS.OverlayTrigger>
+        {taskCounts}
         <span key='right-footer' className='pull-right'>
           <Time key='time' className='updated-at' dateTime={issue.updatedAt}/>
           {assignedAvatar}
@@ -175,10 +208,23 @@ let Issue = React.createClass({
     );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < issue.updatedAt;
+    // Calculates the task list count by rendering the Markdown in the DOM and
+    // then counting the number of `<li>[x] ...</li>` elements
+    const hiddenTaskListCount = (
+      <div className='hidden-tasklist-count'>
+        <GithubFlavoredMarkdown
+          disableLinks={true}
+          repoOwner={repoOwner}
+          repoName={repoName}
+          ref='tasklistHtml'
+          text={issue.body}/>
+      </div>
+    );
     const header = [
       <div className='issue-labels'>
         {labels}
       </div>,
+      hiddenTaskListCount,
       <a
         key='link'
         target='_blank'
