@@ -139,7 +139,7 @@ let Issue = React.createClass({
           <i key='icon' title='Merge Conflict' className='issue-icon octicon octicon-git-pull-request'/>
         );
       }
-    } else {
+    } else if (!issue.pullRequest) {
       icon = (
         <i key='icon' title='GitHub Issue' className='issue-icon octicon octicon-issue-opened'/>
       );
