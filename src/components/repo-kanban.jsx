@@ -102,8 +102,8 @@ const KanbanRepo = React.createClass({
       });
     }
   },
-  renderBoard(issues) {
-    const {repoOwner, repoName, labels} = this.props;
+  render() {
+    const {repoOwner, repoName, labels, issues} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
     const kanbanColumns = _.map(kanbanLabels, (label) => {
@@ -135,16 +135,6 @@ const KanbanRepo = React.createClass({
         </tbody>
       </table>
     );
-  },
-  render() {
-    const {repoOwner, repoName} = this.props;
-    const promise = Store.fetchAll(repoOwner, repoName);
-    return (
-      <Loadable key="${repoOwner}/${repoName}"
-        promise={promise}
-        renderLoaded={this.renderBoard}
-      />
-    );
   }
 });
 
@@ -166,37 +156,41 @@ const Repo = React.createClass({
   onLabelsChanged() {
     this.setState({});
   },
+  renderKanbanRepo(values) {
+    const {repoOwner, repoName} = this.props;
+    const labels = values[0];
+    const issues = values[1];
+
+    // If there are at least 2 'special' kanban labels then consider it valid
+    // const kanbanLabels = filterKanbanLabels(labels);
+    // const isValidKanbanRepo = kanbanLabels.length > 1;
+    let allLabels;
+    if (FilterStore.getShowIcebox()) {
+      const icebox = [{name: ICEBOX_NAME}];
+      allLabels = icebox.concat(labels);
+    } else {
+      allLabels = labels;
+    }
+
+    return (
+      <KanbanRepo
+        repoOwner={repoOwner}
+        repoName={repoName}
+        labels={allLabels}
+        issues={issues}
+        onLabelsChanged={this.onLabelsChanged}
+      />
+    );
+  },
   render() {
-    const {repoOwner, repoName, data} = this.props;
-
-    // Get all the issue labels first
-    const renderLoaded = (labels) => {
-      // If there are at least 2 'special' kanban labels then consider it valid
-      // const kanbanLabels = filterKanbanLabels(labels);
-      // const isValidKanbanRepo = kanbanLabels.length > 1;
-      let allLabels;
-      if (FilterStore.getShowIcebox()) {
-        const icebox = [{name: ICEBOX_NAME}];
-        allLabels = icebox.concat(labels);
-      } else {
-        allLabels = labels;
-      }
-
-      return (
-        <KanbanRepo
-          repoOwner={repoOwner}
-          repoName={repoName}
-          labels={allLabels}
-          data={data}
-          onLabelsChanged={this.onLabelsChanged}
-        />
-      );
-    };
+    const {repoOwner, repoName} = this.props;
+    const labelsPromise = Client.getOcto().repos(repoOwner, repoName).labels.fetch();
+    const issuesPromise = Store.fetchAll(repoOwner, repoName);
 
     return (
       <Loadable key="${repoOwner}/${repoName}"
-        promise={Client.getOcto().repos(repoOwner, repoName).labels.fetch()}
-        renderLoaded={renderLoaded}
+        promise={Promise.all([labelsPromise, issuesPromise])}
+        renderLoaded={this.renderKanbanRepo}
       />
     );
   }
@@ -210,12 +204,13 @@ const RepoKanbanShell = React.createClass({
   render() {
     const {repoOwner, repoName} = this.context.router.getCurrentParams();
 
-    const renderLoaded = (data) => {
+    // Sanity check to make sure the repo is valid
+    const renderLoaded = (repo) => {
       return (
         <Repo {...this.props}
           repoOwner={repoOwner}
           repoName={repoName}
-          data={data}
+          repo={repo}
         />
       );
     };
