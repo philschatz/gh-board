@@ -131,7 +131,10 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 
 .emoji { width: 20px; height: 20px; }
 
-.issue.is-updated { background-color: #ff9; }
+.issue.is-updated,
+.issue.is-updated.list-group-item .list-group-item-heading,
+.issue.is-updated.list-group-item .list-group-item-text { background-color: #ff9; }
+
 /* When a Pull Request is not mergeable then make the background a light gray with slashes */
 .issue.is-pull-request:not(.is-mergeable) {
   background-image: linear-gradient(to bottom left,

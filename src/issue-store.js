@@ -87,6 +87,7 @@ class IssueStore extends EventEmitter {
   fetchAll(repoOwner, repoName, isForced) {
     const listKey = toIssueListKey(repoOwner, repoName);
     // Start polling
+    // TODO: Poll each repo, not just the main one
     if (!this.polling) {
       this.polling = setTimeout(() => {
         this.polling = null;
@@ -105,6 +106,7 @@ class IssueStore extends EventEmitter {
           const key = toIssueKey(repoOwner, repoName, issueNumber);
           cacheIssues[key] = issue;
         }
+        this.emit('change');
         this.emit('change:' + listKey, vals);
         return vals;
       });
