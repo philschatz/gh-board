@@ -134,7 +134,6 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 .issue.is-updated { background-color: #ff9; }
 /* When a Pull Request is not mergeable then make the background a light gray with slashes */
 .issue.is-pull-request:not(.is-mergeable) {
-  background-color: #eee;
   background-image: linear-gradient(to bottom left,
     rgba(255,255,255, .8) 25%,
     transparent 25%,
@@ -145,6 +144,34 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
     transparent);
   background-size: 1pc 1pc;
 }
+.issue.is-pull-request:not(.is-mergeable) .issue-icon { color: #888; }
+
+/* Pull Request status. pending, success, error, or failure */
+.issue.is-pull-request[data-status-state='pending'] { background-color: #ffc; }
+.issue.is-pull-request[data-status-state='success'] { background-color: #6cdf44; } .issue.is-pull-request[data-status-state='error'] { background-color: #d00; }
+.issue.is-pull-request[data-status-state='failure'] { background-color: #d00; }
+
+.issue.list-group-item {
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 1rem;
+}
+.issue.list-group-item .list-group-item-heading {
+  margin-bottom: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 1rem;
+  background-color: white;
+}
+
+.issue.list-group-item .list-group-item-text {
+  background-color: white;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: 1rem;
+}
+.issue.list-group-item .issue-icon { padding-right: 1rem; }
 
 
 .kanban-board .issue .badge {

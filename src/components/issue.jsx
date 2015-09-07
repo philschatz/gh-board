@@ -4,6 +4,7 @@ import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
 import {KANBAN_LABEL} from '../helpers';
+import Client from '../github-client';
 import {Store, toIssueKey} from '../issue-store';
 import {CurrentUserStore} from '../user-store';
 import {FilterStore} from '../filter-store';
@@ -111,7 +112,7 @@ let Issue = React.createClass({
     Store.setLastViewed(repoOwner, repoName, issue.number);
   },
   render() {
-    const {repoOwner, repoName, pullRequest, primaryRepoName} = this.props;
+    const {repoOwner, repoName, pullRequest, status, primaryRepoName} = this.props;
     const {issue, taskFinishedCount, taskTotalCount} = this.state;
 
     // Defined by the collector
@@ -133,19 +134,15 @@ let Issue = React.createClass({
     );
     let icon;
     if (pullRequest) {
-      if (isMergeable) {
+      if (!isMergeable) {
         icon = (
-          <i key='pullrequest' className='is-open octicon octicon-git-merge' style={{color: '#6cc644'}}/>
-        );
-      } else {
-        icon = (
-          <i key='pullrequest' className='is-open octicon octicon-git-pull-request' style={{color: '#888'}}/>
+          <i key='icon' title='Merge Conflict' className='issue-icon octicon octicon-git-pull-request'/>
         );
       }
-    // } else {
-    //   icon = (
-    //     <i className='is-open mega-octicon octicon-issue-opened'/>
-    //   );
+    } else {
+      icon = (
+        <i key='icon' title='GitHub Issue' className='issue-icon octicon octicon-issue-opened'/>
+      );
     }
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
       if (!KANBAN_LABEL.test(label.name)) {
@@ -243,6 +240,7 @@ let Issue = React.createClass({
     return connectDragSource(
       <BS.ListGroupItem
         key={issue.id}
+        data-status-state={status ? status.state : null}
         header={header}
         className={classes}>
         {footer}
@@ -263,12 +261,20 @@ const IssueShell = React.createClass({
   render() {
     const {issue, repoOwner, repoName} = this.props;
     if (issue.pullRequest && CurrentUserStore.getUser()) {
-      const promise = Store.fetchPullRequest(repoOwner, repoName, issue.number);
+      const promise = Store.fetchPullRequest(repoOwner, repoName, issue.number)
+      // Find the status of the most-recent commit
+      .then((pullRequest) => {
+        const lastCommit = pullRequest.head;
+        return Client.getOcto().repos(repoOwner, repoName).commits(lastCommit.sha).statuses.fetch().then((statuses) => {
+          const status = statuses[0];
+          return {pullRequest, status};
+        });
+      });
       return (
         <Loadable key={issue.id}
           promise={promise}
           renderLoading={() => <Issue key={issue.id} {...this.props}/>}
-          renderLoaded={(pullRequest) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest}/> }
+          renderLoaded={({pullRequest, status}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={status}/> }
         />
       );
     } else {
