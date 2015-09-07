@@ -3,7 +3,7 @@ import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
 import {KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
-import {Store, toIssueListKey, filterCards} from '../issue-store';
+import {Store, filterCards} from '../issue-store';
 import {FilterStore} from '../filter-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
@@ -138,14 +138,10 @@ const KanbanRepo = React.createClass({
 const Repos = React.createClass({
   displayName: 'Repos',
   componentDidMount() {
-    const {repoOwner, repoName} = this.props;
-    const issueListKey = toIssueListKey(repoOwner, repoName);
-    Store.on('change:' + issueListKey, this.onChange);
+    Store.on('change', this.onChange);
   },
   componentWillUnmount() {
-    const {repoOwner, repoName} = this.props;
-    const issueListKey = toIssueListKey(repoOwner, repoName);
-    Store.off('change:' + issueListKey, this.onChange);
+    Store.off('change', this.onChange);
   },
   onChange() {
     this.setState({});

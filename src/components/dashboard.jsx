@@ -3,6 +3,7 @@ import _ from 'underscore';
 import {Link} from 'react-router';
 
 import Client from '../github-client';
+import {fetchAll} from '../helpers';
 import Loadable from './loadable.jsx';
 
 const Dashboard = React.createClass({
@@ -13,11 +14,12 @@ const Dashboard = React.createClass({
     const items = _.map(data, (repo) => {
       const repoOwner = repo.owner.login;
       const repoName = repo.name;
+      const repoNames = repoName;
 
       return (
         <div key={repo.id}>
           {repoOwner} /
-          <Link to='viewRepo' params={{repoOwner, repoName}}>{repoName}</Link>
+          <Link to='viewRepo' params={{repoOwner, repoNames}}>{repoName}</Link>
         </div>
       );
     });
@@ -36,12 +38,13 @@ const DashboardShell = React.createClass({
     const sampleRepos = [
       'react-bootstrap/react-bootstrap',
       'rauhryan/huboard',
-      'philschatz/gh-board'
+      'philschatz/gh-board',
+      'jquery/jquery'
     ];
     const anonLinks = _.map(sampleRepos, (repo) => {
       const params = {
         repoOwner: repo.split('/')[0],
-        repoName: repo.split('/')[1]
+        repoNames: repo.split('/')[1]
       };
       return (
         <li key={repo}>
@@ -58,10 +61,20 @@ const DashboardShell = React.createClass({
         </ul>
       </span>
     );
+    const loggedInLinks = (data) => {
+      return (
+        <div>
+          <ul>
+            {anonLinks}
+          </ul>
+          <Dashboard data={data}/>
+        </div>
+      );
+    };
     return (
       <Loadable
-        promise={Client.getOcto().user.repos.fetch()}
-        renderLoaded={(data) => { return (<Dashboard data={data}/>); } }
+        promise={fetchAll(Client.getOcto().user.repos.fetch)}
+        renderLoaded={loggedInLinks}
         renderError={() => { return anonymousText; }}
       />
     );

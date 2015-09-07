@@ -121,7 +121,7 @@ let Issue = React.createClass({
     const isMergeable = pullRequest ? pullRequest.mergeable : false;
 
     if (!issue) {
-      return (<span>Bug? No Issue</span>);
+      return (<span>Maybe moving Issue...</span>);
     }
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
