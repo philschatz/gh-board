@@ -91,7 +91,7 @@ const LoginButton = React.createClass({
         <BS.DropdownButton id='signin-dropdown' className='logoff' title={info.login}>
           <BS.MenuItem disabled href='https://github.com'>Signed in as <strong>{info.login}</strong></BS.MenuItem>
           <BS.MenuItem divider/>
-          <BS.MenuItem eventKey='1' onClick={this.onSignOut}>Sign Out</BS.MenuItem>
+          <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
         </BS.DropdownButton>
       );
     } else {

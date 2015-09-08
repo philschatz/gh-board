@@ -43,6 +43,21 @@ export default React.createClass({
             placeholder='Enter GitHub token'
             ref='token'
           />
+          <div className='github-token-instructions'>
+            To create a GitHub token:
+            <ol>
+              <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new</a></li>
+              <li>Provide a descriptive title (like "gh-board") in the "Token Description"</li>
+              <li>Unselect all the checkboxes to just look at public repositories</li>
+                <ul>
+                  <li>Select <code>public_repo</code> to be able to update/move issues</li>
+                  <li>Select <code>repo</code> if you want to see/update information for <strong>private</strong> repositories</li>
+                </ul>
+              <li>Click <code>Generate Token</code></li>
+              <li>Copy the new token and paste it in here!</li>
+              <li><strong>Note:</strong> You may need to refresh the page when you click "Save"</li>
+            </ol>
+          </div>
         </BS.Modal.Body>
         <BS.Modal.Footer className='modal-footer'>
           {footer}
