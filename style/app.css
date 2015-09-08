@@ -150,7 +150,21 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 .issue.is-pull-request:not(.is-mergeable) .issue-icon { color: #888; }
 
 /* Pull Request status. pending, success, error, or failure */
-.issue.is-pull-request[data-status-state='pending'] { background-color: #ffc; }
+.issue.is-pull-request[data-status-state='pending'] {
+  /* Animate the bar while CI is running */
+  background-color: #ffc;
+  -webkit-animation: progress-bar-stripes 2s linear infinite;
+  animation: progress-bar-stripes 2s linear infinite;
+  background-image: linear-gradient(to bottom left,
+    rgba(255,255,255, .8) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255,255,255, .8) 50%,
+    rgba(255,255,255, .8) 75%,
+    transparent 75%,
+    transparent);
+  background-size: 1pc 1pc;
+}
 .issue.is-pull-request[data-status-state='success'] { background-color: #6cdf44; } .issue.is-pull-request[data-status-state='error'] { background-color: #d00; }
 .issue.is-pull-request[data-status-state='failure'] { background-color: #d00; }
 
