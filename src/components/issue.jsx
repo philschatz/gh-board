@@ -118,6 +118,8 @@ let Issue = React.createClass({
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
 
+    // PR updatedAt is updated when commits are pushed
+    const updatedAt = pullRequest ? pullRequest.updatedAt : issue.updatedAt;
     const isMergeable = pullRequest ? pullRequest.mergeable : false;
 
     if (!issue) {
@@ -199,13 +201,13 @@ let Issue = React.createClass({
         </BS.OverlayTrigger>
         {taskCounts}
         <span key='right-footer' className='pull-right'>
-          <Time key='time' className='updated-at' dateTime={issue.updatedAt}/>
+          <Time key='time' className='updated-at' dateTime={updatedAt}/>
           {assignedAvatar}
         </span>
       </span>
     );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
-    const isUpdated = lastViewed < issue.updatedAt;
+    const isUpdated = lastViewed < updatedAt;
     // Calculates the task list count by rendering the Markdown in the DOM and
     // then counting the number of `<li>[x] ...</li>` elements
     const hiddenTaskListCount = (
