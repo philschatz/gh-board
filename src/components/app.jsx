@@ -40,7 +40,7 @@ const KarmaWarning = React.createClass({
       );
     } else {
       karmaText = (
-        <span className='lots-of-karma'>GitHub Karma: {remaining} / {limit}.</span>
+        <span className='lots-of-karma' title='Rate Limit for the GitHub API'>GitHub Karma: {remaining} / {limit}.</span>
       );
     }
     if (reset) {
@@ -53,6 +53,9 @@ const KarmaWarning = React.createClass({
         <BS.Nav>
           {karmaText}
           {resetText}
+        </BS.Nav>
+        <BS.Nav right>
+          <a target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Improve the Source Code!</a>
         </BS.Nav>
       </BS.Navbar>
     );
