@@ -68,7 +68,7 @@ body { background-color: #eee; }
   display: inline-block;
   white-space: nowrap;
   vertical-align: middle;
-  max-width: 9rem;
+  max-width: 10rem;
   overflow-x: hidden;
   text-overflow: ellipsis;
 }

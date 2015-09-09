@@ -22,8 +22,8 @@ const delayedPromise = (fn) => {
       promise = fn();
       return promise;
     }
-  }
-}
+  };
+};
 
 
 export function filterCards(cards, labels) {
@@ -94,7 +94,7 @@ class IssueStore extends EventEmitter {
                     return {pullRequest, statuses};
                   });
                 });
-              }
+              };
               const pullRequestDelayedPromise = delayedPromise(fn);
               return {repoOwner, repoName, issue, pullRequestDelayedPromise};
             } else {
