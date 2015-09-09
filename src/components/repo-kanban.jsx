@@ -23,27 +23,7 @@ const KanbanColumn = React.createClass({
   render() {
     const {label, cards, primaryRepoName} = this.props;
 
-    let filteredCards = cards;
-    const userFilter = FilterStore.getUser();
-    if (userFilter) {
-      filteredCards = _.filter(filteredCards, (card) => {
-        const issue = card.issue;
-        if (issue.assignee && issue.assignee.login === userFilter.login) {
-          return true;
-        } else if (issue.user.login === userFilter.login) {
-          return true;
-        }
-      });
-    }
-    filteredCards = filterCards(filteredCards, FilterStore.getLabels().concat(label));
-    // Sort the cards by `updatedAt`
-    const sortedCards = _.sortBy(filteredCards, (card) => {
-      return card.issue.updatedAt;
-    });
-    // Reverse so newest ones are on top
-    sortedCards.reverse();
-
-    const issueComponents = _.map(sortedCards, (card) => {
+    const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.issue.id}
@@ -70,64 +50,95 @@ const KanbanColumn = React.createClass({
 
 const KanbanRepo = React.createClass({
   displayName: 'KanbanRepo',
-  onAddCardList() {
-    const {onLabelsChanged} = this.props;
-    const {labels} = this.props;
-    const {repoOwner, repoName} = this.props;
-
-    const kanbanLabels = filterKanbanLabels(labels);
-
-    let lastId = '-1';
-
-    const lastLabel = kanbanLabels[kanbanLabels.length - 1];
-    if (lastLabel.name === ICEBOX_NAME) {
-      lastId = '-1';
-    } else {
-      lastId = lastLabel.name.match(/^\d+/)[0];
-    }
-    const newId = parseInt(lastId) + 1;
-
-    const labelName = prompt('Name of new CardList');
-    if (labelName) {
-      const name = newId + ' - ' + labelName;
-      const color = 'cccccc';
-
-      // Add the label and re-render
-      Store.createLabel(repoOwner, repoName, {name, color})
-      .then(() => {
-        // Shortcut: Add the label to the list locally w/o refetching
-        onLabelsChanged();
-      });
-    }
-  },
+  // onAddCardList() {
+  //   const {onLabelsChanged} = this.props;
+  //   const {labels} = this.props;
+  //   const {repoOwner, repoName} = this.props;
+  //
+  //   const kanbanLabels = filterKanbanLabels(labels);
+  //
+  //   let lastId = '-1';
+  //
+  //   const lastLabel = kanbanLabels[kanbanLabels.length - 1];
+  //   if (lastLabel.name === ICEBOX_NAME) {
+  //     lastId = '-1';
+  //   } else {
+  //     lastId = lastLabel.name.match(/^\d+/)[0];
+  //   }
+  //   const newId = parseInt(lastId) + 1;
+  //
+  //   const labelName = prompt('Name of new CardList');
+  //   if (labelName) {
+  //     const name = newId + ' - ' + labelName;
+  //     const color = 'cccccc';
+  //
+  //     // Add the label and re-render
+  //     Store.createLabel(repoOwner, repoName, {name, color})
+  //     .then(() => {
+  //       // Shortcut: Add the label to the list locally w/o refetching
+  //       onLabelsChanged();
+  //     });
+  //   }
+  // },
   render() {
     const {labels, cards, primaryRepoName} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
+    // Filter all the cards
+    let filteredCards = cards;
+    const userFilter = FilterStore.getUser();
+    if (userFilter) {
+      filteredCards = _.filter(filteredCards, (card) => {
+        const issue = card.issue;
+        if (issue.assignee && issue.assignee.login === userFilter.login) {
+          return true;
+        } else if (issue.user.login === userFilter.login) {
+          return true;
+        }
+      });
+    }
+    filteredCards = filterCards(filteredCards, FilterStore.getLabels());
+    const isFilteringByColumn = _.filter(FilterStore.getLabels(), (label) => {
+      return KANBAN_LABEL.test(label.name);
+    })[0];
+
+    // Sort the cards by `updatedAt`
+    const sortedCards = _.sortBy(filteredCards, (card) => {
+      return card.issue.updatedAt;
+    });
+    // Reverse so newest ones are on top
+    sortedCards.reverse();
+
     const kanbanColumns = _.map(kanbanLabels, (label) => {
-      return (
-        <KanbanColumn
-          label={label}
-          cards={cards}
-          primaryRepoName={primaryRepoName}
-        />
-      );
+      // If we are filtering by a kanban column then only show that column
+      // Otherwise show all columns
+      if (!isFilteringByColumn || (isFilteringByColumn.name === label.name)) {
+        return (
+          <KanbanColumn
+            label={label}
+            cards={filterCards(sortedCards, [label])}
+            primaryRepoName={primaryRepoName}
+          />
+        );
+      } else {
+        return null;
+      }
     });
 
-    const addCardList = (
-      <td key='add-cardlist'>
-        <BS.Button
-          alt='Add a new Cardlist to Board'
-          onClick={this.onAddCardList}>+</BS.Button>
-      </td>
-    );
+    // const addCardList = (
+    //   <td key='add-cardlist'>
+    //     <BS.Button
+    //       alt='Add a new Cardlist to Board'
+    //       onClick={this.onAddCardList}>+</BS.Button>
+    //   </td>
+    // );
 
     return (
       <table className='kanban-board' data-column-count={kanbanColumns.length}>
         <tbody>
           <tr>
             {kanbanColumns}
-            {addCardList}
+            {/* addCardList */}
           </tr>
         </tbody>
       </table>
@@ -151,13 +162,8 @@ const Repos = React.createClass({
   },
   // Curried func to squirrell the primaryRepoName var
   renderKanbanRepos(primaryRepoName) {
-    return (values) => {
-      const labels = values[0];
-      const cards = values[1];
+    return ([labels, cards]) => {
 
-      // If there are at least 2 'special' kanban labels then consider it valid
-      // const kanbanLabels = filterKanbanLabels(labels);
-      // const isValidKanbanRepo = kanbanLabels.length > 1;
       let allLabels;
       if (FilterStore.getShowIcebox()) {
         const icebox = [{name: ICEBOX_NAME}];
@@ -181,17 +187,7 @@ const Repos = React.createClass({
     const {repoOwner, repoNames} = this.props;
     const primaryRepoName = repoNames[0];
     const labelsPromise = Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch();
-    const cardPromises = _.map(repoNames, (repoName) => {
-      return Store.fetchAll(repoOwner, repoName).then((issues) => {
-        return _.map(issues, (issue) => {
-          return {repoOwner, repoName, issue};
-        });
-      });
-    });
-
-    const cardsPromise = Promise.all(cardPromises).then((arr) => {
-      return _.flatten(arr, true /*shallow*/);
-    });
+    const cardsPromise = Store.fetchAllIssues(repoOwner, repoNames);
 
     return (
       <Loadable key="${repoOwner}/${repoNames}"
