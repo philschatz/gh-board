@@ -110,6 +110,18 @@ let Issue = React.createClass({
     evt.stopPropagation();
     Store.setLastViewed(repoOwner, repoName, issue.number);
   },
+  onDragStart() {
+    // Rotate the div just long enough for the browser to get a screenshot
+    // so the element looks like it is being moved
+    {style} = this.getDOMNode();
+    style.transform = 'rotate(10deg)';
+    style.webkitTransform = 'rotate(10deg)';
+    setTimeout(() => {
+      style.transform = '';
+      style.webkitTransform = '';
+    }, 100);
+
+  },
   render() {
     const {card, pullRequest, status, primaryRepoName} = this.props;
     const {issue, repoOwner, repoName} = card;
@@ -244,6 +256,7 @@ let Issue = React.createClass({
         key={issue.id}
         data-status-state={status ? status.state : null}
         header={header}
+        onDragStart={this.onDragStart}
         className={classes}>
         {footer}
       </BS.ListGroupItem>
