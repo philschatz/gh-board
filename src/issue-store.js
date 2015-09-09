@@ -13,6 +13,19 @@ const toIssueKey = (repoOwner, repoName, issueNumber) => {
   return repoOwner + '/' + repoName + '/issues/' + issueNumber;
 };
 
+const delayedPromise = (fn) => {
+  let promise = null;
+  return () => {
+    if (promise) {
+      return promise;
+    } else {
+      promise = fn();
+      return promise;
+    }
+  }
+}
+
+
 export function filterCards(cards, labels) {
   let filtered = cards;
   // Curry the fn so it is not declared inside a loop
@@ -75,12 +88,15 @@ class IssueStore extends EventEmitter {
             // If this is a Pull Request fetch the data and the CI status.
             // Add the promise to the card
             if (CurrentUserStore.getUser() && issue.pullRequest) {
-              const pullRequestPromise = Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
-                return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
-                  return {pullRequest, statuses};
+              const fn = () => {
+                return Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
+                  return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
+                    return {pullRequest, statuses};
+                  });
                 });
-              });
-              return {repoOwner, repoName, issue, pullRequestPromise};
+              }
+              const pullRequestDelayedPromise = delayedPromise(fn);
+              return {repoOwner, repoName, issue, pullRequestDelayedPromise};
             } else {
               return {repoOwner, repoName, issue};
             }

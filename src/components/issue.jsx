@@ -275,11 +275,11 @@ Issue = DragSource(ItemTypes.CARD, issueSource, collect)(Issue);
 const IssueShell = React.createClass({
   render() {
     const {card} = this.props;
-    const {issue, pullRequestPromise} = card;
-    if (pullRequestPromise) {
+    const {issue, pullRequestDelayedPromise} = card;
+    if (pullRequestDelayedPromise) {
       return (
         <Loadable key={issue.id}
-          promise={pullRequestPromise}
+          promise={pullRequestDelayedPromise()}
           renderLoading={() => <Issue key={issue.id} {...this.props}/>}
           renderLoaded={({pullRequest, statuses}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={statuses[0]}/> }
         />
