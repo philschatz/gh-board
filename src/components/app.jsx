@@ -6,6 +6,7 @@ import HTML5Backend from 'react-dnd/modules/backends/HTML5';
 import { DragDropContext } from 'react-dnd';
 
 import Client from '../github-client';
+import NewVersionChecker from '../new-version-checker';
 import LoginModal from './login-modal.jsx';
 import LabelBadge from './label-badge.jsx';
 import {CurrentUserStore} from '../user-store';
@@ -15,14 +16,16 @@ import Time from './time.jsx';
 
 const KarmaWarning = React.createClass({
   getInitialState() {
-    return {timer: null, limit: null, remaining: null};
+    return {timer: null, limit: null, remaining: null, newestVersion: null};
   },
   componentDidMount() {
     this.setState({timer: setInterval(this.pollKarma, 60000)});
     this.pollKarma();
+    NewVersionChecker.on('change', this.updateNewestVersion);
   },
   componentWillUnmount() {
     clearInterval(this.pollKarma);
+    NewVersionChecker.off('change', this.updateNewestVersion);
   },
   pollKarma() {
     Client.getOcto().rateLimit.fetch().then((rates) => {
@@ -30,8 +33,11 @@ const KarmaWarning = React.createClass({
       this.setState({remaining, limit, reset});
     });
   },
+  updateNewestVersion(newestVersion) {
+    this.setState({newestVersion});
+  },
   render() {
-    const {remaining, limit, reset} = this.state;
+    const {remaining, limit, reset, newestVersion} = this.state;
     let karmaText;
     let resetText;
     if (remaining / limit < .2) {
@@ -48,11 +54,18 @@ const KarmaWarning = React.createClass({
         <span>Resets <Time dateTime={new Date(reset * 1000)}/></span>
       );
     }
+    let newestText = null;
+    if (newestVersion) {
+      newestText = (
+        <button className='btn btn-primary' onClick={() => window.location.reload(true)}>New Version released <Time dateTime={new Date(newestVersion.date)}/>. Click to Reload</button>
+      );
+    }
     return (
       <BS.Navbar fixedBottom>
         <BS.Nav>
           {karmaText}
           {resetText}
+          {newestText}
         </BS.Nav>
         <BS.Nav right>
           <a target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Improve the Source Code!</a>
