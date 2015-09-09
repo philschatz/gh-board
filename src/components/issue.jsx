@@ -113,7 +113,7 @@ let Issue = React.createClass({
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
     // so the element looks like it is being moved
-    {style} = this.getDOMNode();
+    const {style} = this.getDOMNode();
     style.transform = 'rotate(10deg)';
     style.webkitTransform = 'rotate(10deg)';
     setTimeout(() => {
