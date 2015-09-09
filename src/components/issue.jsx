@@ -4,9 +4,7 @@ import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
 import {KANBAN_LABEL} from '../helpers';
-import Client from '../github-client';
-import {Store, toIssueKey} from '../issue-store';
-import {CurrentUserStore} from '../user-store';
+import {Store} from '../issue-store';
 import {FilterStore} from '../filter-store';
 import Loadable from './loadable.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
@@ -30,9 +28,11 @@ const issueSource = {
     }
 
     // When dropped on a compatible target, do something
-    const item = monitor.getItem();
+    const {card} = monitor.getItem();
+    const {repoOwner, repoName, issue} = card;
     const dropResult = monitor.getDropResult();
-    Store.move(item.repoOwner, item.repoName, item.issue.number, dropResult.label);
+
+    Store.move(repoOwner, repoName, issue, dropResult.label);
   }
 };
 
@@ -54,18 +54,17 @@ function collect(connect, monitor) {
 let Issue = React.createClass({
   displayName: 'Issue',
   getInitialState() {
-    const {issue} = this.props;
-    return {issue};
+    return {taskFinishedCount: 0, taskTotalCount: 0};
   },
   update(issue) {
     this.setState({issue});
   },
-  getKey(props) {
-    const {repoOwner, repoName, issue} = props;
-    const issueNumber = issue.number;
-    const key = toIssueKey(repoOwner, repoName, issueNumber);
-    return key;
-  },
+  // getKey(props) {
+  //   const {repoOwner, repoName, issue} = props;
+  //   const issueNumber = issue.number;
+  //   const key = toIssueKey(repoOwner, repoName, issueNumber);
+  //   return key;
+  // },
   // Calculates the task list count by rendering the Markdown in the DOM and
   // then counting the number of `<li>[x] ...</li>` elements
   calculateTaskListCount() {
@@ -86,34 +85,35 @@ let Issue = React.createClass({
       this.setState({taskFinishedCount, taskTotalCount});
     }
   },
-  componentDidMount() {
-    const key = this.getKey(this.props);
-    Store.on('change:' + key, this.update);
-    this.calculateTaskListCount();
-  },
-  componentDidUpdate(oldProps) {
-    const newKey = this.getKey(this.props);
-    const oldKey = this.getKey(oldProps);
-    if (newKey !== oldKey) {
-      Store.on('change:' + newKey, this.update);
-      Store.off('change:' + oldKey, this.update);
-    }
-    // this.calculateTaskListCount();
-  },
-  componentWillUnmount() {
-    const key = this.getKey(this.props);
-    Store.off('change:' + key, this.update);
-  },
+  // componentDidMount() {
+  //   const key = this.getKey(this.props);
+  //   Store.on('change:' + key, this.update);
+  //   this.calculateTaskListCount();
+  // },
+  // componentDidUpdate(oldProps) {
+  //   const newKey = this.getKey(this.props);
+  //   const oldKey = this.getKey(oldProps);
+  //   if (newKey !== oldKey) {
+  //     Store.on('change:' + newKey, this.update);
+  //     Store.off('change:' + oldKey, this.update);
+  //   }
+  //   // this.calculateTaskListCount();
+  // },
+  // componentWillUnmount() {
+  //   const key = this.getKey(this.props);
+  //   Store.off('change:' + key, this.update);
+  // },
   onClickNumber(evt) {
-    const {repoOwner, repoName} = this.props;
-    const {issue} = this.state;
+    const {card} = this.props;
+    const {repoOwner, repoName, issue} = card;
 
     evt.stopPropagation();
     Store.setLastViewed(repoOwner, repoName, issue.number);
   },
   render() {
-    const {repoOwner, repoName, pullRequest, status, primaryRepoName} = this.props;
-    const {issue, taskFinishedCount, taskTotalCount} = this.state;
+    const {card, pullRequest, status, primaryRepoName} = this.props;
+    const {issue, repoOwner, repoName} = card;
+    const {taskFinishedCount, taskTotalCount} = this.state;
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -261,22 +261,14 @@ Issue = DragSource(ItemTypes.CARD, issueSource, collect)(Issue);
 // we have to get both.
 const IssueShell = React.createClass({
   render() {
-    const {issue, repoOwner, repoName} = this.props;
-    if (issue.pullRequest && CurrentUserStore.getUser()) {
-      const promise = Store.fetchPullRequest(repoOwner, repoName, issue.number)
-      // Find the status of the most-recent commit
-      .then((pullRequest) => {
-        const lastCommit = pullRequest.head;
-        return Client.getOcto().repos(repoOwner, repoName).commits(lastCommit.sha).statuses.fetch().then((statuses) => {
-          const status = statuses[0];
-          return {pullRequest, status};
-        });
-      });
+    const {card} = this.props;
+    const {issue, pullRequestPromise} = card;
+    if (pullRequestPromise) {
       return (
         <Loadable key={issue.id}
-          promise={promise}
+          promise={pullRequestPromise}
           renderLoading={() => <Issue key={issue.id} {...this.props}/>}
-          renderLoaded={({pullRequest, status}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={status}/> }
+          renderLoaded={({pullRequest, statuses}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={statuses[0]}/> }
         />
       );
     } else {

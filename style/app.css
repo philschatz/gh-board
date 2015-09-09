@@ -152,15 +152,15 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 /* Pull Request status. pending, success, error, or failure */
 .issue.is-pull-request[data-status-state='pending'] {
   /* Animate the bar while CI is running */
-  background-color: #ffc;
+  background-color: #fcfc00;
   -webkit-animation: progress-bar-stripes 2s linear infinite;
   animation: progress-bar-stripes 2s linear infinite;
   background-image: linear-gradient(to bottom left,
-    rgba(255,255,255, .8) 25%,
+    rgba(255,255,255, .9) 25%,
     transparent 25%,
     transparent 50%,
-    rgba(255,255,255, .8) 50%,
-    rgba(255,255,255, .8) 75%,
+    rgba(255,255,255, .9) 50%,
+    rgba(255,255,255, .9) 75%,
     transparent 75%,
     transparent);
   background-size: 1pc 1pc;

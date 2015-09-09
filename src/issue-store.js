@@ -1,9 +1,10 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
+import {CurrentUserStore} from './user-store';
 import Client from './github-client';
 import {fetchAll, contains, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
-const RELOAD_TIME = 60 * 1000;
+const RELOAD_TIME = 30 * 1000;
 
 const toIssueListKey = (repoOwner, repoName) => {
   return repoOwner + '/' + repoName + '/issues';
@@ -43,7 +44,6 @@ export function filterCards(cards, labels) {
 }
 
 let cacheCards = null;
-let cacheIssues = {};
 let cacheLastViewed = {};
 const initialTimestamp = new Date();
 
@@ -52,10 +52,6 @@ class IssueStore extends EventEmitter {
     const slice = [].slice;
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
-  }
-  fetchPullRequest(repoOwner, repoName, issueNumber) {
-    const issue = Client.getOcto().repos(repoOwner, repoName).pulls(issueNumber);
-    return issue.fetch();
   }
   fetchAllIssues(repoOwner, repoNames, isForced) {
     // Start/keep polling
@@ -73,22 +69,36 @@ class IssueStore extends EventEmitter {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
       return fetchAll(issues)
       .then((vals) => {
-        return _.map(vals, (issue) => {
-          return {repoOwner, repoName, issue};
+        // CurrentUserStore.fetch is a hack to ensure the current user is determined
+        return CurrentUserStore.fetch().then(() => {
+          return _.map(vals, (issue) => {
+            // If this is a Pull Request fetch the data and the CI status.
+            // Add the promise to the card
+            if (CurrentUserStore.getUser() && issue.pullRequest) {
+              const pullRequestPromise = Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
+                return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
+                  return {pullRequest, statuses};
+                });
+              });
+              return {repoOwner, repoName, issue, pullRequestPromise};
+            } else {
+              return {repoOwner, repoName, issue};
+            }
+          });
         });
       });
     });
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
       cacheCards = cards;
+      if (isForced) {
+        this.emit('change');
+      }
       return cards;
-    })
+    });
   }
-  move(repoOwner, repoName, issueNumber, newLabel) {
+  move(repoOwner, repoName, issue, newLabel) {
     // Find all the labels, remove the kanbanLabel, and add the new label
-    const key = toIssueKey(repoOwner, repoName, issueNumber);
-    const listKey = toIssueListKey(repoOwner, repoName);
-    const issue = cacheIssues[key];
     // Exclude Kanban labels
     const labels = _.filter(issue.labels, (label) => {
       if (ICEBOX_NAME === label.name || KANBAN_LABEL.test(label.name)) {
@@ -102,16 +112,14 @@ class IssueStore extends EventEmitter {
       labelNames.push(newLabel.name);
     }
 
-    return Client.getOcto().repos(repoOwner, repoName).issues(issueNumber).update({labels: labelNames})
+    return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({labels: labelNames})
     .then(() => {
 
-      this.setLastViewed(repoOwner, repoName, issueNumber);
+      this.setLastViewed(repoOwner, repoName, issue.number);
 
       // invalidate the issues list
-      delete cacheIssues[listKey];
+      cacheCards = null;
       this.emit('change');
-      this.emit('change:' + key);
-      this.emit('change:' + listKey);
     });
   }
   createLabel(repoOwner, repoName, opts) {
@@ -119,7 +127,8 @@ class IssueStore extends EventEmitter {
   }
   setLastViewed(repoOwner, repoName, issueNumber) {
     const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
-    const now = new Date();
+    let now = new Date();
+    now = new Date(now.getTime() + 5 * 1000); // Add 5 sec just in case
     const isNew = !cacheLastViewed[issueKey] || (now.getTime() - cacheLastViewed[issueKey].getTime() > 10000);
     cacheLastViewed[issueKey] = now;
     if (isNew) {
@@ -133,4 +142,4 @@ class IssueStore extends EventEmitter {
 }
 
 const Store = new IssueStore();
-export {toIssueKey, toIssueListKey, Store};
+export {toIssueListKey, Store};

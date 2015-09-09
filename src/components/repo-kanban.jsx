@@ -1,6 +1,5 @@
 import React from 'react';
 import _ from 'underscore';
-import * as BS from 'react-bootstrap';
 
 import {KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
 import {Store, filterCards} from '../issue-store';
@@ -28,9 +27,7 @@ const KanbanColumn = React.createClass({
         <Issue
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
-          repoOwner={card.repoOwner}
-          repoName={card.repoName}
-          issue={card.issue}
+          card={card}
           />
       );
     });
