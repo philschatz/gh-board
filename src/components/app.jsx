@@ -19,19 +19,19 @@ const KarmaWarning = React.createClass({
     return {timer: null, limit: null, remaining: null, newestVersion: null};
   },
   componentDidMount() {
-    this.setState({timer: setInterval(this.pollKarma, 60000)});
-    this.pollKarma();
     NewVersionChecker.on('change', this.updateNewestVersion);
+    Client.on('request', this.updateRateLimit);
   },
   componentWillUnmount() {
-    clearInterval(this.pollKarma);
     NewVersionChecker.off('change', this.updateNewestVersion);
+    Client.off('request', this.updateRateLimit);
   },
-  pollKarma() {
-    Client.getOcto().rateLimit.fetch().then((rates) => {
-      const {remaining, limit, reset} = rates.resources.core;
-      this.setState({remaining, limit, reset});
-    });
+  updateRateLimit(remaining, limit, method, path, data, options) {
+    this.setState({remaining, limit});
+    // Client.getOcto().rateLimit.fetch().then((rates) => {
+    //   const {remaining, limit, reset} = rates.resources.core;
+    //   this.setState({remaining, limit, reset});
+    // });
   },
   updateNewestVersion(newestVersion) {
     this.setState({newestVersion});
@@ -40,14 +40,30 @@ const KarmaWarning = React.createClass({
     const {remaining, limit, reset, newestVersion} = this.state;
     let karmaText;
     let resetText;
-    if (remaining / limit < .2) {
-      karmaText = (
-        <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in.</BS.Button>
-      );
-    } else {
-      karmaText = (
-        <span className='lots-of-karma' title='Rate Limit for the GitHub API'>GitHub Karma: {remaining} / {limit}.</span>
-      );
+    if (limit) {
+      if (remaining / limit < .2) {
+        karmaText = (
+          <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in.</BS.Button>
+        );
+      } else {
+        const percent = Math.floor(remaining * 1000 / limit) / 10;
+        let bsStyle = 'danger';
+        if (percent >= 75) { bsStyle = 'success'; }
+        else if (percent >= 40) { bsStyle = 'warning'; }
+        karmaText = (
+          <span className='karma-stats'>
+            <i className='octicon octicon-mark-github'/>
+            {'API Karma Left: '}
+            <BS.ProgressBar
+              className='karma-progress'
+              title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
+              now={remaining}
+              max={limit}
+              bsStyle={bsStyle}
+              label={percent + '% (' + remaining + ')'} />
+          </span>
+        );
+      }
     }
     if (reset) {
       resetText = (

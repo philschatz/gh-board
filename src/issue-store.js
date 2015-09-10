@@ -123,16 +123,18 @@ class IssueStore extends EventEmitter {
             // Add the promise to the card
             if (issue.pullRequest) {
               const fn = () => {
+                if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
+                  return Promise.resolve({});
+                }
+
                 return Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
                   // TODO: Check if we still have a bunch of karma before getting merge conflict status and updated dates.
-                  // Actually, maybe make these a separate promise
-                  if (CurrentUserStore.getUser()) {
-                    return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
-                      return {pullRequest, statuses};
-                    });
-                  } else {
+                  if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
                     return {pullRequest};
                   }
+                  return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
+                    return {pullRequest, statuses};
+                  });
                 });
               };
               const pullRequestDelayedPromise = delayedPromise(fn);

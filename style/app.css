@@ -135,6 +135,7 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 
 /* When a Pull Request is not mergeable then make the background a light gray with slashes */
 .issue.is-pull-request:not(.is-mergeable) {
+  background-color: #ccc; /* Default merge conflict color when no CI status */
   background-image: linear-gradient(to bottom left,
     rgba(255,255,255, .8) 25%,
     transparent 25%,
@@ -217,3 +218,10 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 }
 .issue .related-issues .issue-blurb,
 .issue .related-issues .issue-blurb .blurb-icon { font-size: 1.5rem; }
+
+
+.karma-stats .karma-progress {
+  display: inline-block;
+  margin-bottom: 0;
+  width: 12rem;
+}

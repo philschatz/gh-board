@@ -3,12 +3,50 @@ import Octo from 'octokat';
 
 let cachedClient = null;
 
+const cacheHandler = new class CacheHandler {
+  constructor() {
+    // Pull data from `sessionStorage`
+    this.storage = window.sessionStorage;
+    const cache = this.storage.getItem('octokat-cache');
+    if (cache) {
+      this.cachedETags = JSON.parse(cache);
+    } else {
+      this.cachedETags = {};
+    }
+  }
+  get(method, path) {
+    return this.cachedETags[method + ' ' + path];
+  }
+  add(method, path, eTag, data, status) {
+    this.cachedETags[method + ' ' + path] = {eTag, data, status};
+    if (Object.keys(this.cachedETags).length > 100) {
+      // stop saving. blow the storage cache because
+      // stringifying JSON and saving is slow
+      this.storage.removeItem('octokat-cache');
+    } else {
+      // If sessionStorage fills up, just blow it away.
+      try {
+        this.storage.setItem('octokat-cache', JSON.stringify(this.cachedETags));
+      } catch (e) {
+        this.cachedETags = {};
+        this.storage.removeItem('octokat-cache');
+      }
+    }
+  }
+};
+
 class Client extends EventEmitter {
+  constructor() {
+    super();
+    this.LOW_RATE_LIMIT = 10;
+  }
   getCredentials() {
     return {
       token: window.localStorage.getItem('gh-token'),
       username: window.localStorage.getItem('gh-username'),
-      password: window.localStorage.getItem('gh-password')
+      password: window.localStorage.getItem('gh-password'),
+      cacheHandler,
+      emitter: this
     };
   }
   hasCredentials() {
@@ -19,11 +57,19 @@ class Client extends EventEmitter {
     if (!cachedClient) {
       let credentials = this.getCredentials();
       cachedClient = new Octo(credentials);
+      // update the rateLimit for issue-store so it can gracefully back off
+      // making requests when the rate limit is low
+      this.on('request', (rateLimitRemaining) => {
+        this.rateLimitRemaining = rateLimitRemaining;
+      });
     }
     return cachedClient;
   }
   readMessage() {
     return this.getOcto().zen.read();
+  }
+  getRateLimitRemaining() {
+    return this.rateLimitRemaining;
   }
 
   setToken(token) {
