@@ -128,8 +128,8 @@ const App = React.createClass({
   componentWillUnmount() {
     FilterStore.off('change', this.update);
   },
-  changeShowIcebox() {
-    FilterStore.setShowIcebox(!FilterStore.getShowIcebox());
+  changeShowUncategorized() {
+    FilterStore.setShowUncategorized(!FilterStore.getShowUncategorized());
   },
   update() {
     this.setState({});
@@ -156,9 +156,9 @@ const App = React.createClass({
           <BS.Nav>
             <BS.Input
               type='checkbox'
-              label='Show Icebox'
-              onChange={this.changeShowIcebox}
-              checked={FilterStore.getShowIcebox()}/>
+              label='Show Uncategorized'
+              onChange={this.changeShowUncategorized}
+              checked={FilterStore.getShowUncategorized()}/>
             <span className='active-filter'>
               {filtering}
             </span>

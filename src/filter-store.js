@@ -3,7 +3,7 @@ import {EventEmitter} from 'events';
 
 import {contains} from './helpers';
 
-let showIcebox = true;
+let showUncategorized = true;
 let userFilter = null;
 let filteredLabels = [];
 
@@ -13,12 +13,12 @@ class Store extends EventEmitter {
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
   }
-  setShowIcebox(flag) {
-    showIcebox = !!flag;
+  setShowUncategorized(flag) {
+    showUncategorized = !!flag;
     this.emit('change');
   }
-  getShowIcebox() {
-    return showIcebox;
+  getShowUncategorized() {
+    return showUncategorized;
   }
   clearUser() {
     userFilter = null;

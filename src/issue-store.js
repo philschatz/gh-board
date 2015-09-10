@@ -4,7 +4,7 @@ import {CurrentUserStore} from './user-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
-import {fetchAll, contains, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
+import {fetchAll, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 
 const RELOAD_TIME = 30 * 1000;
 
@@ -37,7 +37,7 @@ export function filterCards(cards, labels) {
     });
     if (containsLabel) {
       return true;
-    } else if (ICEBOX_NAME === label.name) {
+    } else if (UNCATEGORIZED_NAME === label.name) {
       // If the issue does not match any list then add it to the backlog
       for (const l of card.issue.labels) {
         if (KANBAN_LABEL.test(l.name)) {
@@ -151,14 +151,14 @@ class IssueStore extends EventEmitter {
     // Find all the labels, remove the kanbanLabel, and add the new label
     // Exclude Kanban labels
     const labels = _.filter(issue.labels, (label) => {
-      if (ICEBOX_NAME === label.name || KANBAN_LABEL.test(label.name)) {
+      if (UNCATEGORIZED_NAME === label.name || KANBAN_LABEL.test(label.name)) {
         return false;
       }
       return true;
     });
     const labelNames = _.map(labels);
-    // When moving back to icebox do not add a new label
-    if (ICEBOX_NAME !== newLabel.name) {
+    // When moving back to uncategorized do not add a new label
+    if (UNCATEGORIZED_NAME !== newLabel.name) {
       labelNames.push(newLabel.name);
     }
 

@@ -28,6 +28,6 @@ export function contains(arr, condition) {
 
 // Of the form `# - ...`
 const KANBAN_LABEL = /^\d+\ -\ /;
-const ICEBOX_NAME = '999 - Icebox';
+const UNCATEGORIZED_NAME = '999 - Uncategorized';
 
-export {KANBAN_LABEL, ICEBOX_NAME};
+export {KANBAN_LABEL, UNCATEGORIZED_NAME};

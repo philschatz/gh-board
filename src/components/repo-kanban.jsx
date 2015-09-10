@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 
-import {KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
+import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../helpers';
 import {Store, filterCards, buildBipartiteGraph} from '../issue-store';
 import {FilterStore} from '../filter-store';
 import Client from '../github-client';
@@ -58,7 +58,7 @@ const KanbanRepo = React.createClass({
   //   let lastId = '-1';
   //
   //   const lastLabel = kanbanLabels[kanbanLabels.length - 1];
-  //   if (lastLabel.name === ICEBOX_NAME) {
+  //   if (lastLabel.name === UNCATEGORIZED_NAME) {
   //     lastId = '-1';
   //   } else {
   //     lastId = lastLabel.name.match(/^\d+/)[0];
@@ -164,9 +164,9 @@ const Repos = React.createClass({
     return ([labels, cards]) => {
 
       let allLabels;
-      if (FilterStore.getShowIcebox()) {
-        const icebox = [{name: ICEBOX_NAME}];
-        allLabels = icebox.concat(labels);
+      if (FilterStore.getShowUncategorized()) {
+        const uncategorized = [{name: UNCATEGORIZED_NAME}];
+        allLabels = uncategorized.concat(labels);
       } else {
         allLabels = labels;
       }
