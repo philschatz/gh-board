@@ -110,22 +110,6 @@ let Issue = React.createClass({
   update(issue) {
     this.setState({issue});
   },
-  // componentDidMount() {
-  //   const key = this.getKey(this.props);
-  //   Store.on('change:' + key, this.update);
-  // },
-  // componentDidUpdate(oldProps) {
-  //   const newKey = this.getKey(this.props);
-  //   const oldKey = this.getKey(oldProps);
-  //   if (newKey !== oldKey) {
-  //     Store.on('change:' + newKey, this.update);
-  //     Store.off('change:' + oldKey, this.update);
-  //   }
-  // },
-  // componentWillUnmount() {
-  //   const key = this.getKey(this.props);
-  //   Store.off('change:' + key, this.update);
-  // },
   onClickNumber(evt) {
     const {card} = this.props;
     const {repoOwner, repoName, issue} = card;
@@ -271,7 +255,8 @@ const IssueShell = React.createClass({
         <Loadable key={issue.id}
           promise={pullRequestDelayedPromise()}
           renderLoading={() => <Issue key={issue.id} {...this.props}/>}
-          renderLoaded={({pullRequest, statuses}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={statuses[0]}/> }
+          renderError={() => <Issue key={issue.id} {...this.props}/>}
+          renderLoaded={({pullRequest, statuses}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={statuses ? statuses[0] : null}/> }
         />
       );
     } else {

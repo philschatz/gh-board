@@ -121,12 +121,18 @@ class IssueStore extends EventEmitter {
           return _.map(vals, (issue) => {
             // If this is a Pull Request fetch the data and the CI status.
             // Add the promise to the card
-            if (CurrentUserStore.getUser() && issue.pullRequest) {
+            if (issue.pullRequest) {
               const fn = () => {
                 return Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
-                  return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
-                    return {pullRequest, statuses};
-                  });
+                  // TODO: Check if we still have a bunch of karma before getting merge conflict status and updated dates.
+                  // Actually, maybe make these a separate promise
+                  if (CurrentUserStore.getUser()) {
+                    return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
+                      return {pullRequest, statuses};
+                    });
+                  } else {
+                    return {pullRequest};
+                  }
                 });
               };
               const pullRequestDelayedPromise = delayedPromise(fn);
