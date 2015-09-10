@@ -31,8 +31,8 @@ const IssueList = React.createClass({
     const {isOver} = this.props; // from the collector
 
     const header = (
-      <h2 style={{backgroundColor: label.color}}>
-        <span className='column-title' onClick={() => FilterStore.addLabel(label)}>{title}</span>
+      <h2 className='column-title' style={{backgroundColor: label.color}}>
+        <span className='column-title-text' onClick={() => FilterStore.addLabel(label)}>{title}</span>
       </h2>
     );
 

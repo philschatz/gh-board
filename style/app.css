@@ -44,7 +44,8 @@ body { background-color: #eee; }
 .kanban-board .kanban-issues .panel-heading .panel-title {
   padding: 10px 15px;
 }
-.kanban-board .kanban-issues .panel-heading .panel-title .column-title {
+
+.kanban-board .kanban-issues .panel-heading .panel-title.column-title .column-title-text {
   /* Support filtering on a single kanban column */
   cursor: pointer;
 }
