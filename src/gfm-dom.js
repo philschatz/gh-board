@@ -5,6 +5,8 @@ import linkify from 'gfm-linkify';
 const DIV = document.createElement('div');
 
 function getElement(text, repoOwner, repoName) {
+  DIV.innerHTML = '';
+  if (!text) { return DIV; }
   let html = null;
   if (repoOwner) {
     const context = repoOwner + '/' + repoName;

@@ -49,6 +49,56 @@ function collect(connect, monitor) {
 }
 
 
+const IssueOrPullRequestBlurb = React.createClass({
+  render() {
+    const {card, primaryRepoName} = this.props;
+    const {issue, repoOwner, repoName} = card;
+
+    const isPullRequest = !!issue.pullRequest;
+    const multipleRepoName = primaryRepoName === repoName ? null : repoName;
+    const popoverTitle = isPullRequest ? 'Pull Request Description' : 'Issue Description';
+
+    const bodyPopover = (
+      <BS.Popover id="popover-${issue.id}" className='issue-body' title={popoverTitle}>
+        <GithubFlavoredMarkdown
+          disableLinks={false}
+          repoOwner={repoOwner}
+          repoName={repoName}
+          text={issue.body}/>
+      </BS.Popover>
+    );
+
+    let icon = null;
+    if (isPullRequest) {
+      icon = (
+        <i title='Click for Pull Request Details' className='blurb-icon octicon octicon-git-pull-request'/>
+      );
+    } else {
+      icon = (
+        <i title='Click for Issue Details' className='blurb-icon octicon octicon-issue-opened'/>
+      );
+    }
+
+    return (
+      <span className='issue-blurb'>
+        <BS.OverlayTrigger
+          rootClose
+          trigger={['click', 'focus']}
+          placement='bottom'
+          overlay={bodyPopover}>
+          {icon}
+        </BS.OverlayTrigger>
+        {' '}
+        <a className='blurb-number'
+          target='_blank'
+          href={issue.htmlUrl}
+          >{multipleRepoName}#{issue.number}
+        </a>
+      </span>
+    );
+  }
+});
+
 // `GET .../issues` returns an object with `labels` and
 // `GET .../pulls` returns an object with `mergeable` so for Pull Requests
 // we have to have both to fully render an Issue.
@@ -115,22 +165,10 @@ let Issue = React.createClass({
       <img
         key='avatar'
         className='avatar-image'
-        title={user.login}
+        title={'Click to filter on ' + user.login}
         onClick={() => FilterStore.setUser(user)}
         src={user.avatar.url}/>
     );
-    let icon;
-    if (pullRequest) {
-      if (!isMergeable) {
-        icon = (
-          <i key='icon' title='Merge Conflict' className='issue-icon octicon octicon-git-pull-request'/>
-        );
-      }
-    } else if (!issue.pullRequest) {
-      icon = (
-        <i key='icon' title='GitHub Issue' className='issue-icon octicon octicon-issue-opened'/>
-      );
-    }
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
       if (!KANBAN_LABEL.test(label.name)) {
         return label;
@@ -153,15 +191,6 @@ let Issue = React.createClass({
         </BS.OverlayTrigger>
       );
     });
-    const bodyPopover = (
-      <BS.Popover id="popover-${issue.id}" className='issue-body' title='Issue Description'>
-        <GithubFlavoredMarkdown
-          disableLinks={false}
-          repoOwner={repoOwner}
-          repoName={repoName}
-          text={issue.body}/>
-      </BS.Popover>
-    );
     let taskCounts = null;
     if (taskTotalCount) {
       taskCounts = (
@@ -172,18 +201,9 @@ let Issue = React.createClass({
       );
     }
 
-    const multipleRepoName = primaryRepoName === repoName ? null : repoName;
     const footer = (
       <span key='footer' className='issue-footer'>
-        {icon}
-        <BS.OverlayTrigger
-          key='issue-number'
-          rootClose
-          trigger={['click', 'focus']}
-          placement='bottom'
-          overlay={bodyPopover}>
-          <span className='issue-number'>{multipleRepoName}#{issue.number}</span>
-        </BS.OverlayTrigger>
+        <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
         {taskCounts}
         <span key='right-footer' className='pull-right'>
           <Time key='time' className='updated-at' dateTime={updatedAt}/>
@@ -196,23 +216,7 @@ let Issue = React.createClass({
 
     const relatedIssues = _.map(graph.getB(graph.cardToKey(card)), (issueCard) => {
       return (
-        <div className='related-issue'>
-          <a
-            className='related-link'
-            title={issueCard.issue.title}
-            target='_blank'
-            href={issueCard.issue.htmlUrl}
-            >
-            <i className='related-icon octicon octicon-issue-opened'/>
-            <span className='related-number'>
-              {'fixes '}
-              {primaryRepoName === issueCard.repoName ? null : issueCard.repoName}
-              #
-              {issueCard.issue.number}
-            </span>
-            <span className='related-title'>{issueCard.issue.title}</span>
-          </a>
-        </div>
+        <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName}/>
       );
     });
 

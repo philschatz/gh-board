@@ -14,9 +14,9 @@ Just specify a GitHub repository in the URL and off you go!
 
 # Screenshots
 
-Combining an Issue with a Pull Request by using `fixes #123` in the Pull Request body:
+Automatically Combine an Issue with a Pull Request by using `fixes #123` in the Pull Request body:
 
-![combining Issue and Pull Request](https://cloud.githubusercontent.com/assets/253202/9782154/db16ca10-5768-11e5-9620-e36cdfb52f8b.png)
+![combines Issue and Pull Request](https://cloud.githubusercontent.com/assets/253202/9784658/8e231a26-577a-11e5-85ec-1d40fcaa5207.png)
 
 # TODO List
 

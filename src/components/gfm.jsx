@@ -29,13 +29,48 @@ const InnerMarkdown = React.createClass({
         link.setAttribute('target', '_blank');
       });
     }
+  },
+  updateCheckboxes() {
+    const div = this.getDOMNode();
+    function buildCheckbox(checked) {
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.disabled = true;
+      checkbox.checked = checked;
+      return checkbox;
+    }
 
+    _.each(div.querySelectorAll('li'), (listItem) => {
+      if (/^\[x\]\ /.test(listItem.textContent)) {
+        const textChild = listItem.firstChild;
+        const checkbox = buildCheckbox(true);
+
+        if (textChild.nodeType === Node.TEXT_NODE) {
+          // remove the `[x] ` and replace it with a disabled input box
+          textChild.textContent = textChild.textContent.substring(3);
+          listItem.insertBefore(checkbox, textChild);
+        }
+      } else if (/^\[\ \]\ /.test(listItem.textContent)) {
+        const textChild = listItem.firstChild;
+        const checkbox = buildCheckbox(false);
+
+        if (textChild.nodeType === Node.TEXT_NODE) {
+          // remove the `[x] ` and replace it with a disabled input box
+          textChild.textContent = textChild.textContent.substring(3);
+          listItem.insertBefore(checkbox, textChild);
+        }
+      }
+    });
+  },
+  updateDOM() {
+    this.updateLinks();
+    this.updateCheckboxes();
   },
   componentDidMount() {
-    this.updateLinks();
+    this.updateDOM();
   },
   componentDidUpdate() {
-    this.updateLinks();
+    this.updateDOM();
   },
   replaceEmojis(text) {
     const emojisMap = CurrentUserStore.getEmojis() || {};
@@ -47,6 +82,7 @@ const InnerMarkdown = React.createClass({
   },
   render() {
     const {text, repoOwner, repoName} = this.props;
+    if (!text) { return null; }
     const context = repoOwner + '/' + repoName;
     const textStripped = text.replace(/<!--[\s\S]*?-->/g, '');
     const textEmojis = this.replaceEmojis(textStripped);
@@ -67,26 +103,3 @@ const InnerMarkdown = React.createClass({
 });
 
 export default InnerMarkdown;
-
-// export default React.createClass({
-//   displayName: 'GithubFlavoredMarkdown',
-//   getPromise() {
-//     const {text, repoOwner, repoName} = this.props;
-//     const context = repoOwner + '/' + repoName;
-//     const isRaw = true;
-//     const HACK = JSON.stringify({text: text, context: context, mode: 'gfm'});
-//     return Client.getOcto().markdown.create(HACK, isRaw);
-//   },
-//   render() {
-//     return (
-//       <Loadable
-//         promise={this.getPromise()}
-//         renderLoaded={(html) => {
-//           return (
-//             <InnerMarkdown html={html} />
-//           );
-//         }}
-//       />
-//     );
-//   }
-// });

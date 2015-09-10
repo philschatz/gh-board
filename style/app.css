@@ -58,7 +58,7 @@ body { background-color: #eee; }
 .kanban-board .kanban-issues .dnd-placeholder::before { content: 'Release to drop me in this list'; }
 
 
-.kanban-board .list-group-item.issue { cursor: pointer; }
+.kanban-board .list-group-item.issue { cursor: move; }
 
 .kanban-board .list-group-item.issue .issue-footer time.updated-at {
   font-size: 1.2rem;
@@ -73,9 +73,8 @@ body { background-color: #eee; }
   text-overflow: ellipsis;
 }
 
-.kanban-board .list-group-item.issue .issue-footer {
-  font-size: 2rem;
-}
+.kanban-board .list-group-item.issue .issue-footer { font-size: 2rem; }
+.kanban-board .list-group-item.issue .issue-footer .avatar-image { cursor: pointer; }
 .kanban-board .list-group-item.issue .issue-footer .octicon {
   /* Override the font size in .octicon */
   font-size: 100%;
@@ -146,7 +145,12 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
     transparent);
   background-size: 1pc 1pc;
 }
-.issue.is-pull-request:not(.is-mergeable) .issue-icon { color: #888; }
+
+/* Color the blurb icon to be gray if there is an issue */
+.issue.is-pull-request:not(.is-mergeable) .issue-footer .blurb-icon,
+.issue.is-pull-request[data-status-state='pending'] .issue-footer .blurb-icon,
+.issue.is-pull-request[data-status-state='error']   .issue-footer .blurb-icon,
+.issue.is-pull-request[data-status-state='failure'] .issue-footer .blurb-icon { color: #888; }
 
 /* Pull Request status. pending, success, error, or failure */
 .issue.is-pull-request[data-status-state='pending'] {
@@ -187,8 +191,10 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
   padding-right: 1rem;
   padding-bottom: 1rem;
 }
-.issue.list-group-item .issue-icon { padding-right: 1rem; }
 
+/* All blurbs, not just the footer, get a pointer and link color inherits */
+.issue-blurb .blurb-icon { cursor: pointer; }
+.issue-blurb .blurb-number { color: inherit; }
 
 .kanban-board .issue .badge {
   max-width: 10rem;
@@ -204,11 +210,10 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 }
 
 
-.issue .related-issues .related-issue .related-link {
+.issue .related-issues .issue-blurb::before { content: 'fixes '; }
+.issue .related-issues .issue-blurb {
   color: #999;
   font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
 }
-.issue .related-issues .related-issue .related-link,
-.issue .related-issues .related-issue .related-link .related-icon { font-size: 1.5rem; }
-.issue .related-issues .related-issue .related-link .related-icon { padding-right: .5rem; }
-.issue .related-issues .related-issue .related-link .related-title { display: none; }
+.issue .related-issues .issue-blurb,
+.issue .related-issues .issue-blurb .blurb-icon { font-size: 1.5rem; }
