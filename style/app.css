@@ -196,10 +196,19 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
   text-overflow: ellipsis;
 }
 
-.hidden-tasklist-count { display: none; }
 .issue .task-list {
   font-size: 1.2rem;
   color: #ccc;
   vertical-align: middle;
   padding: 0 2rem;
 }
+
+
+.issue .related-issues .related-issue .related-link {
+  color: #999;
+  font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
+}
+.issue .related-issues .related-issue .related-link,
+.issue .related-issues .related-issue .related-link .related-icon { font-size: 1.5rem; }
+.issue .related-issues .related-issue .related-link .related-icon { padding-right: .5rem; }
+.issue .related-issues .related-issue .related-link .related-title { display: none; }

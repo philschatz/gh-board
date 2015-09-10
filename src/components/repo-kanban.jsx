@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 
 import {KANBAN_LABEL, ICEBOX_NAME} from '../helpers';
-import {Store, filterCards} from '../issue-store';
+import {Store, filterCards, buildBipartiteGraph} from '../issue-store';
 import {FilterStore} from '../filter-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
@@ -20,7 +20,7 @@ const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2)
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, primaryRepoName} = this.props;
+    const {label, cards, graph, primaryRepoName} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -28,6 +28,7 @@ const KanbanColumn = React.createClass({
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
           card={card}
+          graph={graph}
           />
       );
     });
@@ -78,7 +79,7 @@ const KanbanRepo = React.createClass({
   //   }
   // },
   render() {
-    const {labels, cards, primaryRepoName} = this.props;
+    const {labels, cards, graph, primaryRepoName} = this.props;
     const kanbanLabels = filterKanbanLabels(labels);
 
     // Filter all the cards
@@ -114,6 +115,7 @@ const KanbanRepo = React.createClass({
           <KanbanColumn
             label={label}
             cards={filterCards(sortedCards, [label])}
+            graph={graph}
             primaryRepoName={primaryRepoName}
           />
         );
@@ -169,10 +171,13 @@ const Repos = React.createClass({
         allLabels = labels;
       }
 
+      const graph = buildBipartiteGraph(cards);
+
       return (
         <KanbanRepo
           labels={allLabels}
           cards={cards}
+          graph={graph}
           primaryRepoName={primaryRepoName}
           onLabelsChanged={this.onLabelsChanged}
         />

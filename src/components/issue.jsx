@@ -6,6 +6,7 @@ import { DragSource } from 'react-dnd';
 import {KANBAN_LABEL} from '../helpers';
 import {Store} from '../issue-store';
 import {FilterStore} from '../filter-store';
+import {getTaskCounts} from '../gfm-dom';
 import Loadable from './loadable.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
 import Time from './time.jsx';
@@ -59,36 +60,9 @@ let Issue = React.createClass({
   update(issue) {
     this.setState({issue});
   },
-  // getKey(props) {
-  //   const {repoOwner, repoName, issue} = props;
-  //   const issueNumber = issue.number;
-  //   const key = toIssueKey(repoOwner, repoName, issueNumber);
-  //   return key;
-  // },
-  // Calculates the task list count by rendering the Markdown in the DOM and
-  // then counting the number of `<li>[x] ...</li>` elements
-  calculateTaskListCount() {
-    // Find the task list count
-    const {tasklistHtml} = this.refs;
-    if (!tasklistHtml) { return; }
-    let taskFinishedCount = 0;
-    let taskUnfinishedCount = 0;
-    _.each(tasklistHtml.getDOMNode().querySelectorAll('li'), (listItem) => {
-      if (/^\[x\]\ /.test(listItem.textContent)) {
-        taskFinishedCount++;
-      } else if (/^\[\ \]\ /.test(listItem.textContent)) {
-        taskUnfinishedCount++;
-      }
-    });
-    const taskTotalCount = taskFinishedCount + taskUnfinishedCount;
-    if (taskTotalCount) {
-      this.setState({taskFinishedCount, taskTotalCount});
-    }
-  },
   // componentDidMount() {
   //   const key = this.getKey(this.props);
   //   Store.on('change:' + key, this.update);
-  //   this.calculateTaskListCount();
   // },
   // componentDidUpdate(oldProps) {
   //   const newKey = this.getKey(this.props);
@@ -97,7 +71,6 @@ let Issue = React.createClass({
   //     Store.on('change:' + newKey, this.update);
   //     Store.off('change:' + oldKey, this.update);
   //   }
-  //   // this.calculateTaskListCount();
   // },
   // componentWillUnmount() {
   //   const key = this.getKey(this.props);
@@ -123,9 +96,9 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, pullRequest, status, primaryRepoName} = this.props;
+    const {card, graph, pullRequest, status, primaryRepoName} = this.props;
     const {issue, repoOwner, repoName} = card;
-    const {taskFinishedCount, taskTotalCount} = this.state;
+    const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -183,7 +156,7 @@ let Issue = React.createClass({
     const bodyPopover = (
       <BS.Popover id="popover-${issue.id}" className='issue-body' title='Issue Description'>
         <GithubFlavoredMarkdown
-          disableLinks={true}
+          disableLinks={false}
           repoOwner={repoOwner}
           repoName={repoName}
           text={issue.body}/>
@@ -220,23 +193,36 @@ let Issue = React.createClass({
     );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
-    // Calculates the task list count by rendering the Markdown in the DOM and
-    // then counting the number of `<li>[x] ...</li>` elements
-    const hiddenTaskListCount = (
-      <div className='hidden-tasklist-count'>
-        <GithubFlavoredMarkdown
-          disableLinks={true}
-          repoOwner={repoOwner}
-          repoName={repoName}
-          ref='tasklistHtml'
-          text={issue.body}/>
-      </div>
-    );
+
+    const relatedIssues = _.map(graph.getB(graph.cardToKey(card)), (issueCard) => {
+      return (
+        <div className='related-issue'>
+          <a
+            className='related-link'
+            title={issueCard.issue.title}
+            target='_blank'
+            href={issueCard.issue.htmlUrl}
+            >
+            <i className='related-icon octicon octicon-issue-opened'/>
+            <span className='related-number'>
+              {'fixes '}
+              {primaryRepoName === issueCard.repoName ? null : issueCard.repoName}
+              #
+              {issueCard.issue.number}
+            </span>
+            <span className='related-title'>{issueCard.issue.title}</span>
+          </a>
+        </div>
+      );
+    });
+
     const header = [
       <div className='issue-labels'>
         {labels}
       </div>,
-      hiddenTaskListCount,
+      <div className='related-issues'>
+        {relatedIssues}
+      </div>,
       <a
         key='link'
         target='_blank'

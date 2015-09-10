@@ -2,6 +2,8 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 import {CurrentUserStore} from './user-store';
 import Client from './github-client';
+import BipartiteGraph from './bipartite-graph';
+import {getRelatedIssues} from './gfm-dom';
 import {fetchAll, contains, KANBAN_LABEL, ICEBOX_NAME} from './helpers';
 
 const RELOAD_TIME = 30 * 1000;
@@ -54,6 +56,38 @@ export function filterCards(cards, labels) {
     }
   }
   return filtered;
+}
+
+export function buildBipartiteGraph(cards) {
+  const graph = new BipartiteGraph();
+  const allPullRequests = {};
+  const allIssues = {};
+
+  _.each(cards, (card) => {
+    const cardPath = graph.cardToKey(card);
+    if (card.issue.pullRequest) {
+      // card is a Pull Request
+      allPullRequests[cardPath] = card;
+    } else {
+      // or card is an Issue
+      allIssues[cardPath] = card;
+    }
+  });
+
+  _.each(cards, (card) => {
+    const cardPath = graph.cardToKey(card);
+    const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
+    if (card.issue.pullRequest) {
+      // card is a Pull Request
+      _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
+        const otherCardPath = graph.cardToKey({repoOwner, repoName, issue: {number}});
+        if (fixes && allIssues[otherCardPath]) {
+          graph.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card);
+        }
+      });
+    }
+  });
+  return graph;
 }
 
 let cacheCards = null;
