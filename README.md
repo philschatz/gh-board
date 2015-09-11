@@ -18,6 +18,12 @@ Automatically Combine an Issue with a Pull Request by using `fixes #123` in the 
 
 ![combines Issue and Pull Request](https://cloud.githubusercontent.com/assets/253202/9784658/8e231a26-577a-11e5-85ec-1d40fcaa5207.png)
 
+
+# Development
+
+- `npm start` to start up the dev server and go to `http://localhost:8080`
+- `npm run build` to generate the JS and CSS files in `./dist`
+
 # TODO List
 
 - [x] combine Issue and the Pull Requests that fixes it
