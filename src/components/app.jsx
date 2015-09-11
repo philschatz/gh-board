@@ -77,7 +77,7 @@ const KarmaWarning = React.createClass({
       );
     }
     return (
-      <BS.Navbar fixedBottom>
+      <BS.Navbar fixedBottom className='bottombar-nav'>
         <BS.Nav>
           {karmaText}
           {resetText}

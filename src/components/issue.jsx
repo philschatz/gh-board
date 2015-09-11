@@ -194,16 +194,6 @@ let Issue = React.createClass({
       );
     }
 
-    const footer = (
-      <span key='footer' className='issue-footer'>
-        <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
-        {taskCounts}
-        <span key='right-footer' className='pull-right'>
-          <Time key='time' className='updated-at' dateTime={updatedAt}/>
-          {assignedAvatar}
-        </span>
-      </span>
-    );
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
 
@@ -253,7 +243,14 @@ let Issue = React.createClass({
         header={header}
         onDragStart={this.onDragStart}
         className={classes}>
-        {footer}
+
+        <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
+        {taskCounts}
+        <span key='right-footer' className='pull-right'>
+          <Time key='time' className='updated-at' dateTime={updatedAt}/>
+          {assignedAvatar}
+        </span>
+
       </BS.ListGroupItem>
     );
   }

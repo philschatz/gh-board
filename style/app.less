@@ -1,251 +1,249 @@
 @import '../node_modules/font-awesome/css/font-awesome.css';
 @import '../node_modules/octicons/octicons/octicons.css';
 
-.kanban-board .kanban-board-column { min-width: 30rem; }
-.kanban-board[data-column-count='1'] .kanban-board-column { width: 100%; }
-.kanban-board[data-column-count='2'] .kanban-board-column { width: 50%; }
-.kanban-board[data-column-count='3'] .kanban-board-column { width: 33%; }
-.kanban-board[data-column-count='4'] .kanban-board-column { width: 25%; }
-.kanban-board[data-column-count='5'] .kanban-board-column { width: 20%; }
-.kanban-board[data-column-count='6'] .kanban-board-column { width: 16%; }
-.kanban-board[data-column-count='7'] .kanban-board-column { width: 14%; }
-.kanban-board[data-column-count='8'] .kanban-board-column { width: 12%; }
-.kanban-board[data-column-count='9'] .kanban-board-column { width: 11%; }
-.kanban-board[data-column-count='10'] .kanban-board-column { width: 10%; }
+.x-stripes(@color; @opacity) {
+  background-color: @color;
+  background-image: linear-gradient(to bottom left,
+    rgba(255,255,255, @opacity) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255,255,255, @opacity) 50%,
+    rgba(255,255,255, @opacity) 75%,
+    transparent 75%,
+    transparent);
+  background-size: 1pc 1pc;
+}
 
 body { background-color: #eee; }
 
 .app {
+
   /* Allow enough space on top/bottom of screen for fixed header/footer */
   padding-top: 7rem;
   padding-bottom: 4rem;
+
+  // Styles for the whole app (no matter where they occur)
+  // TODO: Mixin?
+  .badge { cursor: pointer; }
+  .avatar-image { width: 2rem; }
+
+  .topbar-nav {
+    .active-filter {
+      &:not(:empty)::before { content: 'Active Filter: '; }
+
+      .badge::after {
+        content: 'x';
+        padding-left: 0.5rem;
+      }
+    }
+  }
+
+  .kanban-board {
+    // "ideal" widths for each column
+    .x-column-widths(@counter) when (@counter > 0) {
+      .x-column-widths((@counter - 1));
+      &[data-column-count="@{counter}"] {
+        @percent: round(100 / @counter) / 100;
+        .kanban-board-column { width: percentage(@percent); }
+      }
+    }
+
+    .x-column-widths(10);
+    .kanban-board-column {
+      // .x-column-widths specifies the "ideal" widths but this ensures there is a minimum
+      min-width: 30rem;
+
+      vertical-align: top;
+      padding-left: 1rem;
+      padding-right: 1rem;
+
+      /* Move the padding to the title so the color fills up the entire header */
+      .kanban-issues {
+        .panel-heading {
+          padding: 0;
+
+          .column-title {
+            padding: 10px 15px;
+
+            /* Support filtering on a single kanban column */
+            .column-title-text { cursor: pointer; }
+          }
+        }
+
+        // DnD styling
+
+        &:not(.is-over) .dnd-placeholder { display: none; }
+        .dnd-placeholder {
+          background-color: #ccc;
+          height: 5rem;
+          margin: 2rem;
+
+          &::before { content: 'Release to drop me in this list'; }
+        }
+
+        // Each Issue
+        .issue {
+          cursor: move;
+          padding-top: 0;
+          padding-right: 0;
+          padding-bottom: 0;
+          padding-left: 1rem; // leave room to show the CI and mergeable status
+
+          /* Just make the issue gray so it is clear we are dragging this element from */
+          &.is-dragging { opacity: .25; }
+
+          // When remotely updated since you last looked, mark the issue as yellow
+          &.is-updated,
+          &.is-updated .list-group-item-heading,
+          &.is-updated .list-group-item-text { background-color: #ff9; }
+
+          .list-group-item-heading {
+            margin-bottom: 0;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            padding-top: 1rem;
+            background-color: white;
+
+            .related-issues .issue-blurb {
+              color: #999;
+              font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
+              font-size: 1.5rem;
+            }
+
+            // The list of labels(tags)
+            .issue-labels .badge {
+              max-width: 10rem;
+              overflow-x: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+
+          .list-group-item-text {
+            background-color: white;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            padding-bottom: 1rem;
+
+            font-size: 2rem;
+
+            // The little `[4/5]` section
+            .task-list {
+              font-size: 1.2rem;
+              color: #ccc;
+              vertical-align: middle;
+              padding: 0 2rem;
+            }
+
+            time.updated-at {
+              font-size: 1.2rem;
+              color: #999;
+              padding-right: 1rem;
+
+              display: inline-block;
+              white-space: nowrap;
+              vertical-align: middle;
+              max-width: 10rem;
+              overflow-x: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .avatar-image { cursor: pointer; }
+            // TODO: Remove dependence on octicon class name
+            /* Override the font size in .octicon */
+            .octicon { font-size: 100%; }
+
+          }
+
+
+          // Elements that can occur anywhere in an issue
+          /* All blurbs, not just the footer, get a pointer and link color inherits */
+          .issue-blurb {
+            .blurb-context,
+            .blurb-icon { margin-right: .5rem; }
+            .blurb-icon { cursor: pointer; }
+            .blurb-number { color: inherit; }
+          }
+
+
+          /* Color the blurb icon to be gray if there is an issue */
+          &.is-pull-request {
+            /* When a Pull Request is not mergeable then make the background a light gray with slashes */
+            /* Default merge conflict color when no CI status */
+            &:not(.is-mergeable) { .x-stripes(#ccc; .8); }
+
+            // Make the blurb icon gray when the PR is not mergeable
+            // or when CI does not report success
+            &:not(.is-mergeable),
+            &[data-status-state='pending'],
+            &[data-status-state='error'],
+            &[data-status-state='failure'] {
+              .issue-footer .blurb-icon { color: #888; }
+            }
+
+            /* Pull Request status. pending, success, error, or failure */
+            &[data-status-state='pending'] {
+              // TODO: Move the animation into the mixin
+              // Animate the bar while CI is running (uses bootstrap's progress-bar-stripes)
+              -webkit-animation: progress-bar-stripes 2s linear infinite;
+              animation: progress-bar-stripes 2s linear infinite;
+
+              .x-stripes(#fcfc00; .9);
+            }
+            &[data-status-state='success'] { background-color: #6cdf44; } &[data-status-state='error'] { background-color: #d00; }
+            &[data-status-state='failure'] { background-color: #d00; }
+
+          }
+
+        } /* End Issue */
+
+
+      }
+    }
+  } /* End kanban-board */
+
+  .dashboard {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 50rem;
+
+    .repo-item {
+      .repo-icon,
+      .repo-open-link,
+      .repo-private-label { margin-right: 1rem; }
+      .repo-updated-at {
+        color: #888;
+        &::before { content: '('; }
+        &::after  { content: ')'; }
+      }
+    }
+  }
+
+
+  .bottombar-nav .karma-stats .karma-progress {
+    display: inline-block;
+    margin-bottom: 0;
+    width: 12rem;
+  }
+
 }
 
-.active-filter:not(:empty)::before { content: 'Active Filter: '; }
-.active-filter .badge::after {
-  content: 'x';
-  padding-left: 0.5rem;
-}
-.badge { cursor: pointer; }
 
-.kanban-board {
-}
-.kanban-board td { vertical-align: top; }
-.kanban-board th,
-.kanban-board td {
-  width: 40rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-
-/* Move the padding to the title so the color fills up the entire header */
-.kanban-board .kanban-issues .panel-heading { padding: 0; }
-.kanban-board .kanban-issues .panel-heading .panel-title {
-  padding: 10px 15px;
-}
-
-.kanban-board .kanban-issues .panel-heading .panel-title.column-title .column-title-text {
-  /* Support filtering on a single kanban column */
-  cursor: pointer;
-}
-
-.kanban-board .kanban-issues:not(.is-over) .dnd-placeholder { display: none; }
-.kanban-board .kanban-issues .dnd-placeholder {
-  background-color: #ccc;
-  height: 15rem;
-  margin: 2rem;
-}
-.kanban-board .kanban-issues .dnd-placeholder::before { content: 'Release to drop me in this list'; }
-
-
-.kanban-board .list-group-item.issue { cursor: move; }
-
-.kanban-board .list-group-item.issue .issue-footer time.updated-at {
-  font-size: 1.2rem;
-  color: #999;
-  padding-right: 1rem;
-
-  display: inline-block;
-  white-space: nowrap;
-  vertical-align: middle;
-  max-width: 10rem;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-}
-
-.kanban-board .list-group-item.issue .issue-footer { font-size: 2rem; }
-.kanban-board .list-group-item.issue .issue-footer .avatar-image { cursor: pointer; }
-.kanban-board .list-group-item.issue .issue-footer .octicon {
-  /* Override the font size in .octicon */
-  font-size: 100%;
-}
-
-
+// These are/can-be outside of the app
 .popover.issue-body {
   max-width: 500px;
-}
 
-.avatar-image, /* just do it for all avatar images */
-.list-group-item.issue .avatar-image,
-.modal.issue-edit .body-avatar,
-.modal.issue-edit .avatar-image {
-  width: 2rem;
-}
-
-.markdown-format { }
-
-/*
-.issue-comment-wrapper { }
-.issue-comment { width: 100%; }
-.issue-comment-avatar { }
-
-.issue-comment-header { }
-.issue-comment-header-text { }
-
-.comment-content { }
-.comment-body { }
-*/
-
-
-/* Just make it gray so it is clear we are dragging this element */
-.is-dragging {
-  opacity: .25;
-}
-
-.topbar-nav .logoff .avatar { max-height: 40px; }
-
-/* Make sure images are scaled to fit in the modal */
-.rendered-markdown img { max-width: 100%; }
-
-.rendered-markdown.is-empty { color: #ccc; font-style: italic; }
-.rendered-markdown.is-empty::before { content: 'No Content provided.'; }
-
-/*
-.issue-comments.is-empty { color: #ccc; font-style: italic; }
-.issue-comments.is-empty::before { content: 'No Comments'; }
-
-textarea.edit-text { min-height: 5rem; max-height: 100rem; }
-*/
-
-.emoji { width: 20px; height: 20px; }
-
-.issue.is-updated,
-.issue.is-updated.list-group-item .list-group-item-heading,
-.issue.is-updated.list-group-item .list-group-item-text { background-color: #ff9; }
-
-/* When a Pull Request is not mergeable then make the background a light gray with slashes */
-.issue.is-pull-request:not(.is-mergeable) {
-  background-color: #ccc; /* Default merge conflict color when no CI status */
-  background-image: linear-gradient(to bottom left,
-    rgba(255,255,255, .8) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255,255,255, .8) 50%,
-    rgba(255,255,255, .8) 75%,
-    transparent 75%,
-    transparent);
-  background-size: 1pc 1pc;
-}
-
-/* Color the blurb icon to be gray if there is an issue */
-.issue.is-pull-request:not(.is-mergeable) .issue-footer .blurb-icon,
-.issue.is-pull-request[data-status-state='pending'] .issue-footer .blurb-icon,
-.issue.is-pull-request[data-status-state='error']   .issue-footer .blurb-icon,
-.issue.is-pull-request[data-status-state='failure'] .issue-footer .blurb-icon { color: #888; }
-
-/* Pull Request status. pending, success, error, or failure */
-.issue.is-pull-request[data-status-state='pending'] {
-  /* Animate the bar while CI is running */
-  background-color: #fcfc00;
-  -webkit-animation: progress-bar-stripes 2s linear infinite;
-  animation: progress-bar-stripes 2s linear infinite;
-  background-image: linear-gradient(to bottom left,
-    rgba(255,255,255, .9) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255,255,255, .9) 50%,
-    rgba(255,255,255, .9) 75%,
-    transparent 75%,
-    transparent);
-  background-size: 1pc 1pc;
-}
-.issue.is-pull-request[data-status-state='success'] { background-color: #6cdf44; } .issue.is-pull-request[data-status-state='error'] { background-color: #d00; }
-.issue.is-pull-request[data-status-state='failure'] { background-color: #d00; }
-
-.issue.list-group-item {
-  padding-top: 0;
-  padding-right: 0;
-  padding-bottom: 0;
-  padding-left: 1rem;
-}
-.issue.list-group-item .list-group-item-heading {
-  margin-bottom: 0;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 1rem;
-  background-color: white;
-}
-
-.issue.list-group-item .list-group-item-text {
-  background-color: white;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-bottom: 1rem;
-}
-
-/* All blurbs, not just the footer, get a pointer and link color inherits */
-.issue-blurb {
-  .blurb-context,
-  .blurb-icon { margin-right: .5rem; }
-  .blurb-icon { cursor: pointer; }
-  .blurb-number { color: inherit; }
-}
-
-.kanban-board .issue .badge {
-  max-width: 10rem;
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-}
-
-.issue .task-list {
-  font-size: 1.2rem;
-  color: #ccc;
-  vertical-align: middle;
-  padding: 0 2rem;
-}
-
-.issue .related-issues {
-  .issue-blurb {
-    color: #999;
-    font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
-    font-size: 1.5rem;
-  }
-}
-
-
-.karma-stats .karma-progress {
-  display: inline-block;
-  margin-bottom: 0;
-  width: 12rem;
-}
-
-
-.dashboard {
-
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 50rem;
-
-  .repo-item {
-    .repo-icon,
-    .repo-open-link,
-    .repo-private-label { margin-right: 1rem; }
-    .repo-updated-at {
-      color: #888;
-      &::before { content: '('; }
-      &::after  { content: ')'; }
+  // Move this into a mixin if we use it outside of popovers
+  .rendered-markdown {
+    &.is-empty {
+      color: #ccc;
+      font-style: italic;
+      &::before { content: 'No Content provided.'; }
     }
+
+    /* Make sure images are scaled to fit in the modal */
+    img { max-width: 100%; }
+
+    .emoji { width: 20px; height: 20px; }
   }
 
 }
