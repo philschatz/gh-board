@@ -226,3 +226,23 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
   margin-bottom: 0;
   width: 12rem;
 }
+
+
+.dashboard {
+
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 50rem;
+
+  .repo-item {
+    .repo-icon,
+    .repo-open-link,
+    .repo-private-label { margin-right: 1rem; }
+    .repo-updated-at {
+      color: #888;
+      &::before { content: '('; }
+      &::after  { content: ')'; }
+    }
+  }
+
+}

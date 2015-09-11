@@ -90,6 +90,7 @@ export function buildBipartiteGraph(cards) {
   return graph;
 }
 
+let cacheCardsRepoNames = null;
 let cacheCards = null;
 let cacheLastViewed = {};
 const initialTimestamp = new Date();
@@ -108,7 +109,7 @@ class IssueStore extends EventEmitter {
         this.fetchAllIssues(repoOwner, repoNames, true /*isForced*/);
       }, RELOAD_TIME);
     }
-    if (!isForced && cacheCards) {
+    if (!isForced && cacheCards && cacheCardsRepoNames === repoOwner + JSON.stringify(repoNames)) {
       console.log('potential re-render bug. Occurs when filtering');
       return Promise.resolve(cacheCards);
     }
@@ -149,6 +150,7 @@ class IssueStore extends EventEmitter {
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
       cacheCards = cards;
+      cacheCardsRepoNames = repoOwner + JSON.stringify(repoNames);
       if (isForced) {
         this.emit('change');
       }

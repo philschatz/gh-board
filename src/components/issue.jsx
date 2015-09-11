@@ -50,6 +50,13 @@ function collect(connect, monitor) {
 
 
 const IssueOrPullRequestBlurb = React.createClass({
+  onClickNumber(evt) {
+    const {card} = this.props;
+    const {repoOwner, repoName, issue} = card;
+
+    evt.stopPropagation();
+    Store.setLastViewed(repoOwner, repoName, issue.number);
+  },
   render() {
     const {card, primaryRepoName} = this.props;
     const {issue, repoOwner, repoName} = card;
@@ -92,6 +99,7 @@ const IssueOrPullRequestBlurb = React.createClass({
         <a className='blurb-number'
           target='_blank'
           href={issue.htmlUrl}
+          onClick={this.onClickNumber}
           >{multipleRepoName}#{issue.number}
         </a>
       </span>
