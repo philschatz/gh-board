@@ -40,6 +40,11 @@ class Client extends EventEmitter {
     super();
     this.LOW_RATE_LIMIT = 10;
   }
+  off() { // EventEmitter has `.on` but no matching `.off`
+    const slice = [].slice;
+    const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
+    return this.removeListener.apply(this, args);
+  }
   getCredentials() {
     return {
       token: window.localStorage.getItem('gh-token'),
