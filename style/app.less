@@ -127,7 +127,8 @@ body { background-color: #eee; }
             font-size: 2rem;
 
             // The little `[4/5]` section
-            .task-list {
+            .task-list-overview {
+              cursor: pointer;
               font-size: 1.2rem;
               color: #ccc;
               vertical-align: middle;
@@ -229,8 +230,15 @@ body { background-color: #eee; }
 
 
 // These are/can-be outside of the app
-.popover.issue-body {
+.popover {
   max-width: 500px;
+
+  // When looking at the task-list popover only show the task lists
+  &.task-list-details .rendered-markdown {
+    > :not(.task-list),
+    // also hide any child list items that do not have a checkbox
+    .task-list li:not(.task-list-item) { display: none; }
+  }
 
   // Move this into a mixin if we use it outside of popovers
   .rendered-markdown {
@@ -244,6 +252,21 @@ body { background-color: #eee; }
     img { max-width: 100%; }
 
     .emoji { width: 20px; height: 20px; }
+
+    // only apply padding to the top-most task list
+    > .task-list {
+      padding-left: 0;
+
+      .task-list-item {
+        list-style-type: none;
+
+        .task-list-item-checkbox {
+          cursor: default;
+          vertical-align: middle;
+          margin-right: .5rem;
+        }
+      }
+    }
   }
 
 }

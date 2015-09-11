@@ -186,11 +186,27 @@ let Issue = React.createClass({
     });
     let taskCounts = null;
     if (taskTotalCount) {
+      const taskListPopover = (
+        <BS.Popover id="popover-${issue.id}-task-list" className='task-list-details' title='Task List'>
+          <GithubFlavoredMarkdown
+            disableLinks={false}
+            repoOwner={repoOwner}
+            repoName={repoName}
+            text={issue.body}/>
+        </BS.Popover>
+      );
+
       taskCounts = (
-        <span className='task-list'>
-          <i className='fa fa-check-square-o'/>
-          {taskFinishedCount}/{taskTotalCount}
-        </span>
+        <BS.OverlayTrigger
+          rootClose
+          trigger={['click', 'focus']}
+          placement='bottom'
+          overlay={taskListPopover}>
+          <span className='task-list-overview'>
+            <i className='fa fa-check-square-o'/>
+            {taskFinishedCount}/{taskTotalCount}
+          </span>
+        </BS.OverlayTrigger>
       );
     }
 

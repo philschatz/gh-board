@@ -37,6 +37,7 @@ const InnerMarkdown = React.createClass({
       checkbox.type = 'checkbox';
       checkbox.disabled = true;
       checkbox.checked = checked;
+      checkbox.classList.add('task-list-item-checkbox');
       return checkbox;
     }
 
@@ -45,6 +46,8 @@ const InnerMarkdown = React.createClass({
         const textChild = listItem.firstChild;
         const checkbox = buildCheckbox(true);
 
+        listItem.classList.add('task-list-item');
+        listItem.parentNode.classList.add('task-list');
         if (textChild.nodeType === Node.TEXT_NODE) {
           // remove the `[x] ` and replace it with a disabled input box
           textChild.textContent = textChild.textContent.substring(3);
@@ -54,6 +57,8 @@ const InnerMarkdown = React.createClass({
         const textChild = listItem.firstChild;
         const checkbox = buildCheckbox(false);
 
+        listItem.classList.add('task-list-item');
+        listItem.parentNode.classList.add('task-list');
         if (textChild.nodeType === Node.TEXT_NODE) {
           // remove the `[x] ` and replace it with a disabled input box
           textChild.textContent = textChild.textContent.substring(3);
