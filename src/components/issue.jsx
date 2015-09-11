@@ -96,11 +96,13 @@ const IssueOrPullRequestBlurb = React.createClass({
           overlay={bodyPopover}>
           {icon}
         </BS.OverlayTrigger>
-        <a className='blurb-number'
+        <a className='blurb-number-link'
           target='_blank'
           href={issue.htmlUrl}
           onClick={this.onClickNumber}
-          >{multipleRepoName}#{issue.number}
+          >
+          <span className='blurb-secondary-repo'>{multipleRepoName}</span>
+          <span className='blurb-number'>{'#' + issue.number}</span>
         </a>
       </span>
     );

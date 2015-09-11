@@ -51,7 +51,7 @@ body { background-color: #eee; }
     .x-column-widths(10);
     .kanban-board-column {
       // .x-column-widths specifies the "ideal" widths but this ensures there is a minimum
-      min-width: 30rem;
+      min-width: 35rem; // make it more than 30 to account for secondary repo names.
 
       vertical-align: top;
       padding-left: 1rem;
@@ -126,6 +126,27 @@ body { background-color: #eee; }
 
             font-size: 2rem;
 
+            // Sometimes the non-primary repo name is long
+            // if so, add ellipses that expand when hovered
+            .issue-blurb {
+              .blurb-number-link {
+                .blurb-secondary-repo,
+                .blurb-number {
+                  // TODO: get the underline to show up again
+                  display: inline-block;
+                  white-space: nowrap;
+                  vertical-align: middle;
+                }
+              }
+              &:not(:hover) .blurb-number-link .blurb-secondary-repo {
+                max-width: 11rem;
+                overflow-x: hidden;
+                text-overflow: ellipsis;
+              }
+              // Chrome only underlines links with display:inline
+              .blurb-number-link:hover * { text-decoration: underline; }
+            }
+
             // The little `[4/5]` section
             .task-list-overview {
               cursor: pointer;
@@ -162,7 +183,7 @@ body { background-color: #eee; }
             .blurb-context,
             .blurb-icon { margin-right: .5rem; }
             .blurb-icon { cursor: pointer; }
-            .blurb-number { color: inherit; }
+            .blurb-number-link { color: inherit; }
           }
 
 
