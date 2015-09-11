@@ -58,7 +58,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     Store.setLastViewed(repoOwner, repoName, issue.number);
   },
   render() {
-    const {card, primaryRepoName} = this.props;
+    const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
 
     const isPullRequest = !!issue.pullRequest;
@@ -88,6 +88,7 @@ const IssueOrPullRequestBlurb = React.createClass({
 
     return (
       <span className='issue-blurb'>
+        <span className='blurb-context'>{context}</span>
         <BS.OverlayTrigger
           rootClose
           trigger={['click', 'focus']}
@@ -95,7 +96,6 @@ const IssueOrPullRequestBlurb = React.createClass({
           overlay={bodyPopover}>
           {icon}
         </BS.OverlayTrigger>
-        {' '}
         <a className='blurb-number'
           target='_blank'
           href={issue.htmlUrl}
@@ -148,6 +148,7 @@ let Issue = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = pullRequest ? pullRequest.updatedAt : issue.updatedAt;
     const isMergeable = pullRequest ? pullRequest.mergeable : false;
+    const isPullRequest = pullRequest || issue.pullRequest;
 
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);
@@ -206,9 +207,20 @@ let Issue = React.createClass({
     const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
 
-    const relatedIssues = _.map(graph.getB(graph.cardToKey(card)), (issueCard) => {
+    let relatedIssues = null;
+    let relatedPullRequests = null;
+    relatedIssues = _.map(graph.getB(graph.cardToKey(card)), (issueCard) => {
       return (
-        <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName}/>
+        <span className='related-issue'>
+          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context='fixes'/>
+        </span>
+      );
+    });
+    relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), (issueCard) => {
+      return (
+        <span className='related-issue'>
+          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context='fixed by'/>
+        </span>
       );
     });
 
@@ -218,6 +230,7 @@ let Issue = React.createClass({
       </div>,
       <div className='related-issues'>
         {relatedIssues}
+        {relatedPullRequests}
       </div>,
       <a
         key='link'

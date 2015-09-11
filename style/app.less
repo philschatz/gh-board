@@ -195,8 +195,12 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
 }
 
 /* All blurbs, not just the footer, get a pointer and link color inherits */
-.issue-blurb .blurb-icon { cursor: pointer; }
-.issue-blurb .blurb-number { color: inherit; }
+.issue-blurb {
+  .blurb-context,
+  .blurb-icon { margin-right: .5rem; }
+  .blurb-icon { cursor: pointer; }
+  .blurb-number { color: inherit; }
+}
 
 .kanban-board .issue .badge {
   max-width: 10rem;
@@ -211,14 +215,13 @@ textarea.edit-text { min-height: 5rem; max-height: 100rem; }
   padding: 0 2rem;
 }
 
-
-.issue .related-issues .issue-blurb::before { content: 'fixes '; }
-.issue .related-issues .issue-blurb {
-  color: #999;
-  font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
+.issue .related-issues {
+  .issue-blurb {
+    color: #999;
+    font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
+    font-size: 1.5rem;
+  }
 }
-.issue .related-issues .issue-blurb,
-.issue .related-issues .issue-blurb .blurb-icon { font-size: 1.5rem; }
 
 
 .karma-stats .karma-progress {

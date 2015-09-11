@@ -32,9 +32,9 @@ class BipartiteGraph {
   //   });
   //   delete this.edgesB[b];
   // }
-  // getA(a) {
-  //   return _.values(this.edgesA[a]);
-  // }
+  getA(a) {
+    return _.values(this.edgesA[a]);
+  }
   getB(b) {
     return _.values(this.edgesB[b]);
   }
