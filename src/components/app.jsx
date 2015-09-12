@@ -51,17 +51,19 @@ const KarmaWarning = React.createClass({
         if (percent >= 75) { bsStyle = 'success'; }
         else if (percent >= 40) { bsStyle = 'warning'; }
         karmaText = (
-          <span className='karma-stats'>
-            <i className='octicon octicon-mark-github'/>
-            {'API Karma Left: '}
-            <BS.ProgressBar
-              className='karma-progress'
-              title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
-              now={remaining}
-              max={limit}
-              bsStyle={bsStyle}
-              label={percent + '% (' + remaining + ')'} />
-          </span>
+          <li>
+            <span className='karma-stats'>
+              <i className='octicon octicon-cloud-download'/>
+              {' API Requests Left: '}
+              <BS.ProgressBar
+                className='karma-progress'
+                title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
+                now={remaining}
+                max={limit}
+                bsStyle={bsStyle}
+                label={percent + '% (' + remaining + ')'} />
+            </span>
+          </li>
         );
       }
     }
@@ -84,7 +86,7 @@ const KarmaWarning = React.createClass({
           {newestText}
         </BS.Nav>
         <BS.Nav right>
-          <a target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Improve the Source Code!</a>
+          <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
         </BS.Nav>
       </BS.Navbar>
     );
@@ -137,7 +139,7 @@ const App = React.createClass({
     const close = () => this.setState({ showModal: false});
 
     const brand = (
-      <Link to='viewDashboard'>Dashboard</Link>
+      <Link to='viewDashboard'><i className='octicon octicon-home'/></Link>
     );
     const filtering = _.map(FilterStore.getLabels(), (label) => {
       return (
@@ -161,28 +163,31 @@ const App = React.createClass({
     let loginButton;
     if (info) {
       loginButton = (
-        <BS.DropdownButton title={info.login}>
+        <BS.NavDropdown title={info.login}>
           <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
-        </BS.DropdownButton>
+        </BS.NavDropdown>
       );
     } else {
       loginButton = (
-        <span className='signin-and-modal'>
-          <BS.Button eventKey={1} onClick={() => this.setState({showModal: true})}>Sign In</BS.Button>
-          <LoginModal show={showModal} container={this} onHide={close}/>
-        </span>
+        <BS.NavItem className='sign-in' onClick={() => this.setState({showModal: true})}>Sign In</BS.NavItem>
       );
     }
 
     const settingsTitle = (
-      <span className='display-settings'><i className='octicon octicon-device-desktop'/>{' Settings'}</span>
+      <i className='octicon octicon-gear'/>
     );
 
     return (
       <div className={classes.join(' ')}>
-        <BS.Navbar className='topbar-nav navbar-fixed-top' brand={brand} toggleNavKey={0}>
+        <BS.Navbar className='topbar-nav' fixedTop brand={brand}>
           <BS.Nav>
-            <BS.DropdownButton title={settingsTitle}>
+            <BS.NavItem className='active-filter'>
+              {filtering}
+            </BS.NavItem>
+          </BS.Nav>
+          <BS.Nav right>
+            <BS.NavDropdown title={settingsTitle}>
+              <BS.MenuItem header>Display Settings</BS.MenuItem>
               <SettingsItem
                 onSelect={FilterStore.toggleHideUncategorized.bind(FilterStore)}
                 isChecked={FilterStore.getHideUncategorized()}
@@ -214,30 +219,26 @@ const App = React.createClass({
                 onSelect={FilterStore.setRelatedHideIssues.bind(FilterStore)}
                 isChecked={FilterStore.getRelatedHideIssues()}
                 >
-                Developer-Friendly View
+                Developer-Friendly
               </SettingsItem>
               <SettingsItem
                 onSelect={FilterStore.setRelatedHidePullRequests.bind(FilterStore)}
                 isChecked={FilterStore.getRelatedHidePullRequests()}
                 >
-                QA-Friendly View
+                QA-Friendly
               </SettingsItem>
               <SettingsItem
                 onSelect={FilterStore.setRelatedShowAll.bind(FilterStore)}
                 isChecked={FilterStore.getRelatedShowAll()}
                 >
-                Combined View
+                Combined
               </SettingsItem>
-
-            </BS.DropdownButton>
-            <span className='active-filter'>
-              {filtering}
-            </span>
-          </BS.Nav>
-          <BS.Nav right eventKey={0}>
+            </BS.NavDropdown>
             {loginButton}
           </BS.Nav>
         </BS.Navbar>
+
+        <LoginModal show={showModal} container={this} onHide={close}/>
 
         {/* Subroutes are added here */}
         <RouteHandler/>

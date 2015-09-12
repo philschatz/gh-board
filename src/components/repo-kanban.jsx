@@ -143,6 +143,8 @@ const KanbanRepo = React.createClass({
       sortedCards = filterReferencedCards(graph, sortedCards, isFilteringPullRequests);
     }
 
+    let kanbanColumnCount = 0; // Count the number of actual columns displayed
+
     const kanbanColumns = _.map(kanbanLabels, (label) => {
       // If we are filtering by a kanban column then only show that column
       // Otherwise show all columns
@@ -153,6 +155,7 @@ const KanbanRepo = React.createClass({
       // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
 
       if ((!isFilteringByColumn && (FilterStore.getShowEmptyColumns() || columnCards.length)) || (isFilteringByColumn && isFilteringByColumn.name === label.name)) {
+        kanbanColumnCount++; // Count the number of actual columns displayed
         return (
           <KanbanColumn
             label={label}
@@ -175,7 +178,7 @@ const KanbanRepo = React.createClass({
     // );
 
     return (
-      <BS.Grid className='kanban-board' data-column-count={kanbanColumns.length}>
+      <BS.Grid className='kanban-board' data-column-count={kanbanColumnCount}>
         <BS.Row>
           {kanbanColumns}
           {/* addCardList */}

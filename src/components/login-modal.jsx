@@ -46,7 +46,7 @@ export default React.createClass({
           <div className='github-token-instructions'>
             To create a GitHub token:
             <ol>
-              <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new</a></li>
+              <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new{' '}<i className='octicon octicon-link-external'/></a></li>
               <li>Provide a descriptive title (like "gh-board") in the "Token Description"</li>
               <li>Unselect all the checkboxes to just look at public repositories</li>
                 <ul>

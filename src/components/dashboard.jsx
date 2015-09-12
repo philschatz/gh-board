@@ -25,11 +25,13 @@ const ListGroupWithMore = React.createClass({
   render() {
     const {children} = this.props;
     const {morePressedCount} = this.state;
-    const multiple = 10; // Add 10 results at a time
+    const multiple = 4; // Add 4 results at a time
     let partialChildren;
     if (morePressedCount * multiple < children.length) {
       const moreButton = (
-        <BS.ListGroupItem onClick={this.onClickMore}>more...</BS.ListGroupItem>
+        <BS.ListGroupItem onClick={this.onClickMore}>
+          {children.length - morePressedCount * multiple} more...
+        </BS.ListGroupItem>
       );
       partialChildren = children.slice(0, morePressedCount * multiple);
       partialChildren.push(moreButton);
@@ -155,23 +157,22 @@ const Dashboard = React.createClass({
           <i className='org-icon octicon octicon-organization'/>
           {' '}
           {repoOwner}
-          {' (' + sortedRepos.length + ')'}
         </span>
       );
 
       return (
-        <BS.Panel key={repoOwner} header={header} eventKey={index}>
-          <ListGroupWithMore>
-            {sortedRepoNodes}
-          </ListGroupWithMore>
-        </BS.Panel>
+        <BS.Col md={6}>
+          <BS.Panel key={repoOwner} header={header} eventKey={index}>
+            <ListGroupWithMore>
+              {sortedRepoNodes}
+            </ListGroupWithMore>
+          </BS.Panel>
+        </BS.Col>
       );
     });
 
     return (
-      <BS.PanelGroup accordion defaultActiveKey={0}>
-        {repoOwnersNodes}
-      </BS.PanelGroup>
+          <span>{repoOwnersNodes}</span>
     );
   }
 });
@@ -212,12 +213,16 @@ const DashboardShell = React.createClass({
     );
 
     return (
-      <div className='dashboard'>
-        <BS.Panel key='example-repos' header={examplesHeader}>
-          {_.map(SAMPLE_REPOS, (props) => <RepoItem {...props}/>)}
-        </BS.Panel>
-        {myRepos}
-      </div>
+      <BS.Grid className='dashboard' data-org-count={myRepos.length}>
+        <BS.Row>
+          <BS.Col md={6}>
+            <BS.Panel key='example-repos' header={examplesHeader}>
+              {_.map(SAMPLE_REPOS, (props) => <RepoItem {...props}/>)}
+            </BS.Panel>
+          </BS.Col>
+          {myRepos}
+        </BS.Row>
+      </BS.Grid>
     );
   }
 });

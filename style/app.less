@@ -1,6 +1,10 @@
 @import '../node_modules/font-awesome/css/font-awesome.css';
 @import '../node_modules/octicons/octicons/octicons.css';
 
+.user-select(@type) {
+  -webkit-user-select: @type;
+  user-select: @type;
+}
 .x-stripes(@color; @opacity) {
   background-color: @color;
   background-image: linear-gradient(to bottom left,
@@ -14,7 +18,7 @@
   background-size: 1pc 1pc;
 }
 
-body { background-color: #eee; }
+body { background-color: #f3f3f3; }
 
 .app {
 
@@ -26,6 +30,9 @@ body { background-color: #eee; }
   // TODO: Mixin?
   .badge { cursor: pointer; }
   .avatar-image { width: 2rem; }
+
+  .topbar-nav,
+  .bottombar-nav { opacity: .9; }
 
   .topbar-nav {
     // Add a check next to settings menu items
@@ -49,11 +56,16 @@ body { background-color: #eee; }
     }
 
     .active-filter {
-      &:not(:empty)::before { content: 'Active Filter: '; }
 
-      .badge::after {
-        content: 'x';
-        padding-left: 0.5rem;
+      // &:not(:empty)::before { content: 'Active Filter: '; }
+
+      .badge {
+        margin-right: .3rem; // space between labels
+
+        &::after {
+          content: 'x';
+          padding-left: 0.5rem;
+        }
       }
     }
   }
@@ -251,9 +263,6 @@ body { background-color: #eee; }
   } /* End kanban-board */
 
   .dashboard {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 50rem;
 
     .repo-item {
       .repo-icon,
@@ -268,10 +277,16 @@ body { background-color: #eee; }
   }
 
 
-  .bottombar-nav .karma-stats .karma-progress {
+  .bottombar-nav .karma-stats {
+    padding: 15px;
     display: inline-block;
-    margin-bottom: 0;
-    width: 12rem;
+    color: #777; // from .navbar-default .navbar-nav > li > a
+
+    .karma-progress {
+      display: inline-block;
+      margin-bottom: -3px;
+      width: 20rem;
+    }
   }
 
 }
@@ -339,5 +354,72 @@ body { background-color: #eee; }
         float: none;
       }
     }
+  }
+}
+
+
+// Override bootstrap breakpoints for the nav bar on smaller screens
+.topbar-nav {
+  .container {
+
+    .navbar-header {
+      float: left;
+      margin-right: 0;
+      margin-left: 0;
+    }
+    .navbar-nav {
+      float: left;
+      margin: 0;
+
+      > li {
+        float: left;
+        > a {
+          padding-top: 15px;
+          padding-bottom: 15px;
+        }
+      }
+    }
+    .navbar-right {
+      // .pull-right();
+      float: right !important;
+      margin-right: -15px;
+    }
+
+  }
+}
+// More bootstrap overrides
+.dropdown-header {
+  .user-select(none);
+  cursor: default;
+}
+
+@media (min-width: 992px) {
+  .kanban-board[data-column-count="1"] .kanban-board-column {
+    width: 70%;
+    max-width: 1024px;
+  }
+}
+
+.sign-in a {
+  padding: 10px !important;
+  margin: 5px;
+
+  // .btn
+  font-size: 14px;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  .user-select(none);
+  border-radius: 4px;
+
+  // .btn-success
+  color: white !important;
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+
+  &:hover,
+  &:focus {
+    background-color: lighten(#5cb85c, 10%) !important; // btn-success
   }
 }
