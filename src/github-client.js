@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import EventEmitter from 'events';
 import Octo from 'octokat';
 
@@ -15,10 +16,26 @@ const cacheHandler = new class CacheHandler {
     }
   }
   get(method, path) {
-    return this.cachedETags[method + ' ' + path];
+    const ret = this.cachedETags[method + ' ' + path];
+    if (ret) {
+      const {data, linkRelations} = ret;
+      _.each(linkRelations, (value, key) => {
+        data[key] = value;
+      });
+    }
+    return ret;
   }
   add(method, path, eTag, data, status) {
-    this.cachedETags[method + ' ' + path] = {eTag, data, status};
+    const linkRelations = {};
+    // if data is an array, it contains additional link relations (to other pages)
+    if (_.isArray(data)) {
+      _.each(['next', 'previous', 'first', 'last'], (name) => {
+        const key = name + '_page_url';
+        linkRelations[key] = data[key];
+      });
+    }
+
+    this.cachedETags[method + ' ' + path] = {eTag, data, status, linkRelations};
     if (Object.keys(this.cachedETags).length > 100) {
       // stop saving. blow the storage cache because
       // stringifying JSON and saving is slow
