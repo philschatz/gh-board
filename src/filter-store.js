@@ -3,7 +3,10 @@ import {EventEmitter} from 'events';
 
 import {contains} from './helpers';
 
-let showUncategorized = true;
+let isHideUncategorized = false;
+let isShowEmptyColumns = false;
+let isTableLayout = false;
+
 let userFilter = null;
 let filteredLabels = [];
 
@@ -13,12 +16,26 @@ class Store extends EventEmitter {
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
   }
-  setShowUncategorized(flag) {
-    showUncategorized = !!flag;
+  toggleHideUncategorized() {
+    isHideUncategorized = !isHideUncategorized;
     this.emit('change');
   }
-  getShowUncategorized() {
-    return showUncategorized;
+  getHideUncategorized() {
+    return isHideUncategorized;
+  }
+  toggleShowEmptyColumns() {
+    isShowEmptyColumns = !isShowEmptyColumns;
+    this.emit('change');
+  }
+  getShowEmptyColumns() {
+    return isShowEmptyColumns;
+  }
+  toggleTableLayout() {
+    isTableLayout = !isTableLayout;
+    this.emit('change');
+  }
+  getTableLayout() {
+    return isTableLayout;
   }
   clearUser() {
     userFilter = null;

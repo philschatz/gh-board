@@ -28,6 +28,26 @@ body { background-color: #eee; }
   .avatar-image { width: 2rem; }
 
   .topbar-nav {
+    // Add a check next to settings menu items
+    .settings-item-checkbox[data-checked='true']::before {
+      // From `.octicon`
+      font: normal normal normal 16px/1 octicons;
+      display: inline-block;
+      text-decoration: none;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      // From `.octicon-check`
+      content: '\f03a';
+
+      position: absolute;
+      left: 5px;
+    }
+
     .active-filter {
       &:not(:empty)::before { content: 'Active Filter: '; }
 
@@ -48,10 +68,10 @@ body { background-color: #eee; }
       }
     }
 
-    .x-column-widths(10);
+    // .x-column-widths(10);
     .kanban-board-column {
       // .x-column-widths specifies the "ideal" widths but this ensures there is a minimum
-      min-width: 35rem; // make it more than 30 to account for secondary repo names.
+      // min-width: 35rem; // make it more than 30 to account for secondary repo names.
 
       vertical-align: top;
       padding-left: 1rem;
@@ -290,4 +310,27 @@ body { background-color: #eee; }
     }
   }
 
+}
+
+
+.app.is-table-layout {
+  .kanban-board {
+    display: table;
+
+    &::before,
+    &::after { display: none; }
+
+    > .row {
+      display: table-row;
+
+      &::before,
+      &::after { display: none; }
+
+      .kanban-board-column {
+        min-width: 30rem;
+        display: table-cell;
+        float: none;
+      }
+    }
+  }
 }

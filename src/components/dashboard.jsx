@@ -46,7 +46,7 @@ const ListGroupWithMore = React.createClass({
 
 const RepoItem = React.createClass({
   render() {
-    const {repoOwner, comment} = this.props;
+    const {repoOwner, comment, isSelected, onSelect} = this.props;
     let {repoName, repoNames} = this.props;
 
     // Example repos do not have additional information and may contain multiple repos
@@ -80,6 +80,13 @@ const RepoItem = React.createClass({
       );
     }
 
+    let multiSelectButton = null;
+    if (onSelect) {
+      multiSelectButton = (
+        <BS.Button bsSize='xs' className='multi-repo-select pull-right' active={isSelected}>Select</BS.Button>
+      );
+    }
+
     return (
       <BS.ListGroupItem key={repoName} className={classes}>
         <i className={'repo-icon octicon ' + iconClass}/>
@@ -87,6 +94,7 @@ const RepoItem = React.createClass({
         {repo.private && (<BS.Label className='repo-private-label' bsStyle='warning'>PRIVATE</BS.Label>) || null}
         {updatedAt}
         {comment}
+        {multiSelectButton}
       </BS.ListGroupItem>
     );
   }
@@ -137,6 +145,7 @@ const Dashboard = React.createClass({
             repoOwner={repoOwner}
             repoName={repoName}
             repo={repo}
+            onSelect={() => {}}
             />
         );
       });

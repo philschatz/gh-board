@@ -26,7 +26,7 @@ const KarmaWarning = React.createClass({
     NewVersionChecker.off('change', this.updateNewestVersion);
     Client.off('request', this.updateRateLimit);
   },
-  updateRateLimit(remaining, limit, method, path, data, options) {
+  updateRateLimit(remaining, limit /*, method, path, data, options */) {
     this.setState({remaining, limit});
     // Client.getOcto().rateLimit.fetch().then((rates) => {
     //   const {remaining, limit, reset} = rates.resources.core;
@@ -91,16 +91,33 @@ const KarmaWarning = React.createClass({
   }
 });
 
-const LoginButton = React.createClass({
+
+const SettingsItem = React.createClass({
+  render() {
+    const {onSelect, isChecked, children} = this.props;
+
+    return (
+      <BS.MenuItem onSelect={onSelect}>
+        <span className='settings-item-checkbox' data-checked={isChecked}>{children}</span></BS.MenuItem>
+    );
+  }
+});
+
+const App = React.createClass({
   getInitialState() {
     return {info: null, showModal: false};
   },
   componentDidMount() {
+    FilterStore.on('change', this.update);
     Client.on('changeToken', this.onChangeToken);
     this.onChangeToken();
   },
   componentWillUnmount() {
+    FilterStore.off('change', this.update);
     Client.off('changeToken', this.onChangeToken);
+  },
+  update() {
+    this.setState({});
   },
   onChangeToken() {
     CurrentUserStore.fetch()
@@ -114,43 +131,11 @@ const LoginButton = React.createClass({
     Client.setToken(null);
     CurrentUserStore.clear();
   },
+
   render() {
     const {info, showModal} = this.state;
     const close = () => this.setState({ showModal: false});
 
-    if (info) {
-      return (
-        <BS.DropdownButton id='signin-dropdown' className='logoff' title={info.login}>
-          <BS.MenuItem disabled href='https://github.com'>Signed in as <strong>{info.login}</strong></BS.MenuItem>
-          <BS.MenuItem divider/>
-          <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
-        </BS.DropdownButton>
-      );
-    } else {
-      return (
-        <span className='signin-and-modal'>
-          <BS.Button eventKey={1} onClick={() => this.setState({showModal: true})}>Sign In</BS.Button>
-          <LoginModal show={showModal} container={this} onHide={close}/>
-        </span>
-      );
-    }
-  }
-});
-
-const App = React.createClass({
-  componentDidMount() {
-    FilterStore.on('change', this.update);
-  },
-  componentWillUnmount() {
-    FilterStore.off('change', this.update);
-  },
-  changeShowUncategorized() {
-    FilterStore.setShowUncategorized(!FilterStore.getShowUncategorized());
-  },
-  update() {
-    this.setState({});
-  },
-  render() {
     const brand = (
       <Link to='viewDashboard'>Dashboard</Link>
     );
@@ -166,21 +151,63 @@ const App = React.createClass({
         <BS.Badge key='user' onClick={() => FilterStore.clearUser()}>{filterUser.login}</BS.Badge>
       );
     }
+
+    const classes = ['app'];
+    if (FilterStore.getTableLayout()) {
+      classes.push('is-table-layout');
+    }
+
+
+    let loginButton;
+    if (info) {
+      loginButton = (
+        <BS.DropdownButton title={info.login}>
+          <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
+        </BS.DropdownButton>
+      );
+    } else {
+      loginButton = (
+        <span className='signin-and-modal'>
+          <BS.Button eventKey={1} onClick={() => this.setState({showModal: true})}>Sign In</BS.Button>
+          <LoginModal show={showModal} container={this} onHide={close}/>
+        </span>
+      );
+    }
+
+    const settingsTitle = (
+      <span className='display-settings'><i className='octicon octicon-device-desktop'/>{' Settings'}</span>
+    );
+
     return (
-      <div className='app'>
+      <div className={classes.join(' ')}>
         <BS.Navbar className='topbar-nav navbar-fixed-top' brand={brand} toggleNavKey={0}>
           <BS.Nav>
-            <BS.Input
-              type='checkbox'
-              label='Show Uncategorized'
-              onChange={this.changeShowUncategorized}
-              checked={FilterStore.getShowUncategorized()}/>
+            <BS.DropdownButton title={settingsTitle}>
+              <SettingsItem
+                onSelect={FilterStore.toggleHideUncategorized.bind(FilterStore)}
+                isChecked={FilterStore.getHideUncategorized()}
+                >
+                Hide Uncategorized
+              </SettingsItem>
+              <SettingsItem
+                onSelect={FilterStore.toggleShowEmptyColumns.bind(FilterStore)}
+                isChecked={FilterStore.getShowEmptyColumns()}
+                >
+                Show Empty Columns
+              </SettingsItem>
+              <SettingsItem
+                onSelect={FilterStore.toggleTableLayout.bind(FilterStore)}
+                isChecked={FilterStore.getTableLayout()}
+                >
+                Use Table Layout
+              </SettingsItem>
+            </BS.DropdownButton>
             <span className='active-filter'>
               {filtering}
             </span>
           </BS.Nav>
           <BS.Nav right eventKey={0}>
-            <LoginButton/>
+            {loginButton}
           </BS.Nav>
         </BS.Navbar>
 

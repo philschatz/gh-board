@@ -150,7 +150,6 @@ let Issue = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = pullRequest ? pullRequest.updatedAt : issue.updatedAt;
     const isMergeable = pullRequest ? pullRequest.mergeable : false;
-    const isPullRequest = pullRequest || issue.pullRequest;
 
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);

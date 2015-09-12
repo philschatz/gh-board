@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
+import * as BS from 'react-bootstrap';
 
 import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../helpers';
 import {Store, filterCards, buildBipartiteGraph} from '../issue-store';
@@ -34,14 +35,14 @@ const KanbanColumn = React.createClass({
     });
 
     return (
-      <td key={label.name} className='kanban-board-column'>
+      <BS.Col key={label.name} md={4} className='kanban-board-column'>
         <IssueList
           title={kanbanLabelName(label)}
           label={label}
         >
           {issueComponents}
         </IssueList>
-      </td>
+      </BS.Col>
     );
   }
 });
@@ -110,11 +111,17 @@ const KanbanRepo = React.createClass({
     const kanbanColumns = _.map(kanbanLabels, (label) => {
       // If we are filtering by a kanban column then only show that column
       // Otherwise show all columns
-      if (!isFilteringByColumn || (isFilteringByColumn.name === label.name)) {
+      const columnCards = filterCards(sortedCards, [label]);
+
+      // Show the column when:
+      // isFilteringByColumn = label (the current column we are filtering on)
+      // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
+
+      if ((!isFilteringByColumn && (FilterStore.getShowEmptyColumns() || columnCards.length)) || (isFilteringByColumn && isFilteringByColumn.name === label.name)) {
         return (
           <KanbanColumn
             label={label}
-            cards={filterCards(sortedCards, [label])}
+            cards={columnCards}
             graph={graph}
             primaryRepoName={primaryRepoName}
           />
@@ -133,14 +140,12 @@ const KanbanRepo = React.createClass({
     // );
 
     return (
-      <table className='kanban-board' data-column-count={kanbanColumns.length}>
-        <tbody>
-          <tr>
-            {kanbanColumns}
-            {/* addCardList */}
-          </tr>
-        </tbody>
-      </table>
+      <BS.Grid className='kanban-board' data-column-count={kanbanColumns.length}>
+        <BS.Row>
+          {kanbanColumns}
+          {/* addCardList */}
+        </BS.Row>
+      </BS.Grid>
     );
   }
 });
@@ -164,7 +169,7 @@ const Repos = React.createClass({
     return ([labels, cards]) => {
 
       let allLabels;
-      if (FilterStore.getShowUncategorized()) {
+      if (!FilterStore.getHideUncategorized()) {
         const uncategorized = [{name: UNCATEGORIZED_NAME}];
         allLabels = uncategorized.concat(labels);
       } else {
@@ -195,6 +200,7 @@ const Repos = React.createClass({
       <Loadable key="${repoOwner}/${repoNames}"
         promise={Promise.all([labelsPromise, cardsPromise])}
         renderLoaded={this.renderKanbanRepos(primaryRepoName)}
+        renderError={() => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.</span>)}
       />
     );
   }
@@ -208,12 +214,6 @@ const RepoKanbanShell = React.createClass({
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
     repoNames = repoNames.split('|');
-
-    const renderError = () => {
-      return (
-        <div>Problem loading repo. Is it a valid repo? And are you connected to the internet?</div>
-      );
-    };
 
     return (
       <Repos {...this.props}
