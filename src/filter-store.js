@@ -6,6 +6,7 @@ import {contains} from './helpers';
 let isHideUncategorized = false;
 let isShowEmptyColumns = false;
 let isTableLayout = false;
+let isRelated = 1; // The "I want to focus on Issues" or "PullRequests" tri-state
 
 let userFilter = null;
 let filteredLabels = [];
@@ -36,6 +37,27 @@ class Store extends EventEmitter {
   }
   getTableLayout() {
     return isTableLayout;
+  }
+  setRelatedShowAll() {
+    isRelated = 0;
+    this.emit('change');
+  }
+  getRelatedShowAll() {
+    return isRelated === 0;
+  }
+  setRelatedHideIssues() {
+    isRelated = 1;
+    this.emit('change');
+  }
+  getRelatedHideIssues() {
+    return isRelated === 1;
+  }
+  setRelatedHidePullRequests() {
+    isRelated = 2;
+    this.emit('change');
+  }
+  getRelatedHidePullRequests() {
+    return isRelated === 2;
   }
   clearUser() {
     userFilter = null;

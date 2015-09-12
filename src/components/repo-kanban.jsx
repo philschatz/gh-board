@@ -19,6 +19,35 @@ const filterKanbanLabels = (labels) => {
 
 const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2);
 
+
+const filterReferencedCards = (graph, cards, isFilteringPullRequests) => {
+  const allPossiblyRelatedCards = {};
+  _.each(cards, (card) => {
+    // XOR
+    if (isFilteringPullRequests ? !card.issue.pullRequest : card.issue.pullRequest) {
+      allPossiblyRelatedCards[graph.cardToKey(card)] = true;
+    }
+  });
+  return _.filter(cards, (card) => {
+    // XOR
+    if (isFilteringPullRequests ? card.issue.pullRequest : !card.issue.pullRequest) {
+      // loop through all the related PR's. If one matches, remove this issue
+      const graphGet = isFilteringPullRequests ? graph.getB : graph.getA;
+      const hasVisiblePullRequest = _.filter(graphGet.bind(graph)(graph.cardToKey(card)), (otherCard) => {
+        if (allPossiblyRelatedCards[graph.cardToKey(otherCard)]) {
+          return true;
+        }
+        return false;
+      });
+      // console.log(graphGet.bind(graph)(graph.cardToKey(card)));
+      if (hasVisiblePullRequest.length) {console.log('aslkjdaslkjd', hasVisiblePullRequest.length); }
+      return !hasVisiblePullRequest.length;
+    } else {
+      return true;
+    }
+  });
+}
+
 const KanbanColumn = React.createClass({
   render() {
     const {label, cards, graph, primaryRepoName} = this.props;
@@ -102,11 +131,17 @@ const KanbanRepo = React.createClass({
     })[0];
 
     // Sort the cards by `updatedAt`
-    const sortedCards = _.sortBy(filteredCards, (card) => {
+    let sortedCards = _.sortBy(filteredCards, (card) => {
       return card.issue.updatedAt;
     });
     // Reverse so newest ones are on top
     sortedCards.reverse();
+
+    // Filter out any Issues that are associated with at least one Pull request in the list of cards
+    if (!FilterStore.getRelatedShowAll()) {
+      const isFilteringPullRequests = FilterStore.getRelatedHidePullRequests();
+      sortedCards = filterReferencedCards(graph, sortedCards, isFilteringPullRequests);
+    }
 
     const kanbanColumns = _.map(kanbanLabels, (label) => {
       // If we are filtering by a kanban column then only show that column

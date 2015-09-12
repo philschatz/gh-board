@@ -26,13 +26,14 @@ function collect(connect, monitor) {
 const IssueList = React.createClass({
   displayName: 'IssueList',
   render() {
-    const {title, label} = this.props;
+    const {title, label, children} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
 
     const header = (
       <h2 className='column-title' style={{backgroundColor: label.color}}>
         <span className='column-title-text' onClick={() => FilterStore.addLabel(label)}>{title}</span>
+        {' (' + children.length + ')'}
       </h2>
     );
 
@@ -45,7 +46,7 @@ const IssueList = React.createClass({
       <BS.Panel className={classes} header={header}>
         <BS.ListGroup fill>
           <BS.ListGroupItem key='dnd-placeholder' className='dnd-placeholder'/>
-          {this.props.children}
+          {children}
         </BS.ListGroup>
       </BS.Panel>
     );

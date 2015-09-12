@@ -201,6 +201,34 @@ const App = React.createClass({
                 >
                 Use Table Layout
               </SettingsItem>
+              <BS.MenuItem divider/>
+              <BS.MenuItem header>Viewing Mode
+                <button
+                  className='btn btn-xs btn-default'
+                  onClick={() => alert('When an Issue and Pull Request are linked (by writing "fixes #123" in the Pull Request description) the related Issue/Pull request is removed from the list.\n Developers will probably want to see the Pull Request in their board (since they created it) while QA would probably rather see the Issue (since they created it).')}
+                  >
+                  <i className='octicon octicon-question'/>
+                </button>
+              </BS.MenuItem>
+              <SettingsItem
+                onSelect={FilterStore.setRelatedHideIssues.bind(FilterStore)}
+                isChecked={FilterStore.getRelatedHideIssues()}
+                >
+                Developer-Friendly View
+              </SettingsItem>
+              <SettingsItem
+                onSelect={FilterStore.setRelatedHidePullRequests.bind(FilterStore)}
+                isChecked={FilterStore.getRelatedHidePullRequests()}
+                >
+                QA-Friendly View
+              </SettingsItem>
+              <SettingsItem
+                onSelect={FilterStore.setRelatedShowAll.bind(FilterStore)}
+                isChecked={FilterStore.getRelatedShowAll()}
+                >
+                Combined View
+              </SettingsItem>
+
             </BS.DropdownButton>
             <span className='active-filter'>
               {filtering}
