@@ -33,14 +33,12 @@ const filterReferencedCards = (graph, cards, isFilteringPullRequests) => {
     if (isFilteringPullRequests ? card.issue.pullRequest : !card.issue.pullRequest) {
       // loop through all the related PR's. If one matches, remove this issue
       const graphGet = isFilteringPullRequests ? graph.getB : graph.getA;
-      const hasVisiblePullRequest = _.filter(graphGet.bind(graph)(graph.cardToKey(card)), (otherCard) => {
+      const hasVisiblePullRequest = _.filter(graphGet.bind(graph)(graph.cardToKey(card)), ({vertex: otherCard}) => {
         if (allPossiblyRelatedCards[graph.cardToKey(otherCard)]) {
           return true;
         }
         return false;
       });
-      // console.log(graphGet.bind(graph)(graph.cardToKey(card)));
-      if (hasVisiblePullRequest.length) {console.log('aslkjdaslkjd', hasVisiblePullRequest.length); }
       return !hasVisiblePullRequest.length;
     } else {
       return true;

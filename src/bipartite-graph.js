@@ -8,12 +8,12 @@ class BipartiteGraph {
   cardToKey(card) {
     return card.repoOwner + '/' + card.repoName + '/' + card.issue.number;
   }
-  addEdge(a, b, aObj, bObj) {
+  addEdge(a, b, aObj, bObj, edgeValue) {
     if (!this.edgesA[a]) { this.edgesA[a] = {}; }
     if (!this.edgesB[b]) { this.edgesB[b] = {}; }
 
-    this.edgesA[a][b] = bObj;
-    this.edgesB[b][a] = aObj;
+    this.edgesA[a][b] = {vertex: bObj, edgeValue};
+    this.edgesB[b][a] = {vertex: aObj, edgeValue};
   }
   // removeEdge(a, b) {
   //   delete this.edgesA[a][b];

@@ -36,17 +36,19 @@ export function getTaskCounts(text) {
 }
 
 // From https://help.github.com/articles/closing-issues-via-commit-messages/
-const CLOSE_STRINGS = [
-  'close',
-  'closes',
-  'closed',
-  'fix',
-  'fixes',
-  'fixed',
-  'resolve',
-  'resolves',
-  'resolved'
-];
+export const PULL_REQUEST_ISSUE_RELATION = {
+  'close': 'closed by',
+  'closes': 'closed by',
+  'closed': 'closed by',
+  'fix': 'fixed by',
+  'fixes': 'fixed by',
+  'fixed': 'fixed by',
+  'resolve': 'resolved by',
+  'resolves': 'resolved by',
+  'resolved': 'resolved by'
+};
+
+const CLOSE_STRINGS = Object.keys(PULL_REQUEST_ISSUE_RELATION);
 
 
 // Find all links in the Issue body to other issues or Pull Requests
@@ -68,7 +70,7 @@ export function getRelatedIssues(text, repoOwner1, repoName1) {
         const prevTexts = prevNode.textContent.trimRight().split(' ');
         prevWord = prevTexts[prevTexts.length - 1].toLowerCase();
         if (CLOSE_STRINGS.indexOf(prevWord) >= 0) {
-          fixes = true;
+          fixes = prevWord;
         }
       }
       relatedIssues.push({repoOwner, repoName, number, fixes, prevWord});

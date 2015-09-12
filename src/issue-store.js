@@ -81,8 +81,8 @@ export function buildBipartiteGraph(cards) {
       // card is a Pull Request
       _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
         const otherCardPath = graph.cardToKey({repoOwner, repoName, issue: {number}});
-        if (fixes && allIssues[otherCardPath]) {
-          graph.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card);
+        if (allIssues[otherCardPath]) {
+          graph.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card, fixes);
         }
       });
     }

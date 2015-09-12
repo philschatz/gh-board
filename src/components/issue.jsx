@@ -6,7 +6,7 @@ import { DragSource } from 'react-dnd';
 import {KANBAN_LABEL} from '../helpers';
 import {Store} from '../issue-store';
 import {FilterStore} from '../filter-store';
-import {getTaskCounts} from '../gfm-dom';
+import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
 import Time from './time.jsx';
@@ -216,17 +216,17 @@ let Issue = React.createClass({
 
     let relatedIssues = null;
     let relatedPullRequests = null;
-    relatedIssues = _.map(graph.getB(graph.cardToKey(card)), (issueCard) => {
+    relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
       return (
         <span className='related-issue'>
-          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context='fixes'/>
+          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
         </span>
       );
     });
-    relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), (issueCard) => {
+    relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
       return (
         <span className='related-issue'>
-          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context='fixed by'/>
+          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
         </span>
       );
     });
