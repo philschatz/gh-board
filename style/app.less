@@ -79,6 +79,8 @@ body { background-color: #eee; }
 
       /* Move the padding to the title so the color fills up the entire header */
       .kanban-issues {
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.15);
+
         .panel-heading {
           padding: 0;
 
@@ -94,9 +96,14 @@ body { background-color: #eee; }
 
         &:not(.is-over) .dnd-placeholder { display: none; }
         .dnd-placeholder {
-          background-color: #ccc;
+          background-color: #fefefe;
           height: 5rem;
           margin: 2rem;
+          border-radius: 3px;
+          border: 1px dashed #aaa;
+          text-align: center;
+          line-height: 2.5rem;
+          color: #888;
 
           &::before { content: 'Release to drop me in this list'; }
         }
