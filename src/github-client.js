@@ -20,7 +20,9 @@ const cacheHandler = new class CacheHandler {
     if (ret) {
       const {data, linkRelations} = ret;
       _.each(linkRelations, (value, key) => {
-        data[key] = value;
+        if (value) {
+          data[key] = value;
+        }
       });
     }
     return ret;
@@ -31,7 +33,9 @@ const cacheHandler = new class CacheHandler {
     if (_.isArray(data)) {
       _.each(['next', 'previous', 'first', 'last'], (name) => {
         const key = name + '_page_url';
-        linkRelations[key] = data[key];
+        if (data[key]) {
+          linkRelations[key] = data[key];
+        }
       });
     }
 
