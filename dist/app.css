@@ -7231,6 +7231,10 @@ body {
 .app .kanban-board .kanban-board-column .kanban-issues .issue.is-pull-request[data-status-state='failure'] {
   background-color: #d00;
 }
+.app .dashboard .example-repo-input {
+  width: 100px;
+  display: inline;
+}
 .app .dashboard .repo-item .repo-icon,
 .app .dashboard .repo-item .repo-open-link,
 .app .dashboard .repo-item .repo-private-label {
@@ -7249,6 +7253,10 @@ body {
   padding: 15px;
   display: inline-block;
   color: #777;
+  cursor: default;
+}
+.app .bottombar-nav .karma-stats:not(.is-karma-low):not(:hover) .reset-at {
+  display: none;
 }
 .app .bottombar-nav .karma-stats .karma-progress {
   display: inline-block;
@@ -7335,6 +7343,9 @@ body {
   user-select: none;
   cursor: default;
 }
+.btn.btn-link {
+  padding: 0;
+}
 @-webkit-keyframes icon-spin {
   0% {
     -webkit-transform: rotate(0deg);
@@ -7355,7 +7366,7 @@ body {
     transform: rotate(359deg);
   }
 }
-i.spin {
+i.icon-spin {
   -webkit-animation: icon-spin 2s infinite linear;
   animation: icon-spin 2s infinite linear;
 }
