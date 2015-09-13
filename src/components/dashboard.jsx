@@ -88,7 +88,7 @@ const RepoItem = React.createClass({
     let multiSelectButton = null;
     if (onSelect) {
       multiSelectButton = (
-        <BS.Button bsSize='xs' className='multi-repo-select pull-right' active={isSelected}>Select</BS.Button>
+        <BS.Button bsSize='xs' className='multi-repo-select pull-right' active={isSelected} onClick={onSelect}>Select</BS.Button>
       );
     }
 
@@ -101,6 +101,81 @@ const RepoItem = React.createClass({
         {comment}
         {multiSelectButton}
       </BS.ListGroupItem>
+    );
+  }
+});
+
+const RepoGroup = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
+  getInitialState() {
+    return {selectedRepos: {}};
+  },
+  toggleSelect(repoName) {
+    return () => {
+      const {selectedRepos} = this.state;
+      if (selectedRepos[repoName]) {
+        delete selectedRepos[repoName];
+      } else {
+        selectedRepos[repoName] = true;
+      }
+      this.setState({selectedRepos});
+      // this.forceUpdate(); // since we are modifying hte object directly
+    };
+  },
+  goToBoard() {
+    const {repoOwner} = this.props;
+    const {selectedRepos} = this.state;
+    const repoNames = Object.keys(selectedRepos).join('|');
+    this.context.router.transitionTo('viewBoard', {repoOwner, repoNames});
+  },
+  render() {
+    let {repoOwner, repos, index} = this.props;
+    const {selectedRepos} = this.state;
+    repos = _.sortBy(repos, ({pushedAt: repoUpdatedAt}) => {
+      return repoUpdatedAt;
+    });
+    repos.reverse();
+
+    const sortedRepoNodes = _.map(repos, (repo) => {
+      const repoName = repo.name;
+
+      return (
+        <RepoItem
+          repoOwner={repoOwner}
+          repoName={repoName}
+          repo={repo}
+          isSelected={selectedRepos[repoName]}
+          onSelect={this.toggleSelect(repoName)}
+          />
+      );
+    });
+
+    let viewBoard = null;
+    if (Object.keys(selectedRepos).length) {
+      viewBoard = (
+        <BS.Button className='pull-right' bsStyle='primary' bsSize='xs' onClick={this.goToBoard}>View Board</BS.Button>
+      );
+    }
+
+    const header = (
+      <span className='org-header'>
+        <i className='org-icon octicon octicon-organization'/>
+        {' '}
+        {repoOwner}
+        {viewBoard}
+      </span>
+    );
+
+    return (
+      <BS.Col md={6}>
+        <BS.Panel key={repoOwner} header={header} eventKey={index}>
+          <ListGroupWithMore>
+            {sortedRepoNodes}
+          </ListGroupWithMore>
+        </BS.Panel>
+      </BS.Col>
     );
   }
 });
@@ -136,42 +211,10 @@ const Dashboard = React.createClass({
 
 
     const repoOwnersNodes = _.map(sortedRepoOwners, ({repoOwner, updatedAt}, index) => {
-      let sortedRepos = reposByOwner[repoOwner];
-      sortedRepos = _.sortBy(sortedRepos, ({pushedAt: repoUpdatedAt}) => {
-        return repoUpdatedAt;
-      });
-      sortedRepos.reverse();
-
-      const sortedRepoNodes = _.map(sortedRepos, (repo) => {
-        const repoName = repo.name;
-
-        return (
-          <RepoItem
-            repoOwner={repoOwner}
-            repoName={repoName}
-            repo={repo}
-            onSelect={() => {}}
-            />
-        );
-      });
-
-      const header = (
-        <span className='org-header'>
-          <i className='org-icon octicon octicon-organization'/>
-          {' '}
-          {repoOwner}
-        </span>
-      );
-
+      const groupRepos = reposByOwner[repoOwner];
       return (
-        <BS.Col md={6}>
-          <BS.Panel key={repoOwner} header={header} eventKey={index}>
-            <ListGroupWithMore>
-              {sortedRepoNodes}
-            </ListGroupWithMore>
-          </BS.Panel>
-        </BS.Col>
-      );
+        <RepoGroup repoOwner={repoOwner} repos={groupRepos} index={index}/>
+      )
     });
 
     return (
