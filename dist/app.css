@@ -7031,6 +7031,9 @@ body {
 .app .badge {
   cursor: pointer;
 }
+.app .badge.is-light {
+  color: black;
+}
 .app .avatar-image {
   width: 2rem;
 }
@@ -7052,6 +7055,18 @@ body {
   content: '\F03A';
   position: absolute;
   left: 5px;
+}
+.app .topbar-nav .repo-links {
+  padding-top: 15px;
+  padding-bottom: 15px;
+  display: inline-block;
+}
+.app .topbar-nav .repo-links .repo-owner {
+  padding-right: .5rem;
+}
+.app .topbar-nav .repo-links .repo-name {
+  padding-left: .5rem;
+  padding-right: .5rem;
 }
 .app .topbar-nav .active-filter .badge {
   margin-right: .3rem;
@@ -7309,6 +7324,7 @@ body {
 .topbar-nav .container .navbar-nav > li > a {
   padding-top: 15px;
   padding-bottom: 15px;
+  display: inline-block;
 }
 .topbar-nav .container .navbar-right {
   float: right !important;
