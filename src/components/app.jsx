@@ -106,6 +106,9 @@ const SettingsItem = React.createClass({
 });
 
 const App = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
   getInitialState() {
     return {info: null, showModal: false};
   },
@@ -135,6 +138,11 @@ const App = React.createClass({
   },
 
   render() {
+    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    if (repoNames) {
+      repoNames = repoNames.split('|');
+    }
+
     const {info, showModal} = this.state;
     const close = () => this.setState({ showModal: false});
 
@@ -177,10 +185,18 @@ const App = React.createClass({
       <i className='octicon octicon-gear'/>
     );
 
+    let repoInfo = null;
+    if (!filtering.length && repoOwner) {
+      repoInfo = (
+        <BS.NavItem>{repoOwner}{' / '}{repoNames.join(' & ')}</BS.NavItem>
+      );
+    }
+
     return (
       <div className={classes.join(' ')}>
         <BS.Navbar className='topbar-nav' fixedTop brand={brand}>
           <BS.Nav>
+            {repoInfo}
             <BS.NavItem className='active-filter'>
               {filtering}
             </BS.NavItem>
