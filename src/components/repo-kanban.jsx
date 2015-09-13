@@ -235,6 +235,7 @@ const Repos = React.createClass({
     return (
       <Loadable key="${repoOwner}/${repoNames}"
         promise={Promise.all([labelsPromise, cardsPromise])}
+        loadingText='Loading GitHub Issues and Pull Requests...'
         renderLoaded={this.renderKanbanRepos(primaryRepoName)}
         renderError={() => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.</span>)}
       />

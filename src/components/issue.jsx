@@ -204,7 +204,7 @@ let Issue = React.createClass({
           placement='bottom'
           overlay={taskListPopover}>
           <span className='task-list-overview'>
-            <i className='fa fa-check-square-o'/>
+            <i className='octicon octicon-checklist'/>
             {taskFinishedCount}/{taskTotalCount}
           </span>
         </BS.OverlayTrigger>

@@ -28,7 +28,6 @@
   },
   "dependencies": {
     "bootstrap": "^3.3.4",
-    "font-awesome": "^4.3.0",
     "gfm-linkify": "^0.1.0",
     "moment": "2.10.3",
     "octicons": "git://github.com/github/octicons#v3.1.0",

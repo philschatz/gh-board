@@ -202,7 +202,12 @@ const DashboardShell = React.createClass({
       fetchAll(Client.getOcto().user.repos.fetch)
       .then((allRepos) => this.setState({repos: allRepos}))
       .then(null, () => this.setState({repos: []}));
-      myRepos = 'Loading...';
+      myRepos = (
+        <span className='custom-loading'>
+          <i className='octicon octicon-sync spin'/>
+          {' Loading List of Repositories...'}
+        </span>
+      );
     }
 
     const examplesHeader = (

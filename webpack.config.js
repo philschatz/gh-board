@@ -17,7 +17,7 @@ var config = {
       './src/index.js'
     ],
     output: {
-        path: './dist',
+        path: __dirname + '/dist',
         publicPath: '/dist/',
         filename: 'bundle.js'
     },
