@@ -92,7 +92,7 @@ const RepoItem = React.createClass({
     return (
       <BS.ListGroupItem key={repoName} className={classes}>
         <i className={'repo-icon octicon ' + iconClass}/>
-        <Link className='repo-open-link' to='viewRepo' params={{repoOwner, repoNames}}>{repoName}</Link>
+        <Link className='repo-open-link' to='viewBoard' params={{repoOwner, repoNames}}>{repoName}</Link>
         {repo.private && (<BS.Label className='repo-private-label' bsStyle='warning'>PRIVATE</BS.Label>) || null}
         {updatedAt}
         {comment}
