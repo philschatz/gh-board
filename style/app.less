@@ -28,7 +28,10 @@ body { background-color: #f3f3f3; }
 
   // Styles for the whole app (no matter where they occur)
   // TODO: Mixin?
-  .badge { cursor: pointer; }
+  .badge {
+    cursor: pointer;
+    &.is-light { color: black; }
+  }
   .avatar-image { width: 2rem; }
 
   .topbar-nav,
