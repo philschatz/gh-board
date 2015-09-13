@@ -278,6 +278,11 @@ body { background-color: #f3f3f3; }
 
   .dashboard {
 
+    .example-repo-input {
+      width: 100px;
+      display: inline;
+    }
+
     .repo-item {
       .repo-icon,
       .repo-open-link,
@@ -295,6 +300,11 @@ body { background-color: #f3f3f3; }
     padding: 15px;
     display: inline-block;
     color: #777; // from .navbar-default .navbar-nav > li > a
+    cursor: default;
+
+    &:not(:hover) .reset-at {
+      display: none;
+    }
 
     .karma-progress {
       display: inline-block;
@@ -407,7 +417,8 @@ body { background-color: #f3f3f3; }
   .user-select(none);
   cursor: default;
 }
-
+// buttons made to look like links have extra padding
+.btn.btn-link { padding: 0; }
 
 @-webkit-keyframes icon-spin {
   0% {
@@ -429,7 +440,7 @@ body { background-color: #f3f3f3; }
     transform: rotate(359deg);
   }
 }
-i.spin {
+i.icon-spin {
   -webkit-animation: icon-spin 2s infinite linear;
   animation: icon-spin 2s infinite linear;
 }

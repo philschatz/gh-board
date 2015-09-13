@@ -1,10 +1,12 @@
-export function fetchAll(fn, args) {
+export const FETCHALL_MAX = 10;
+
+export function fetchAll(maxRequests, fn, args) {
   let acc = [];
   let p = new Promise((resolve, reject) => {
     fn(args).then((val) => {
       acc = acc.concat(val);
-      if (val.nextPage) {
-        fetchAll(val.nextPage).then((val2) => {
+      if (val.nextPage && maxRequests) {
+        fetchAll(maxRequests - 1, val.nextPage).then((val2) => {
           acc = acc.concat(val2);
           resolve(acc);
         }, reject);

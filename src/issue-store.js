@@ -5,7 +5,7 @@ import {FilterStore} from './filter-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
-import {fetchAll, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
+import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 
 const RELOAD_TIME = 30 * 1000;
 
@@ -96,6 +96,8 @@ let cacheCards = null;
 let cacheLastViewed = {};
 const initialTimestamp = new Date();
 
+let isPollingEnabled = false;
+
 class IssueStore extends EventEmitter {
   off() { // EventEmitter has `.on` but no matching `.off`
     const slice = [].slice;
@@ -106,9 +108,15 @@ class IssueStore extends EventEmitter {
     cacheCards = null;
     cacheCardsRepoNames = null;
   }
+  stopPolling() {
+    isPollingEnabled = false;
+  }
+  startPolling() {
+    isPollingEnabled = true;
+  }
   fetchAllIssues(repoOwner, repoNames, isForced) {
     // Start/keep polling
-    if (!this.polling) {
+    if (!this.polling && isPollingEnabled) {
       this.polling = setTimeout(() => {
         this.polling = null;
         this.fetchAllIssues(repoOwner, repoNames, true /*isForced*/);
@@ -120,7 +128,7 @@ class IssueStore extends EventEmitter {
     }
     const allPromises = _.map(repoNames, (repoName) => {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
-      return fetchAll(issues)
+      return fetchAll(FETCHALL_MAX, issues)
       .then((vals) => {
         // CurrentUserStore.fetch is a hack to ensure the current user is determined
         return CurrentUserStore.fetch().then(() => {

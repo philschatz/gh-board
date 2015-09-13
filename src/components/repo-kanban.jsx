@@ -254,6 +254,13 @@ const RepoKanbanShell = React.createClass({
   contextTypes: {
     router: React.PropTypes.func
   },
+  componentWillMount() {
+    // Needs to be called before `render()`
+    Store.startPolling();
+  },
+  componentWillUnmount() {
+    Store.stopPolling();
+  },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
     repoNames = repoNames.split('|');

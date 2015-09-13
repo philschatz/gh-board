@@ -14,6 +14,8 @@ import {FilterStore} from '../filter-store';
 
 import Time from './time.jsx';
 
+const RATE_LIMIT_POLLING_INTERVAL = 5 * 60 * 1000;
+
 const KarmaWarning = React.createClass({
   getInitialState() {
     return {timer: null, limit: null, remaining: null, newestVersion: null};
@@ -21,6 +23,7 @@ const KarmaWarning = React.createClass({
   componentDidMount() {
     NewVersionChecker.on('change', this.updateNewestVersion);
     Client.on('request', this.updateRateLimit);
+    this.pollRateLimit();
   },
   componentWillUnmount() {
     NewVersionChecker.off('change', this.updateNewestVersion);
@@ -28,22 +31,32 @@ const KarmaWarning = React.createClass({
   },
   updateRateLimit(remaining, limit /*, method, path, data, options */) {
     this.setState({remaining, limit});
-    // Client.getOcto().rateLimit.fetch().then((rates) => {
-    //   const {remaining, limit, reset} = rates.resources.core;
-    //   this.setState({remaining, limit, reset});
-    // });
   },
   updateNewestVersion(newestVersion) {
     this.setState({newestVersion});
+  },
+  pollRateLimit() {
+    Client.getOcto().rateLimit.fetch().then((rates) => {
+      let {remaining, limit, reset} = rates.resources.core;
+      reset = new Date(reset * 1000);
+      this.setState({remaining, limit, reset});
+      setTimeout(this.pollRateLimit, RATE_LIMIT_POLLING_INTERVAL);
+    });
   },
   render() {
     const {remaining, limit, reset, newestVersion} = this.state;
     let karmaText;
     let resetText;
+    if (reset) {
+      resetText = (
+        <span className='reset-at'>Resets <Time dateTime={reset}/></span>
+      );
+    }
+
     if (limit) {
       if (remaining / limit < .2) {
         karmaText = (
-          <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in.</BS.Button>
+          <BS.Button bsStyle='warning' bsSize='sm'>{remaining} / {limit}. Sign In to get rid of this. {resetText}</BS.Button>
         );
       } else {
         const percent = Math.floor(remaining * 1000 / limit) / 10;
@@ -51,27 +64,17 @@ const KarmaWarning = React.createClass({
         if (percent >= 75) { bsStyle = 'success'; }
         else if (percent >= 40) { bsStyle = 'warning'; }
         karmaText = (
-          <li>
-            <span className='karma-stats'>
-              <i className='octicon octicon-cloud-download'/>
-              {' API Requests Left: '}
-              <BS.ProgressBar
-                className='karma-progress'
-                title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
-                now={remaining}
-                max={limit}
-                bsStyle={bsStyle}
-                label={percent + '% (' + remaining + ')'} />
-            </span>
-          </li>
+          <BS.ProgressBar
+            className='karma-progress'
+            title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
+            now={remaining}
+            max={limit}
+            bsStyle={bsStyle}
+            label={percent + '% (' + remaining + ')'} />
         );
       }
     }
-    if (reset) {
-      resetText = (
-        <span>Resets <Time dateTime={new Date(reset * 1000)}/></span>
-      );
-    }
+
     let newestText = null;
     if (newestVersion) {
       newestText = (
@@ -81,8 +84,14 @@ const KarmaWarning = React.createClass({
     return (
       <BS.Navbar fixedBottom className='bottombar-nav'>
         <BS.Nav>
-          {karmaText}
-          {resetText}
+          <li>
+            <span className='karma-stats'>
+              <i className='octicon octicon-cloud-download' title='GitHub API'/>
+              {' API Requests Left: '}
+              {karmaText}
+              {resetText}
+            </span>
+          </li>
           {newestText}
         </BS.Nav>
         <BS.Nav right>
