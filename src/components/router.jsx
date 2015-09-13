@@ -10,7 +10,7 @@ const routes = (
   <Route name='app' path='/' handler={App}>
     <Redirect from='/' to='viewDashboard' />
     <Route name='viewDashboard' path='/dashboard' handler={Dashboard}/>
-    <Route name='viewRepo' path='/r/:repoOwner/:repoNames' handler={RepoKanban}/>
+    <Route name='viewBoard' path='/r/:repoOwner/:repoNames' handler={RepoKanban}/>
   </Route>
 );
 

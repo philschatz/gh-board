@@ -105,7 +105,10 @@ const SettingsItem = React.createClass({
   }
 });
 
-const App = React.createClass({
+const AppNav = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
   getInitialState() {
     return {info: null, showModal: false};
   },
@@ -133,8 +136,12 @@ const App = React.createClass({
     Client.setToken(null);
     CurrentUserStore.clear();
   },
-
   render() {
+    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    if (repoNames) {
+      repoNames = repoNames.split('|');
+    }
+
     const {info, showModal} = this.state;
     const close = () => this.setState({ showModal: false});
 
@@ -154,12 +161,6 @@ const App = React.createClass({
       );
     }
 
-    const classes = ['app'];
-    if (FilterStore.getTableLayout()) {
-      classes.push('is-table-layout');
-    }
-
-
     let loginButton;
     if (info) {
       loginButton = (
@@ -177,10 +178,37 @@ const App = React.createClass({
       <i className='octicon octicon-gear'/>
     );
 
+    let repoInfo = null;
+    if (!filtering.length && repoOwner) {
+      let repoNameItems;
+      if (repoNames.length === 1) {
+        repoNameItems = (
+          <span className='repo-name'>{repoNames[0]}</span>
+        );
+      } else {
+        repoNameItems = _.map(repoNames, (repoName, index) => {
+          return (
+            <span className='repo-name-wrap'>
+              {index !== 0 && '&' || null}{/* Put an & between repo names */}
+              <Link className='repo-name' to='viewBoard' params={{repoOwner, repoNames: repoName}}>{repoName}</Link>
+            </span>
+          );
+        });
+      }
+      repoInfo = (
+        <li className='repo-links'>
+          <span className='repo-owner'>{repoOwner}</span>
+          {'/'}
+          {repoNameItems}
+        </li>
+      );
+    }
+
     return (
-      <div className={classes.join(' ')}>
+      <div className='app-nav'>
         <BS.Navbar className='topbar-nav' fixedTop brand={brand}>
           <BS.Nav>
+            {repoInfo}
             <BS.NavItem className='active-filter'>
               {filtering}
             </BS.NavItem>
@@ -237,12 +265,26 @@ const App = React.createClass({
             {loginButton}
           </BS.Nav>
         </BS.Navbar>
-
         <LoginModal show={showModal} container={this} onHide={close}/>
+      </div>
+    );
+  }
 
+
+});
+
+const App = React.createClass({
+  render() {
+    const classes = ['app'];
+    if (FilterStore.getTableLayout()) {
+      classes.push('is-table-layout');
+    }
+
+    return (
+      <div className={classes.join(' ')}>
+        <AppNav/>
         {/* Subroutes are added here */}
         <RouteHandler/>
-
         <KarmaWarning/>
       </div>
     );

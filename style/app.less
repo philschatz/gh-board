@@ -28,7 +28,10 @@ body { background-color: #f3f3f3; }
 
   // Styles for the whole app (no matter where they occur)
   // TODO: Mixin?
-  .badge { cursor: pointer; }
+  .badge {
+    cursor: pointer;
+    &.is-light { color: black; }
+  }
   .avatar-image { width: 2rem; }
 
   .topbar-nav,
@@ -53,6 +56,21 @@ body { background-color: #f3f3f3; }
 
       position: absolute;
       left: 5px;
+    }
+
+
+    .repo-links {
+      padding-top: 15px;
+      padding-bottom: 15px;
+      display: inline-block;
+
+      .repo-owner {
+        padding-right: .5rem;
+      }
+      .repo-name {
+        padding-left: .5rem;
+        padding-right: .5rem;
+      }
     }
 
     .active-filter {
@@ -372,6 +390,7 @@ body { background-color: #f3f3f3; }
         > a {
           padding-top: 15px;
           padding-bottom: 15px;
+          display: inline-block;
         }
       }
     }
