@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
 import {CurrentUserStore} from './user-store';
+import {FilterStore} from './filter-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
@@ -101,6 +102,10 @@ class IssueStore extends EventEmitter {
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
   }
+  clearCacheCards() {
+    cacheCards = null;
+    cacheCardsRepoNames = null;
+  }
   fetchAllIssues(repoOwner, repoNames, isForced) {
     // Start/keep polling
     if (!this.polling) {
@@ -122,7 +127,7 @@ class IssueStore extends EventEmitter {
           return _.map(vals, (issue) => {
             // If this is a Pull Request fetch the data and the CI status.
             // Add the promise to the card
-            if (issue.pullRequest) {
+            if (issue.pullRequest && FilterStore.getShowPullRequestData()) {
               const fn = () => {
                 if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
                   return Promise.resolve({});

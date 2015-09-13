@@ -7,6 +7,7 @@ let isHideUncategorized = false;
 let isShowEmptyColumns = false;
 let isTableLayout = false;
 let isRelated = 1; // The "I want to focus on Issues" or "PullRequests" tri-state
+let isShowPullRequestData = false; // By default (anon users) this is unchecked. Gets checked when user logs in
 
 let userFilter = null;
 let filteredLabels = [];
@@ -58,6 +59,20 @@ class Store extends EventEmitter {
   }
   getRelatedHidePullRequests() {
     return isRelated === 2;
+  }
+  toggleShowPullRequestData() {
+    isShowPullRequestData = !isShowPullRequestData;
+    this.emit('change');
+    this.emit('change:showPullRequestData', isShowPullRequestData);
+  }
+  setShowPullRequestData() {
+    // The App does this when we verify the user is logged in
+    isShowPullRequestData = true;
+    this.emit('change');
+    this.emit('change:showPullRequestData', isShowPullRequestData);
+  }
+  getShowPullRequestData() {
+    return isShowPullRequestData;
   }
   clearUser() {
     userFilter = null;

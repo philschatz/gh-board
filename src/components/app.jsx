@@ -127,6 +127,11 @@ const AppNav = React.createClass({
   onChangeToken() {
     CurrentUserStore.fetch()
     .then((info) => {
+      // TODO: when anonymous, getting the current user should be an error.
+      // probably a bug in CurrentUserStore
+      if (info) {
+        FilterStore.setShowPullRequestData();
+      }
       this.setState({info});
     }).catch(() => {
       this.setState({info: null});
@@ -260,6 +265,14 @@ const AppNav = React.createClass({
                 isChecked={FilterStore.getRelatedShowAll()}
                 >
                 Combined
+              </SettingsItem>
+              <BS.MenuItem divider/>
+              <BS.MenuItem header>GitHub API Settings</BS.MenuItem>
+              <SettingsItem
+                onSelect={FilterStore.toggleShowPullRequestData.bind(FilterStore)}
+                isChecked={FilterStore.getShowPullRequestData()}
+                >
+                Show More Pull Request Info
               </SettingsItem>
             </BS.NavDropdown>
             {loginButton}
