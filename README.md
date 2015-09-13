@@ -1,4 +1,4 @@
-# Kanban frontend to GitHub Issues
+# Kanban frontend to GitHub Issues [![gh-board](https://img.shields.io/github/issues/philschatz/gh-board.svg?label=Issues%20%28gh-board%29)](https://philschatz.com/gh-board/)
 
 
 ![screenshot](https://cloud.githubusercontent.com/assets/253202/9746214/a9242c34-5644-11e5-8a83-5590d03398ab.png)
