@@ -14,6 +14,8 @@ import {FilterStore} from '../filter-store';
 
 import Time from './time.jsx';
 
+const RATE_LIMIT_POLLING_INTERVAL = 30 * 60 * 1000;
+
 const KarmaWarning = React.createClass({
   getInitialState() {
     return {timer: null, limit: null, remaining: null, newestVersion: null};
@@ -21,6 +23,7 @@ const KarmaWarning = React.createClass({
   componentDidMount() {
     NewVersionChecker.on('change', this.updateNewestVersion);
     Client.on('request', this.updateRateLimit);
+    this.pollRateLimit();
   },
   componentWillUnmount() {
     NewVersionChecker.off('change', this.updateNewestVersion);
@@ -28,50 +31,53 @@ const KarmaWarning = React.createClass({
   },
   updateRateLimit(remaining, limit /*, method, path, data, options */) {
     this.setState({remaining, limit});
-    // Client.getOcto().rateLimit.fetch().then((rates) => {
-    //   const {remaining, limit, reset} = rates.resources.core;
-    //   this.setState({remaining, limit, reset});
-    // });
   },
   updateNewestVersion(newestVersion) {
     this.setState({newestVersion});
+  },
+  pollRateLimit() {
+    Client.getOcto().rateLimit.fetch().then((rates) => {
+      let {remaining, limit, reset} = rates.resources.core;
+      reset = new Date(reset * 1000);
+      this.setState({remaining, limit, reset});
+      setTimeout(this.pollRateLimit, RATE_LIMIT_POLLING_INTERVAL);
+    });
   },
   render() {
     const {remaining, limit, reset, newestVersion} = this.state;
     let karmaText;
     let resetText;
+    if (reset) {
+      resetText = (
+        <span className='reset-at'>Resets <Time dateTime={reset}/></span>
+      );
+    }
+
+    let isKarmaLow = true;
     if (limit) {
       if (remaining / limit < .2) {
         karmaText = (
-          <BS.Button bsStyle='warning'>Running low on GitHub Karma: {remaining} / {limit} Either slow down or log in.</BS.Button>
+          <BS.Button bsStyle='danger' bsSize='sm'>{remaining} / {limit}. Sign In to avoid this. {resetText}</BS.Button>
         );
+        resetText = null;
       } else {
+        isKarmaLow = false;
         const percent = Math.floor(remaining * 1000 / limit) / 10;
         let bsStyle = 'danger';
         if (percent >= 75) { bsStyle = 'success'; }
         else if (percent >= 40) { bsStyle = 'warning'; }
         karmaText = (
-          <li>
-            <span className='karma-stats'>
-              <i className='octicon octicon-cloud-download'/>
-              {' API Requests Left: '}
-              <BS.ProgressBar
-                className='karma-progress'
-                title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
-                now={remaining}
-                max={limit}
-                bsStyle={bsStyle}
-                label={percent + '% (' + remaining + ')'} />
-            </span>
-          </li>
+          <BS.ProgressBar
+            className='karma-progress'
+            title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
+            now={remaining}
+            max={limit}
+            bsStyle={bsStyle}
+            label={percent + '% (' + remaining + ')'} />
         );
       }
     }
-    if (reset) {
-      resetText = (
-        <span>Resets <Time dateTime={new Date(reset * 1000)}/></span>
-      );
-    }
+
     let newestText = null;
     if (newestVersion) {
       newestText = (
@@ -81,8 +87,14 @@ const KarmaWarning = React.createClass({
     return (
       <BS.Navbar fixedBottom className='bottombar-nav'>
         <BS.Nav>
-          {karmaText}
-          {resetText}
+          <li>
+            <span className={'karma-stats' + (isKarmaLow && ' is-karma-low' || '')}>
+              <i className='octicon octicon-cloud-download' title='GitHub API'/>
+              {' API Requests Left: '}
+              {karmaText}
+              {resetText}
+            </span>
+          </li>
           {newestText}
         </BS.Nav>
         <BS.Nav right>
@@ -114,11 +126,15 @@ const AppNav = React.createClass({
   },
   componentDidMount() {
     FilterStore.on('change', this.update);
+    FilterStore.on('change:showPullRequestData', this.update);
+    FilterStore.on('change:tableLayout', this.update);
     Client.on('changeToken', this.onChangeToken);
     this.onChangeToken();
   },
   componentWillUnmount() {
     FilterStore.off('change', this.update);
+    FilterStore.off('change:showPullRequestData', this.update);
+    FilterStore.off('change:tableLayout', this.update);
     Client.off('changeToken', this.onChangeToken);
   },
   update() {
@@ -127,6 +143,11 @@ const AppNav = React.createClass({
   onChangeToken() {
     CurrentUserStore.fetch()
     .then((info) => {
+      // TODO: when anonymous, getting the current user should be an error.
+      // probably a bug in CurrentUserStore
+      if (info) {
+        FilterStore.setShowPullRequestData();
+      }
       this.setState({info});
     }).catch(() => {
       this.setState({info: null});
@@ -261,6 +282,14 @@ const AppNav = React.createClass({
                 >
                 Combined
               </SettingsItem>
+              <BS.MenuItem divider/>
+              <BS.MenuItem header>GitHub API Settings</BS.MenuItem>
+              <SettingsItem
+                onSelect={FilterStore.toggleShowPullRequestData.bind(FilterStore)}
+                isChecked={FilterStore.getShowPullRequestData()}
+                >
+                Show More Pull Request Info
+              </SettingsItem>
             </BS.NavDropdown>
             {loginButton}
           </BS.Nav>
@@ -274,6 +303,15 @@ const AppNav = React.createClass({
 });
 
 const App = React.createClass({
+  componentDidMount() {
+    FilterStore.on('change:tableLayout', this.onChange);
+  },
+  componentWillMount() {
+    FilterStore.off('change:tableLayout', this.onChange);
+  },
+  onChange() {
+    this.forceUpdate();
+  },
   render() {
     const classes = ['app'];
     if (FilterStore.getTableLayout()) {

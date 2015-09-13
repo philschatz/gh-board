@@ -190,9 +190,17 @@ const Repos = React.createClass({
   displayName: 'Repos',
   componentDidMount() {
     Store.on('change', this.onChange);
+    FilterStore.on('change', this.onChange);
+    FilterStore.on('change:showPullRequestData', this.onChangeAndRefetch);
   },
   componentWillUnmount() {
     Store.off('change', this.onChange);
+    FilterStore.off('change', this.onChange);
+    FilterStore.off('change:showPullRequestData', this.onChangeAndRefetch);
+  },
+  onChangeAndRefetch() {
+    Store.clearCacheCards();
+    this.forceUpdate();
   },
   onChange() {
     this.setState({});
@@ -247,6 +255,13 @@ const RepoKanbanShell = React.createClass({
   displayName: 'RepoKanbanShell',
   contextTypes: {
     router: React.PropTypes.func
+  },
+  componentWillMount() {
+    // Needs to be called before `render()`
+    Store.startPolling();
+  },
+  componentWillUnmount() {
+    Store.stopPolling();
   },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
