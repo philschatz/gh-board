@@ -14,7 +14,7 @@ import {FilterStore} from '../filter-store';
 
 import Time from './time.jsx';
 
-const RATE_LIMIT_POLLING_INTERVAL = 5 * 60 * 1000;
+const RATE_LIMIT_POLLING_INTERVAL = 30 * 60 * 1000;
 
 const KarmaWarning = React.createClass({
   getInitialState() {
@@ -53,12 +53,15 @@ const KarmaWarning = React.createClass({
       );
     }
 
+    let isKarmaLow = true;
     if (limit) {
       if (remaining / limit < .2) {
         karmaText = (
-          <BS.Button bsStyle='warning' bsSize='sm'>{remaining} / {limit}. Sign In to get rid of this. {resetText}</BS.Button>
+          <BS.Button bsStyle='danger' bsSize='sm'>{remaining} / {limit}. Sign In to avoid this. {resetText}</BS.Button>
         );
+        resetText = null;
       } else {
+        isKarmaLow = false;
         const percent = Math.floor(remaining * 1000 / limit) / 10;
         let bsStyle = 'danger';
         if (percent >= 75) { bsStyle = 'success'; }
@@ -85,7 +88,7 @@ const KarmaWarning = React.createClass({
       <BS.Navbar fixedBottom className='bottombar-nav'>
         <BS.Nav>
           <li>
-            <span className='karma-stats'>
+            <span className={'karma-stats' + (isKarmaLow && ' is-karma-low' || '')}>
               <i className='octicon octicon-cloud-download' title='GitHub API'/>
               {' API Requests Left: '}
               {karmaText}
@@ -123,11 +126,15 @@ const AppNav = React.createClass({
   },
   componentDidMount() {
     FilterStore.on('change', this.update);
+    FilterStore.on('change:showPullRequestData', this.update);
+    FilterStore.on('change:tableLayout', this.update);
     Client.on('changeToken', this.onChangeToken);
     this.onChangeToken();
   },
   componentWillUnmount() {
     FilterStore.off('change', this.update);
+    FilterStore.off('change:showPullRequestData', this.update);
+    FilterStore.off('change:tableLayout', this.update);
     Client.off('changeToken', this.onChangeToken);
   },
   update() {
@@ -296,6 +303,15 @@ const AppNav = React.createClass({
 });
 
 const App = React.createClass({
+  componentDidMount() {
+    FilterStore.on('change:tableLayout', this.onChange);
+  },
+  componentWillMount() {
+    FilterStore.off('change:tableLayout', this.onChange);
+  },
+  onChange() {
+    this.forceUpdate();
+  },
   render() {
     const classes = ['app'];
     if (FilterStore.getTableLayout()) {

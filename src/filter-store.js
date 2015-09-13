@@ -34,7 +34,7 @@ class Store extends EventEmitter {
   }
   toggleTableLayout() {
     isTableLayout = !isTableLayout;
-    this.emit('change');
+    this.emit('change:tableLayout');
   }
   getTableLayout() {
     return isTableLayout;
@@ -62,13 +62,13 @@ class Store extends EventEmitter {
   }
   toggleShowPullRequestData() {
     isShowPullRequestData = !isShowPullRequestData;
-    this.emit('change');
+    // this.emit('change');
     this.emit('change:showPullRequestData', isShowPullRequestData);
   }
   setShowPullRequestData() {
     // The App does this when we verify the user is logged in
     isShowPullRequestData = true;
-    this.emit('change');
+    // this.emit('change');
     this.emit('change:showPullRequestData', isShowPullRequestData);
   }
   getShowPullRequestData() {

@@ -190,10 +190,12 @@ const Repos = React.createClass({
   displayName: 'Repos',
   componentDidMount() {
     Store.on('change', this.onChange);
+    FilterStore.on('change', this.onChange);
     FilterStore.on('change:showPullRequestData', this.onChangeAndRefetch);
   },
   componentWillUnmount() {
     Store.off('change', this.onChange);
+    FilterStore.off('change', this.onChange);
     FilterStore.off('change:showPullRequestData', this.onChangeAndRefetch);
   },
   onChangeAndRefetch() {
