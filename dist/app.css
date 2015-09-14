@@ -7298,6 +7298,9 @@ body {
   vertical-align: middle;
   margin-right: .5rem;
 }
+.modal .anonymous-instructions [disabled] {
+  opacity: 1;
+}
 .app.is-table-layout .kanban-board {
   display: table;
 }
