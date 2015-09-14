@@ -88,7 +88,11 @@ const RepoItem = React.createClass({
     let multiSelectButton = null;
     if (onSelect) {
       multiSelectButton = (
-        <BS.Button bsSize='xs' className='multi-repo-select pull-right' active={isSelected} onClick={onSelect}>Select</BS.Button>
+        <input
+          className='pull-right'
+          type='checkbox'
+          checked={isSelected}
+          onChange={onSelect}/>
       );
     }
 
