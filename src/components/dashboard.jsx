@@ -162,9 +162,15 @@ const RepoGroup = React.createClass({
       );
     }
 
+    let orgIcon;
+    if (CurrentUserStore.getUser() && CurrentUserStore.getUser().login === repoOwner) {
+      orgIcon = 'octicon-person';
+    } else {
+      orgIcon = 'octicon-organization';
+    }
     const header = (
       <span className='org-header'>
-        <i className='org-icon octicon octicon-organization'/>
+        <i className={'org-icon octicon ' + orgIcon}/>
         {' '}
         {repoOwner}
         {viewBoard}
@@ -297,12 +303,14 @@ const ExamplesPanel = React.createClass({
 
     return (
       <BS.Panel key='example-repos' header={examplesHeader}>
-        {_.map(SAMPLE_REPOS, (props) => <RepoItem {...props}/>)}
-        <BS.ListGroupItem className='repo-item' onClick={this.onClickMore}>
-          <i className='repo-icon octicon octicon-repo'/>
-          Choose your own...
-        </BS.ListGroupItem>
-        <CustomRepoModal show={showModal} container={this} onHide={close}/>
+        <BS.ListGroup>
+          {_.map(SAMPLE_REPOS, (props) => <RepoItem {...props}/>)}
+          <BS.ListGroupItem className='repo-item' onClick={this.onClickMore}>
+            <i className='repo-icon octicon octicon-repo'/>
+            Choose your own...
+          </BS.ListGroupItem>
+          <CustomRepoModal show={showModal} container={this} onHide={close}/>
+        </BS.ListGroup>
       </BS.Panel>
     );
   }
