@@ -213,7 +213,7 @@ const Dashboard = React.createClass({
     sortedRepoOwners.reverse();
 
 
-    const repoOwnersNodes = _.map(sortedRepoOwners, ({repoOwner, updatedAt}, index) => {
+    const repoOwnersNodes = _.map(sortedRepoOwners, ({repoOwner /*,updatedAt*/}, index) => {
       const groupRepos = reposByOwner[repoOwner];
       return (
         <RepoGroup repoOwner={repoOwner} repos={groupRepos} index={index}/>
