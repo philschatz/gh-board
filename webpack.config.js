@@ -5,9 +5,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var isBuild = process.env['BUILD'];
 
 var config = {
-    devtool: 'inline-source-map',
     // devtool: '#eval-source-map',
-    debug: true,
     context: path.resolve(__dirname),
     entry: [
       // The following is added when `isBuild = falsy`
@@ -47,6 +45,8 @@ var config = {
 };
 
 if (!isBuild) {
+  config.debug = true;
+  config.devtool = 'inline-source-map';
   config.entry.unshift('webpack/hot/only-dev-server');
   config.entry.unshift('webpack-dev-server/client?http://0.0.0.0:8080');
   config.devServer.hotComponents = true;
