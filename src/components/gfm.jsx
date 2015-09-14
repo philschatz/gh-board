@@ -5,7 +5,7 @@ import linkify from 'gfm-linkify';
 
 // import Client from '../github-client';
 // import Loadable from './loadable.jsx';
-import {CurrentUserStore} from '../user-store';
+import CurrentUserStore from '../user-store';
 
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',

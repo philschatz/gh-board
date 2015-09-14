@@ -4,8 +4,8 @@ import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 
 import Client from '../github-client';
-import {CurrentUserStore} from '../user-store';
-import {Store} from '../issue-store';
+import CurrentUserStore from '../user-store';
+import IssueStore from '../issue-store';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import AsyncButton from './async-button.jsx';
 import Time from './time.jsx';

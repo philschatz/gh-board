@@ -2,7 +2,7 @@ import React from 'react';
 import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 
-import {FilterStore} from '../filter-store';
+import FilterStore from '../filter-store';
 
 const ItemTypes = {
   CARD: 'card'

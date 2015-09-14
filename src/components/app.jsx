@@ -9,8 +9,8 @@ import Client from '../github-client';
 import NewVersionChecker from '../new-version-checker';
 import LoginModal from './login-modal.jsx';
 import LabelBadge from './label-badge.jsx';
-import {CurrentUserStore} from '../user-store';
-import {FilterStore} from '../filter-store';
+import CurrentUserStore from '../user-store';
+import FilterStore from '../filter-store';
 
 import Time from './time.jsx';
 

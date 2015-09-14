@@ -4,8 +4,8 @@ import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
 import {KANBAN_LABEL} from '../helpers';
-import {Store} from '../issue-store';
-import {FilterStore} from '../filter-store';
+import IssueStore from '../issue-store';
+import FilterStore from '../filter-store';
 import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable.jsx';
 import GithubFlavoredMarkdown from './gfm.jsx';
@@ -33,7 +33,7 @@ const issueSource = {
     const {repoOwner, repoName, issue} = card;
     const dropResult = monitor.getDropResult();
 
-    Store.move(repoOwner, repoName, issue, dropResult.label);
+    IssueStore.move(repoOwner, repoName, issue, dropResult.label);
   }
 };
 
@@ -55,7 +55,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     const {repoOwner, repoName, issue} = card;
 
     evt.stopPropagation();
-    Store.setLastViewed(repoOwner, repoName, issue.number);
+    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
   },
   render() {
     const {card, primaryRepoName, context} = this.props;
@@ -125,7 +125,7 @@ let Issue = React.createClass({
     const {repoOwner, repoName, issue} = card;
 
     evt.stopPropagation();
-    Store.setLastViewed(repoOwner, repoName, issue.number);
+    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
   },
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
@@ -211,7 +211,7 @@ let Issue = React.createClass({
       );
     }
 
-    const lastViewed = Store.getLastViewed(repoOwner, repoName, issue.number);
+    const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
 
     let relatedIssues = null;

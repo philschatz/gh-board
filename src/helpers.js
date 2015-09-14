@@ -29,7 +29,5 @@ export function contains(arr, condition) {
 }
 
 // Of the form `# - ...`
-const KANBAN_LABEL = /^\d+\ -\ /;
-const UNCATEGORIZED_NAME = '999 - Uncategorized';
-
-export {KANBAN_LABEL, UNCATEGORIZED_NAME};
+export const KANBAN_LABEL = /^\d+\ -\ /;
+export const UNCATEGORIZED_NAME = '999 - Uncategorized';
