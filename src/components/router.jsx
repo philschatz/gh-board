@@ -5,12 +5,14 @@ import { Route, Redirect } from 'react-router';
 import App from './app.jsx';
 import Dashboard from './dashboard.jsx';
 import RepoKanban from './repo-kanban.jsx';
+import MergedSince from './merged-since.jsx';
 
 const routes = (
   <Route name='app' path='/' handler={App}>
     <Redirect from='/' to='viewDashboard' />
     <Route name='viewDashboard' path='/dashboard' handler={Dashboard}/>
     <Route name='viewBoard' path='/r/:repoOwner/:repoNames' handler={RepoKanban}/>
+    <Route name='viewMergedSince' path='/r/:repoOwner/:repoNames/since/:sha' handler={MergedSince}/>
   </Route>
 );
 

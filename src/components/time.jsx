@@ -35,7 +35,7 @@ export default React.createClass({
     const humanized = Moment(dateTime).fromNow();
 
     return (
-      <time dateTime={dateTime.toISOString()} className={className}>{humanized}</time>
+      <time {...this.props} dateTime={dateTime.toISOString()} className={className}>{humanized}</time>
     );
   }
 });
