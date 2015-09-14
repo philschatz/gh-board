@@ -20,7 +20,7 @@ export default React.createClass({
     this.props.onHide();
   },
   render() {
-    const {token, username, password} = Client.getCredentials();
+    const {token} = Client.getCredentials();
 
     const footer = (
       <span>

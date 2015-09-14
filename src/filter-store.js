@@ -109,5 +109,4 @@ class Store extends EventEmitter {
   }
 }
 
-const FilterStore = new Store();
-export {FilterStore};
+export default new Store();

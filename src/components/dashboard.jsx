@@ -4,8 +4,7 @@ import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 
 import Client from '../github-client';
-import {CurrentUserStore} from '../user-store';
-import {Store} from '../issue-store';
+import CurrentUserStore from '../user-store';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import AsyncButton from './async-button.jsx';
 import Time from './time.jsx';
@@ -214,11 +213,11 @@ const Dashboard = React.createClass({
     sortedRepoOwners.reverse();
 
 
-    const repoOwnersNodes = _.map(sortedRepoOwners, ({repoOwner, updatedAt}, index) => {
+    const repoOwnersNodes = _.map(sortedRepoOwners, ({repoOwner /*,updatedAt*/}, index) => {
       const groupRepos = reposByOwner[repoOwner];
       return (
         <RepoGroup repoOwner={repoOwner} repos={groupRepos} index={index}/>
-      )
+      );
     });
 
     return (
@@ -243,7 +242,6 @@ const CustomRepoModal = React.createClass({
     this.context.router.transitionTo('viewBoard', {repoOwner, repoNames: repoName});
   },
   render() {
-    const {onSelectRepo} = this.props;
     const {customRepoName} = this.state;
     // Make sure the repo contains a '/'
     const isInvalid = customRepoName && !/[^\/]\/[^\/]/.test(customRepoName);

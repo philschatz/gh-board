@@ -2,8 +2,8 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
-import {Store} from '../issue-store';
-import {CurrentUserStore} from '../user-store';
+import IssueStore from '../issue-store';
+import CurrentUserStore from '../user-store';
 import IssueComment from './issue-comment.jsx';
 import Loadable from './loadable.jsx';
 import AsyncButton from './async-button.jsx';
@@ -23,7 +23,7 @@ const IssueTitle = React.createClass({
     let {issue, repoOwner, repoName} = this.props;
     let newTitle = this.refs.title.getValue();
 
-    return Store.update(repoOwner, repoName, issue.number, {title: newTitle})
+    return IssueStore.update(repoOwner, repoName, issue.number, {title: newTitle})
     // close editing when successful
     .then(this.onCancel);
   },
@@ -70,7 +70,7 @@ export default React.createClass({
   displayName: 'IssueEditModal',
   updateLastViewed() {
     const {issue, repoOwner, repoName} = this.props;
-    Store.setLastViewed(repoOwner, repoName, issue.number);
+    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
   },
   componentDidMount() {
     this.updateLastViewed();
@@ -83,14 +83,14 @@ export default React.createClass({
   },
   onEditBody(body) {
     const {repoOwner, repoName, issue} = this.props;
-    return Store.update(repoOwner, repoName, issue.number, {body})
+    return IssueStore.update(repoOwner, repoName, issue.number, {body})
     .then(() => {
       this.setState({});
     });
   },
   onNewComment(body) {
     const {repoOwner, repoName, issue} = this.props;
-    return Store.createComment(repoOwner, repoName, issue.number, {body})
+    return IssueStore.createComment(repoOwner, repoName, issue.number, {body})
     .then(() => {
       this.setState({});
     });

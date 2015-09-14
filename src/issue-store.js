@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
-import {CurrentUserStore} from './user-store';
-import {FilterStore} from './filter-store';
+import CurrentUserStore from './user-store';
+import FilterStore from './filter-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
@@ -9,9 +9,6 @@ import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from
 
 const RELOAD_TIME = 30 * 1000;
 
-const toIssueListKey = (repoOwner, repoName) => {
-  return repoOwner + '/' + repoName + '/issues';
-};
 const toIssueKey = (repoOwner, repoName, issueNumber) => {
   return repoOwner + '/' + repoName + '/issues/' + issueNumber;
 };
@@ -123,7 +120,6 @@ class IssueStore extends EventEmitter {
       }, RELOAD_TIME);
     }
     if (!isForced && cacheCards && cacheCardsRepoNames === repoOwner + JSON.stringify(repoNames)) {
-      console.log('potential re-render bug. Occurs when filtering');
       return Promise.resolve(cacheCards);
     }
     const allPromises = _.map(repoNames, (repoName) => {
@@ -214,5 +210,4 @@ class IssueStore extends EventEmitter {
   }
 }
 
-const Store = new IssueStore();
-export {toIssueListKey, Store};
+export default new IssueStore();

@@ -1,10 +1,10 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 
-const ASYNC_UNSTARTED = Symbol('ASYNC_UNSTARTED');
-const ASYNC_RESOLVED = Symbol('ASYNC_RESOLVED');
-const ASYNC_REJECTED = Symbol('ASYNC_REJECTED');
-const ASYNC_WAITING = Symbol('ASYNC_WAITING');
+const ASYNC_UNSTARTED = 'ASYNC_UNSTARTED';
+const ASYNC_RESOLVED = 'ASYNC_RESOLVED';
+const ASYNC_REJECTED = 'ASYNC_REJECTED';
+const ASYNC_WAITING = 'ASYNC_WAITING';
 
 
 export default React.createClass({

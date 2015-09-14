@@ -44,5 +44,4 @@ class Store extends EventEmitter {
   }
 }
 
-const CurrentUserStore = new Store();
-export {CurrentUserStore};
+export default new Store();

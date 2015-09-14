@@ -9,8 +9,8 @@ import Client from '../github-client';
 import NewVersionChecker from '../new-version-checker';
 import LoginModal from './login-modal.jsx';
 import LabelBadge from './label-badge.jsx';
-import {CurrentUserStore} from '../user-store';
-import {FilterStore} from '../filter-store';
+import CurrentUserStore from '../user-store';
+import FilterStore from '../filter-store';
 
 import Time from './time.jsx';
 
@@ -225,6 +225,12 @@ const AppNav = React.createClass({
       );
     }
 
+    const settingsMenuHelp = () => {
+      /*eslint-disable no-alert */
+      alert('When an Issue and Pull Request are linked (by writing "fixes #123" in the Pull Request description) the related Issue/Pull request is removed from the list.\n Developers will probably want to see the Pull Request in their board (since they created it) while QA would probably rather see the Issue (since they created it).');
+      /*eslint-enable no-alert */
+    };
+
     return (
       <div className='app-nav'>
         <BS.Navbar className='topbar-nav' fixedTop brand={brand}>
@@ -259,7 +265,7 @@ const AppNav = React.createClass({
               <BS.MenuItem header>Viewing Mode
                 <button
                   className='btn btn-xs btn-default'
-                  onClick={() => alert('When an Issue and Pull Request are linked (by writing "fixes #123" in the Pull Request description) the related Issue/Pull request is removed from the list.\n Developers will probably want to see the Pull Request in their board (since they created it) while QA would probably rather see the Issue (since they created it).')}
+                  onClick={settingsMenuHelp}
                   >
                   <i className='octicon octicon-question'/>
                 </button>

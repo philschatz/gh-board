@@ -3,9 +3,10 @@ import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
 import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../helpers';
-import {Store, filterCards, buildBipartiteGraph} from '../issue-store';
-import {FilterStore} from '../filter-store';
-import {CurrentUserStore} from '../user-store';
+import IssueStore from '../issue-store';
+import {filterCards, buildBipartiteGraph} from '../issue-store';
+import FilterStore from '../filter-store';
+import CurrentUserStore from '../user-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
@@ -45,7 +46,7 @@ const filterReferencedCards = (graph, cards, isFilteringPullRequests) => {
       return true;
     }
   });
-}
+};
 
 const KanbanColumn = React.createClass({
   render() {
@@ -101,7 +102,7 @@ const KanbanRepo = React.createClass({
   //     const color = 'cccccc';
   //
   //     // Add the label and re-render
-  //     Store.createLabel(repoOwner, repoName, {name, color})
+  //     IssueStore.createLabel(repoOwner, repoName, {name, color})
   //     .then(() => {
   //       // Shortcut: Add the label to the list locally w/o refetching
   //       onLabelsChanged();
@@ -113,7 +114,7 @@ const KanbanRepo = React.createClass({
     const close = () => {
       isAlreadyShowedAnonymousModal = true;
       this.setState({ showModal: false});
-    }
+    };
     let showModal;
     if (CurrentUserStore.getUser()) {
       showModal = false;
@@ -220,17 +221,17 @@ const KanbanRepo = React.createClass({
 const Repos = React.createClass({
   displayName: 'Repos',
   componentDidMount() {
-    Store.on('change', this.onChange);
+    IssueStore.on('change', this.onChange);
     FilterStore.on('change', this.onChange);
     FilterStore.on('change:showPullRequestData', this.onChangeAndRefetch);
   },
   componentWillUnmount() {
-    Store.off('change', this.onChange);
+    IssueStore.off('change', this.onChange);
     FilterStore.off('change', this.onChange);
     FilterStore.off('change:showPullRequestData', this.onChangeAndRefetch);
   },
   onChangeAndRefetch() {
-    Store.clearCacheCards();
+    IssueStore.clearCacheCards();
     this.forceUpdate();
   },
   onChange() {
@@ -269,7 +270,7 @@ const Repos = React.createClass({
     const {repoOwner, repoNames} = this.props;
     const primaryRepoName = repoNames[0];
     const labelsPromise = Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch();
-    const cardsPromise = Store.fetchAllIssues(repoOwner, repoNames);
+    const cardsPromise = IssueStore.fetchAllIssues(repoOwner, repoNames);
 
     return (
       <Loadable key="${repoOwner}/${repoNames}"
@@ -289,10 +290,10 @@ const RepoKanbanShell = React.createClass({
   },
   componentWillMount() {
     // Needs to be called before `render()`
-    Store.startPolling();
+    IssueStore.startPolling();
   },
   componentWillUnmount() {
-    Store.stopPolling();
+    IssueStore.stopPolling();
   },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
