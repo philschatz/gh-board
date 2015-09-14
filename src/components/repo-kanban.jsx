@@ -46,7 +46,7 @@ const filterReferencedCards = (graph, cards, isFilteringPullRequests) => {
       return true;
     }
   });
-}
+};
 
 const KanbanColumn = React.createClass({
   render() {
@@ -114,7 +114,7 @@ const KanbanRepo = React.createClass({
     const close = () => {
       isAlreadyShowedAnonymousModal = true;
       this.setState({ showModal: false});
-    }
+    };
     let showModal;
     if (CurrentUserStore.getUser()) {
       showModal = false;

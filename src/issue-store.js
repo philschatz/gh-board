@@ -120,7 +120,6 @@ class IssueStore extends EventEmitter {
       }, RELOAD_TIME);
     }
     if (!isForced && cacheCards && cacheCardsRepoNames === repoOwner + JSON.stringify(repoNames)) {
-      console.log('potential re-render bug. Occurs when filtering');
       return Promise.resolve(cacheCards);
     }
     const allPromises = _.map(repoNames, (repoName) => {
