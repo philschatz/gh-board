@@ -5,6 +5,7 @@ import * as BS from 'react-bootstrap';
 import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../helpers';
 import {Store, filterCards, buildBipartiteGraph} from '../issue-store';
 import {FilterStore} from '../filter-store';
+import {CurrentUserStore} from '../user-store';
 import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
@@ -74,8 +75,9 @@ const KanbanColumn = React.createClass({
   }
 });
 
+let isAlreadyShowedAnonymousModal = false;
+
 const KanbanRepo = React.createClass({
-  displayName: 'KanbanRepo',
   // onAddCardList() {
   //   const {onLabelsChanged} = this.props;
   //   const {labels} = this.props;
@@ -108,6 +110,17 @@ const KanbanRepo = React.createClass({
   // },
   render() {
     const {labels, cards, graph, primaryRepoName} = this.props;
+    const close = () => {
+      isAlreadyShowedAnonymousModal = true;
+      this.setState({ showModal: false});
+    }
+    let showModal;
+    if (CurrentUserStore.getUser()) {
+      showModal = false;
+    } else {
+      showModal = !isAlreadyShowedAnonymousModal;
+    }
+
     const kanbanLabels = filterKanbanLabels(labels);
 
     // Filter all the cards
@@ -181,6 +194,24 @@ const KanbanRepo = React.createClass({
           {kanbanColumns}
           {/* addCardList */}
         </BS.Row>
+        <BS.Modal show={showModal} container={this} onHide={close}>
+          <BS.Modal.Header closeButton>Viewing a Board Anonymously</BS.Modal.Header>
+          <BS.Modal.Body className='anonymous-instructions'>
+            <p>You are currently <strong>not signed in</strong>. GitHub's API only allows <em>60</em> requests per hour for non-authenticated users.</p>
+            <p>Showing additional information for Pull Requests requires making a separte API call for each and can end up depleting the 60 requests quickly.</p>
+
+            <p>The following information is <strong>disabled initially</strong>:</p>
+            <ul>
+              <li>Status information from services like Travis-CI and Jenkins</li>
+              <li>Merge conflict information</li>
+              <li>More than 20 issues on the board</li>
+            </ul>
+            <p>You can enable it by clicking the <BS.Button disabled bsSize='xs'><i className='octicon octicon-gear'/>{' '}<span className='caret'/></BS.Button> on the top-right corner next to <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button> and selecting "Show More Pull Request Info".</p>
+          </BS.Modal.Body>
+          <BS.Modal.Footer>
+            <BS.Button bsStyle='primary' onClick={close}>Ok, I'll find it if I need it</BS.Button>
+          </BS.Modal.Footer>
+        </BS.Modal>
       </BS.Grid>
     );
   }
