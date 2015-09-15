@@ -4,7 +4,6 @@ import Client from '../github-client';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import Loadable from './loadable.jsx';
 import Time from './time.jsx';
-import GithubFlavoredMarkdown from './gfm.jsx';
 
 const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 
