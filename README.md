@@ -18,6 +18,9 @@ Automatically Combine an Issue with a Pull Request by using `fixes #123` in the 
 
 ![combines Issue and Pull Request](https://cloud.githubusercontent.com/assets/253202/9784658/8e231a26-577a-11e5-85ec-1d40fcaa5207.png)
 
+Prompts to move both the Pull Request and related issue(s):
+
+![prompt to move related Issues](https://cloud.githubusercontent.com/assets/253202/9868052/39c4cdaa-5b42-11e5-8942-7d5a1e19fd24.png)
 
 # Development
 
@@ -29,6 +32,6 @@ Automatically Combine an Issue with a Pull Request by using `fixes #123` in the 
 - [x] combine Issue and the Pull Requests that fixes it
 - [x] handle dragging in multiple repos:
   1. auto-create the label in the new repo (confirm first)
-- [ ] add checkbox for selecting multiple repos in dashboard
+- [x] add checkbox for selecting multiple repos in dashboard
+- [x] select between Issue-centric and PullRequest-centric view
 - [ ] add GitHub search
-- [ ] select between Issue-centric and PullRequest-centric view

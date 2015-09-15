@@ -166,6 +166,9 @@ class IssueStore extends EventEmitter {
       return cards;
     });
   }
+  tryToMove(card, graph, primaryRepoName, label) {
+    this.emit('tryToMove', card, graph, primaryRepoName, label);
+  }
   move(repoOwner, repoName, issue, newLabel) {
     // Find all the labels, remove the kanbanLabel, and add the new label
     // Exclude Kanban labels
