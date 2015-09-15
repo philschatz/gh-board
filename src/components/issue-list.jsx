@@ -3,6 +3,7 @@ import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 
 import FilterStore from '../filter-store';
+import {isLight} from '../helpers';
 
 const ItemTypes = {
   CARD: 'card'
@@ -30,8 +31,14 @@ const IssueList = React.createClass({
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
 
+    let className = 'column-title';
+    if (!label.color || isLight(label.color)) {
+      className = className || '';
+      className += ' ' + 'is-light';
+    }
+
     const header = (
-      <h2 className='column-title' style={{backgroundColor: label.color}}>
+      <h2 className={className} style={{backgroundColor: '#' + label.color}}>
         <span className='column-title-text' onClick={() => FilterStore.addLabel(label)}>{title}</span>
         {' (' + children.length + ')'}
       </h2>
