@@ -230,13 +230,6 @@ body { background-color: #f3f3f3; }
 
 
           // Elements that can occur anywhere in an issue
-          /* All blurbs, not just the footer, get a pointer and link color inherits */
-          .issue-blurb {
-            .blurb-context,
-            .blurb-icon { margin-right: .5rem; }
-            .blurb-icon { cursor: pointer; }
-            .blurb-number-link { color: inherit; }
-          }
 
 
           /* Color the blurb icon to be gray if there is an issue */
@@ -354,12 +347,23 @@ body { background-color: #f3f3f3; }
       }
     }
   }
-
 }
+
+// All blurbs, not just the footer, get a pointer and link color inherits
+// A blurb can be inside an issue or in the move modal
+.issue-blurb {
+  .blurb-context,
+  .blurb-icon { margin-right: .5rem; }
+  .blurb-icon { cursor: pointer; }
+  .blurb-number-link { color: inherit; }
+}
+
+
 .modal .anonymous-instructions [disabled] {
   opacity: 1;
 }
-
+// move the checkbox to cover the list bullet just like a <BS.Input> without a label=""
+.modal.move-issue .select-related-issue { margin-left: -20px; }
 
 .app.is-table-layout {
   .kanban-board {
