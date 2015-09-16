@@ -240,6 +240,9 @@ const AppNav = React.createClass({
     Client.setToken(null);
     CurrentUserStore.clear();
   },
+  starThisProject() {
+    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => alert('Thanks!\n I hope you will understand this page is a bit bleak. I hope you enjoy the other pages more, but thank you for helping me out!'));
+  },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
     if (repoNames) {
@@ -267,8 +270,17 @@ const AppNav = React.createClass({
 
     let loginButton;
     if (info) {
+      const avatarImage = (
+        <img
+          alt={'@' + info.login}
+          className='avatar-image'
+          src={info.avatar.url}/>
+      );
       loginButton = (
-        <BS.NavDropdown title={info.login}>
+        <BS.NavDropdown title={avatarImage}>
+          <BS.MenuItem header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
+          <BS.MenuItem onSelect={this.starThisProject}>Click to <i className='octicon octicon-star icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
+          <BS.MenuItem divider/>
           <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
         </BS.NavDropdown>
       );
