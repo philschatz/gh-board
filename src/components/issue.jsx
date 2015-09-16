@@ -150,6 +150,37 @@ let Issue = React.createClass({
         </BS.OverlayTrigger>
       );
     }
+    let milestone = null;
+    if (issue.milestone) {
+      const openCount = issue.milestone.openIssues;
+      const closedCount = issue.milestone.closedIssues;
+      const totalCount = openCount + closedCount;
+      const milestonePopover = (
+        <BS.Popover id="popover-${issue.id}-milestone" className='milestone-details' title='Milestone Details'>
+          <h4>{issue.milestone.title}</h4>
+          <BS.ProgressBar bsStyle='success' now={closedCount} max={totalCount}/>
+          <p>{openCount} open {closedCount} closed</p>
+          <GithubFlavoredMarkdown
+            disableLinks={false}
+            repoOwner={repoOwner}
+            repoName={repoName}
+            text={issue.milestone.description}/>
+        </BS.Popover>
+      );
+      milestone = (
+        <span className='issue-milestone'>
+          <BS.OverlayTrigger
+            rootClose
+            trigger={['click', 'focus']}
+            placement='bottom'
+            overlay={milestonePopover}>
+            <i className='milestone-icon octicon octicon-milestone'/>
+          </BS.OverlayTrigger>
+          <span className='milestone-title'>{issue.milestone.title}</span>
+        </span>
+      );
+    }
+
 
     const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
@@ -203,6 +234,7 @@ let Issue = React.createClass({
 
         <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
         {taskCounts}
+        {milestone}
         <span key='right-footer' className='pull-right'>
           <Time key='time' className='updated-at' dateTime={updatedAt}/>
           {assignedAvatar}

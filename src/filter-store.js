@@ -10,6 +10,7 @@ let isRelated = 1; // The "I want to focus on Issues" or "PullRequests" tri-stat
 let isShowPullRequestData = false; // By default (anon users) this is unchecked. Gets checked when user logs in
 
 let userFilter = null;
+let milestoneFilter = null;
 let filteredLabels = [];
 
 class Store extends EventEmitter {
@@ -86,6 +87,14 @@ class Store extends EventEmitter {
   }
   getUser() {
     return userFilter;
+  }
+  getMilestone() {
+    return milestoneFilter;
+  }
+  setMilestone(milestone) {
+    milestoneFilter = milestone;
+    this.emit('change');
+    this.emit('change:milestone', milestone);
   }
   addLabel(label) {
     const containsLabel = contains(filteredLabels, (l) => {
