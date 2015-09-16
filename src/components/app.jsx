@@ -267,8 +267,15 @@ const AppNav = React.createClass({
 
     let loginButton;
     if (info) {
+      const avatarImage = (
+        <img
+          alt={'@' + info.login}
+          className='avatar-image'
+          src={info.avatar.url}/>
+      );
       loginButton = (
-        <BS.NavDropdown title={info.login}>
+        <BS.NavDropdown title={avatarImage}>
+          <BS.MenuItem header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
           <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
         </BS.NavDropdown>
       );
