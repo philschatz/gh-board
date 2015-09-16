@@ -87,7 +87,7 @@ const InnerMarkdown = React.createClass({
     return text;
   },
   render() {
-    const {text, repoOwner, repoName} = this.props;
+    const {text, repoOwner, repoName, inline} = this.props;
     if (!text) { return null; }
     const context = repoOwner + '/' + repoName;
     const textStripped = text.replace(/<!--[\s\S]*?-->/g, '');
@@ -95,9 +95,15 @@ const InnerMarkdown = React.createClass({
     const html = ultramarked(linkify(textEmojis, context));
 
     if (html) {
-      return (
-        <div className='rendered-markdown' dangerouslySetInnerHTML={{__html: html}} />
-      );
+      const props = {
+        className: 'rendered-markdown',
+        dangerouslySetInnerHTML: {__html: html}
+      };
+      if (inline) {
+        return (<span {...props}/>);
+      } else {
+        return (<div {...props}/>);
+      }
     } else {
       return (
         <div className='rendered-markdown is-empty'></div>
