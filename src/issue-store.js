@@ -166,6 +166,9 @@ class IssueStore extends EventEmitter {
       return cards;
     });
   }
+  fetchMilestones(repoOwner, repoName) {
+    return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
+  }
   tryToMove(card, graph, primaryRepoName, label) {
     this.emit('tryToMove', card, graph, primaryRepoName, label);
   }

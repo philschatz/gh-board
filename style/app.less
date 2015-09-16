@@ -29,6 +29,7 @@ body { background-color: #f3f3f3; }
   // TODO: Mixin?
   .badge {
     cursor: pointer;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12); // From GH Issues
     &.is-light { color: black; }
   }
   .avatar-image { width: 2rem; }
@@ -55,6 +56,13 @@ body { background-color: #f3f3f3; }
 
       position: absolute;
       left: 5px;
+    }
+
+    .milestone-dropdown {
+      .due-at {
+        color: #888;
+      }
+      .milestone-item .due-at { float: right; }
     }
 
 
@@ -206,6 +214,7 @@ body { background-color: #f3f3f3; }
             }
 
             // The little `[4/5]` section
+            .issue-milestone,
             .task-list-overview {
               cursor: pointer;
               font-size: 1.5rem;
@@ -213,6 +222,8 @@ body { background-color: #f3f3f3; }
               vertical-align: middle;
               padding: 0 2rem;
             }
+
+            .issue-milestone .milestone-title { padding-left: .5rem; }
 
             time.updated-at {
               font-size: 1.2rem;
@@ -222,7 +233,7 @@ body { background-color: #f3f3f3; }
               display: inline-block;
               white-space: nowrap;
               vertical-align: middle;
-              max-width: 10rem;
+              max-width: 9rem;
               overflow-x: hidden;
               text-overflow: ellipsis;
             }

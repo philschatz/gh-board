@@ -137,6 +137,16 @@ const KanbanRepo = React.createClass({
         }
       });
     }
+    const milestoneFilter = FilterStore.getMilestone();
+    if (milestoneFilter) {
+      filteredCards = _.filter(filteredCards, (card) => {
+        const issue = card.issue;
+        if (issue.milestone && issue.milestone.number === milestoneFilter.number) {
+          return true;
+        }
+      });
+    }
+
     filteredCards = filterCards(filteredCards, FilterStore.getLabels());
     const isFilteringByColumn = _.filter(FilterStore.getLabels(), (label) => {
       return KANBAN_LABEL.test(label.name);

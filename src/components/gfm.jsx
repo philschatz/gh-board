@@ -68,6 +68,7 @@ const InnerMarkdown = React.createClass({
     });
   },
   updateDOM() {
+    if (!this.getDOMNode()) { return; }
     this.updateLinks();
     this.updateCheckboxes();
   },

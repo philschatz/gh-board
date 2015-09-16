@@ -9,12 +9,13 @@ import Client from '../github-client';
 import NewVersionChecker from '../new-version-checker';
 import CurrentUserStore from '../user-store';
 import FilterStore from '../filter-store';
+import IssueStore from '../issue-store';
 
 import LoginModal from './login-modal.jsx';
 import LabelBadge from './label-badge.jsx';
 import MoveModal from './move-modal.jsx';
-
 import Time from './time.jsx';
+import Loadable from './loadable.jsx';
 
 const RATE_LIMIT_POLLING_INTERVAL = 30 * 60 * 1000;
 
@@ -119,6 +120,85 @@ const SettingsItem = React.createClass({
   }
 });
 
+const MilestonesDropdown = React.createClass({
+  componentDidMount() {
+    FilterStore.on('change:milestone', this.update);
+  },
+  componentWillUnmount() {
+    FilterStore.off('change:milestone', this.update);
+  },
+  update() {
+    this.forceUpdate();
+  },
+  onSelectMilestone(milestone) {
+    return () => {
+      FilterStore.setMilestone(milestone);
+    };
+  },
+  render() {
+    const {milestones} = this.props;
+    const selectedMilestone = FilterStore.getMilestone();
+
+    const renderMilestone = (milestone) => {
+      let dueDate;
+      if (milestone.dueOn) {
+        dueDate = (
+          <span className='due-at'>
+            {' due '}
+            <Time dateTime={new Date(milestone.dueOn)}/>
+          </span>
+        );
+      }
+      return [
+        <i className='octicon octicon-milestone'/>,
+        ' ',
+        milestone.title,
+        dueDate
+      ];
+    };
+
+    if (milestones.length) {
+      const milestonesItems = _.map(milestones, (milestone) => {
+        return (
+          <BS.MenuItem className='milestone-item' onSelect={this.onSelectMilestone(milestone)}>{renderMilestone(milestone)}</BS.MenuItem>
+        );
+      });
+      let selectedMilestoneItem;
+      if (selectedMilestone) {
+        selectedMilestoneItem = renderMilestone(selectedMilestone);
+      } else {
+        selectedMilestoneItem = 'All Issues and Pull Requests';
+      }
+      return (
+        <BS.NavDropdown className='milestone-dropdown' title={<span className='selected-milestone'>{selectedMilestoneItem}</span>}>
+          <BS.MenuItem header>Filter by Milestone</BS.MenuItem>
+          {milestonesItems}
+          <BS.MenuItem divider/>
+          <BS.MenuItem onSelect={this.onSelectMilestone(null)}>All Issues and Pull Requests</BS.MenuItem>
+          <BS.MenuItem disabled>Not in a Milestone</BS.MenuItem>
+          <BS.MenuItem divider/>
+          <BS.MenuItem header>Milestone Planning Views</BS.MenuItem>
+          <BS.MenuItem disabled>Issue Grooming</BS.MenuItem>
+        </BS.NavDropdown>
+      );
+    } else {
+      return null;
+    }
+
+  }
+});
+
+const MilestonesDropdownShell = React.createClass({
+  render() {
+    const {repoOwner, repoName} = this.props;
+    return (
+      <Loadable
+        promise={IssueStore.fetchMilestones(repoOwner, repoName)}
+        renderLoaded={(milestones) => <MilestonesDropdown milestones={milestones}/>}
+        />
+    );
+  }
+});
 
 const AppNav = React.createClass({
   contextTypes: {
@@ -203,6 +283,7 @@ const AppNav = React.createClass({
     );
 
     let repoInfo = null;
+    let milestonesDropdown = null;
     if (!filtering.length && repoOwner) {
       let repoNameItems;
       if (repoNames.length === 1) {
@@ -226,6 +307,9 @@ const AppNav = React.createClass({
           {repoNameItems}
         </li>
       );
+      milestonesDropdown = (
+        <MilestonesDropdownShell repoOwner={repoOwner} repoName={repoNames[0]}/>
+      );
     }
 
     const settingsMenuHelp = () => {
@@ -244,6 +328,7 @@ const AppNav = React.createClass({
             </BS.NavItem>
           </BS.Nav>
           <BS.Nav right>
+            {milestonesDropdown}
             <BS.NavDropdown title={settingsTitle}>
               <BS.MenuItem header>Display Settings</BS.MenuItem>
               <SettingsItem
