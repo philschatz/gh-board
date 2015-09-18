@@ -150,9 +150,8 @@ const MilestonesDropdown = React.createClass({
         );
       }
       return [
-        <i className='octicon octicon-milestone'/>,
-        ' ',
-        milestone.title,
+        <i className='milestone-icon octicon octicon-milestone'/>,
+        <span className='milestone-title'>{milestone.title}</span>,
         dueDate
       ];
     };
