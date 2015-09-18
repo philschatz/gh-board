@@ -15,7 +15,7 @@ const LabelBadge = React.createClass({
       name = label.name;
     }
 
-    if (isLight(label.color)) {
+    if (label.color && isLight(label.color)) {
       className = className || '';
       className += ' ' + 'is-light';
     }
