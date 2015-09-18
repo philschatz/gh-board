@@ -232,13 +232,13 @@ let Issue = React.createClass({
         onDragStart={this.onDragStart}
         className={classes}>
 
-        <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
-        {taskCounts}
-        {milestone}
         <span key='right-footer' className='pull-right'>
           <Time key='time' className='updated-at' dateTime={updatedAt}/>
           {assignedAvatar}
         </span>
+        <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
+        {taskCounts}
+        {milestone}
 
       </BS.ListGroupItem>
     );
