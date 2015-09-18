@@ -189,16 +189,16 @@ let Issue = React.createClass({
     let relatedPullRequests = null;
     relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
       return (
-        <span className='related-issue'>
+        <div className='related-issue'>
           <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
-        </span>
+        </div>
       );
     });
     relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
       return (
-        <span className='related-issue'>
+        <div className='related-issue'>
           <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
-        </span>
+        </div>
       );
     });
 
