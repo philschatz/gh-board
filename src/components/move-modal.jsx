@@ -69,9 +69,9 @@ const MoveModal = React.createClass({
       if (related.length) {
         const makeRelated = ({vertex}) => {
           const relatedColumn = getCardColumn(vertex);
-          let label = null;
+          let relatedLabel = null;
           if (relatedColumn.name !== getCardColumn(card).name) {
-            label = (<LabelBadge label={getCardColumn(vertex)}/>);
+            relatedLabel = (<LabelBadge label={relatedColumn}/>);
           }
           const checkLabel = (
             <span>
@@ -79,7 +79,7 @@ const MoveModal = React.createClass({
               <span className='issue-title'>
                 {': '}
                 {vertex.issue.title}
-                {label}
+                {relatedLabel}
               </span>
             </span>
           );
