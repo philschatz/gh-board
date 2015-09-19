@@ -92,7 +92,7 @@ body { background-color: #f3f3f3; }
           }
         }
 
-}
+      }
     }
 
 
@@ -100,6 +100,12 @@ body { background-color: #f3f3f3; }
       padding-top: 15px;
       padding-bottom: 15px;
       display: inline-block;
+
+      // handle many repos (just hide the rest)
+      max-width: 550px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
 
       .repo-owner {
         padding-right: .5rem;
