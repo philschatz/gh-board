@@ -232,7 +232,7 @@ const AppNav = React.createClass({
       // TODO: when anonymous, getting the current user should be an error.
       // probably a bug in CurrentUserStore
       if (info) {
-        FilterStore.setShowPullRequestData();
+        SettingsStore.setShowPullRequestData();
       }
       this.setState({info});
     }).catch(() => {
