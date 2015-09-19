@@ -2,6 +2,7 @@ import _ from 'underscore';
 import React from 'react';
 import * as BS from 'react-bootstrap';
 
+import {getCardColumn} from '../helpers';
 import IssueStore from '../issue-store';
 import IssueOrPullRequestBlurb from './issue-blurb.jsx';
 import LabelBadge from './label-badge.jsx';
@@ -67,17 +68,23 @@ const MoveModal = React.createClass({
       let body;
       if (related.length) {
         const makeRelated = ({vertex}) => {
+          const relatedColumn = getCardColumn(vertex);
+          let relatedLabel = null;
+          if (relatedColumn.name !== getCardColumn(card).name) {
+            relatedLabel = (<LabelBadge label={relatedColumn}/>);
+          }
           const checkLabel = (
             <span>
               <IssueOrPullRequestBlurb card={vertex} primaryRepoName={primaryRepoName}/>
               <span className='issue-title'>
                 {': '}
                 {vertex.issue.title}
+                {relatedLabel}
               </span>
             </span>
           );
           return (
-            <li>
+            <li className='related-issue'>
               <BS.Input
                 type='checkbox'
                 defaultChecked={!unCheckedCards[graph.cardToKey(vertex)]}
@@ -93,7 +100,7 @@ const MoveModal = React.createClass({
         body = (
           <BS.Modal.Body>
             Select the related items to move as well:
-            <ul>
+            <ul className='related-issues'>
               {relatedIssues}
             </ul>
           </BS.Modal.Body>

@@ -414,7 +414,13 @@ body { background-color: #f3f3f3; }
   opacity: 1;
 }
 // move the checkbox to cover the list bullet just like a <BS.Input> without a label=""
-.modal.move-issue .select-related-issue { margin-left: -20px; }
+.modal.move-issue {
+  .related-issues .related-issue {
+    list-style: none;
+
+    .select-related-issue { margin-left: -20px; }
+  }
+}
 
 .app.is-table-layout {
   .kanban-board {

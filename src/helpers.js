@@ -47,3 +47,13 @@ export function isLight(hexColor) {
 // Of the form `# - ...`
 export const KANBAN_LABEL = /^\d+\ -\ /;
 export const UNCATEGORIZED_NAME = '999 - Uncategorized';
+
+export function getCardColumn(card) {
+  for (const label of card.issue.labels) {
+    if (KANBAN_LABEL.test(label.name)) {
+      return label;
+    }
+  }
+  // not found. Must be uncategorized
+  return {name: UNCATEGORIZED_NAME};
+}

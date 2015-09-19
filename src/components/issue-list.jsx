@@ -39,7 +39,7 @@ const IssueList = React.createClass({
 
     const header = (
       <h2 className={className} style={{backgroundColor: '#' + label.color}}>
-        <span className='column-title-text' onClick={() => FilterStore.addLabel(label)}>{title}</span>
+        <span className='column-title-text' onClick={() => FilterStore.addLabel(label)}><i className='octicon octicon-list-unordered'/> {title}</span>
         {' (' + children.length + ')'}
       </h2>
     );
