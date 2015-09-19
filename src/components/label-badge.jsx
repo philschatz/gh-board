@@ -9,9 +9,12 @@ const LabelBadge = React.createClass({
     let {className} = this.props;
 
     let name;
+    let icon;
     if (KANBAN_LABEL.test(label.name)) {
-      name = label.name.replace(/^\d+\ -\ /, 'Column: ');
+      icon = (<i className='octicon octicon-list-unordered'/>);
+      name = label.name.replace(/^\d+\ -\ /, ' ');
     } else {
+      icon = null;
       name = label.name;
     }
 
@@ -26,6 +29,7 @@ const LabelBadge = React.createClass({
         {...this.props}
         className={className}
         style={{backgroundColor: '#' + label.color}}>
+        {icon}
         {name}
       </BS.Badge>
     );
