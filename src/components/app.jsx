@@ -244,7 +244,7 @@ const AppNav = React.createClass({
     CurrentUserStore.clear();
   },
   starThisProject() {
-    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => alert('Thanks!\n I hope you will understand this page is a bit bleak. I hope you enjoy the other pages more, but thank you for helping me out!'));
+    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!'));
   },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
