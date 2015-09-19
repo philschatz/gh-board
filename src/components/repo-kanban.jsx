@@ -5,6 +5,7 @@ import * as BS from 'react-bootstrap';
 import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards, buildBipartiteGraph} from '../issue-store';
+import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import Client from '../github-client';
@@ -141,7 +142,7 @@ const KanbanRepo = React.createClass({
     if (milestoneFilter) {
       filteredCards = _.filter(filteredCards, (card) => {
         const issue = card.issue;
-        if (issue.milestone && issue.milestone.number === milestoneFilter.number) {
+        if (issue.milestone && issue.milestone.title === milestoneFilter.title) {
           return true;
         }
       });
@@ -160,8 +161,8 @@ const KanbanRepo = React.createClass({
     sortedCards.reverse();
 
     // Filter out any Issues that are associated with at least one Pull request in the list of cards
-    if (!FilterStore.getRelatedShowAll()) {
-      const isFilteringPullRequests = FilterStore.getRelatedHidePullRequests();
+    if (!SettingsStore.getRelatedShowAll()) {
+      const isFilteringPullRequests = SettingsStore.getRelatedHidePullRequests();
       sortedCards = filterReferencedCards(graph, sortedCards, isFilteringPullRequests);
     }
 
@@ -176,7 +177,7 @@ const KanbanRepo = React.createClass({
       // isFilteringByColumn = label (the current column we are filtering on)
       // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
 
-      if ((!isFilteringByColumn && (FilterStore.getShowEmptyColumns() || columnCards.length)) || (isFilteringByColumn && isFilteringByColumn.name === label.name)) {
+      if ((!isFilteringByColumn && (SettingsStore.getShowEmptyColumns() || columnCards.length)) || (isFilteringByColumn && isFilteringByColumn.name === label.name)) {
         kanbanColumnCount++; // Count the number of actual columns displayed
         return (
           <KanbanColumn
@@ -233,12 +234,14 @@ const Repos = React.createClass({
   componentDidMount() {
     IssueStore.on('change', this.onChange);
     FilterStore.on('change', this.onChange);
-    FilterStore.on('change:showPullRequestData', this.onChangeAndRefetch);
+    SettingsStore.on('change', this.onChange);
+    SettingsStore.on('change:showPullRequestData', this.onChangeAndRefetch);
   },
   componentWillUnmount() {
     IssueStore.off('change', this.onChange);
     FilterStore.off('change', this.onChange);
-    FilterStore.off('change:showPullRequestData', this.onChangeAndRefetch);
+    SettingsStore.off('change', this.onChange);
+    SettingsStore.off('change:showPullRequestData', this.onChangeAndRefetch);
   },
   onChangeAndRefetch() {
     IssueStore.clearCacheCards();
@@ -255,7 +258,7 @@ const Repos = React.createClass({
     return ([labels, cards]) => {
 
       let allLabels;
-      if (!FilterStore.getHideUncategorized()) {
+      if (!SettingsStore.getHideUncategorized()) {
         const uncategorized = [{name: UNCATEGORIZED_NAME}];
         allLabels = uncategorized.concat(labels);
       } else {
@@ -310,9 +313,9 @@ const RepoKanbanShell = React.createClass({
     repoNames = repoNames.split('|');
 
     return (
-      <Repos {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
+      <Loadable
+        promise={CurrentUserStore.fetchUser()}
+        renderLoaded={() => <Repos {...this.props} repoOwner={repoOwner} repoNames={repoNames}/>}
       />
     );
   }

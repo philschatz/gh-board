@@ -5,6 +5,7 @@ import * as BS from 'react-bootstrap';
 
 import Client from '../github-client';
 import CurrentUserStore from '../user-store';
+import FilterStore from '../filter-store';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import AsyncButton from './async-button.jsx';
 import Time from './time.jsx';
@@ -323,6 +324,9 @@ const DashboardShell = React.createClass({
   getInitialState() {
     return {repos: null};
   },
+  componentDidMount() {
+    FilterStore.clearFilters();
+  },
   render() {
     let {repos} = this.state;
 
@@ -337,7 +341,7 @@ const DashboardShell = React.createClass({
         <Dashboard repos={repos}/>
       );
     } else {
-      CurrentUserStore.fetch()
+      CurrentUserStore.fetchUser()
       .then((currentUser) => {
         if (currentUser) {
           return fetchAll(FETCHALL_MAX, Client.getOcto().user.repos.fetch);

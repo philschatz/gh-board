@@ -16,7 +16,7 @@ class Store extends EventEmitter {
   getUser() {
     return currentUser;
   }
-  fetch() {
+  fetchUser() {
     if (currentUser) {
       return Promise.resolve(currentUser);
     } else {

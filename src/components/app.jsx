@@ -5,6 +5,7 @@ import * as BS from 'react-bootstrap';
 import HTML5Backend from 'react-dnd/modules/backends/HTML5';
 import { DragDropContext } from 'react-dnd';
 
+import SettingsStore from '../settings-store';
 import Client from '../github-client';
 import NewVersionChecker from '../new-version-checker';
 import CurrentUserStore from '../user-store';
@@ -101,6 +102,7 @@ const KarmaWarning = React.createClass({
           {newestText}
         </BS.Nav>
         <BS.Nav right>
+          <BS.NavItem className='nav-squirrel' onClick={SettingsStore.resetSettings.bind(SettingsStore)}><i className='octicon octicon-squirrel' title='Clear Settings and Cache'/></BS.NavItem>
           <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
         </BS.Nav>
       </BS.Navbar>
@@ -208,22 +210,24 @@ const AppNav = React.createClass({
   },
   componentDidMount() {
     FilterStore.on('change', this.update);
-    FilterStore.on('change:showPullRequestData', this.update);
-    FilterStore.on('change:tableLayout', this.update);
+    SettingsStore.on('change', this.update);
+    SettingsStore.on('change:showPullRequestData', this.update);
+    SettingsStore.on('change:tableLayout', this.update);
     Client.on('changeToken', this.onChangeToken);
     this.onChangeToken();
   },
   componentWillUnmount() {
     FilterStore.off('change', this.update);
-    FilterStore.off('change:showPullRequestData', this.update);
-    FilterStore.off('change:tableLayout', this.update);
+    SettingsStore.off('change', this.update);
+    SettingsStore.off('change:showPullRequestData', this.update);
+    SettingsStore.off('change:tableLayout', this.update);
     Client.off('changeToken', this.onChangeToken);
   },
   update() {
     this.setState({});
   },
   onChangeToken() {
-    CurrentUserStore.fetch()
+    CurrentUserStore.fetchUser()
     .then((info) => {
       // TODO: when anonymous, getting the current user should be an error.
       // probably a bug in CurrentUserStore
@@ -343,20 +347,20 @@ const AppNav = React.createClass({
             <BS.NavDropdown title={settingsTitle}>
               <BS.MenuItem header>Display Settings</BS.MenuItem>
               <SettingsItem
-                onSelect={FilterStore.toggleHideUncategorized.bind(FilterStore)}
-                isChecked={FilterStore.getHideUncategorized()}
+                onSelect={SettingsStore.toggleHideUncategorized.bind(SettingsStore)}
+                isChecked={SettingsStore.getHideUncategorized()}
                 >
                 Hide Uncategorized
               </SettingsItem>
               <SettingsItem
-                onSelect={FilterStore.toggleShowEmptyColumns.bind(FilterStore)}
-                isChecked={FilterStore.getShowEmptyColumns()}
+                onSelect={SettingsStore.toggleShowEmptyColumns.bind(SettingsStore)}
+                isChecked={SettingsStore.getShowEmptyColumns()}
                 >
                 Show Empty Columns
               </SettingsItem>
               <SettingsItem
-                onSelect={FilterStore.toggleTableLayout.bind(FilterStore)}
-                isChecked={FilterStore.getTableLayout()}
+                onSelect={SettingsStore.toggleTableLayout.bind(SettingsStore)}
+                isChecked={SettingsStore.getTableLayout()}
                 >
                 Use Table Layout
               </SettingsItem>
@@ -370,28 +374,28 @@ const AppNav = React.createClass({
                 </button>
               </BS.MenuItem>
               <SettingsItem
-                onSelect={FilterStore.setRelatedHideIssues.bind(FilterStore)}
-                isChecked={FilterStore.getRelatedHideIssues()}
+                onSelect={SettingsStore.setRelatedHideIssues.bind(SettingsStore)}
+                isChecked={SettingsStore.getRelatedHideIssues()}
                 >
                 Developer-Friendly
               </SettingsItem>
               <SettingsItem
-                onSelect={FilterStore.setRelatedHidePullRequests.bind(FilterStore)}
-                isChecked={FilterStore.getRelatedHidePullRequests()}
+                onSelect={SettingsStore.setRelatedHidePullRequests.bind(SettingsStore)}
+                isChecked={SettingsStore.getRelatedHidePullRequests()}
                 >
                 QA-Friendly
               </SettingsItem>
               <SettingsItem
-                onSelect={FilterStore.setRelatedShowAll.bind(FilterStore)}
-                isChecked={FilterStore.getRelatedShowAll()}
+                onSelect={SettingsStore.setRelatedShowAll.bind(SettingsStore)}
+                isChecked={SettingsStore.getRelatedShowAll()}
                 >
                 Combined
               </SettingsItem>
               <BS.MenuItem divider/>
               <BS.MenuItem header>GitHub API Settings</BS.MenuItem>
               <SettingsItem
-                onSelect={FilterStore.toggleShowPullRequestData.bind(FilterStore)}
-                isChecked={FilterStore.getShowPullRequestData()}
+                onSelect={SettingsStore.toggleShowPullRequestData.bind(SettingsStore)}
+                isChecked={SettingsStore.getShowPullRequestData()}
                 >
                 Show More Pull Request Info
               </SettingsItem>
@@ -410,17 +414,17 @@ const AppNav = React.createClass({
 
 const App = React.createClass({
   componentDidMount() {
-    FilterStore.on('change:tableLayout', this.onChange);
+    SettingsStore.on('change:tableLayout', this.onChange);
   },
   componentWillMount() {
-    FilterStore.off('change:tableLayout', this.onChange);
+    SettingsStore.off('change:tableLayout', this.onChange);
   },
   onChange() {
     this.forceUpdate();
   },
   render() {
     const classes = ['app'];
-    if (FilterStore.getTableLayout()) {
+    if (SettingsStore.getTableLayout()) {
       classes.push('is-table-layout');
     }
 
