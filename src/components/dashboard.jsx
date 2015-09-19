@@ -20,7 +20,7 @@ const SAMPLE_REPOS = [
 
 const ListGroupWithMore = React.createClass({
   getInitialState() {
-    return {morePressedCount: 1};
+    return {morePressedCount: 0};
   },
   onClickMore() {
     this.setState({morePressedCount: this.state.morePressedCount + 1});
@@ -28,15 +28,16 @@ const ListGroupWithMore = React.createClass({
   render() {
     const {children} = this.props;
     const {morePressedCount} = this.state;
-    const multiple = 4; // Add 4 results at a time
+    const initial = 4; // Show 4 results initially
+    const multiple = 10; // Add 10 results at a time
     let partialChildren;
-    if (morePressedCount * multiple < children.length) {
+    if (initial + morePressedCount * multiple < children.length) {
       const moreButton = (
         <BS.ListGroupItem onClick={this.onClickMore}>
           {children.length - morePressedCount * multiple} more...
         </BS.ListGroupItem>
       );
-      partialChildren = children.slice(0, morePressedCount * multiple);
+      partialChildren = children.slice(0, initial + morePressedCount * multiple);
       partialChildren.push(moreButton);
     } else {
       partialChildren = children;
