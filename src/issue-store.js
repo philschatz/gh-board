@@ -1,7 +1,6 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
-import CurrentUserStore from './user-store';
-import FilterStore from './filter-store';
+import SettingsStore from './settings-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
@@ -126,33 +125,30 @@ class IssueStore extends EventEmitter {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
       return fetchAll(FETCHALL_MAX, issues)
       .then((vals) => {
-        // CurrentUserStore.fetch is a hack to ensure the current user is determined
-        return CurrentUserStore.fetch().then(() => {
-          return _.map(vals, (issue) => {
-            // If this is a Pull Request fetch the data and the CI status.
-            // Add the promise to the card
-            if (issue.pullRequest && FilterStore.getShowPullRequestData()) {
-              const fn = () => {
-                if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
-                  return Promise.resolve({});
-                }
+        return _.map(vals, (issue) => {
+          // If this is a Pull Request fetch the data and the CI status.
+          // Add the promise to the card
+          if (issue.pullRequest && SettingsStore.getShowPullRequestData()) {
+            const fn = () => {
+              if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
+                return Promise.resolve({});
+              }
 
-                return Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
-                  // TODO: Check if we still have a bunch of karma before getting merge conflict status and updated dates.
-                  if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
-                    return {pullRequest};
-                  }
-                  return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
-                    return {pullRequest, statuses};
-                  });
+              return Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
+                // TODO: Check if we still have a bunch of karma before getting merge conflict status and updated dates.
+                if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
+                  return {pullRequest};
+                }
+                return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
+                  return {pullRequest, statuses};
                 });
-              };
-              const pullRequestDelayedPromise = delayedPromise(fn);
-              return {repoOwner, repoName, issue, pullRequestDelayedPromise};
-            } else {
-              return {repoOwner, repoName, issue};
-            }
-          });
+              });
+            };
+            const pullRequestDelayedPromise = delayedPromise(fn);
+            return {repoOwner, repoName, issue, pullRequestDelayedPromise};
+          } else {
+            return {repoOwner, repoName, issue};
+          }
         });
       });
     });

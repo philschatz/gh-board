@@ -341,7 +341,7 @@ const DashboardShell = React.createClass({
         <Dashboard repos={repos}/>
       );
     } else {
-      CurrentUserStore.fetch()
+      CurrentUserStore.fetchUser()
       .then((currentUser) => {
         if (currentUser) {
           return fetchAll(FETCHALL_MAX, Client.getOcto().user.repos.fetch);

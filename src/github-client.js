@@ -54,7 +54,6 @@ const cacheHandler = new class CacheHandler {
         this.pendingTimeout = null;
         // If sessionStorage fills up, just blow it away.
         try {
-          console.log('octokat-saving');
           this.storage.setItem('octokat-cache', JSON.stringify(this.cachedETags));
         } catch (e) {
           this.cachedETags = {};
