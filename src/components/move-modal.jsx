@@ -4,6 +4,7 @@ import * as BS from 'react-bootstrap';
 
 import {getCardColumn} from '../helpers';
 import IssueStore from '../issue-store';
+import CurrentUserStore from '../user-store';
 import IssueOrPullRequestBlurb from './issue-blurb.jsx';
 import LabelBadge from './label-badge.jsx';
 
@@ -64,6 +65,12 @@ const MoveModal = React.createClass({
         graph.getA(graph.cardToKey(card)),
         graph.getB(graph.cardToKey(card))
       );
+
+      let anonymousComment = null;
+      const isAnonymous = !CurrentUserStore.getUser();
+      if (isAnonymous) {
+        anonymousComment = 'Sign In to move items ';
+      }
 
       let body;
       if (related.length) {
@@ -130,6 +137,7 @@ const MoveModal = React.createClass({
           </BS.Modal.Header>
           {body}
           <BS.Modal.Footer>
+            {anonymousComment}
             <BS.Button bsStyle='primary' onClick={this.onClickMove}>Move</BS.Button>
             <BS.Button onClick={close}>Cancel</BS.Button>
           </BS.Modal.Footer>
