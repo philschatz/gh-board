@@ -19,6 +19,12 @@ class Store extends EventEmitter {
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
   }
+  clearFilters() {
+    userFilter = null;
+    milestoneFilter = null;
+    filteredLabels = [];
+    this.emit('change');
+  }
   toggleHideUncategorized() {
     isHideUncategorized = !isHideUncategorized;
     this.emit('change');
