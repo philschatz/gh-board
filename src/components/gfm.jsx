@@ -13,19 +13,23 @@ const InnerMarkdown = React.createClass({
     const {disableLinks} = this.props;
 
     if (!disableLinks) {
-      const links = this.getDOMNode().querySelectorAll('a');
-      _.each(links, (link) => {
-        link.setAttribute('target', '_blank');
-      });
       // Wrap images with a link that opens them in a new tab
       const images = this.getDOMNode().querySelectorAll('img:not(.emoji)');
       _.each(images, (img) => {
         const parent = img.parentNode;
+        // Do not re-wrap if the image already has a link around it
+        if (parent.tagName.toLowerCase() === 'a') {
+          return;
+        }
         const href = img.getAttribute('src');
         const link = document.createElement('a');
         parent.replaceChild(link, img);
         link.appendChild(img);
         link.setAttribute('href', href);
+      });
+
+      const links = this.getDOMNode().querySelectorAll('a');
+      _.each(links, (link) => {
         link.setAttribute('target', '_blank');
       });
     }
