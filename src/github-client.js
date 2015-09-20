@@ -94,8 +94,8 @@ class Client extends EventEmitter {
       cachedClient = new Octo(credentials);
       // update the rateLimit for issue-store so it can gracefully back off
       // making requests when the rate limit is low
-      this.on('request', (rateLimitRemaining) => {
-        this.rateLimitRemaining = rateLimitRemaining;
+      this.on('request', ({rate: {remaining}}) => {
+        this.rateLimitRemaining = remaining;
       });
     }
     return cachedClient;

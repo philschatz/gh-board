@@ -18,8 +18,6 @@ import MoveModal from './move-modal.jsx';
 import Time from './time.jsx';
 import Loadable from './loadable.jsx';
 
-const RATE_LIMIT_POLLING_INTERVAL = 30 * 60 * 1000;
-
 const KarmaWarning = React.createClass({
   getInitialState() {
     return {timer: null, limit: null, remaining: null, newestVersion: null};
@@ -27,25 +25,16 @@ const KarmaWarning = React.createClass({
   componentDidMount() {
     NewVersionChecker.on('change', this.updateNewestVersion);
     Client.on('request', this.updateRateLimit);
-    this.pollRateLimit();
   },
   componentWillUnmount() {
     NewVersionChecker.off('change', this.updateNewestVersion);
     Client.off('request', this.updateRateLimit);
   },
-  updateRateLimit(remaining, limit /*, method, path, data, options */) {
-    this.setState({remaining, limit});
+  updateRateLimit({rate: {remaining, limit, reset}} /*, method, path, data, options */) {
+    this.setState({remaining, limit, reset: new Date(reset * 1000)});
   },
   updateNewestVersion(newestVersion) {
     this.setState({newestVersion});
-  },
-  pollRateLimit() {
-    Client.getOcto().rateLimit.fetch().then((rates) => {
-      let {remaining, limit, reset} = rates.resources.core;
-      reset = new Date(reset * 1000);
-      this.setState({remaining, limit, reset});
-      setTimeout(this.pollRateLimit, RATE_LIMIT_POLLING_INTERVAL);
-    });
   },
   render() {
     const {remaining, limit, reset, newestVersion} = this.state;
@@ -244,7 +233,7 @@ const AppNav = React.createClass({
     CurrentUserStore.clear();
   },
   starThisProject() {
-    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => alert('Thanks!\n I hope you will understand this page is a bit bleak. I hope you enjoy the other pages more, but thank you for helping me out!'));
+    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!'));
   },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
