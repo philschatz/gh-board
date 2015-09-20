@@ -210,7 +210,7 @@ const KanbanRepo = React.createClass({
           <BS.Modal.Header closeButton>Viewing a Board Anonymously</BS.Modal.Header>
           <BS.Modal.Body className='anonymous-instructions'>
             <p>You are currently <strong>not signed in</strong>. GitHub's API only allows <em>60</em> requests per hour for non-authenticated users.</p>
-            <p>Showing additional information for Pull Requests requires making a separte API call for each and can end up depleting the 60 requests quickly.</p>
+            <p>Showing additional information for Pull Requests requires making a separate API call for each and can end up depleting the 60 requests quickly.</p>
 
             <p>The following information is <strong>disabled initially</strong>:</p>
             <ul>
