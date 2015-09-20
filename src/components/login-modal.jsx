@@ -44,7 +44,9 @@ export default React.createClass({
             ref='token'
           />
           <div className='github-token-instructions'>
-            To create a GitHub token:
+            <h4>"Why do I need a token?"</h4>
+            <p>Unlinke other issue trackers, this one runs <em>in your browser</em> via any <a href='https://pages.github.com' target='_blank'>static webserver{' '}<i className='octicon octicon-link-external'/></a> so secret application keys are not possible.</p>
+            <h4>"OK, That's fair. How do I create a token?"</h4>
             <ol>
               <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new{' '}<i className='octicon octicon-link-external'/></a></li>
               <li>Provide a descriptive title (like "gh-board") in the "Token Description"</li>

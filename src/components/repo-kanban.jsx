@@ -216,9 +216,9 @@ const KanbanRepo = React.createClass({
             <ul>
               <li>Status information from services like Travis-CI and Jenkins</li>
               <li>Merge conflict information</li>
-              <li>More than 20 issues on the board</li>
+              <li>More than 100 issues on the board</li>
             </ul>
-            <p>You can enable it by clicking the <BS.Button disabled bsSize='xs'><i className='octicon octicon-gear'/>{' '}<span className='caret'/></BS.Button> on the top-right corner next to <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button> and selecting "Show More Pull Request Info".</p>
+            <p>You can enable it by clicking the <BS.Button disabled bsSize='xs'><i className='octicon octicon-gear'/>{' '}<span className='caret'/></BS.Button> on the top-right corner next to <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button> and selecting "Show More Pull Request Info" or by clicking the <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button>.</p>
           </BS.Modal.Body>
           <BS.Modal.Footer>
             <BS.Button bsStyle='primary' onClick={close}>Ok, I'll find it if I need it</BS.Button>
