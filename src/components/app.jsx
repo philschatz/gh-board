@@ -18,6 +18,8 @@ import MoveModal from './move-modal.jsx';
 import Time from './time.jsx';
 import Loadable from './loadable.jsx';
 
+import GameModal from './game-modal.jsx';
+
 const KarmaWarning = React.createClass({
   getInitialState() {
     return {timer: null, limit: null, remaining: null, newestVersion: null};
@@ -36,8 +38,14 @@ const KarmaWarning = React.createClass({
   updateNewestVersion(newestVersion) {
     this.setState({newestVersion});
   },
+  showGameModal() {
+    this.setState({isGameOpen: true});
+  },
+  onHideGameModal() {
+    this.setState({isGameOpen: false});
+  },
   render() {
-    const {remaining, limit, reset, newestVersion} = this.state;
+    const {remaining, limit, reset, newestVersion, isGameOpen} = this.state;
     let karmaText;
     let resetText;
     if (reset) {
@@ -91,9 +99,10 @@ const KarmaWarning = React.createClass({
           {newestText}
         </BS.Nav>
         <BS.Nav right>
-          <BS.NavItem className='nav-squirrel' onClick={SettingsStore.resetSettings.bind(SettingsStore)}><i className='octicon octicon-squirrel' title='Clear Settings and Cache'/></BS.NavItem>
+          <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><i className='octicon octicon-gift' title='Oooh, a present!'/></BS.NavItem>
           <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
         </BS.Nav>
+        <GameModal show={isGameOpen} onHide={this.onHideGameModal}/>
       </BS.Navbar>
     );
   }
@@ -233,7 +242,11 @@ const AppNav = React.createClass({
     CurrentUserStore.clear();
   },
   starThisProject() {
-    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!'));
+    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => {
+      /*eslint-disable no-alert */
+      alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!');
+      /*eslint-enable no-alert */
+    });
   },
   render() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();

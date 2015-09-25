@@ -4,7 +4,7 @@
   "description": "kanban board using just GitHub",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --hot --progress --colors",
+    "start": "webpack-dev-server --hot --progress --colors --display-chunks --display-modules --display-origins",
     "build": "eslint src; BUILD=1 webpack --optimize-minimize --progress --colors"
   },
   "author": "",
@@ -32,6 +32,7 @@
     "moment": "2.10.3",
     "octicons": "github/octicons#v3.1.0",
     "octokat": "^0.4.12",
+    "puzzle-script": "philschatz/puzzle-script",
     "react": "^0.13.3",
     "react-bootstrap": "^0.25.1",
     "react-dnd": "^1.1.2",

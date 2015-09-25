@@ -16,7 +16,7 @@ var config = {
     ],
     output: {
         path: __dirname + '/dist',
-        publicPath: '/dist/',
+        publicPath: './dist/', // gh-pages needs this to have a '.' for bundles
         filename: 'bundle.js'
     },
     plugins: [
@@ -28,7 +28,7 @@ var config = {
           { test: /\.jsx?$/, loader: 'eslint-loader', exclude: /node_modules/ },
         ],
         loaders: [
-            { test: /\.jsx?$/, loaders: ['react-hot', 'babel'], exclude: /node_modules/ },
+            { test: /\.jsx?$/, loaders: ['react-hot', 'babel'], exclude: [/node_modules/, /puzzle-script/] },
             { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
             { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
             { test: /\.(woff|woff2|eot|ttf)/, loader: "url-loader?limit=30000&name=[name]-[hash].[ext]" }
@@ -46,6 +46,7 @@ var config = {
 
 if (!isBuild) {
   config.debug = true;
+  config.output.publicPath = '/dist/'; // Dev server needs this to not have a dot.
   config.devtool = 'inline-source-map';
   config.entry.unshift('webpack/hot/only-dev-server');
   config.entry.unshift('webpack-dev-server/client?http://0.0.0.0:8080');
