@@ -10,7 +10,7 @@ const Board = React.createClass({
     type: React.PropTypes.func.isRequired, // A React Component
     repoOwner: React.PropTypes.string.isRequired,
     repoNames: React.PropTypes.array.isRequired,
-    columnDataPromise: React.PropTypes.func.isRequired
+    columnDataPromise: React.PropTypes.object.isRequired
   },
   componentDidMount() {
     IssueStore.on('change', this.onChange);

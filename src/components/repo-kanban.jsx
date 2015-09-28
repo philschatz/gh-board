@@ -185,6 +185,7 @@ const KanbanRepo = React.createClass({
         kanbanColumnCount++; // Count the number of actual columns displayed
         return (
           <KanbanColumn
+            key={label.name}
             label={label}
             cards={columnCards}
             graph={graph}
