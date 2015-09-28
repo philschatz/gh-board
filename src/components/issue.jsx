@@ -33,7 +33,14 @@ const issueSource = {
     const {card, graph, primaryRepoName} = monitor.getItem();
     const dropResult = monitor.getDropResult();
 
-    IssueStore.tryToMove(card, graph, primaryRepoName, dropResult.label);
+    if (dropResult.label) {
+      IssueStore.tryToMoveLabel(card, graph, primaryRepoName, dropResult.label);
+    } else if (dropResult.milestone){
+      IssueStore.tryToMoveMilestone(card, graph, primaryRepoName, dropResult.milestone);
+    } else {
+      throw new Error('BUG: Only know how to move to a kanban label or a milestone');
+    }
+
   }
 };
 
@@ -150,8 +157,14 @@ let Issue = React.createClass({
         </BS.OverlayTrigger>
       );
     }
+    const shouldShowMilestone = (
+      issue.milestone && (
+        !FilterStore.getMilestone()
+        || (FilterStore.getMilestone().title !== issue.milestone.title)
+      )
+    );
     let milestone = null;
-    if (issue.milestone) {
+    if (shouldShowMilestone) {
       const openCount = issue.milestone.openIssues;
       const closedCount = issue.milestone.closedIssues;
       const totalCount = openCount + closedCount;

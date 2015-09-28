@@ -4,12 +4,17 @@ import React from 'react';
 import {KANBAN_LABEL, isLight} from '../helpers';
 
 const LabelBadge = React.createClass({
+  propTypes: {
+    label: React.PropTypes.object.isRequired,
+    className: React.PropTypes.string
+  },
   render() {
     const {label} = this.props;
     let {className} = this.props;
 
     let name;
     let icon;
+
     if (KANBAN_LABEL.test(label.name)) {
       icon = (<i className='octicon octicon-list-unordered'/>);
       name = label.name.replace(/^\d+\ -\ /, ' ');
@@ -17,11 +22,12 @@ const LabelBadge = React.createClass({
       icon = null;
       name = label.name;
     }
-
     if (label.color && isLight(label.color)) {
       className = className || '';
       className += ' ' + 'is-light';
     }
+
+
 
     return (
       <BS.Badge

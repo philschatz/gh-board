@@ -12,8 +12,8 @@ import Client from '../github-client';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
 import Issue from './issue.jsx';
+import Board from './board.jsx';
 
-const kanbanLabelName = (label) => label.name.slice(label.name.indexOf('-') + 2);
 
 const filterKanbanLabels = (labels) => {
   const kanbanLabels = _.filter(labels, (label) => KANBAN_LABEL.test(label.name));
@@ -37,16 +37,41 @@ const KanbanColumn = React.createClass({
       );
     });
 
-    return (
-      <BS.Col key={label.name} md={4} className='kanban-board-column'>
-        <IssueList
-          title={kanbanLabelName(label)}
-          label={label}
-        >
-          {issueComponents}
-        </IssueList>
-      </BS.Col>
+    let onClick;
+    onClick = () => FilterStore.addLabel(label);
+
+    let icon;
+    let name;
+    if (KANBAN_LABEL.test(label.name)) {
+      icon = (<i className='octicon octicon-list-unordered'/>);
+      name = label.name.replace(/^\d+\ -\ /, ' ');
+    } else {
+      icon = null;
+      name = label.name;
+    }
+    const title = (
+      <span className='label-title' onClick={onClick}>
+        {icon}
+        {name}
+      </span>
     );
+
+    if (issueComponents.length || SettingsStore.getShowEmptyColumns()) {
+      return (
+        <BS.Col key={label.name} md={4} className='kanban-board-column'>
+          <IssueList
+            title={title}
+            backgroundColor={label.color}
+            label={label}
+          >
+            {issueComponents}
+          </IssueList>
+        </BS.Col>
+      );
+    } else {
+      return null; // TODO: Maybe the panel should say "No Issues" (but only if it's the only column)
+    }
+
   }
 });
 
@@ -184,62 +209,6 @@ const KanbanRepo = React.createClass({
 });
 
 
-const Repos = React.createClass({
-  displayName: 'Repos',
-  componentDidMount() {
-    IssueStore.on('change', this.onChange);
-    FilterStore.on('change', this.onChange);
-    SettingsStore.on('change', this.onChange);
-    SettingsStore.on('change:showPullRequestData', this.onChangeAndRefetch);
-  },
-  componentWillUnmount() {
-    IssueStore.off('change', this.onChange);
-    FilterStore.off('change', this.onChange);
-    SettingsStore.off('change', this.onChange);
-    SettingsStore.off('change:showPullRequestData', this.onChangeAndRefetch);
-  },
-  onChangeAndRefetch() {
-    IssueStore.clearCacheCards();
-    this.forceUpdate();
-  },
-  onChange() {
-    this.setState({});
-  },
-  onLabelsChanged() {
-    this.setState({});
-  },
-  // Curried func to squirrell the primaryRepoName var
-  renderKanbanRepos(primaryRepoName) {
-    return ([columnData, cards]) => {
-
-      return (
-        <KanbanRepo
-          columnData={columnData}
-          cards={cards}
-          primaryRepoName={primaryRepoName}
-          onLabelsChanged={this.onLabelsChanged}
-        />
-      );
-
-    };
-  },
-  render() {
-    const {repoOwner, repoNames} = this.props;
-    const primaryRepoName = repoNames[0];
-    const labelsPromise = Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch();
-    const cardsPromise = IssueStore.fetchAllIssues(repoOwner, repoNames);
-
-    return (
-      <Loadable key="${repoOwner}/${repoNames}"
-        promise={Promise.all([labelsPromise, cardsPromise])}
-        loadingText='Loading GitHub Issues and Pull Requests...'
-        renderLoaded={this.renderKanbanRepos(primaryRepoName)}
-        renderError={() => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.</span>)}
-      />
-    );
-  }
-});
-
 const RepoKanbanShell = React.createClass({
   displayName: 'RepoKanbanShell',
   contextTypes: {
@@ -252,14 +221,27 @@ const RepoKanbanShell = React.createClass({
   componentWillUnmount() {
     IssueStore.stopPolling();
   },
-  render() {
+  renderLoaded() {
     let {repoOwner, repoNames} = this.context.router.getCurrentParams();
     repoNames = repoNames.split('|');
+
+    const primaryRepoName = repoNames[0];
+
+    return (
+      <Board {...this.props}
+        repoOwner={repoOwner}
+        repoNames={repoNames}
+        type={KanbanRepo}
+        columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch()}
+      />
+    );
+  },
+  render() {
 
     return (
       <Loadable
         promise={CurrentUserStore.fetchUser()}
-        renderLoaded={() => <Repos {...this.props} repoOwner={repoOwner} repoNames={repoNames}/>}
+        renderLoaded={this.renderLoaded}
       />
     );
   }

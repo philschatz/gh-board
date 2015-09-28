@@ -121,6 +121,9 @@ const SettingsItem = React.createClass({
 });
 
 const MilestonesDropdown = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
   componentDidMount() {
     FilterStore.on('change:milestone', this.update);
   },
@@ -134,6 +137,10 @@ const MilestonesDropdown = React.createClass({
     return () => {
       FilterStore.setMilestone(milestone);
     };
+  },
+  onSelectMilestonePlanning() {
+    const {router} = this.context;
+    router.transitionTo('viewMilestones', router.getCurrentParams());
   },
   render() {
     const {milestones} = this.props;
@@ -159,7 +166,7 @@ const MilestonesDropdown = React.createClass({
     if (milestones.length) {
       const milestonesItems = _.map(milestones, (milestone) => {
         return (
-          <BS.MenuItem className='milestone-item' onSelect={this.onSelectMilestone(milestone)}>{renderMilestone(milestone)}</BS.MenuItem>
+          <BS.MenuItem key={milestone.title} className='milestone-item' onSelect={this.onSelectMilestone(milestone)}>{renderMilestone(milestone)}</BS.MenuItem>
         );
       });
       let selectedMilestoneItem;
@@ -176,8 +183,7 @@ const MilestonesDropdown = React.createClass({
           <BS.MenuItem onSelect={this.onSelectMilestone(null)}>All Issues and Pull Requests</BS.MenuItem>
           <BS.MenuItem disabled>Not in a Milestone</BS.MenuItem>
           <BS.MenuItem divider/>
-          <BS.MenuItem header>Milestone Planning Views</BS.MenuItem>
-          <BS.MenuItem disabled>Issue Grooming</BS.MenuItem>
+          <BS.MenuItem onSelect={this.onSelectMilestonePlanning}>Milestone Planning View</BS.MenuItem>
         </BS.NavDropdown>
       );
     } else {

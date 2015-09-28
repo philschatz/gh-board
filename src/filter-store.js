@@ -91,7 +91,7 @@ class Store extends EventEmitter {
     return filteredLabels;
   }
 
-  filterAndSort(graph, cards) {
+  filterAndSort(graph, cards, isShowingMilestones) {
 
     // Filter all the cards
     let filteredCards = cards;
@@ -108,7 +108,7 @@ class Store extends EventEmitter {
     if (milestoneFilter) {
       filteredCards = _.filter(filteredCards, (card) => {
         const issue = card.issue;
-        if (issue.milestone && issue.milestone.title === milestoneFilter.title) {
+        if ((isShowingMilestones && !issue.milestone) || (issue.milestone && issue.milestone.title === milestoneFilter.title)) {
           return true;
         }
       });
