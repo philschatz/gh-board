@@ -34,4 +34,5 @@ Prompts to move both the Pull Request and related issue(s):
   1. auto-create the label in the new repo (confirm first)
 - [x] add checkbox for selecting multiple repos in dashboard
 - [x] select between Issue-centric and PullRequest-centric view
+- [x] support milestone (sprint) planning by making each milestone a column
 - [ ] add GitHub search
