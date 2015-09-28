@@ -121,6 +121,9 @@ const SettingsItem = React.createClass({
 });
 
 const MilestonesDropdown = React.createClass({
+  contextTypes: {
+    router: React.PropTypes.func
+  },
   componentDidMount() {
     FilterStore.on('change:milestone', this.update);
   },
@@ -134,6 +137,10 @@ const MilestonesDropdown = React.createClass({
     return () => {
       FilterStore.setMilestone(milestone);
     };
+  },
+  onSelectMilestonePlanning() {
+    const {router} = this.context;
+    router.transitionTo('viewMilestones', router.getCurrentParams());
   },
   render() {
     const {milestones} = this.props;
@@ -159,7 +166,7 @@ const MilestonesDropdown = React.createClass({
     if (milestones.length) {
       const milestonesItems = _.map(milestones, (milestone) => {
         return (
-          <BS.MenuItem className='milestone-item' onSelect={this.onSelectMilestone(milestone)}>{renderMilestone(milestone)}</BS.MenuItem>
+          <BS.MenuItem key={milestone.id} className='milestone-item' onSelect={this.onSelectMilestone(milestone)}>{renderMilestone(milestone)}</BS.MenuItem>
         );
       });
       let selectedMilestoneItem;
@@ -169,15 +176,14 @@ const MilestonesDropdown = React.createClass({
         selectedMilestoneItem = 'All Issues and Pull Requests';
       }
       return (
-        <BS.NavDropdown className='milestone-dropdown' title={<span className='selected-milestone'>{selectedMilestoneItem}</span>}>
-          <BS.MenuItem header>Filter by Milestone</BS.MenuItem>
+        <BS.NavDropdown id='milestone-dropdown' className='milestone-dropdown' title={<span className='selected-milestone'>{selectedMilestoneItem}</span>}>
+          <BS.MenuItem key='1' header>Filter by Milestone</BS.MenuItem>
           {milestonesItems}
-          <BS.MenuItem divider/>
-          <BS.MenuItem onSelect={this.onSelectMilestone(null)}>All Issues and Pull Requests</BS.MenuItem>
-          <BS.MenuItem disabled>Not in a Milestone</BS.MenuItem>
-          <BS.MenuItem divider/>
-          <BS.MenuItem header>Milestone Planning Views</BS.MenuItem>
-          <BS.MenuItem disabled>Issue Grooming</BS.MenuItem>
+          <BS.MenuItem key='2' divider/>
+          <BS.MenuItem key='3' onSelect={this.onSelectMilestone(null)}>All Issues and Pull Requests</BS.MenuItem>
+          <BS.MenuItem key='4' disabled>Not in a Milestone</BS.MenuItem>
+          <BS.MenuItem key='5' divider/>
+          <BS.MenuItem key='6' onSelect={this.onSelectMilestonePlanning}>Milestone Planning View</BS.MenuItem>
         </BS.NavDropdown>
       );
     } else {
@@ -282,7 +288,7 @@ const AppNav = React.createClass({
           src={info.avatar.url}/>
       );
       loginButton = (
-        <BS.NavDropdown title={avatarImage}>
+        <BS.NavDropdown id='signin-dropdown' title={avatarImage}>
           <BS.MenuItem header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
           <BS.MenuItem onSelect={this.starThisProject}>Click to <i className='octicon octicon-star icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
           <BS.MenuItem divider/>
@@ -346,21 +352,24 @@ const AppNav = React.createClass({
           </BS.Nav>
           <BS.Nav right>
             {milestonesDropdown}
-            <BS.NavDropdown title={settingsTitle}>
+            <BS.NavDropdown id='display-settings' title={settingsTitle}>
               <BS.MenuItem header>Display Settings</BS.MenuItem>
               <SettingsItem
+                key='HideUncategorized'
                 onSelect={SettingsStore.toggleHideUncategorized.bind(SettingsStore)}
                 isChecked={SettingsStore.getHideUncategorized()}
                 >
                 Hide Uncategorized
               </SettingsItem>
               <SettingsItem
+                key='ShowEmptyColumns'
                 onSelect={SettingsStore.toggleShowEmptyColumns.bind(SettingsStore)}
                 isChecked={SettingsStore.getShowEmptyColumns()}
                 >
                 Show Empty Columns
               </SettingsItem>
               <SettingsItem
+                key='TableLayout'
                 onSelect={SettingsStore.toggleTableLayout.bind(SettingsStore)}
                 isChecked={SettingsStore.getTableLayout()}
                 >
@@ -376,18 +385,21 @@ const AppNav = React.createClass({
                 </button>
               </BS.MenuItem>
               <SettingsItem
+                key='RelatedHideIssues'
                 onSelect={SettingsStore.setRelatedHideIssues.bind(SettingsStore)}
                 isChecked={SettingsStore.getRelatedHideIssues()}
                 >
                 Developer-Friendly
               </SettingsItem>
               <SettingsItem
+                key='RelatedHidePullRequests'
                 onSelect={SettingsStore.setRelatedHidePullRequests.bind(SettingsStore)}
                 isChecked={SettingsStore.getRelatedHidePullRequests()}
                 >
                 QA-Friendly
               </SettingsItem>
               <SettingsItem
+                key='RelatedShowAll'
                 onSelect={SettingsStore.setRelatedShowAll.bind(SettingsStore)}
                 isChecked={SettingsStore.getRelatedShowAll()}
                 >
@@ -396,6 +408,7 @@ const AppNav = React.createClass({
               <BS.MenuItem divider/>
               <BS.MenuItem header>GitHub API Settings</BS.MenuItem>
               <SettingsItem
+                key='ShowPullRequestData'
                 onSelect={SettingsStore.toggleShowPullRequestData.bind(SettingsStore)}
                 isChecked={SettingsStore.getShowPullRequestData()}
                 >

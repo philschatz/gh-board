@@ -20,13 +20,17 @@ const MoveModal = React.createClass({
     };
   },
   componentDidMount() {
-    IssueStore.on('tryToMove', this.onTryToMove);
+    IssueStore.on('tryToMoveLabel', this.onTryToMoveLabel);
+    IssueStore.on('tryToMoveMilestone', this.onTryToMoveMilestone);
   },
   componentWillUnmount() {
-    IssueStore.off('tryToMove', this.onTryToMove);
+    IssueStore.off('tryToMoveMilestone', this.onTryToMoveMilestone);
   },
-  onTryToMove(card, graph, primaryRepoName, label) {
-    this.setState({showModal: true, card, graph, primaryRepoName, label, unCheckedCards: {}});
+  onTryToMoveLabel(card, graph, primaryRepoName, label) {
+    this.setState({showModal: true, card, graph, primaryRepoName, label, milestone: null, unCheckedCards: {}});
+  },
+  onTryToMoveMilestone(card, graph, primaryRepoName, milestone) {
+    this.setState({showModal: true, card, graph, primaryRepoName, label: null, milestone, unCheckedCards: {}});
   },
   onToggleCheckbox(card) {
     return () => {
@@ -40,7 +44,7 @@ const MoveModal = React.createClass({
       this.setState({unCheckedCards});
     };
   },
-  onClickMove() {
+  onClickMoveLabel() {
     const {card, graph, label, unCheckedCards} = this.state;
     const allOtherCards = _.union(
       _.map(graph.getA(graph.cardToKey(card)), ({vertex}) => vertex),
@@ -50,14 +54,30 @@ const MoveModal = React.createClass({
 
     // Move the card and then all the others
     const promises = _.map(otherCardsToMove, (otherCard) => {
-      return IssueStore.move(otherCard.repoOwner, otherCard.repoName, otherCard.issue, label);
+      return IssueStore.moveLabel(otherCard.repoOwner, otherCard.repoName, otherCard.issue, label);
     });
-    promises.push(IssueStore.move(card.repoOwner, card.repoName, card.issue, label));
+    promises.push(IssueStore.moveLabel(card.repoOwner, card.repoName, card.issue, label));
+    Promise.all(promises).then(() => this.setState({showModal: false}));
+  },
+  // TODO: Copy/pasta from above
+  onClickMoveMilestone() {
+    const {card, graph, milestone, unCheckedCards} = this.state;
+    const allOtherCards = _.union(
+      _.map(graph.getA(graph.cardToKey(card)), ({vertex}) => vertex),
+      _.map(graph.getB(graph.cardToKey(card)), ({vertex}) => vertex)
+    );
+    const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
+
+    // Move the card and then all the others
+    const promises = _.map(otherCardsToMove, (otherCard) => {
+      return IssueStore.moveMilestone(otherCard.repoOwner, otherCard.repoName, otherCard.issue, milestone);
+    });
+    promises.push(IssueStore.moveMilestone(card.repoOwner, card.repoName, card.issue, milestone));
     Promise.all(promises).then(() => this.setState({showModal: false}));
   },
   render() {
     const {container} = this.props;
-    const {showModal, card, graph, primaryRepoName, label, unCheckedCards} = this.state;
+    const {showModal, card, graph, primaryRepoName, label, milestone, unCheckedCards} = this.state;
     const close = () => this.setState({showModal: false});
 
     if (showModal) {
@@ -124,6 +144,18 @@ const MoveModal = React.createClass({
         title = 'Move Issue';
       }
 
+      let dest;
+      let onClick;
+      if (label) {
+        dest = (<LabelBadge label={label}/>);
+        onClick = this.onClickMoveLabel;
+      } else if (milestone) {
+        dest = milestone.title;
+        onClick = this.onClickMoveMilestone;
+      } else {
+        throw new Error('BUG: only know how to move to a label or milestone');
+      }
+
       return (
         <BS.Modal
           className='move-issue'
@@ -132,13 +164,13 @@ const MoveModal = React.createClass({
           onHide={close}>
           <BS.Modal.Header closeButton>
             <BS.Modal.Title>
-              {title} to <LabelBadge label={label}/>
+              {title} to {dest}
             </BS.Modal.Title>
           </BS.Modal.Header>
           {body}
           <BS.Modal.Footer>
             {anonymousComment}
-            <BS.Button bsStyle='primary' onClick={this.onClickMove}>Move</BS.Button>
+            <BS.Button bsStyle='primary' onClick={onClick}>Move</BS.Button>
             <BS.Button onClick={close}>Cancel</BS.Button>
           </BS.Modal.Footer>
         </BS.Modal>

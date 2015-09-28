@@ -6,7 +6,7 @@ class BipartiteGraph {
     this.edgesB = {};
   }
   cardToKey(card) {
-    return card.repoOwner + '/' + card.repoName + '/' + card.issue.number;
+    return card.repoOwner + '/' + card.repoName + '#' + card.issue.number;
   }
   addEdge(a, b, aObj, bObj, edgeValue) {
     if (!this.edgesA[a]) { this.edgesA[a] = {}; }

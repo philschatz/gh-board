@@ -2,7 +2,7 @@ var path = require("path");
 var webpack = require('webpack');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var isBuild = process.env['BUILD'];
+var isBuild = process.env['NODE_ENV'] === 'production';
 
 var config = {
     // devtool: '#eval-source-map',
@@ -44,7 +44,10 @@ var config = {
     }
 };
 
-if (!isBuild) {
+if (isBuild) {
+  // Remove React warnings and whatnot
+  config.plugins.unshift(new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }));
+} else {
   config.debug = true;
   config.output.publicPath = '/dist/'; // Dev server needs this to not have a dot.
   config.devtool = 'inline-source-map';

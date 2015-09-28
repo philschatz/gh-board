@@ -161,7 +161,7 @@ const GameModal = React.createClass({
         );
       }
       return (
-        <BS.MenuItem onSelect={() => this.startupGame(game)}>
+        <BS.MenuItem key={game.id} onSelect={() => this.startupGame(game)}>
           {game.name}
           {' '}
           {winIcon}

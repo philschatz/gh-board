@@ -165,10 +165,13 @@ class IssueStore extends EventEmitter {
   fetchMilestones(repoOwner, repoName) {
     return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
   }
-  tryToMove(card, graph, primaryRepoName, label) {
-    this.emit('tryToMove', card, graph, primaryRepoName, label);
+  tryToMoveLabel(card, graph, primaryRepoName, label) {
+    this.emit('tryToMoveLabel', card, graph, primaryRepoName, label);
   }
-  move(repoOwner, repoName, issue, newLabel) {
+  tryToMoveMilestone(card, graph, primaryRepoName, milestone) {
+    this.emit('tryToMoveMilestone', card, graph, primaryRepoName, milestone);
+  }
+  moveLabel(repoOwner, repoName, issue, newLabel) {
     // Find all the labels, remove the kanbanLabel, and add the new label
     // Exclude Kanban labels
     const labels = _.filter(issue.labels, (label) => {
@@ -192,6 +195,29 @@ class IssueStore extends EventEmitter {
       cacheCards = null;
       this.emit('change');
     });
+  }
+  moveMilestone(repoOwner, repoName, issue, newMilestone) {
+    // TODO: Check if the milestone exists. If not, create it
+
+    Client.getOcto().repos(repoOwner, repoName).milestones.fetch()
+    .then((milestones) => {
+      // Find the milestone with a matching Title
+      const matchingMilestone = _.filter(milestones, (milestone) => {
+        return milestone.title === newMilestone.title;
+      })[0];
+
+      return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({milestone: matchingMilestone.number})
+      .then(() => {
+
+        this.setLastViewed(repoOwner, repoName, issue.number);
+
+        // invalidate the issues list
+        cacheCards = null;
+        this.emit('change');
+      });
+
+    });
+
   }
   createLabel(repoOwner, repoName, opts) {
     return Client.getOcto().repos(repoOwner, repoName).labels.create(opts);
