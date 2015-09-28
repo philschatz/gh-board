@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --hot --progress --colors --display-chunks --display-modules --display-origins",
-    "build": "eslint src; BUILD=1 webpack --optimize-minimize --progress --colors"
+    "build": "eslint src; NODE_ENV=production webpack --optimize-minimize --progress --colors"
   },
   "author": "",
   "license": "MIT",
