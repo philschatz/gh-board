@@ -35,7 +35,7 @@ const ALL_GAMES = [
   { name: 'You\'re Pulleying my Leg', id: '11345687' },
   { name: 'Aunt Flora\'s Mansion', id: 'dca39858ca7ca7fcbe20' },
   { name: 'Cyber-Lasso', id: 'e3e444f7c63fb21b6ec0' }, // slow bc of `new Function() and no global`
-  { name: 'Puzzle Butler', id: '7347484' },
+  { name: 'Bubble Butler', id: '7347484' },
   { name: 'Marble Shoot', id: '11359118' },
   { name: 'Spacekoban', note: 'short', id: '6a6c07f71d7039e4155e' },
   { name: 'Pushcat Jr', id: 'a8f4e5aed01de7c9ef50' },
@@ -44,7 +44,6 @@ const ALL_GAMES = [
   { name: 'Aaaah! I\'m Being Attacked by a Giant Tentacle!', id: 'cffeb1b80f76458b742a' },
   { name: 'A Good Tunnel is hard to dig', id: 'ddd34751c0a09df5b6f9' },
   { name: 'Train Braining', id: 'a4195276e6979f5bdb21' }
-  // { name: 'Test', id: 'eca4fa7926c882036002' }
 ];
 
 
@@ -150,8 +149,9 @@ const GameModal = React.createClass({
   },
   render() {
     const gamesWon = this.getGamesWon();
-    const winCount = Object.keys(gamesWon).length;
-    const availableGames = ALL_GAMES.slice(0, winCount < 6 ? winCount + 3 : ALL_GAMES.length);
+    // const winCount = Object.keys(gamesWon).length;
+    // const availableGames = ALL_GAMES.slice(0, winCount < 6 ? winCount + 3 : ALL_GAMES.length);
+    const availableGames = ALL_GAMES;
 
     const unlockedGames = _.map(availableGames, (game) => {
       let winIcon;
@@ -169,22 +169,24 @@ const GameModal = React.createClass({
       );
     });
 
-    const nextGames = _.map(ALL_GAMES.slice(winCount + 3, winCount + 3 + 2), (game) => {
-      return (
-        <BS.MenuItem disabled>
-          {game.name.replace(/[A-Za-z]/g, '?')}
-        </BS.MenuItem>
-      );
-    });
+    // const nextGames = _.map(ALL_GAMES.slice(winCount + 3, winCount + 3 + 2), (game) => {
+    //   return (
+    //     <BS.MenuItem disabled>
+    //       {game.name.replace(/[A-Za-z]/g, '?')}
+    //     </BS.MenuItem>
+    //   );
+    // });
 
     const dropDown = (
       <BS.DropdownButton title='Change Game' style={{display: 'inline'}}>
         <BS.MenuItem header>Unlocked Games</BS.MenuItem>
         {unlockedGames}
+        { /*
         <BS.MenuItem divider/>
         <BS.MenuItem header>Locked Games</BS.MenuItem>
         {nextGames}
         <BS.MenuItem disabled>... Finish a game to unlock more!</BS.MenuItem>
+        */}
       </BS.DropdownButton>
     );
     return (
