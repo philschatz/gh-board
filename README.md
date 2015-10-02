@@ -12,15 +12,25 @@ Just specify a GitHub repository in the URL and off you go!
 - [react-bootstrap/react-bootstrap](http://philschatz.com/gh-board/#/r/react-bootstrap/react-bootstrap)
 - [jquery/jquery](http://philschatz.com/gh-board/#/r/jquery/jquery)
 
-# Screenshots
+# Features
 
-Automatically Combine an Issue with a Pull Request by using `fixes #123` in the Pull Request body:
+Updates the board when a Pull Request or Issue changes.
+
+Allows Drag and Drop to move Issues/Pull Requests.
+
+Shows CI status (red/green bar) and merge conflicts (dashed bar):
+
+![ci status and merge conflicts](https://cloud.githubusercontent.com/assets/253202/10155505/20f04fe0-6644-11e5-8570-b5eb9b2f7702.png)
+
+Combines an Issue with a Pull Request by using `fixes #123` in the Pull Request body:
 
 ![combines Issue and Pull Request](https://cloud.githubusercontent.com/assets/253202/9784658/8e231a26-577a-11e5-85ec-1d40fcaa5207.png)
 
-Prompts to move both the Pull Request and related issue(s):
+Prompts to move both the Pull Request and related Issue(s) when an item is dragged:
 
 ![prompt to move related Issues](https://cloud.githubusercontent.com/assets/253202/9868052/39c4cdaa-5b42-11e5-8942-7d5a1e19fd24.png)
+
+Supports multiple repositories on one board.
 
 # Development
 
