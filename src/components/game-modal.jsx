@@ -178,7 +178,7 @@ const GameModal = React.createClass({
     // });
 
     const dropDown = (
-      <BS.DropdownButton title='Change Game' style={{display: 'inline'}}>
+      <BS.DropdownButton title='Change Game' bsStyle='primary' style={{display: 'inline'}}>
         <BS.MenuItem header>Unlocked Games</BS.MenuItem>
         {unlockedGames}
         { /*
