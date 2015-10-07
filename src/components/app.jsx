@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link, RouteHandler} from 'react-router';
+import {Link, RouteHandler, HistoryLocation} from 'react-router';
 import * as BS from 'react-bootstrap';
 import HTML5Backend from 'react-dnd/modules/backends/HTML5';
 import { DragDropContext } from 'react-dnd';
@@ -19,6 +19,7 @@ import Time from './time.jsx';
 import Loadable from './loadable.jsx';
 
 import GameModal from './game-modal.jsx';
+
 
 const KarmaWarning = React.createClass({
   getInitialState() {
@@ -428,11 +429,24 @@ const AppNav = React.createClass({
 });
 
 const App = React.createClass({
+  contextTypes: {router: React.PropTypes.func},
+
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
+    HistoryLocation.addChangeListener(this.storeHistory);
+    this.storeHistory({path: this.context.router.getCurrentPath()});
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
+  },
+  componentWillUnmount() {
+    HistoryLocation.removeChangeListener(this.storeHistory);
+  },
+  storeHistory(locationChangeEvent) {
+    if (window.ga) {
+      window.ga('set', 'page', locationChangeEvent.path);
+      window.ga('send', 'pageview');
+    }
   },
   onChange() {
     this.forceUpdate();
