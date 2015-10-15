@@ -3,7 +3,6 @@ import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 
-import {KANBAN_LABEL} from '../helpers';
 import IssueStore from '../issue-store';
 import FilterStore from '../filter-store';
 import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
@@ -87,7 +86,7 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, graph, pullRequest, status, primaryRepoName} = this.props;
+    const {card, graph, pullRequest, status, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
 
@@ -111,7 +110,7 @@ let Issue = React.createClass({
         src={user.avatar.url}/>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
-      if (!KANBAN_LABEL.test(label.name)) {
+      if (!columnRegExp.test(label.name)) {
         return label;
       }
     });

@@ -15,8 +15,8 @@ import Issue from './issue.jsx';
 import Board from './board.jsx';
 
 
-const filterKanbanLabels = (labels) => {
-  const kanbanLabels = _.filter(labels, (label) => KANBAN_LABEL.test(label.name));
+const filterKanbanLabels = (labels, columnRegExp) => {
+  const kanbanLabels = _.filter(labels, (label) => columnRegExp.test(label.name));
   // TODO: Handle more than 10 workflow states
   return kanbanLabels.sort();
 };
@@ -24,7 +24,7 @@ const filterKanbanLabels = (labels) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, graph, primaryRepoName} = this.props;
+    const {label, cards, graph, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -33,6 +33,7 @@ const KanbanColumn = React.createClass({
           primaryRepoName={primaryRepoName}
           card={card}
           graph={graph}
+          columnRegExp={columnRegExp}
           />
       );
     });
@@ -42,7 +43,7 @@ const KanbanColumn = React.createClass({
 
     let icon;
     let name;
-    if (KANBAN_LABEL.test(label.name)) {
+    if (columnRegExp.test(label.name)) {
       icon = (<i className='octicon octicon-list-unordered'/>);
       name = label.name.replace(/^\d+\ -\ /, ' ');
     } else {
@@ -146,7 +147,7 @@ const KanbanRepo = React.createClass({
   //   }
   // },
   render() {
-    const {columnData, cards, primaryRepoName} = this.props;
+    const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
 
 
     let allLabels;
@@ -157,7 +158,7 @@ const KanbanRepo = React.createClass({
       allLabels = columnData;
     }
 
-    const kanbanLabels = filterKanbanLabels(allLabels);
+    const kanbanLabels = filterKanbanLabels(allLabels, columnRegExp);
 
     const graph = buildBipartiteGraph(cards);
 
@@ -168,7 +169,7 @@ const KanbanRepo = React.createClass({
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 
     const isFilteringByColumn = _.filter(FilterStore.getLabels(), (label) => {
-      return KANBAN_LABEL.test(label.name);
+      return columnRegExp.test(label.name);
     })[0];
 
     const kanbanColumns = _.map(kanbanLabels, (label) => {
@@ -189,6 +190,7 @@ const KanbanRepo = React.createClass({
             label={label}
             cards={columnCards}
             graph={graph}
+            columnRegExp={columnRegExp}
             primaryRepoName={primaryRepoName}
           />
         );
@@ -223,8 +225,14 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    let {repoOwner, repoNames, columnRegExp} = this.context.router.getCurrentParams();
     repoNames = repoNames.split('|');
+
+    if (columnRegExp) {
+      columnRegExp = new RegExp(columnRegExp);
+    } else {
+      columnRegExp = KANBAN_LABEL;
+    }
 
     const primaryRepoName = repoNames[0];
 
@@ -232,6 +240,7 @@ const RepoKanbanShell = React.createClass({
       <Board {...this.props}
         repoOwner={repoOwner}
         repoNames={repoNames}
+        columnRegExp={columnRegExp}
         type={KanbanRepo}
         columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch()}
       />

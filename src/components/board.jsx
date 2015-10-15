@@ -36,11 +36,11 @@ const Board = React.createClass({
   },
   // Curried func to squirrell the primaryRepoName var
   renderKanbanRepos(primaryRepoName) {
-    const {type} = this.props;
+    const {type, columnRegExp} = this.props;
 
     return ([columnData, cards]) => {
 
-      return React.createElement(type, {columnData, cards, primaryRepoName});
+      return React.createElement(type, {columnData, cards, primaryRepoName, columnRegExp});
 
     };
   },
