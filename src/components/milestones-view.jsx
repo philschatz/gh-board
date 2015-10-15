@@ -8,6 +8,7 @@ import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import Client from '../github-client';
+import {KANBAN_LABEL} from '../helpers';
 import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
 import Issue from './issue.jsx';
@@ -16,7 +17,7 @@ import Board from './board.jsx';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, graph, primaryRepoName} = this.props;
+    const {milestone, cards, graph, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -25,6 +26,7 @@ const KanbanColumn = React.createClass({
           primaryRepoName={primaryRepoName}
           card={card}
           graph={graph}
+          columnRegExp={columnRegExp}
           />
       );
     });
@@ -69,7 +71,7 @@ const KanbanColumn = React.createClass({
 
 const MilestonesView = React.createClass({
   render() {
-    const {columnData, cards, primaryRepoName} = this.props;
+    const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
 
     const graph = buildBipartiteGraph(cards);
 
@@ -86,6 +88,7 @@ const MilestonesView = React.createClass({
         cards={uncategorizedCards}
         graph={graph}
         primaryRepoName={primaryRepoName}
+        columnRegExp={columnRegExp}
       />
     );
 
@@ -109,6 +112,7 @@ const MilestonesView = React.createClass({
           cards={columnCards}
           graph={graph}
           primaryRepoName={primaryRepoName}
+          columnRegExp={columnRegExp}
         />
       );
     });
@@ -138,15 +142,22 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    let {repoOwner, repoNames, columnRegExp} = this.context.router.getCurrentParams();
     repoNames = repoNames.split('|');
 
     const primaryRepoName = repoNames[0];
+
+    if (columnRegExp) {
+      columnRegExp = new RegExp(columnRegExp);
+    } else {
+      columnRegExp = KANBAN_LABEL;
+    }
 
     return (
       <Board {...this.props}
         repoOwner={repoOwner}
         repoNames={repoNames}
+        columnRegExp={columnRegExp}
         type={MilestonesView}
         columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch()}
       />

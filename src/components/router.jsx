@@ -13,6 +13,7 @@ const routes = (
     <Redirect from='/' to='viewDashboard' />
     <Route name='viewDashboard' path='/dashboard' handler={Dashboard}/>
     <Route name='viewBoard' path='/r/:repoOwner/:repoNames' handler={RepoKanban}/>
+    <Route name='viewBoardByRegexp' path='/r/:repoOwner/:repoNames/by/:columnRegExp' handler={RepoKanban}/>
     <Route name='viewMilestones' path='/r/:repoOwner/:repoNames/milestones' handler={MilestonesView}/>
     <Route name='viewMergedSince' path='/r/:repoOwner/:repoNames/since/:sha' handler={MergedSince}/>
   </Route>
