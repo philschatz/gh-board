@@ -32,6 +32,10 @@ Prompts to move both the Pull Request and related Issue(s) when an item is dragg
 
 Supports multiple repositories on one board.
 
+Organize Pull requests and Issues by user to see when things were last updated.
+
+![list issues by user](https://cloud.githubusercontent.com/assets/253202/10700740/d15fd326-798d-11e5-9cf5-bb990696979c.png)
+
 # Development
 
 - `npm start` to start up the dev server and go to `http://localhost:8080`
