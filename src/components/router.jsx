@@ -6,6 +6,7 @@ import App from './app.jsx';
 import Dashboard from './dashboard.jsx';
 import RepoKanban from './repo-kanban.jsx';
 import MilestonesView from './milestones-view.jsx';
+import ByUserView from './by-user-view.jsx';
 import MergedSince from './merged-since.jsx';
 
 const routes = (
@@ -15,6 +16,7 @@ const routes = (
     <Route name='viewBoard' path='/r/:repoOwner/:repoNames' handler={RepoKanban}/>
     <Route name='viewBoardByRegexp' path='/r/:repoOwner/:repoNames/by/:columnRegExp' handler={RepoKanban}/>
     <Route name='viewMilestones' path='/r/:repoOwner/:repoNames/milestones' handler={MilestonesView}/>
+    <Route name='viewBoardByUser' path='/r/:repoOwner/:repoNames/by-user' handler={ByUserView}/>
     <Route name='viewMergedSince' path='/r/:repoOwner/:repoNames/since/:sha' handler={MergedSince}/>
   </Route>
 );

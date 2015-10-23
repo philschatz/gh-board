@@ -406,6 +406,9 @@ const AppNav = React.createClass({
                 >
                 Combined
               </SettingsItem>
+              <BS.MenuItem>
+                <Link to='viewBoardByUser' params={{repoOwner, repoNames: repoNames.join('|')}}>Manager (Issues by User)</Link>
+              </BS.MenuItem>
               <BS.MenuItem divider/>
               <BS.MenuItem header>GitHub API Settings</BS.MenuItem>
               <SettingsItem
