@@ -351,7 +351,7 @@ const DashboardShell = React.createClass({
         }
       })
       .then((allRepos) => this.setState({repos: allRepos}))
-      .then(null, () => this.setState({repos: []}));
+      .catch(() => this.setState({repos: []}));
       myRepos = (
         <span className='custom-loading'>
           <i className='octicon octicon-sync icon-spin'/>
