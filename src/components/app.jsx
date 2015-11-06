@@ -454,7 +454,7 @@ const App = React.createClass({
   },
   storeHistory(locationChangeEvent) {
     if (window.ga) {
-      window.ga('set', 'page', locationChangeEvent.path);
+      window.ga('set', 'page', '/gh-board' + locationChangeEvent.path);
       window.ga('send', 'pageview');
     }
   },
