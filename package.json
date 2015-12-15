@@ -37,6 +37,7 @@
     "react-bootstrap": "^0.25.1",
     "react-dnd": "^1.1.2",
     "react-router": "^0.13.3",
+    "recordo": "philschatz/recordo.js#master",
     "ultramarked": "^1.7.0",
     "underscore": "^1.8.3"
   }

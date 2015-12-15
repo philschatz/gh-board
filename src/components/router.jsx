@@ -24,6 +24,8 @@ const routes = (
 
 export default function() {
   Router.run(routes, function (Handler) {
-    React.render(<Handler/>, document.body);
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+    React.render(<Handler/>, div);
   });
 }
