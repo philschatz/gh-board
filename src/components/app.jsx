@@ -1,8 +1,8 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link, RouteHandler, HistoryLocation} from 'react-router';
+import {Link, HistoryLocation} from 'react-router';
 import * as BS from 'react-bootstrap';
-import HTML5Backend from 'react-dnd/modules/backends/HTML5';
+import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 
 import SettingsStore from '../settings-store';
@@ -140,8 +140,9 @@ const MilestonesDropdown = React.createClass({
     };
   },
   onSelectMilestonePlanning() {
+    const {params} = this.props;
     const {router} = this.context;
-    router.transitionTo('viewMilestones', router.getCurrentParams());
+    router.transitionTo('viewMilestones', params);
   },
   render() {
     const {milestones} = this.props;
@@ -256,7 +257,7 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    let {repoOwner, repoNames} = this.props.params || {};
     if (repoNames) {
       repoNames = repoNames.split('|');
     }
@@ -443,14 +444,14 @@ const App = React.createClass({
 
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
-    HistoryLocation.addChangeListener(this.storeHistory);
-    this.storeHistory({path: this.context.router.getCurrentPath()});
+    //TODO: Bring this back: HistoryLocation.addChangeListener(this.storeHistory);
+    this.storeHistory({path: this.props.route.path});
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
   },
   componentWillUnmount() {
-    HistoryLocation.removeChangeListener(this.storeHistory);
+    //TODO: Bring this back: HistoryLocation.removeChangeListener(this.storeHistory);
   },
   storeHistory(locationChangeEvent) {
     if (window.ga) {
@@ -471,7 +472,7 @@ const App = React.createClass({
       <div className={classes.join(' ')}>
         <AppNav/>
         {/* Subroutes are added here */}
-        <RouteHandler/>
+        {this.props.children}
         <KarmaWarning/>
       </div>
     );

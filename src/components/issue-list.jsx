@@ -53,12 +53,14 @@ const IssueList = React.createClass({
     };
 
     return connectDropTarget(
-      <BS.Panel className={classes} header={header}>
-        <BS.ListGroup fill>
-          <BS.ListGroupItem key='dnd-placeholder' className='dnd-placeholder'/>
-          {children}
-        </BS.ListGroup>
-      </BS.Panel>
+      <div className='-drop-target'>
+        <BS.Panel className={classes} header={header}>
+          <BS.ListGroup fill>
+            <BS.ListGroupItem key='dnd-placeholder' className='dnd-placeholder'/>
+            {children}
+          </BS.ListGroup>
+        </BS.Panel>
+      </div>
     );
 
   }

@@ -237,22 +237,24 @@ let Issue = React.createClass({
       'is-mergeable': isMergeable
     };
     return connectDragSource(
-      <BS.ListGroupItem
-        key={issue.id}
-        data-status-state={status ? status.state : null}
-        header={header}
-        onDragStart={this.onDragStart}
-        className={classes}>
+      <div className='-drag-source'>
+        <BS.ListGroupItem
+          key={issue.id}
+          data-status-state={status ? status.state : null}
+          header={header}
+          onDragStart={this.onDragStart}
+          className={classes}>
 
-        <span key='right-footer' className='pull-right'>
-          <Time key='time' className='updated-at' dateTime={updatedAt}/>
-          {assignedAvatar}
-        </span>
-        <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
-        {taskCounts}
-        {milestone}
+          <span key='right-footer' className='pull-right'>
+            <Time key='time' className='updated-at' dateTime={updatedAt}/>
+            {assignedAvatar}
+          </span>
+          <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
+          {taskCounts}
+          {milestone}
 
-      </BS.ListGroupItem>
+        </BS.ListGroupItem>
+      </div>
     );
   }
 });

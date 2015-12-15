@@ -142,7 +142,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames, columnRegExp} = this.context.router.getCurrentParams();
+    let {repoOwner, repoNames, columnRegExp} = this.props.params;
     repoNames = repoNames.split('|');
 
     const primaryRepoName = repoNames[0];
