@@ -2,6 +2,7 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
+import classnames from 'classnames';
 
 import IssueStore from '../issue-store';
 import FilterStore from '../filter-store';
@@ -243,7 +244,7 @@ let Issue = React.createClass({
           data-status-state={status ? status.state : null}
           header={header}
           onDragStart={this.onDragStart}
-          className={classes}>
+          className={classnames(classes)}>
 
           <span key='right-footer' className='pull-right'>
             <Time key='time' className='updated-at' dateTime={updatedAt}/>
