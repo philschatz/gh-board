@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
+import classnames from 'classnames';
 
 import Client from '../github-client';
 import CurrentUserStore from '../user-store';
@@ -12,7 +13,7 @@ import Time from './time.jsx';
 
 const SAMPLE_REPOS = [
   {repoOwner: 'react-bootstrap', repoName: 'react-bootstrap'},
-  {repoOwner: 'rauhryan', repoName: 'huboard'},
+  {repoOwner: 'huboard', repoName: 'huboard'},
   {repoOwner: 'openstax', repoNames: ['tutor-js', 'tutor-server'], comment: ' (multiple repositories)'},
   {repoOwner: 'jquery', repoName: 'jquery'}
 ];
@@ -97,10 +98,11 @@ const RepoItem = React.createClass({
       );
     }
 
+    const repoLink = `/r/${repoOwner}/${repoNames}`;
     return (
-      <BS.ListGroupItem key={repoName} className={classes}>
+      <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         <i className={'repo-icon octicon ' + iconClass}/>
-        <Link className='repo-open-link' to='viewBoard' params={{repoOwner, repoNames}}>{repoName}</Link>
+        <Link to={repoLink}>{repoName}</Link>
         {repo.private && (<BS.Label className='repo-private-label' bsStyle='warning'>PRIVATE</BS.Label>) || null}
         {updatedAt}
         {comment}

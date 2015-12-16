@@ -1,8 +1,8 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link, RouteHandler, HistoryLocation} from 'react-router';
+import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
-import HTML5Backend from 'react-dnd/modules/backends/HTML5';
+import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 
 import SettingsStore from '../settings-store';
@@ -11,6 +11,7 @@ import NewVersionChecker from '../new-version-checker';
 import CurrentUserStore from '../user-store';
 import FilterStore from '../filter-store';
 import IssueStore from '../issue-store';
+import history from '../history';
 
 import LoginModal from './login-modal.jsx';
 import LabelBadge from './label-badge.jsx';
@@ -99,7 +100,7 @@ const KarmaWarning = React.createClass({
           </li>
           {newestText}
         </BS.Nav>
-        <BS.Nav right>
+        <BS.Nav pullRight>
           <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><i className='octicon octicon-gift' title='Oooh, a present!'/></BS.NavItem>
           <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
         </BS.Nav>
@@ -140,8 +141,9 @@ const MilestonesDropdown = React.createClass({
     };
   },
   onSelectMilestonePlanning() {
+    const {params} = this.props;
     const {router} = this.context;
-    router.transitionTo('viewMilestones', router.getCurrentParams());
+    router.transitionTo('viewMilestones', params);
   },
   render() {
     const {milestones} = this.props;
@@ -256,7 +258,7 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let {repoOwner, repoNames} = this.context.router.getCurrentParams();
+    let {repoOwner, repoNames} = this.props.params || {};
     if (repoNames) {
       repoNames = repoNames.split('|');
     }
@@ -265,7 +267,7 @@ const AppNav = React.createClass({
     const close = () => this.setState({ showModal: false});
 
     const brand = (
-      <Link to='viewDashboard'><i className='octicon octicon-home'/></Link>
+      <Link to='/dashboard'><i className='octicon octicon-home'/></Link>
     );
     const filtering = _.map(FilterStore.getLabels(), (label) => {
       return (
@@ -290,10 +292,10 @@ const AppNav = React.createClass({
       );
       loginButton = (
         <BS.NavDropdown id='signin-dropdown' title={avatarImage}>
-          <BS.MenuItem header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
-          <BS.MenuItem onSelect={this.starThisProject}>Click to <i className='octicon octicon-star icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
-          <BS.MenuItem divider/>
-          <BS.MenuItem eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
+          <BS.MenuItem key='1' header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
+          <BS.MenuItem key='2' onSelect={this.starThisProject}>Click to <i className='octicon octicon-star icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
+          <BS.MenuItem key='3' divider/>
+          <BS.MenuItem key='4' eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
         </BS.NavDropdown>
       );
     } else {
@@ -316,10 +318,11 @@ const AppNav = React.createClass({
         );
       } else {
         repoNameItems = _.map(repoNames, (repoName, index) => {
+          const repoLink = `/r/${repoOwner}/${repoName}`;
           return (
             <span className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
-              <Link className='repo-name' to='viewBoard' params={{repoOwner, repoNames: repoName}}>{repoName}</Link>
+              <Link to={repoLink} className='repo-name'>{repoName}</Link>
             </span>
           );
         });
@@ -342,25 +345,27 @@ const AppNav = React.createClass({
       /*eslint-enable no-alert */
     };
 
+    const repoLink = `/r/${repoOwner}/${repoNames && repoNames.join('|') || ''}/by-user`;
     let managerMenu;
     if (repoNames) {
       managerMenu = (
-        <BS.MenuItem>
-          <Link to='viewBoardByUser' params={{repoOwner, repoNames: repoNames && repoNames.join('|') || null}}>Manager (Issues by User)</Link>
-        </BS.MenuItem>
+        <BS.MenuItem href={"#" + repoLink}>Manager (Issues by User)</BS.MenuItem>
       );
     }
 
     return (
       <div className='app-nav'>
-        <BS.Navbar className='topbar-nav' fixedTop brand={brand}>
+        <BS.Navbar className='topbar-nav' fixedTop>
+          <BS.Navbar.Header>
+            <BS.Navbar.Brand>{brand}</BS.Navbar.Brand>
+          </BS.Navbar.Header>
           <BS.Nav>
             {repoInfo}
             <BS.NavItem className='active-filter'>
               {filtering}
             </BS.NavItem>
           </BS.Nav>
-          <BS.Nav right>
+          <BS.Nav pullRight>
             {milestonesDropdown}
             <BS.NavDropdown id='display-settings' title={settingsTitle}>
               <BS.MenuItem header>Display Settings</BS.MenuItem>
@@ -443,18 +448,18 @@ const App = React.createClass({
 
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
-    HistoryLocation.addChangeListener(this.storeHistory);
-    this.storeHistory({path: this.context.router.getCurrentPath()});
+    this._historyListener = history.listen(this.storeHistory);
+    this.storeHistory({path: this.props.route.path});
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
   },
   componentWillUnmount() {
-    HistoryLocation.removeChangeListener(this.storeHistory);
+    this._historyListener();
   },
   storeHistory(locationChangeEvent) {
     if (window.ga) {
-      window.ga('set', 'page', '/gh-board' + locationChangeEvent.path);
+      window.ga('set', 'page', '/gh-board' + locationChangeEvent.pathname);
       window.ga('send', 'pageview');
     }
   },
@@ -462,6 +467,7 @@ const App = React.createClass({
     this.forceUpdate();
   },
   render() {
+    const {params} = this.props;
     const classes = ['app'];
     if (SettingsStore.getTableLayout()) {
       classes.push('is-table-layout');
@@ -469,9 +475,9 @@ const App = React.createClass({
 
     return (
       <div className={classes.join(' ')}>
-        <AppNav/>
+        <AppNav params={params}/>
         {/* Subroutes are added here */}
-        <RouteHandler/>
+        {this.props.children}
         <KarmaWarning/>
       </div>
     );

@@ -28,7 +28,7 @@ var config = {
           { test: /\.jsx?$/, loader: 'eslint-loader', exclude: /node_modules/ },
         ],
         loaders: [
-            { test: /\.jsx?$/, loaders: ['react-hot', 'babel'], exclude: [/node_modules/, /puzzle-script/] },
+            { test: /\.jsx?$/, loader: 'babel', exclude: [/node_modules/, /puzzle-script/], query: { presets: ['react', 'es2015']} },
             { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
             { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
             { test: /\.(woff|woff2|eot|ttf)/, loader: "url-loader?limit=30000&name=[name]-[hash].[ext]" }

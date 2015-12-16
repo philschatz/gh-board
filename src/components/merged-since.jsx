@@ -47,7 +47,7 @@ const MergedSinceShell = React.createClass({
     router: React.PropTypes.func
   },
   render() {
-    let {repoOwner, repoNames, sha} = this.context.router.getCurrentParams();
+    let {repoOwner, repoNames, sha} = this.props.params;
 
     return (
       <Loadable
