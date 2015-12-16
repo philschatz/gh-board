@@ -349,7 +349,7 @@ const AppNav = React.createClass({
     let managerMenu;
     if (repoNames) {
       managerMenu = (
-        <BS.MenuItem href={"#" + repoLink}>Manager (Issues by User)</BS.MenuItem>
+        <BS.MenuItem href={'#' + repoLink}>Manager (Issues by User)</BS.MenuItem>
       );
     }
 
