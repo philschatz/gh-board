@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'underscore';
-import {Link} from 'react-router';
+import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 
@@ -113,9 +113,7 @@ const RepoItem = React.createClass({
 });
 
 const RepoGroup = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
+  mixins: [History],
   getInitialState() {
     return {selectedRepos: {}};
   },
@@ -135,7 +133,7 @@ const RepoGroup = React.createClass({
     const {repoOwner} = this.props;
     const {selectedRepos} = this.state;
     const repoNames = Object.keys(selectedRepos).join('|');
-    this.context.router.transitionTo('viewBoard', {repoOwner, repoNames});
+    this.history.pushState(null, `/r/${repoOwner}/${repoNames}`);
   },
   render() {
     let {repoOwner, repos, index} = this.props;
@@ -237,9 +235,7 @@ const Dashboard = React.createClass({
 });
 
 const CustomRepoModal = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
+  mixins: [History],
   getInitialState() {
     return {customRepoName: null};
   },
@@ -249,7 +245,7 @@ const CustomRepoModal = React.createClass({
   },
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
-    this.context.router.transitionTo('viewBoard', {repoOwner, repoNames: repoName});
+    this.history.pushState(null, `/r/${repoOwner}/${repoName}`);
   },
   render() {
     const {customRepoName} = this.state;

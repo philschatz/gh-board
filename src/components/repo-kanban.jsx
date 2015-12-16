@@ -213,10 +213,6 @@ const KanbanRepo = React.createClass({
 
 
 const RepoKanbanShell = React.createClass({
-  displayName: 'RepoKanbanShell',
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   componentWillMount() {
     // Needs to be called before `render()`
     IssueStore.startPolling();

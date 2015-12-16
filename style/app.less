@@ -556,3 +556,7 @@ i.icon-spin {
     }
   }
 }
+
+// react-dnd now requires DragSource and DropTarget elements to be simple Components
+// so I had to insert a wrapper div around ListGroupItem
+.list-group > .-drag-source + .-drag-source { border-top: 1px solid #eee; }

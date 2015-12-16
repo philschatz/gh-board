@@ -35,7 +35,7 @@ export default React.createClass({
     const humanized = Moment(dateTime).fromNow();
     let dateTimeString;
     try {
-      dateTimeString = dateTime.toISOString()
+      dateTimeString = dateTime.toISOString();
     } catch (e) {
       console.log('Invalid dateTime. Probably from octokat');
       dateTimeString = '';
