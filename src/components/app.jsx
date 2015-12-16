@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link, HistoryLocation} from 'react-router';
+import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
@@ -11,6 +11,7 @@ import NewVersionChecker from '../new-version-checker';
 import CurrentUserStore from '../user-store';
 import FilterStore from '../filter-store';
 import IssueStore from '../issue-store';
+import history from '../history';
 
 import LoginModal from './login-modal.jsx';
 import LabelBadge from './label-badge.jsx';
@@ -447,18 +448,18 @@ const App = React.createClass({
 
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
-    //TODO: Bring this back: HistoryLocation.addChangeListener(this.storeHistory);
+    this._historyListener = history.listen(this.storeHistory);
     this.storeHistory({path: this.props.route.path});
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
   },
   componentWillUnmount() {
-    //TODO: Bring this back: HistoryLocation.removeChangeListener(this.storeHistory);
+    this._historyListener();
   },
   storeHistory(locationChangeEvent) {
     if (window.ga) {
-      window.ga('set', 'page', '/gh-board' + locationChangeEvent.path);
+      window.ga('set', 'page', '/gh-board' + locationChangeEvent.pathname);
       window.ga('send', 'pageview');
     }
   },
