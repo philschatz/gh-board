@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link} from 'react-router';
+import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
@@ -123,9 +123,7 @@ const SettingsItem = React.createClass({
 });
 
 const MilestonesDropdown = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
+  mixins: [History],
   componentDidMount() {
     FilterStore.on('change:milestone', this.update);
   },
@@ -141,9 +139,8 @@ const MilestonesDropdown = React.createClass({
     };
   },
   onSelectMilestonePlanning() {
-    const {params} = this.props;
-    const {router} = this.context;
-    router.transitionTo('viewMilestones', params);
+    const {repoOwner, repoName} = this.props;
+    this.history.pushState(null, `/r/${repoOwner}/${repoName}/milestones`);
   },
   render() {
     const {milestones} = this.props;
@@ -202,16 +199,13 @@ const MilestonesDropdownShell = React.createClass({
     return (
       <Loadable
         promise={IssueStore.fetchMilestones(repoOwner, repoName)}
-        renderLoaded={(milestones) => <MilestonesDropdown milestones={milestones}/>}
+        renderLoaded={(milestones) => <MilestonesDropdown repoOwner={repoOwner} repoName={repoName} milestones={milestones}/>}
         />
     );
   }
 });
 
 const AppNav = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.func
-  },
   getInitialState() {
     return {info: null, showModal: false};
   },
@@ -444,8 +438,6 @@ const AppNav = React.createClass({
 });
 
 const App = React.createClass({
-  contextTypes: {router: React.PropTypes.func},
-
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
     this._historyListener = history.listen(this.storeHistory);
