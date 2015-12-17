@@ -13,6 +13,7 @@ import Loadable from './loadable.jsx';
 import IssueList from './issue-list.jsx';
 import Issue from './issue.jsx';
 import Board from './board.jsx';
+import GithubFlavoredMarkdown from './gfm.jsx';
 
 
 const KanbanColumn = React.createClass({
@@ -36,7 +37,10 @@ const KanbanColumn = React.createClass({
       heading = (
         <span className='milestone-title' onClick={() => FilterStore.setMilestone(milestone)}>
           <i className='octicon octicon-milestone'/>
-          {milestone.title}
+          <GithubFlavoredMarkdown
+            inline
+            disableLinks={true}
+            text={milestone.title}/>
         </span>
       );
     } else {

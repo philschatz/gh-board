@@ -67,6 +67,10 @@ body { background-color: #f3f3f3; }
     }
 
     .milestone-dropdown {
+      .milestone-title {
+        .emoji { height: 14px; } // from the item styling
+      }
+
       .milestone-item {
         > a {
           display: table;
@@ -163,6 +167,8 @@ body { background-color: #f3f3f3; }
           .column-title {
             padding: 10px 15px;
 
+            .emoji { height: 16px; } // This is what is set on the <h2>
+
             &:not(.is-light) { color: white; }
 
             /* Support filtering on a single kanban column */
@@ -213,6 +219,8 @@ body { background-color: #f3f3f3; }
             padding-right: 1rem;
             padding-top: 1rem;
             background-color: white;
+
+            .emoji { height: 18px; } // This is what is set on the <h4>
 
             .related-issues .issue-blurb {
               color: #999;
