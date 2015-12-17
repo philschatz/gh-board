@@ -99,13 +99,20 @@ const InnerMarkdown = React.createClass({
     const html = ultramarked(linkify(textEmojis, context));
 
     if (html) {
-      const props = {
-        className: 'rendered-markdown',
-        dangerouslySetInnerHTML: {__html: html}
-      };
       if (inline) {
+        // Remove the wrapping `<p>` since this is supposed to be inline markdown
+        // (ie for a title)
+        const inlineHtml = html.replace(/^<p>/, '').replace(/<\/p>\n$/, '');
+        const props = {
+          className: 'rendered-markdown',
+          dangerouslySetInnerHTML: {__html: inlineHtml}
+        };
         return (<span {...props}/>);
       } else {
+        const props = {
+          className: 'rendered-markdown',
+          dangerouslySetInnerHTML: {__html: html}
+        };
         return (<div {...props}/>);
       }
     } else {

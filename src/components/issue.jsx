@@ -170,7 +170,14 @@ let Issue = React.createClass({
       const totalCount = openCount + closedCount;
       const milestonePopover = (
         <BS.Popover id="popover-${issue.id}-milestone" className='milestone-details' title='Milestone Details'>
-          <h4>{issue.milestone.title}</h4>
+          <h4>
+            <GithubFlavoredMarkdown
+              inline
+              disableLinks={true}
+              repoOwner={repoOwner}
+              repoName={repoName}
+              text={issue.milestone.title}/>
+          </h4>
           <BS.ProgressBar bsStyle='success' now={closedCount} max={totalCount}/>
           <p>{openCount} open {closedCount} closed</p>
           <GithubFlavoredMarkdown
@@ -189,7 +196,14 @@ let Issue = React.createClass({
             overlay={milestonePopover}>
             <i className='milestone-icon octicon octicon-milestone'/>
           </BS.OverlayTrigger>
-          <span className='milestone-title'>{issue.milestone.title}</span>
+          <span className='milestone-title'>
+            <GithubFlavoredMarkdown
+              inline
+              disableLinks={true}
+              repoOwner={repoOwner}
+              repoName={repoName}
+              text={issue.milestone.title}/>
+          </span>
         </span>
       );
     }
@@ -228,7 +242,13 @@ let Issue = React.createClass({
         target='_blank'
         href={issue.html.url}
         onClick={this.onClickNumber}>
-          {issue.title}</a>
+        <GithubFlavoredMarkdown
+          inline
+          disableLinks={true}
+          repoOwner={repoOwner}
+          repoName={repoName}
+          text={issue.title}/>
+      </a>
     ];
     const classes = {
       'issue': true,

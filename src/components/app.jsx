@@ -18,6 +18,7 @@ import LabelBadge from './label-badge.jsx';
 import MoveModal from './move-modal.jsx';
 import Time from './time.jsx';
 import Loadable from './loadable.jsx';
+import GithubFlavoredMarkdown from './gfm.jsx';
 
 import GameModal from './game-modal.jsx';
 
@@ -158,7 +159,12 @@ const MilestonesDropdown = React.createClass({
       }
       return [
         <i className='milestone-icon octicon octicon-milestone'/>,
-        <span className='milestone-title'>{milestone.title}</span>,
+        <span className='milestone-title'>
+          <GithubFlavoredMarkdown
+            inline
+            disableLinks={true}
+            text={milestone.title}/>
+        </span>,
         dueDate
       ];
     };
