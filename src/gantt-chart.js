@@ -160,7 +160,7 @@ var PHIL =
         var rect = ganttChartGroup.selectAll("rect.milestone-completed").data(tasks, keyFunction);
 
         rect.enter()
-         .insert("rect",":first-child")
+         .append("rect")
         //  .attr("rx", 5)
         //  .attr("ry", 5)
 	 .attr("class", function(d){
