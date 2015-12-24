@@ -3,13 +3,13 @@ import ReactDOM from 'react-dom';
 import Router from 'react-router';
 import { Route, Redirect, IndexRoute } from 'react-router';
 
-import history from '../history';
-import App from './app.jsx';
-import Dashboard from './dashboard.jsx';
-import RepoKanban from './repo-kanban.jsx';
-import ByMilestoneView from './by-milestone-view.jsx';
-import ByUserView from './by-user-view.jsx';
-import MergedSince from './merged-since.jsx';
+import history from './history';
+import App from './components/app.jsx';
+import Dashboard from './components/dashboard.jsx';
+import RepoKanban from './components/repo-kanban.jsx';
+import ByMilestoneView from './components/by-milestone-view.jsx';
+import ByUserView from './components/by-user-view.jsx';
+import MergedSince from './components/merged-since.jsx';
 
 const routes = [
   // Redirect from `/dashboard` to `/`
@@ -30,7 +30,7 @@ const routes = [
         getComponent(location, callback) {
           require.ensure([], (require) => {
             // Remember to add the `.default`!
-            callback(null, require('./milestone-review.jsx').default);
+            callback(null, require('./components/milestone-review.jsx').default);
           })
         }
       }
@@ -38,10 +38,7 @@ const routes = [
   }
 ];
 
-const router = (
-  <Router history={history} routes={routes}/>
-);
-
+const router = React.createElement(Router, {history, routes});
 
 export default function() {
   const div = document.createElement('div');
