@@ -7,10 +7,10 @@ import {buildBipartiteGraph} from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import {KANBAN_LABEL} from '../helpers';
-import Loadable from './loadable.jsx';
-import IssueList from './issue-list.jsx';
-import Issue from './issue.jsx';
-import Board from './board.jsx';
+import Loadable from './loadable';
+import IssueList from './issue-list';
+import Issue from './issue';
+import Board from './board';
 
 /* Copy-pasta from MilestonesView */
 

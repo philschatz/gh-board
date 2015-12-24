@@ -9,11 +9,11 @@ import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import Client from '../github-client';
 import {KANBAN_LABEL} from '../helpers';
-import Loadable from './loadable.jsx';
-import IssueList from './issue-list.jsx';
-import Issue from './issue.jsx';
-import Board from './board.jsx';
-import GithubFlavoredMarkdown from './gfm.jsx';
+import Loadable from './loadable';
+import IssueList from './issue-list';
+import Issue from './issue';
+import Board from './board';
+import GithubFlavoredMarkdown from './gfm';
 
 import d3 from 'd3';
 import gantt from '../gantt-chart';

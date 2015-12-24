@@ -35,6 +35,7 @@ var config = {
         ]
     },
     resolve: {
+      extensions: ['', '.js', '.jsx'],
       alias: {
         xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
       },

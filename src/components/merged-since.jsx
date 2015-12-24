@@ -2,8 +2,8 @@ import React from 'react';
 import _ from 'underscore';
 import Client from '../github-client';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
-import Loadable from './loadable.jsx';
-import Time from './time.jsx';
+import Loadable from './loadable';
+import Time from './time';
 
 const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 

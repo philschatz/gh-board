@@ -7,11 +7,11 @@ import classnames from 'classnames';
 import IssueStore from '../issue-store';
 import FilterStore from '../filter-store';
 import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
-import Loadable from './loadable.jsx';
-import GithubFlavoredMarkdown from './gfm.jsx';
-import Time from './time.jsx';
-import LabelBadge from './label-badge.jsx';
-import IssueOrPullRequestBlurb from './issue-blurb.jsx';
+import Loadable from './loadable';
+import GithubFlavoredMarkdown from './gfm';
+import Time from './time';
+import LabelBadge from './label-badge';
+import IssueOrPullRequestBlurb from './issue-blurb';
 
 const ItemTypes = {
   CARD: 'card'

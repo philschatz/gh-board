@@ -4,12 +4,12 @@ import Router from 'react-router';
 import { Route, Redirect, IndexRoute } from 'react-router';
 
 import history from './history';
-import App from './components/app.jsx';
-import Dashboard from './components/dashboard.jsx';
-import RepoKanban from './components/repo-kanban.jsx';
-import ByMilestoneView from './components/by-milestone-view.jsx';
-import ByUserView from './components/by-user-view.jsx';
-import MergedSince from './components/merged-since.jsx';
+import App from './components/app';
+import Dashboard from './components/dashboard';
+import RepoKanban from './components/repo-kanban';
+import ByMilestoneView from './components/by-milestone-view';
+import ByUserView from './components/by-user-view';
+import MergedSince from './components/merged-since';
 
 const routes = [
   // Redirect from `/dashboard` to `/`
@@ -30,7 +30,7 @@ const routes = [
         getComponent(location, callback) {
           require.ensure([], (require) => {
             // Remember to add the `.default`!
-            callback(null, require('./components/milestone-review.jsx').default);
+            callback(null, require('./components/milestone-review').default);
           })
         }
       }
