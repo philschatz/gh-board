@@ -10,6 +10,7 @@ import RepoKanban from './repo-kanban.jsx';
 import ByMilestoneView from './by-milestone-view.jsx';
 import ByUserView from './by-user-view.jsx';
 import MergedSince from './merged-since.jsx';
+import MilestoneReview from './milestone-review.jsx';
 
 const router = (
   <Router history={history}>
@@ -21,6 +22,7 @@ const router = (
       <Route path='/r/:repoOwner/:repoNames/by-milestone' component={ByMilestoneView}/>
       <Route path='/r/:repoOwner/:repoNames/by-user' component={ByUserView}/>
       <Route path='/r/:repoOwner/:repoNames/since/:sha' component={MergedSince}/>
+      <Route path='/r/:repoOwner/:repoNames/milestone-review' component={MilestoneReview}/>
     </Route>
   </Router>
 );

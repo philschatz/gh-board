@@ -25,7 +25,7 @@ var config = {
     ],
     module: {
         preLoaders: [
-          { test: /\.jsx?$/, loader: 'eslint-loader', exclude: /node_modules/ },
+          { test: /\.jsx?$/, loader: 'eslint-loader', exclude: /node_modules|gantt-chart.*/ },
         ],
         loaders: [
             { test: /\.jsx?$/, loader: 'babel', exclude: [/node_modules/, /puzzle-script/], query: { presets: ['react', 'es2015']} },
