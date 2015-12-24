@@ -1,12 +1,11 @@
 import d3 from 'd3';
-
 /**
  * From https://github.com/dk8996/Gantt-Chart
  * @author Dimitry Kudrayvtsev
- * @version 2.1
+ * @version 2.x
  */
 
-export default function() {
+export default function(milestoneCount) {
     var FIT_TIME_DOMAIN_MODE = "fit";
     var FIXED_TIME_DOMAIN_MODE = "fixed";
 
@@ -14,7 +13,7 @@ export default function() {
 	top : 20,
 	right : 40,
 	bottom : 20,
-	left : 150
+	left : 250
     };
     var selector = 'body';
     var timeDomainStart = d3.time.day.offset(new Date(),-3);
@@ -22,7 +21,8 @@ export default function() {
     var timeDomainMode = FIT_TIME_DOMAIN_MODE;// fixed or fit
     var taskTypes = [];
     var taskStatus = [];
-    var height = document.body.clientHeight - margin.top - margin.bottom-5;
+    // var height = document.body.clientHeight - margin.top - margin.bottom-5;
+    var height = milestoneCount * 50; // height of chart is based on # of milestones
     var width = document.body.clientWidth - margin.right - margin.left-5;
 
     var tickFormat = "%H:%M";
@@ -32,7 +32,13 @@ export default function() {
     };
 
     var rectTransform = function(d) {
-	return "translate(" + x(d.startDate) + "," + y(d.taskName) + ")";
+	     return "translate(" + x(d.startDate) + "," + y(d.taskName) + ")";
+    };
+    var rectTransformCompleted = function(d) {
+	     return "translate(" + x(d.startDate) + "," + y(d.taskName) + ")";
+    };
+    var rectTransformRemaining = function(d) {
+	     return "translate(" + (x(d.startDate) + d.percent * (x(d.endDate)-x(d.startDate))) + "," + y(d.taskName) + ")";
     };
 
     var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
@@ -42,7 +48,7 @@ export default function() {
     var xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 	    .tickSize(8).tickPadding(8);
 
-    var yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+    var yAxis = d3.svg.axis().scale(y).orient("right").tickSize(0);
 
     var initTimeDomain = function(tasks) {
 	if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
@@ -68,7 +74,7 @@ export default function() {
 	xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 		.tickSize(8).tickPadding(8);
 
-	yAxis = d3.svg.axis().scale(y).orient("left").tickSize(0);
+	yAxis = d3.svg.axis().scale(y).orient("right").tickSize(0);
     };
 
     function gantt(tasks) {
@@ -87,21 +93,48 @@ export default function() {
 	.attr("height", height + margin.top + margin.bottom)
 	.attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-      svg.selectAll(".chart")
-	 .data(tasks, keyFunction).enter()
-	 .append("rect")
-	 .attr("rx", 5)
-         .attr("ry", 5)
-	 .attr("class", function(d){
-	     if(taskStatus[d.status] == null){ return "bar";}
-	     return taskStatus[d.status];
-	     })
-	 .attr("y", 0)
-	 .attr("transform", rectTransform)
-	 .attr("height", function(d) { return y.rangeBand(); })
-	 .attr("width", function(d) {
-	     return (x(d.endDate) - x(d.startDate));
-	     });
+var PHIL =
+      svg.selectAll(".chart");
+
+  PHIL.select('line.today').data([new Date()]).enter()
+    .append('line')
+    .attr('class', 'today')
+    .attr('x1', function(d) { return x(d); })
+    .attr('x2', function(d) { return x(d); })
+    .attr('y1', 0)
+    .attr('y2', height)
+    .style({stroke:'rgb(0,0,255)', 'stroke-width':2})
+    ;
+
+   PHIL.selectAll('rect.milestone-completed').data(tasks, keyFunction).enter()
+  	 .append("rect")
+  	//  .attr("rx", 5)
+    //        .attr("ry", 5)
+  	 .attr("class", function(d){
+  	     return 'milestone-completed ' + d.status;
+  	     })
+  	 .attr("y", 0)
+  	 .attr("transform", rectTransformCompleted)
+  	 .attr("height", function(d) { return y.rangeBand(); })
+  	 .attr("width", function(d) {
+  	     return d.percent * (x(d.endDate) - x(d.startDate));
+       });
+
+   // PHIL: Copy-pasta to show the 2nd half of the milestone (unfinished)
+   PHIL.selectAll('rect.milestone-remaining').data(tasks, keyFunction).enter()
+
+ 	 .append("rect")
+ // 	 .attr("rx", 5)
+  //         .attr("ry", 5)
+ 	 .attr("class", function(d){
+ 	     return 'milestone-remaining ' + d.status;
+ 	     })
+ 	 .attr("y", 0)
+ 	 .attr("transform", rectTransformRemaining)
+ 	 .attr("height", function(d) { return y.rangeBand(); })
+ 	 .attr("width", function(d) {
+ 	     return (1-d.percent) * (x(d.endDate) - x(d.startDate));
+ 	     });
 
 
 	 svg.append("g")
@@ -110,7 +143,7 @@ export default function() {
 	 .transition()
 	 .call(xAxis);
 
-	 svg.append("g").attr("class", "y axis").transition().call(yAxis);
+	 svg.append("g").attr("class", "y axis").attr('transform', 'translate(-'+margin.left+',0)').transition().call(yAxis);
 
 	 return gantt;
 
@@ -124,32 +157,59 @@ export default function() {
         var svg = d3.select(".chart");
 
         var ganttChartGroup = svg.select(".gantt-chart");
-        var rect = ganttChartGroup.selectAll("rect").data(tasks, keyFunction);
+        var rect = ganttChartGroup.selectAll("rect.milestone-completed").data(tasks, keyFunction);
 
         rect.enter()
          .insert("rect",":first-child")
-         .attr("rx", 5)
-         .attr("ry", 5)
+        //  .attr("rx", 5)
+        //  .attr("ry", 5)
 	 .attr("class", function(d){
-	     if(taskStatus[d.status] == null){ return "bar";}
-	     return taskStatus[d.status];
+	     return 'milestone-completed ' +d.status;
 	     })
 	 .transition()
 	 .attr("y", 0)
-	 .attr("transform", rectTransform)
+	 .attr("transform", rectTransformCompleted)
 	 .attr("height", function(d) { return y.rangeBand(); })
 	 .attr("width", function(d) {
-	     return (x(d.endDate) - x(d.startDate));
+	     return d.percent*(x(d.endDate) - x(d.startDate));
 	     });
 
         rect.transition()
           .attr("transform", rectTransform)
 	 .attr("height", function(d) { return y.rangeBand(); })
 	 .attr("width", function(d) {
-	     return (x(d.endDate) - x(d.startDate));
+	     return d.percent*(x(d.endDate) - x(d.startDate));
 	     });
 
 	rect.exit().remove();
+
+  //PHIL Copy-pasta
+  var rect = ganttChartGroup.selectAll("rect.milestone-remaining").data(tasks, keyFunction);
+
+  rect.enter()
+   .append("rect")
+   .attr("rx", 5)
+   .attr("ry", 5)
+.attr("class", function(d){
+ return 'milestone-remaining ' +d.status;
+ })
+.transition()
+.attr("y", 0)
+.attr("transform", rectTransformRemaining)
+.attr("height", function(d) { return y.rangeBand(); })
+.attr("width", function(d) {
+ return (1-d.percent)*(x(d.endDate) - x(d.startDate));
+ });
+
+  rect.transition()
+    .attr("transform", rectTransformRemaining)
+.attr("height", function(d) { return y.rangeBand(); })
+.attr("width", function(d) {
+ return (1-d.percent)*(x(d.endDate) - x(d.startDate));
+ });
+
+rect.exit().remove();
+
 
 	svg.select(".x").transition().call(xAxis);
 	svg.select(".y").transition().call(yAxis);
