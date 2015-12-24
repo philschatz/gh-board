@@ -10,21 +10,36 @@ import RepoKanban from './repo-kanban.jsx';
 import ByMilestoneView from './by-milestone-view.jsx';
 import ByUserView from './by-user-view.jsx';
 import MergedSince from './merged-since.jsx';
-import MilestoneReview from './milestone-review.jsx';
+
+const routes = [
+  // Redirect from `/dashboard` to `/`
+  { path: '/dashboard',
+    onEnter: (nextState, replaceState) => replaceState(null, '/')
+  },
+  { path: '/',
+    component: App,
+    indexRoute: { component: Dashboard },
+    childRoutes: [
+      { path: '/r/:repoOwner/:repoNames', component: RepoKanban },
+      { path: '/r/:repoOwner/:repoNames/by/:columnRegExp', component: RepoKanban },
+      { path: '/r/:repoOwner/:repoNames/by-milestone', component: ByMilestoneView },
+      { path: '/r/:repoOwner/:repoNames/by-user', component: ByUserView },
+      { path: '/r/:repoOwner/:repoNames/since/:sha', component: MergedSince },
+      { path: '/r/:repoOwner/:repoNames/milestone-review',
+        // Keep the review page as a separate chunk because it contains d3
+        getComponent(location, callback) {
+          require.ensure([], (require) => {
+            // Remember to add the `.default`!
+            callback(null, require('./milestone-review.jsx').default);
+          })
+        }
+      }
+    ],
+  }
+];
 
 const router = (
-  <Router history={history}>
-    <Redirect from='/dashboard' to='/' />
-    <Route path='/' component={App}>
-      <IndexRoute component={Dashboard}/>
-      <Route path='/r/:repoOwner/:repoNames' component={RepoKanban}/>
-      <Route path='/r/:repoOwner/:repoNames/by/:columnRegExp' component={RepoKanban}/>
-      <Route path='/r/:repoOwner/:repoNames/by-milestone' component={ByMilestoneView}/>
-      <Route path='/r/:repoOwner/:repoNames/by-user' component={ByUserView}/>
-      <Route path='/r/:repoOwner/:repoNames/since/:sha' component={MergedSince}/>
-      <Route path='/r/:repoOwner/:repoNames/milestone-review' component={MilestoneReview}/>
-    </Route>
-  </Router>
+  <Router history={history} routes={routes}/>
 );
 
 
