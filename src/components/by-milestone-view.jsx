@@ -73,7 +73,7 @@ const KanbanColumn = React.createClass({
 });
 
 
-const MilestonesView = React.createClass({
+const ByMilestoneView = React.createClass({
   render() {
     const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
 
@@ -158,7 +158,7 @@ const RepoKanbanShell = React.createClass({
         repoOwner={repoOwner}
         repoNames={repoNames}
         columnRegExp={columnRegExp}
-        type={MilestonesView}
+        type={ByMilestoneView}
         columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch()}
       />
     );

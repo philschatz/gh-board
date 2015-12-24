@@ -141,7 +141,7 @@ const MilestonesDropdown = React.createClass({
   },
   onSelectMilestonePlanning() {
     const {repoOwner, repoName} = this.props;
-    this.history.pushState(null, `/r/${repoOwner}/${repoName}/milestones`);
+    this.history.pushState(null, `/r/${repoOwner}/${repoName}/by-milestone`);
   },
   render() {
     const {milestones} = this.props;

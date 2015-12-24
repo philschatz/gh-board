@@ -7,7 +7,7 @@ import history from '../history';
 import App from './app.jsx';
 import Dashboard from './dashboard.jsx';
 import RepoKanban from './repo-kanban.jsx';
-import MilestonesView from './milestones-view.jsx';
+import ByMilestoneView from './by-milestone-view.jsx';
 import ByUserView from './by-user-view.jsx';
 import MergedSince from './merged-since.jsx';
 
@@ -18,7 +18,7 @@ const router = (
       <IndexRoute component={Dashboard}/>
       <Route path='/r/:repoOwner/:repoNames' component={RepoKanban}/>
       <Route path='/r/:repoOwner/:repoNames/by/:columnRegExp' component={RepoKanban}/>
-      <Route path='/r/:repoOwner/:repoNames/milestones' component={MilestonesView}/>
+      <Route path='/r/:repoOwner/:repoNames/by-milestone' component={ByMilestoneView}/>
       <Route path='/r/:repoOwner/:repoNames/by-user' component={ByUserView}/>
       <Route path='/r/:repoOwner/:repoNames/since/:sha' component={MergedSince}/>
     </Route>
