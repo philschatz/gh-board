@@ -1,5 +1,5 @@
 import Recordo from 'recordo';
-import startRouter from './components/router.jsx';
+import startRouter from './router';
 import CurrentUserStore from './user-store';
 
 Recordo.initialize();

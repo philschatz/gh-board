@@ -13,14 +13,14 @@ import FilterStore from '../filter-store';
 import IssueStore from '../issue-store';
 import history from '../history';
 
-import LoginModal from './login-modal.jsx';
-import LabelBadge from './label-badge.jsx';
-import MoveModal from './move-modal.jsx';
-import Time from './time.jsx';
-import Loadable from './loadable.jsx';
-import GithubFlavoredMarkdown from './gfm.jsx';
+import LoginModal from './login-modal';
+import LabelBadge from './label-badge';
+import MoveModal from './move-modal';
+import Time from './time';
+import Loadable from './loadable';
+import GithubFlavoredMarkdown from './gfm';
 
-import GameModal from './game-modal.jsx';
+import GameModal from './game-modal';
 
 
 const KarmaWarning = React.createClass({
@@ -141,7 +141,7 @@ const MilestonesDropdown = React.createClass({
   },
   onSelectMilestonePlanning() {
     const {repoOwner, repoName} = this.props;
-    this.history.pushState(null, `/r/${repoOwner}/${repoName}/milestones`);
+    this.history.pushState(null, `/r/${repoOwner}/${repoName}/by-milestone`);
   },
   render() {
     const {milestones} = this.props;
