@@ -5,8 +5,8 @@ import * as BS from 'react-bootstrap';
 import {getCardColumn} from '../helpers';
 import IssueStore from '../issue-store';
 import CurrentUserStore from '../user-store';
-import IssueOrPullRequestBlurb from './issue-blurb.jsx';
-import LabelBadge from './label-badge.jsx';
+import IssueOrPullRequestBlurb from './issue-blurb';
+import LabelBadge from './label-badge';
 
 const MoveModal = React.createClass({
   getInitialState() {

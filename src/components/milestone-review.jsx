@@ -15,6 +15,9 @@ import Issue from './issue';
 import Board from './board';
 import GithubFlavoredMarkdown from './gfm';
 
+import d3 from 'd3';
+import gantt from '../gantt-chart';
+
 
 const KanbanColumn = React.createClass({
   render() {
@@ -132,6 +135,104 @@ const ByMilestoneView = React.createClass({
   }
 });
 
+const GanttChart = React.createClass({
+  componentDidMount() {
+    const {milestones} = this.props;
+    const {ganttWrapper} = this.refs;
+    const now = new Date();
+    const tasks = milestones.map((milestone) => {
+      const {createdAt, dueOn, title, state, closedIssues, openIssues} = milestone;
+      const dueAt = dueOn ? new Date(dueOn) : null;
+      let status;
+      if (dueAt && dueAt.getTime() < now.getTime()) {
+        status = 'milestone-status-overdue';
+      } else {
+        status = `milestone-status-${state}`;
+      }
+      let percent;
+      if (closedIssues + openIssues) {
+        percent = closedIssues / (closedIssues + openIssues);
+      } else {
+        percent = Math.random(); //TODO: HACK to just show something "interesting"
+      }
+      return {
+        startDate: createdAt,
+        endDate: dueAt || now,
+        taskName: title,
+        status: status,
+        percent: percent,
+        progress: closedIssues,
+        progressTotal: closedIssues + openIssues
+      }
+    });
+
+    const taskStatus = {
+      'milestone-status-overdue': 'milestone-status-overdue',
+        'milestone-status-open' : 'milestone-status-open',
+        'milestone-status-closed' : 'milestone-status-closed'
+    };
+
+    const taskNames = tasks.map(({taskName}) => taskName).sort();
+
+    tasks.sort(function(a, b) {
+        return a.endDate - b.endDate;
+    });
+    const maxDate = tasks[tasks.length - 1].endDate;
+    tasks.sort(function(a, b) {
+        return a.startDate - b.startDate;
+    });
+    const minDate = tasks[0].startDate;
+
+    const format = '%H:%M';
+
+    const chart = gantt(taskNames.length).taskTypes(taskNames).taskStatus(taskStatus).tickFormat(format).selector('#the-gantt-chart');
+    chart(tasks);
+
+
+    function changeTimeDomain(timeDomainString) {
+        let format;
+        switch (timeDomainString) {
+          case '1hr':
+          	format = '%H:%M:%S';
+          	chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
+          	break;
+          case '3hr':
+          	format = '%H:%M';
+          	chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
+          	break;
+
+          case '6hr':
+          	format = '%H:%M';
+          	chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
+          	break;
+
+          case '1day':
+          	format = '%H:%M';
+          	chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
+          	break;
+
+          case '1week':
+          	format = '%m/%d';
+          	chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
+          	break;
+          default:
+          	format = '%H:%M'
+
+        }
+        chart.tickFormat(format);
+        chart.redraw(tasks);
+    }
+
+    changeTimeDomain('1week');
+
+  },
+  render() {
+    return (
+      <div ref='ganttWrapper' id='the-gantt-chart'/>
+    );
+  }
+
+});
 
 const RepoKanbanShell = React.createClass({
   componentWillMount() {
@@ -141,33 +242,22 @@ const RepoKanbanShell = React.createClass({
   componentWillUnmount() {
     IssueStore.stopPolling();
   },
-  renderLoaded() {
+  renderLoaded(allMilestones) {
+    return (
+      <GanttChart milestones={allMilestones}/>
+    );
+  },
+  render() {
     let {repoOwner, repoNames, columnRegExp} = this.props.params;
     repoNames = repoNames.split('|');
 
     const primaryRepoName = repoNames[0];
-
-    if (columnRegExp) {
-      columnRegExp = new RegExp(columnRegExp);
-    } else {
-      columnRegExp = KANBAN_LABEL;
-    }
-
-    return (
-      <Board {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
-        columnRegExp={columnRegExp}
-        type={ByMilestoneView}
-        columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch()}
-      />
-    );
-  },
-  render() {
+    // TODO: Actually do all the milestones
+    const allMilestones = Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch();
 
     return (
       <Loadable
-        promise={CurrentUserStore.fetchUser()}
+        promise={allMilestones}
         renderLoaded={this.renderLoaded}
       />
     );

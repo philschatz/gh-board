@@ -570,3 +570,16 @@ i.icon-spin {
 // react-dnd now requires DragSource and DropTarget elements to be simple Components
 // so I had to insert a wrapper div around ListGroupItem
 .list-group > .-drag-source + .-drag-source { border-top: 1px solid #eee; }
+
+
+// Used by the gantt chart
+.milestone-completed {
+  &.milestone-status-overdue { fill: #ff6600; }
+  &.milestone-status-open { fill: #00ff99; }
+  &.milestone-status-closed { fill: #0099ff; }
+}
+.milestone-remaining {
+  &.milestone-status-overdue { fill: #ffcc99; }
+  &.milestone-status-open { fill: #99ffcc; }
+  &.milestone-status-closed { fill: #99ccff; }
+}

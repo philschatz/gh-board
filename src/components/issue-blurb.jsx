@@ -2,7 +2,7 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 
 import IssueStore from '../issue-store';
-import GithubFlavoredMarkdown from './gfm.jsx';
+import GithubFlavoredMarkdown from './gfm';
 
 const IssueOrPullRequestBlurb = React.createClass({
   onClickNumber(evt) {

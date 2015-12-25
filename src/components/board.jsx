@@ -3,7 +3,7 @@ import React from 'react';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
-import Loadable from './loadable.jsx';
+import Loadable from './loadable';
 
 const Board = React.createClass({
   propTypes: {
