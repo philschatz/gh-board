@@ -48,7 +48,7 @@ const IssueList = React.createClass({
     );
 
     const classes = {
-      'kanban-issues': true,
+      'issue-list': true,
       'is-over': isOver
     };
 

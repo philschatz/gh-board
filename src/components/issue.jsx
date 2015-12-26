@@ -111,7 +111,7 @@ let Issue = React.createClass({
         src={user.avatar.url}/>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
-      if (!columnRegExp.test(label.name)) {
+      if (!columnRegExp || !columnRegExp.test(label.name)) {
         return label;
       }
     });
@@ -214,20 +214,22 @@ let Issue = React.createClass({
 
     let relatedIssues = null;
     let relatedPullRequests = null;
-    relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-      return (
-        <div className='related-issue'>
-          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
-        </div>
-      );
-    });
-    relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-      return (
-        <div className='related-issue'>
-          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
-        </div>
-      );
-    });
+    if (graph) {
+      relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
+        return (
+          <div className='related-issue'>
+            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
+          </div>
+        );
+      });
+      relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
+        return (
+          <div className='related-issue'>
+            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
+          </div>
+        );
+      });
+    }
 
     const header = [
       <div className='issue-labels'>

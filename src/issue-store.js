@@ -110,6 +110,9 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
+  issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise=null) {
+    return {repoOwner, repoName, issue, pullRequestDelayedPromise};
+  }
   fetchAllIssues(repoOwner, repoNames, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
@@ -145,9 +148,9 @@ class IssueStore extends EventEmitter {
               });
             };
             const pullRequestDelayedPromise = delayedPromise(fn);
-            return {repoOwner, repoName, issue, pullRequestDelayedPromise};
+            return this.issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise);
           } else {
-            return {repoOwner, repoName, issue};
+            return this.issueToCard(repoOwner, repoName, issue);
           }
         });
       });

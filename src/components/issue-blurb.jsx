@@ -20,7 +20,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
 
-    const isPullRequest = !!issue.pullRequest;
+    const isPullRequest = !!issue.pullRequest || !!issue.base; // use .base in case we are given the PR JSON (which does not contain labels)
     const multipleRepoName = primaryRepoName === repoName ? null : repoName;
     const popoverTitle = isPullRequest ? 'Pull Request Description' : 'Issue Description';
 
