@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
+import mermaid, {mermaidAPI} from 'mermaid';
 
 // import Client from '../github-client';
 // import Loadable from './loadable';
@@ -71,10 +72,22 @@ const InnerMarkdown = React.createClass({
       }
     });
   },
+  updateMermaid() {
+    const root = this.getDOMNode();
+    _.each(root.querySelectorAll('pre > code.lang-mermaid'), (code) => {
+      const text = code.textContent;
+      mermaidAPI.render('mermaid Diagram', text, (html) => {
+        const div = document.createElement('div');
+        div.innerHTML = html;
+        code.parentNode.replaceWith(div);
+      }, root);
+    });
+  },
   updateDOM() {
     if (!this.getDOMNode()) { return; }
     this.updateLinks();
     this.updateCheckboxes();
+    this.updateMermaid();
   },
   componentDidMount() {
     this.updateDOM();
