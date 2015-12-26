@@ -18,7 +18,14 @@ import Board from './board';
 const filterKanbanLabels = (labels, columnRegExp) => {
   const kanbanLabels = _.filter(labels, (label) => columnRegExp.test(label.name));
   // TODO: Handle more than 10 workflow states
-  return kanbanLabels.sort();
+  return _.sortBy(kanbanLabels, ({name}) => {
+    if (name === UNCATEGORIZED_NAME) {
+      // make sure Uncategorized is the left-most column
+      return -1;
+    } else {
+      return /^(\d+)/.exec(name)[1] || name;
+    }
+  });
 };
 
 
