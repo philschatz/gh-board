@@ -251,10 +251,12 @@ body { background-color: #f3f3f3; }
     /* Just make the issue gray so it is clear we are dragging this element from */
     &.is-dragging { opacity: .25; }
 
+    &[data-state='closed'] { opacity: 0.5; }
+
     // When remotely updated since you last looked, mark the issue as yellow
     &.is-updated,
     &.is-updated .list-group-item-heading,
-    &.is-updated .list-group-item-text { background-color: #ff9; }
+    &.is-updated .list-group-item-text { background-color: #ffc; }
 
     .list-group-item-heading {
       margin-bottom: 0;

@@ -171,12 +171,14 @@ let Issue = React.createClass({
       const milestonePopover = (
         <BS.Popover id="popover-${issue.id}-milestone" className='milestone-details' title='Milestone Details'>
           <h4>
-            <GithubFlavoredMarkdown
-              inline
-              disableLinks={true}
-              repoOwner={repoOwner}
-              repoName={repoName}
-              text={issue.milestone.title}/>
+            <a target='_blank' href={issue.milestone.html.url}>
+              <GithubFlavoredMarkdown
+                inline
+                disableLinks={true}
+                repoOwner={repoOwner}
+                repoName={repoName}
+                text={issue.milestone.title}/>
+            </a>
           </h4>
           <BS.ProgressBar bsStyle='success' now={closedCount} max={totalCount}/>
           <p>{openCount} open {closedCount} closed</p>
@@ -266,7 +268,8 @@ let Issue = React.createClass({
           data-status-state={status ? status.state : null}
           header={header}
           onDragStart={this.onDragStart}
-          className={classnames(classes)}>
+          className={classnames(classes)}
+          data-state={issue.state}>
 
           <span key='right-footer' className='pull-right'>
             <Time key='time' className='updated-at' dateTime={updatedAt}/>

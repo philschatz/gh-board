@@ -26,6 +26,7 @@ const MergedSince = React.createClass({
         const {repoOwner, repoName, number} = related;
         return (
           <Loadable
+            key={repoOwner + repoName + number}
             promise={Client.getOcto().repos(repoOwner, repoName).issues(number).fetch()}
             renderLoaded={(issue) => this.renderCard(repoOwner, repoName, issue)}
           />
@@ -44,7 +45,7 @@ const MergedSince = React.createClass({
     }
   },
   render() {
-    const {comparison, repoOwner, repoName} = this.props;
+    const {comparison, repoOwner, repoName, shaStart, shaEnd} = this.props;
 
     const prCommits = [];
     _.each(comparison[0].commits, (commit) => {
@@ -62,23 +63,18 @@ const MergedSince = React.createClass({
         // Try and fetch the issue the PR fixed
         return (
           <Loadable
+            key={number}
             promise={Client.getOcto().repos(repoOwner, repoName).issues(number).fetch()}
             renderLoaded={this.renderPullRequest}
           />
         );
       } else {
-        // TODO: Handle commits directly to master.
-        return (
-          <li>
-            {title}
-            <Time dateTime={at} style={{color: '#ccc'}}/>
-          </li>
-        );
+        console.error('Bug! someone created a commit titled "Merge pull request" without a number');
       }
     });
 
     return (
-      <IssueList title={'Issues related to the Changes'}>
+      <IssueList title={`Issues related to the Changes between ${shaStart} and ${shaEnd}`}>
         {children}
       </IssueList>
     );
@@ -87,15 +83,15 @@ const MergedSince = React.createClass({
 
 const MergedSinceShell = React.createClass({
   render() {
-    let {repoOwner, repoNames, startSha, endSha} = this.props.params;
-    if (!endSha) {
-      endSha = 'master';
+    let {repoOwner, repoNames, shaStart, shaEnd} = this.props.params;
+    if (!shaEnd) {
+      shaEnd = 'master';
     }
 
     return (
       <Loadable
-        promise={fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoNames).compare(startSha, endSha).fetch)}
-        renderLoaded={(comparison) => <MergedSince repoOwner={repoOwner} repoName={repoNames} comparison={comparison}/>}
+        promise={fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoNames).compare(shaStart, shaEnd).fetch)}
+        renderLoaded={(comparison) => <MergedSince repoOwner={repoOwner} repoName={repoNames} comparison={comparison} shaStart={shaStart} shaEnd={shaEnd}/>}
       />
     );
   }
