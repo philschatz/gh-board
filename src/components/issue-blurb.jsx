@@ -1,5 +1,6 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
+import classnames from 'classnames';
 
 import IssueStore from '../issue-store';
 import GithubFlavoredMarkdown from './gfm';
@@ -20,7 +21,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
 
-    const isPullRequest = !!issue.pullRequest;
+    const isPullRequest = !!issue.pullRequest || !!issue.base; // use .base in case we are given the PR JSON (which does not contain labels)
     const multipleRepoName = primaryRepoName === repoName ? null : repoName;
     const popoverTitle = isPullRequest ? 'Pull Request Description' : 'Issue Description';
 
@@ -40,8 +41,15 @@ const IssueOrPullRequestBlurb = React.createClass({
         <i title='Click for Pull Request Details' className='blurb-icon octicon octicon-git-pull-request' onClick={this.onClickIcon}/>
       );
     } else {
+      const classes = {
+        'blurb-icon': true,
+        'octicon': true,
+        'octicon-issue-opened': issue.state === 'open' && !issue.closedBy,
+        'octicon-issue-reopened': issue.state === 'open' && issue.closedBy,
+        'octicon-issue-closed': issue.state === 'closed'
+      }
       icon = (
-        <i title='Click for Issue Details' className='blurb-icon octicon octicon-issue-opened' onClick={this.onClickIcon}/>
+        <i title='Click for Issue Details' className={classnames(classes)} onClick={this.onClickIcon}/>
       );
     }
 

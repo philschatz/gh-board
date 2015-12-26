@@ -111,7 +111,7 @@ let Issue = React.createClass({
         src={user.avatar.url}/>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
-      if (!columnRegExp.test(label.name)) {
+      if (!columnRegExp || !columnRegExp.test(label.name)) {
         return label;
       }
     });
@@ -171,12 +171,14 @@ let Issue = React.createClass({
       const milestonePopover = (
         <BS.Popover id="popover-${issue.id}-milestone" className='milestone-details' title='Milestone Details'>
           <h4>
-            <GithubFlavoredMarkdown
-              inline
-              disableLinks={true}
-              repoOwner={repoOwner}
-              repoName={repoName}
-              text={issue.milestone.title}/>
+            <a target='_blank' href={issue.milestone.html.url}>
+              <GithubFlavoredMarkdown
+                inline
+                disableLinks={true}
+                repoOwner={repoOwner}
+                repoName={repoName}
+                text={issue.milestone.title}/>
+            </a>
           </h4>
           <BS.ProgressBar bsStyle='success' now={closedCount} max={totalCount}/>
           <p>{openCount} open {closedCount} closed</p>
@@ -214,20 +216,22 @@ let Issue = React.createClass({
 
     let relatedIssues = null;
     let relatedPullRequests = null;
-    relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-      return (
-        <div className='related-issue'>
-          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
-        </div>
-      );
-    });
-    relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-      return (
-        <div className='related-issue'>
-          <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
-        </div>
-      );
-    });
+    if (graph) {
+      relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
+        return (
+          <div className='related-issue'>
+            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
+          </div>
+        );
+      });
+      relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
+        return (
+          <div className='related-issue'>
+            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
+          </div>
+        );
+      });
+    }
 
     const header = [
       <div className='issue-labels'>
@@ -264,7 +268,8 @@ let Issue = React.createClass({
           data-status-state={status ? status.state : null}
           header={header}
           onDragStart={this.onDragStart}
-          className={classnames(classes)}>
+          className={classnames(classes)}
+          data-state={issue.state}>
 
           <span key='right-footer' className='pull-right'>
             <Time key='time' className='updated-at' dateTime={updatedAt}/>

@@ -24,7 +24,8 @@ const routes = [
       { path: '/r/:repoOwner/:repoNames/by/:columnRegExp', component: RepoKanban },
       { path: '/r/:repoOwner/:repoNames/by-milestone', component: ByMilestoneView },
       { path: '/r/:repoOwner/:repoNames/by-user', component: ByUserView },
-      { path: '/r/:repoOwner/:repoNames/since/:sha', component: MergedSince },
+      { path: '/r/:repoOwner/:repoNames/since/:shaStart', component: MergedSince },
+      { path: '/r/:repoOwner/:repoNames/since/:shaStart/:shaEnd', component: MergedSince },
       { path: '/r/:repoOwner/:repoNames/milestone-review',
         // Keep the review page as a separate chunk because it contains d3
         getComponent(location, callback) {
