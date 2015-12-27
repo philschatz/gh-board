@@ -62,9 +62,9 @@ export function getCardColumn(card) {
   return {name: UNCATEGORIZED_NAME};
 }
 
-export function getReposFromStr(reposStr) {
+export function getReposFromStr(repoStr) {
   let lastRepoOwner = null;
-  return reposStr.split('|').map((repoInfo) => {
+  return repoStr.split('|').map((repoInfo) => {
     const repoInfoArr = repoInfo.split(':');
     if (repoInfoArr.length === 1) {
       const [repoName] = repoInfoArr;

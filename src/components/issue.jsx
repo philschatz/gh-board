@@ -267,7 +267,7 @@ let Issue = React.createClass({
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
-          key={issue.id}
+          key={card.repoOwner + card.repoName + issue.id}
           data-status-state={status ? status.state : null}
           header={header}
           onDragStart={this.onDragStart}

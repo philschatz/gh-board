@@ -22,6 +22,7 @@ const routes = [
       { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)',
         indexRoute: {component: RepoKanban},
         childRoutes: [
+          { path: 'since/:startShas(/:endShas)', component: MergedSince },
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
           { path: 'milestone-review', onEnter: (state, replace) => replace(null, `/r/${state.params.repoStr}/gantt`) },
@@ -35,8 +36,6 @@ const routes = [
             }
           }
       ] },
-      { path: '/r/:repoOwner/:repoNames/since/:shaStart', component: MergedSince },
-      { path: '/r/:repoOwner/:repoNames/since/:shaStart/:shaEnd', component: MergedSince },
     ],
   }
 ];
