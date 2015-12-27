@@ -20,21 +20,23 @@ const routes = [
     component: App,
     indexRoute: { component: Dashboard },
     childRoutes: [
-      { path: '/r/:repoStr', component: RepoKanban },
-      { path: '/r/:repoStr/by/:columnRegExp', component: RepoKanban },
-      { path: '/r/:repoStr/by-milestone', component: ByMilestoneView },
-      { path: '/r/:repoStr/by-user', component: ByUserView },
+      { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)',
+        indexRoute: {component: RepoKanban},
+        childRoutes: [
+          { path: 'by-milestone', component: ByMilestoneView },
+          { path: 'by-user', component: ByUserView },
+          { path: 'milestone-review',
+            // Keep the review page as a separate chunk because it contains d3
+            getComponent(location, callback) {
+              require.ensure([], (require) => {
+                // Remember to add the `.default`!
+                callback(null, require('./components/milestone-review').default);
+              })
+            }
+          }
+      ] },
       { path: '/r/:repoOwner/:repoNames/since/:shaStart', component: MergedSince },
       { path: '/r/:repoOwner/:repoNames/since/:shaStart/:shaEnd', component: MergedSince },
-      { path: '/r/:repoStr/milestone-review',
-        // Keep the review page as a separate chunk because it contains d3
-        getComponent(location, callback) {
-          require.ensure([], (require) => {
-            // Remember to add the `.default`!
-            callback(null, require('./components/milestone-review').default);
-          })
-        }
-      }
     ],
   }
 ];

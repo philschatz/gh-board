@@ -158,10 +158,7 @@ let Issue = React.createClass({
       );
     }
     const shouldShowMilestone = (
-      issue.milestone && (
-        !FilterStore.getMilestone()
-        || (FilterStore.getMilestone().title !== issue.milestone.title)
-      )
+      issue.milestone && FilterStore.getMilestones().length !== 1
     );
     let milestone = null;
     if (shouldShowMilestone) {

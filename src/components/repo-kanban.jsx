@@ -23,7 +23,8 @@ const filterKanbanLabels = (labels, columnRegExp) => {
       // make sure Uncategorized is the left-most column
       return -1;
     } else {
-      return /^(\d+)/.exec(name)[1] || name;
+      const result = /^(\d+)/.exec(name)
+      return result && result[1] || name;
     }
   });
 };

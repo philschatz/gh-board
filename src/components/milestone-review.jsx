@@ -38,7 +38,7 @@ const KanbanColumn = React.createClass({
     let heading;
     if (milestone) {
       heading = (
-        <span className='milestone-title' onClick={() => FilterStore.setMilestone(milestone)}>
+        <span className='milestone-title' onClick={() => FilterStore.addMilestone(milestone)}>
           <i className='octicon octicon-milestone'/>
           <GithubFlavoredMarkdown
             inline
@@ -50,11 +50,10 @@ const KanbanColumn = React.createClass({
       heading = 'No Milestone';
     }
 
-    const milestoneFilter = FilterStore.getMilestone();
     const isShowingColumn = (
         issueComponents.length
       || SettingsStore.getShowEmptyColumns()
-      || (milestone && milestoneFilter && milestone.title === milestoneFilter.title)
+      || (milestone && FilterStore.isMilestoneIncluded(milestone))
     );
 
     if (isShowingColumn) {

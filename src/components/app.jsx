@@ -115,10 +115,10 @@ const KarmaWarning = React.createClass({
 
 const SettingsItem = React.createClass({
   render() {
-    const {onSelect, isChecked, children} = this.props;
+    const {key, onSelect, isChecked, className, children} = this.props;
 
     return (
-      <BS.MenuItem onSelect={onSelect}>
+      <BS.MenuItem key={key} onSelect={onSelect} className={className}>
         <span className='settings-item-checkbox' data-checked={isChecked}>{children}</span></BS.MenuItem>
     );
   }
@@ -137,16 +137,20 @@ const MilestonesDropdown = React.createClass({
   },
   onSelectMilestone(milestone) {
     return () => {
-      FilterStore.setMilestone(milestone);
+      FilterStore.toggleMilestone(milestone);
     };
   },
+  onClearMilestones() {
+    FilterStore.clearMilestoneFilter();
+  },
   onSelectMilestonePlanning() {
-    const {repoOwner, repoName} = this.props;
-    this.history.pushState(null, `/r/${repoOwner}/${repoName}/by-milestone`);
+    const {repoInfos} = this.props;
+
+    this.history.pushState(null, `/r/${convertRepoInfosToStr(repoInfos)}/by-milestone`);
   },
   render() {
     const {milestones} = this.props;
-    const selectedMilestone = FilterStore.getMilestone();
+    const selectedMilestones = FilterStore.getMilestones();
 
     const renderMilestone = (milestone) => {
       let dueDate;
@@ -173,12 +177,29 @@ const MilestonesDropdown = React.createClass({
     if (milestones.length) {
       const milestonesItems = _.map(milestones, (milestone) => {
         return (
-          <BS.MenuItem key={milestone.id} className='milestone-item' onSelect={this.onSelectMilestone(milestone)}>{renderMilestone(milestone)}</BS.MenuItem>
+          <SettingsItem
+            className='milestone-item'
+            key={milestone.id}
+            isChecked={FilterStore.getMilestones().length && FilterStore.isMilestoneIncluded(milestone)}
+            onSelect={this.onSelectMilestone(milestone)}
+          >{renderMilestone(milestone)}</SettingsItem>
         );
       });
+      let clearMilestoneFilter;
+      if (FilterStore.getMilestones().length) {
+        clearMilestoneFilter = (
+          <BS.MenuItem key='2' onSelect={this.onClearMilestones}>Clear Milestone Filter</BS.MenuItem>
+        );
+      }
+
       let selectedMilestoneItem;
-      if (selectedMilestone) {
-        selectedMilestoneItem = renderMilestone(selectedMilestone);
+      if (selectedMilestones.length) {
+        if (selectedMilestones.length > 1) {
+          selectedMilestoneItem = `${selectedMilestones.length} milestones`;
+        } else {
+          // Only 1 milestone is selected so show the milestone title
+          selectedMilestoneItem = renderMilestone(selectedMilestones[0]);
+        }
       } else {
         selectedMilestoneItem = 'All Issues and Pull Requests';
       }
@@ -186,8 +207,8 @@ const MilestonesDropdown = React.createClass({
         <BS.NavDropdown id='milestone-dropdown' className='milestone-dropdown' title={<span className='selected-milestone'>{selectedMilestoneItem}</span>}>
           <BS.MenuItem key='1' header>Filter by Milestone</BS.MenuItem>
           {milestonesItems}
-          <BS.MenuItem key='2' divider/>
-          <BS.MenuItem key='3' onSelect={this.onSelectMilestone(null)}>All Issues and Pull Requests</BS.MenuItem>
+          {clearMilestoneFilter}
+          <BS.MenuItem key='3' divider/>
           <BS.MenuItem key='4' disabled>Not in a Milestone</BS.MenuItem>
           <BS.MenuItem key='5' divider/>
           <BS.MenuItem key='6' onSelect={this.onSelectMilestonePlanning}>Milestone Planning View</BS.MenuItem>
@@ -209,7 +230,7 @@ const MilestonesDropdownShell = React.createClass({
     return (
       <Loadable
         promise={IssueStore.fetchMilestones(repoOwner, repoName)}
-        renderLoaded={(milestones) => <MilestonesDropdown repoOwner={repoOwner} repoName={repoName} milestones={milestones}/>}
+        renderLoaded={(milestones) => <MilestonesDropdown repoInfos={repoInfos} milestones={milestones}/>}
         />
     );
   }
