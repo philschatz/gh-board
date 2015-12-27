@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Router from 'react-router';
-import { Route, Redirect, IndexRoute } from 'react-router';
 
 import history from './history';
 import App from './components/app';
@@ -31,7 +30,7 @@ const routes = [
               require.ensure([], (require) => {
                 // Remember to add the `.default`!
                 callback(null, require('./components/milestone-review').default);
-              })
+              });
             }
           }
       ] },

@@ -52,9 +52,7 @@ const KanbanColumn = React.createClass({
 
 const MilestonesView = React.createClass({
   render() {
-    const {columnData, cards, repoInfos, columnRegExp} = this.props;
-    const [{repoOwner, repoName}] = repoInfos;
-
+    const {columnData, cards, columnRegExp} = this.props;
     const graph = buildBipartiteGraph(cards);
 
     let sortedCards = FilterStore.filterAndSort(graph, cards, true/*isShowingMilestones*/);
@@ -109,8 +107,6 @@ const RepoKanbanShell = React.createClass({
   renderLoaded() {
     let {repoStr, columnRegExp} = this.props.params;
     const repoInfos = getReposFromStr(repoStr);
-    // Get the "Primary" repo for milestones and labels
-    const [{repoOwner, repoName}] = repoInfos;
 
     if (columnRegExp) {
       columnRegExp = new RegExp(columnRegExp);

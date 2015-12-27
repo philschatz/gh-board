@@ -45,9 +45,6 @@ const Board = React.createClass({
   },
   render() {
     const {repoInfos, columnDataPromise} = this.props;
-
-    const [{repoOwner, repoName}] = repoInfos;
-
     const cardsPromise = IssueStore.fetchAllIssues(repoInfos);
 
     return (

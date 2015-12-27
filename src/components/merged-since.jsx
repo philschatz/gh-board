@@ -3,7 +3,6 @@ import _ from 'underscore';
 import Client from '../github-client';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import Loadable from './loadable';
-import Time from './time';
 import {getRelatedIssues} from '../gfm-dom';
 import IssueStore from '../issue-store';
 import IssueList from './issue-list';
@@ -19,7 +18,7 @@ const MergedSince = React.createClass({
     );
   },
   renderPullRequest(pr) {
-    const {comparison, repoOwner, repoName} = this.props;
+    const {repoOwner, repoName} = this.props;
     const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
     if (relatedIssues.length) {
       const relatedIssuesHtml = relatedIssues.map((related) => {
@@ -58,7 +57,7 @@ const MergedSince = React.createClass({
       }
     });
 
-    const children = _.map(prCommits, ({number, title, at}) => {
+    const children = _.map(prCommits, ({number}) => {
       if (number) {
         // Try and fetch the issue the PR fixed
         return (
@@ -68,8 +67,6 @@ const MergedSince = React.createClass({
             renderLoaded={this.renderPullRequest}
           />
         );
-      } else {
-        console.error('Bug! someone created a commit titled "Merge pull request" without a number');
       }
     });
 

@@ -19,7 +19,7 @@ import GithubFlavoredMarkdown from './gfm';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, graph, primaryRepoOwner, primaryRepoName, columnRegExp} = this.props;
+    const {milestone, cards, graph, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (

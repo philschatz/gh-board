@@ -23,7 +23,7 @@ const filterKanbanLabels = (labels, columnRegExp) => {
       // make sure Uncategorized is the left-most column
       return -1;
     } else {
-      const result = /^(\d+)/.exec(name)
+      const result = /^(\d+)/.exec(name);
       return result && result[1] || name;
     }
   });
@@ -32,13 +32,12 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, graph, primaryRepoOwner, primaryRepoName, columnRegExp} = this.props;
+    const {label, cards, graph, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.issue.id}
-          primaryRepoOwner={primaryRepoOwner}
           primaryRepoName={primaryRepoName}
           card={card}
           graph={graph}
@@ -129,7 +128,7 @@ const KanbanRepo = React.createClass({
     const {columnData, cards, repoInfos, columnRegExp} = this.props;
 
     // Get the primary repoOwner and repoName
-    const [{repoOwner, repoName}] = repoInfos;
+    const [{repoName}] = repoInfos;
 
     let allLabels;
     if (!SettingsStore.getHideUncategorized()) {
@@ -172,7 +171,6 @@ const KanbanRepo = React.createClass({
             cards={columnCards}
             graph={graph}
             columnRegExp={columnRegExp}
-            primaryRepoOwner={repoOwner}
             primaryRepoName={repoName}
           />
         );

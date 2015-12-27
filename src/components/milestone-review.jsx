@@ -1,143 +1,17 @@
 import React from 'react';
-import _ from 'underscore';
-import * as BS from 'react-bootstrap';
 
 import IssueStore from '../issue-store';
-import {buildBipartiteGraph} from '../issue-store';
-import SettingsStore from '../settings-store';
-import FilterStore from '../filter-store';
-import CurrentUserStore from '../user-store';
 import Client from '../github-client';
-import {KANBAN_LABEL, getReposFromStr} from '../helpers';
+import {getReposFromStr} from '../helpers';
 import Loadable from './loadable';
-import IssueList from './issue-list';
-import Issue from './issue';
-import Board from './board';
-import GithubFlavoredMarkdown from './gfm';
 
 import d3 from 'd3';
 import gantt from '../gantt-chart';
 
 
-const KanbanColumn = React.createClass({
-  render() {
-    const {milestone, cards, graph, primaryRepoName, columnRegExp} = this.props;
-
-    const issueComponents = _.map(cards, (card) => {
-      return (
-        <Issue
-          key={card.issue.id}
-          primaryRepoName={primaryRepoName}
-          card={card}
-          graph={graph}
-          columnRegExp={columnRegExp}
-          />
-      );
-    });
-
-    let heading;
-    if (milestone) {
-      heading = (
-        <span className='milestone-title' onClick={() => FilterStore.addMilestone(milestone)}>
-          <i className='octicon octicon-milestone'/>
-          <GithubFlavoredMarkdown
-            inline
-            disableLinks={true}
-            text={milestone.title}/>
-        </span>
-      );
-    } else {
-      heading = 'No Milestone';
-    }
-
-    const isShowingColumn = (
-        issueComponents.length
-      || SettingsStore.getShowEmptyColumns()
-      || (milestone && FilterStore.isMilestoneIncluded(milestone))
-    );
-
-    if (isShowingColumn) {
-      return (
-        <BS.Col key={milestone && milestone.title || 'no-milestone'} md={4} className='kanban-board-column'>
-          <IssueList
-            title={heading}
-            milestone={milestone}
-          >
-            {issueComponents}
-          </IssueList>
-        </BS.Col>
-      );
-    } else {
-      return null; // TODO: Maybe the panel should say "No Issues" (but only if it's the only column)
-    }
-
-  }
-});
-
-
-const ByMilestoneView = React.createClass({
-  render() {
-    const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
-
-    const graph = buildBipartiteGraph(cards);
-
-    const uncategorizedCards = _.filter(cards, (card) => {
-      return !card.issue.milestone;
-    });
-
-    let sortedCards = FilterStore.filterAndSort(graph, cards, true/*isShowingMilestones*/);
-
-    let kanbanColumnCount = 0; // Count the number of actual columns displayed
-
-    const uncategorizedColumn = (
-      <KanbanColumn
-        cards={uncategorizedCards}
-        graph={graph}
-        primaryRepoName={primaryRepoName}
-        columnRegExp={columnRegExp}
-      />
-    );
-
-    const kanbanColumns = _.map(columnData, (milestone) => {
-      // If we are filtering by a kanban column then only show that column
-      // Otherwise show all columns
-      const columnCards = _.filter(sortedCards, (card) => {
-        return card.issue.milestone && card.issue.milestone.title === milestone.title;
-      });
-
-
-      // Show the column when:
-      // isFilteringByColumn = label (the current column we are filtering on)
-      // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
-
-      kanbanColumnCount++; // Count the number of actual columns displayed
-      /*HACK: Column should handle milestones */
-      return (
-        <KanbanColumn
-          milestone={milestone}
-          cards={columnCards}
-          graph={graph}
-          primaryRepoName={primaryRepoName}
-          columnRegExp={columnRegExp}
-        />
-      );
-    });
-
-    return (
-      <BS.Grid className='kanban-board' data-column-count={kanbanColumnCount}>
-        <BS.Row>
-          {uncategorizedColumn}
-          {kanbanColumns}
-        </BS.Row>
-      </BS.Grid>
-    );
-  }
-});
-
 const GanttChart = React.createClass({
   componentDidMount() {
     const {milestones} = this.props;
-    const {ganttWrapper} = this.refs;
     const now = new Date();
     const tasks = milestones.map((milestone) => {
       const {createdAt, dueOn, title, state, closedIssues, openIssues} = milestone;
@@ -162,7 +36,7 @@ const GanttChart = React.createClass({
         percent: percent,
         progress: closedIssues,
         progressTotal: closedIssues + openIssues
-      }
+      };
     });
 
     const taskStatus = {
@@ -180,7 +54,7 @@ const GanttChart = React.createClass({
     tasks.sort(function(a, b) {
         return a.startDate - b.startDate;
     });
-    const minDate = tasks[0].startDate;
+    // const minDate = tasks[0].startDate;
 
     const format = '%H:%M';
 
@@ -215,7 +89,7 @@ const GanttChart = React.createClass({
           	chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
           	break;
           default:
-          	format = '%H:%M'
+          	format = '%H:%M';
 
         }
         chart.tickFormat(format);
@@ -247,7 +121,7 @@ const RepoKanbanShell = React.createClass({
     );
   },
   render() {
-    let {repoStr, columnRegExp} = this.props.params;
+    let {repoStr} = this.props.params;
     const repoInfos = getReposFromStr(repoStr);
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
