@@ -111,6 +111,7 @@ const ByMilestoneView = React.createClass({
       /*HACK: Column should handle milestones */
       return (
         <KanbanColumn
+          key={kanbanColumnCount}
           milestone={milestone}
           cards={columnCards}
           graph={graph}

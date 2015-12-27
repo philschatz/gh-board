@@ -179,7 +179,7 @@ const MilestonesDropdown = React.createClass({
         return (
           <SettingsItem
             className='milestone-item'
-            key={milestone.id}
+            key={milestone.title}
             isChecked={FilterStore.getMilestones().length && FilterStore.isMilestoneIncluded(milestone)}
             onSelect={this.onSelectMilestone(milestone)}
           >{renderMilestone(milestone)}</SettingsItem>

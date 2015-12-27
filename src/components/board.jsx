@@ -8,8 +8,7 @@ import Loadable from './loadable';
 const Board = React.createClass({
   propTypes: {
     type: React.PropTypes.func.isRequired, // A React Component
-    repoOwner: React.PropTypes.string.isRequired,
-    repoNames: React.PropTypes.array.isRequired,
+    repoInfos: React.PropTypes.array.isRequired,
     columnDataPromise: React.PropTypes.object.isRequired
   },
   componentDidMount() {
