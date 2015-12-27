@@ -87,7 +87,7 @@ export function buildBipartiteGraph(cards) {
   return graph;
 }
 
-let cacheCardsRepoNames = null;
+let cacheCardsRepoInfos = null;
 let cacheCards = null;
 let cacheLastViewed = {};
 const initialTimestamp = new Date();
@@ -102,7 +102,7 @@ class IssueStore extends EventEmitter {
   }
   clearCacheCards() {
     cacheCards = null;
-    cacheCardsRepoNames = null;
+    cacheCardsRepoInfos = null;
   }
   stopPolling() {
     isPollingEnabled = false;
@@ -113,18 +113,18 @@ class IssueStore extends EventEmitter {
   issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise=null) {
     return {repoOwner, repoName, issue, pullRequestDelayedPromise};
   }
-  fetchAllIssues(repoOwner, repoNames, isForced) {
+  fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
       this.polling = setTimeout(() => {
         this.polling = null;
-        this.fetchAllIssues(repoOwner, repoNames, true /*isForced*/);
+        this.fetchAllIssues(repoInfos, true /*isForced*/);
       }, RELOAD_TIME);
     }
-    if (!isForced && cacheCards && cacheCardsRepoNames === repoOwner + JSON.stringify(repoNames)) {
+    if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);
     }
-    const allPromises = _.map(repoNames, (repoName) => {
+    const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
       return fetchAll(FETCHALL_MAX, issues)
       .then((vals) => {
@@ -158,7 +158,7 @@ class IssueStore extends EventEmitter {
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
       cacheCards = cards;
-      cacheCardsRepoNames = repoOwner + JSON.stringify(repoNames);
+      cacheCardsRepoInfos = JSON.stringify(repoInfos);
       if (isForced) {
         this.emit('change');
       }

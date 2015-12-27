@@ -30,13 +30,13 @@ const issueSource = {
     }
 
     // When dropped on a compatible target, do something
-    const {card, graph, primaryRepoName} = monitor.getItem();
+    const {card, graph, primaryRepoOwner, primaryRepoName} = monitor.getItem();
     const dropResult = monitor.getDropResult();
 
     if (dropResult.label) {
-      IssueStore.tryToMoveLabel(card, graph, primaryRepoName, dropResult.label);
+      IssueStore.tryToMoveLabel(card, graph, primaryRepoOwner, primaryRepoName, dropResult.label);
     } else if (dropResult.milestone){
-      IssueStore.tryToMoveMilestone(card, graph, primaryRepoName, dropResult.milestone);
+      IssueStore.tryToMoveMilestone(card, graph, primaryRepoOwner, primaryRepoName, dropResult.milestone);
     } else {
       throw new Error('BUG: Only know how to move to a kanban label or a milestone');
     }
@@ -87,7 +87,7 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, graph, pullRequest, status, primaryRepoName, columnRegExp} = this.props;
+    const {card, graph, pullRequest, status, primaryRepoOwner, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
 
@@ -220,14 +220,22 @@ let Issue = React.createClass({
       relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
         return (
           <div className='related-issue'>
-            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
+            <IssueOrPullRequestBlurb
+              card={issueCard}
+              primaryRepoOwner={primaryRepoOwner}
+              primaryRepoName={primaryRepoName}
+              context={edgeValue || 'related to'}/>
           </div>
         );
       });
       relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
         return (
           <div className='related-issue'>
-            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
+            <IssueOrPullRequestBlurb
+              card={issueCard}
+              primaryRepoOwner={primaryRepoOwner}
+              primaryRepoName={primaryRepoName}
+              context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
           </div>
         );
       });
@@ -275,7 +283,10 @@ let Issue = React.createClass({
             <Time key='time' className='updated-at' dateTime={updatedAt}/>
             {assignedAvatar}
           </span>
-          <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
+          <IssueOrPullRequestBlurb
+            card={card}
+            primaryRepoOwner={primaryRepoOwner}
+            primaryRepoName={primaryRepoName} />
           {taskCounts}
           {milestone}
 

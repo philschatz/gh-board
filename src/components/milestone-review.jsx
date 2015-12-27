@@ -8,7 +8,7 @@ import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import Client from '../github-client';
-import {KANBAN_LABEL} from '../helpers';
+import {KANBAN_LABEL, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -248,12 +248,13 @@ const RepoKanbanShell = React.createClass({
     );
   },
   render() {
-    let {repoOwner, repoNames, columnRegExp} = this.props.params;
-    repoNames = repoNames.split('|');
+    let {repoStr, columnRegExp} = this.props.params;
+    const repoInfos = getReposFromStr(repoStr);
+    // Get the "Primary" repo for milestones and labels
+    const [{repoOwner, repoName}] = repoInfos;
 
-    const primaryRepoName = repoNames[0];
     // TODO: Actually do all the milestones
-    const allMilestones = Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch();
+    const allMilestones = Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
 
     return (
       <Loadable

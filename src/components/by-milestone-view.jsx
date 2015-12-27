@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
+import {getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
 import {buildBipartiteGraph} from '../issue-store';
 import SettingsStore from '../settings-store';
@@ -18,7 +19,7 @@ import GithubFlavoredMarkdown from './gfm';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {milestone, cards, graph, primaryRepoOwner, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -142,10 +143,11 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames, columnRegExp} = this.props.params;
-    repoNames = repoNames.split('|');
+    let {repoStr, columnRegExp} = this.props.params;
+    const repoInfos = getReposFromStr(repoStr);
 
-    const primaryRepoName = repoNames[0];
+    // pull out the primaryRepoName
+    const [{repoOwner, repoName}] = repoInfos;
 
     if (columnRegExp) {
       columnRegExp = new RegExp(columnRegExp);
@@ -155,11 +157,10 @@ const RepoKanbanShell = React.createClass({
 
     return (
       <Board {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
+        repoInfos={repoInfos}
         columnRegExp={columnRegExp}
         type={ByMilestoneView}
-        columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch()}
+        columnDataPromise={Client.getOcto().repos(repoOwner, repoName).milestones.fetch()}
       />
     );
   },

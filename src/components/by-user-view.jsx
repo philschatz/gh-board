@@ -6,7 +6,7 @@ import IssueStore from '../issue-store';
 import {buildBipartiteGraph} from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
-import {KANBAN_LABEL} from '../helpers';
+import {KANBAN_LABEL, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -52,7 +52,8 @@ const KanbanColumn = React.createClass({
 
 const MilestonesView = React.createClass({
   render() {
-    const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
+    const {columnData, cards, repoInfos, columnRegExp} = this.props;
+    const [{repoOwner, repoName}] = repoInfos;
 
     const graph = buildBipartiteGraph(cards);
 
@@ -79,7 +80,7 @@ const MilestonesView = React.createClass({
           login={login}
           cards={columnCards}
           graph={graph}
-          primaryRepoName={primaryRepoName}
+          primaryRepoName={repoName}
           columnRegExp={columnRegExp}
         />
       );
@@ -106,8 +107,10 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames, columnRegExp} = this.props.params;
-    repoNames = repoNames.split('|');
+    let {repoStr, columnRegExp} = this.props.params;
+    const repoInfos = getReposFromStr(repoStr);
+    // Get the "Primary" repo for milestones and labels
+    const [{repoOwner, repoName}] = repoInfos;
 
     if (columnRegExp) {
       columnRegExp = new RegExp(columnRegExp);
@@ -116,7 +119,7 @@ const RepoKanbanShell = React.createClass({
     }
 
     const columnDataPromise =
-      IssueStore.fetchAllIssues(repoOwner, repoNames, false/*isForced*/)
+      IssueStore.fetchAllIssues(repoInfos, false/*isForced*/)
       .then((cards) => {
         const logins = new Set();
         for (const card of cards) {
@@ -132,8 +135,7 @@ const RepoKanbanShell = React.createClass({
 
     return (
       <Board {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
+        repoInfos={repoInfos}
         columnRegExp={columnRegExp}
         type={MilestonesView}
         columnDataPromise={columnDataPromise}

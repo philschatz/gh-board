@@ -38,8 +38,12 @@ export function isLight(hexColor) {
     g: parseInt(hexColor.substring(2, 4), 16),
     b: parseInt(hexColor.substring(4, 6), 16)
   };
+  // return Math.sqrt(
+  //    color.r * color.r * .299 +
+  //    color.g * color.g * .587 +
+  //    color.b * color.b * .114) >= 130;
   return Math.sqrt(
-     color.r * color.r * .299 +
+     color.r * color.r * .199 +
      color.g * color.g * .587 +
      color.b * color.b * .114) >= 130;
 }
@@ -56,4 +60,33 @@ export function getCardColumn(card) {
   }
   // not found. Must be uncategorized
   return {name: UNCATEGORIZED_NAME};
+}
+
+export function getReposFromStr(reposStr) {
+  let lastRepoOwner = null;
+  return reposStr.split('|').map((repoInfo) => {
+    const repoInfoArr = repoInfo.split(':');
+    if (repoInfoArr.length === 1) {
+      const [repoName] = repoInfoArr;
+      return {repoOwner:lastRepoOwner, repoName};
+    } else if (repoInfoArr.length === 2){
+      const [repoOwner, repoName] = repoInfoArr;
+      lastRepoOwner = repoOwner;
+      return {repoOwner, repoName};
+    } else {
+      throw new Error('Invalid repo format!');
+    }
+  });
+}
+
+export function convertRepoInfosToStr(repoInfos) {
+  let lastRepoOwner = null;
+  return repoInfos.map(({repoOwner, repoName}) => {
+    if (lastRepoOwner === repoOwner) {
+      return repoName;
+    } else {
+      lastRepoOwner = repoOwner;
+      return [repoOwner, repoName].join(':');
+    }
+  });
 }

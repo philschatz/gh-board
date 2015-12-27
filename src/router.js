@@ -20,13 +20,13 @@ const routes = [
     component: App,
     indexRoute: { component: Dashboard },
     childRoutes: [
-      { path: '/r/:repoOwner/:repoNames', component: RepoKanban },
-      { path: '/r/:repoOwner/:repoNames/by/:columnRegExp', component: RepoKanban },
-      { path: '/r/:repoOwner/:repoNames/by-milestone', component: ByMilestoneView },
-      { path: '/r/:repoOwner/:repoNames/by-user', component: ByUserView },
+      { path: '/r/:repoStr', component: RepoKanban },
+      { path: '/r/:repoStr/by/:columnRegExp', component: RepoKanban },
+      { path: '/r/:repoStr/by-milestone', component: ByMilestoneView },
+      { path: '/r/:repoStr/by-user', component: ByUserView },
       { path: '/r/:repoOwner/:repoNames/since/:shaStart', component: MergedSince },
       { path: '/r/:repoOwner/:repoNames/since/:shaStart/:shaEnd', component: MergedSince },
-      { path: '/r/:repoOwner/:repoNames/milestone-review',
+      { path: '/r/:repoStr/milestone-review',
         // Keep the review page as a separate chunk because it contains d3
         getComponent(location, callback) {
           require.ensure([], (require) => {

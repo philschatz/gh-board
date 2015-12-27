@@ -98,7 +98,7 @@ const RepoItem = React.createClass({
       );
     }
 
-    const repoLink = `/r/${repoOwner}/${repoNames}`;
+    const repoLink = `/r/${repoOwner}:${repoNames}`;
     return (
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         <i className={'repo-icon octicon ' + iconClass}/>

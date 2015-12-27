@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
-import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../helpers';
+import {KANBAN_LABEL, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards, buildBipartiteGraph} from '../issue-store';
 import SettingsStore from '../settings-store';
@@ -31,12 +31,13 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {label, cards, graph, primaryRepoOwner, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.issue.id}
+          primaryRepoOwner={primaryRepoOwner}
           primaryRepoName={primaryRepoName}
           card={card}
           graph={graph}
@@ -123,39 +124,11 @@ const AnonymousModal = React.createClass({
 });
 
 const KanbanRepo = React.createClass({
-  // onAddCardList() {
-  //   const {onLabelsChanged} = this.props;
-  //   const {labels} = this.props;
-  //   const {repoOwner, repoName} = this.props;
-  //
-  //   const kanbanLabels = filterKanbanLabels(labels);
-  //
-  //   let lastId = '-1';
-  //
-  //   const lastLabel = kanbanLabels[kanbanLabels.length - 1];
-  //   if (lastLabel.name === UNCATEGORIZED_NAME) {
-  //     lastId = '-1';
-  //   } else {
-  //     lastId = lastLabel.name.match(/^\d+/)[0];
-  //   }
-  //   const newId = parseInt(lastId) + 1;
-  //
-  //   const labelName = prompt('Name of new CardList');
-  //   if (labelName) {
-  //     const name = newId + ' - ' + labelName;
-  //     const color = 'cccccc';
-  //
-  //     // Add the label and re-render
-  //     IssueStore.createLabel(repoOwner, repoName, {name, color})
-  //     .then(() => {
-  //       // Shortcut: Add the label to the list locally w/o refetching
-  //       onLabelsChanged();
-  //     });
-  //   }
-  // },
   render() {
-    const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
+    const {columnData, cards, repoInfos, columnRegExp} = this.props;
 
+    // Get the primary repoOwner and repoName
+    const [{repoOwner, repoName}] = repoInfos;
 
     let allLabels;
     if (!SettingsStore.getHideUncategorized()) {
@@ -198,7 +171,8 @@ const KanbanRepo = React.createClass({
             cards={columnCards}
             graph={graph}
             columnRegExp={columnRegExp}
-            primaryRepoName={primaryRepoName}
+            primaryRepoOwner={repoOwner}
+            primaryRepoName={repoName}
           />
         );
       } else {
@@ -228,8 +202,10 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames, columnRegExp} = this.props.params;
-    repoNames = repoNames.split('|');
+    let {repoStr, columnRegExp} = this.props.params;
+    const repoInfos = getReposFromStr(repoStr);
+    // Get the "Primary" repo for milestones and labels
+    const [{repoOwner, repoName}] = repoInfos;
 
     if (columnRegExp) {
       columnRegExp = new RegExp(columnRegExp);
@@ -237,15 +213,12 @@ const RepoKanbanShell = React.createClass({
       columnRegExp = KANBAN_LABEL;
     }
 
-    const primaryRepoName = repoNames[0];
-
     return (
       <Board {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
+        repoInfos={repoInfos}
         columnRegExp={columnRegExp}
         type={KanbanRepo}
-        columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).labels.fetch()}
+        columnDataPromise={Client.getOcto().repos(repoOwner, repoName).labels.fetch()}
       />
     );
   },

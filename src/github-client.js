@@ -6,8 +6,8 @@ let cachedClient = null;
 
 const cacheHandler = new class CacheHandler {
   constructor() {
-    // Pull data from `sessionStorage`
-    this.storage = window.sessionStorage;
+    // Pull data from `localStorage`
+    this.storage = window.localStorage;
     const cache = this.storage.getItem('octokat-cache');
     if (cache) {
       this.cachedETags = JSON.parse(cache);
@@ -42,7 +42,7 @@ const cacheHandler = new class CacheHandler {
     }
 
     this.cachedETags[method + ' ' + path] = {eTag, data, status, linkRelations};
-    if (Object.keys(this.cachedETags).length > 200) {
+    if (Object.keys(this.cachedETags).length > 1000) {
       // stop saving. blow the storage cache because
       // stringifying JSON and saving is slow
       this.storage.removeItem('octokat-cache');
@@ -52,7 +52,7 @@ const cacheHandler = new class CacheHandler {
       }
       const saveCache = () => {
         this.pendingTimeout = null;
-        // If sessionStorage fills up, just blow it away.
+        // If localStorage fills up, just blow it away.
         try {
           this.storage.setItem('octokat-cache', JSON.stringify(this.cachedETags));
         } catch (e) {

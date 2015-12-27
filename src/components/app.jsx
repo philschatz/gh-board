@@ -12,6 +12,7 @@ import CurrentUserStore from '../user-store';
 import FilterStore from '../filter-store';
 import IssueStore from '../issue-store';
 import history from '../history';
+import {getReposFromStr, convertRepoInfosToStr} from '../helpers';
 
 import LoginModal from './login-modal';
 import LabelBadge from './label-badge';
@@ -201,7 +202,10 @@ const MilestonesDropdown = React.createClass({
 
 const MilestonesDropdownShell = React.createClass({
   render() {
-    const {repoOwner, repoName} = this.props;
+    const {repoInfos} = this.props;
+    // Use primary repo
+    const [{repoOwner, repoName}] = repoInfos;
+
     return (
       <Loadable
         promise={IssueStore.fetchMilestones(repoOwner, repoName)}
@@ -258,10 +262,9 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let {repoOwner, repoNames} = this.props.params || {};
-    if (repoNames) {
-      repoNames = repoNames.split('|');
-    }
+    let {repoStr} = this.props.params || {};
+    const repoInfos = getReposFromStr(repoStr);
+    const [{repoOwner, repoName}] = repoInfos;
 
     const {info, showModal} = this.state;
     const close = () => this.setState({ showModal: false});
@@ -308,17 +311,17 @@ const AppNav = React.createClass({
       <i className='octicon octicon-gear'/>
     );
 
-    let repoInfo = null;
+    let repoDetails = null;
     let milestonesDropdown = null;
     if (!filtering.length && repoOwner) {
       let repoNameItems;
-      if (repoNames.length === 1) {
+      if (repoInfos.length === 1) {
         repoNameItems = (
-          <span className='repo-name'>{repoNames[0]}</span>
+          <span className='repo-name'>{repoName}</span>
         );
       } else {
-        repoNameItems = _.map(repoNames, (repoName, index) => {
-          const repoLink = `/r/${repoOwner}/${repoName}`;
+        repoNameItems = _.map(repoInfos, ({repoOwner, repoName}, index) => {
+          const repoLink = `/r/${repoOwner}:${repoName}`;
           return (
             <span className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
@@ -327,7 +330,7 @@ const AppNav = React.createClass({
           );
         });
       }
-      repoInfo = (
+      repoDetails = (
         <li className='repo-links'>
           <span className='repo-owner'>{repoOwner}</span>
           {'/'}
@@ -335,7 +338,7 @@ const AppNav = React.createClass({
         </li>
       );
       milestonesDropdown = (
-        <MilestonesDropdownShell repoOwner={repoOwner} repoName={repoNames[0]}/>
+        <MilestonesDropdownShell repoInfos={repoInfos}/>
       );
     }
 
@@ -345,9 +348,9 @@ const AppNav = React.createClass({
       /*eslint-enable no-alert */
     };
 
-    const repoLink = `/r/${repoOwner}/${repoNames && repoNames.join('|') || ''}/by-user`;
+    const repoLink = `/r/${repoStr}/by-user`;
     let managerMenu;
-    if (repoNames) {
+    if (repoInfos.length) {
       managerMenu = (
         <BS.MenuItem href={'#' + repoLink}>Manager (Issues by User)</BS.MenuItem>
       );
@@ -360,7 +363,7 @@ const AppNav = React.createClass({
             <BS.Navbar.Brand>{brand}</BS.Navbar.Brand>
           </BS.Navbar.Header>
           <BS.Nav>
-            {repoInfo}
+            {repoDetails}
             <BS.NavItem className='active-filter'>
               {filtering}
             </BS.NavItem>
