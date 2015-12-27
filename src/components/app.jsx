@@ -284,10 +284,14 @@ const AppNav = React.createClass({
   },
   render() {
     let {repoStr} = this.props.params || {};
-    const repoInfos = getReposFromStr(repoStr);
-    const [{repoOwner, repoName}] = repoInfos;
-
     const {info, showModal} = this.state;
+
+    // The dashboard page does not have a list of repos
+    let repoInfos = [];
+    if (repoStr) {
+      repoInfos = getReposFromStr(repoStr);
+    }
+
     const close = () => this.setState({ showModal: false});
 
     const brand = (
@@ -334,7 +338,9 @@ const AppNav = React.createClass({
 
     let repoDetails = null;
     let milestonesDropdown = null;
-    if (!filtering.length && repoOwner) {
+    if (!filtering.length && repoInfos.length) {
+      // Grab the 1st repo
+      const [{repoOwner, repoName}] = repoInfos;
       let repoNameItems;
       if (repoInfos.length === 1) {
         repoNameItems = (
