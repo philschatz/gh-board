@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
@@ -77,7 +78,7 @@ let Issue = React.createClass({
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
     // so the element looks like it is being moved
-    const {style} = this.getDOMNode();
+    const {style} = ReactDOM.findDOMNode(this);
     style.transform = 'rotate(5deg)';
     style.webkitTransform = 'rotate(5deg)';
     setTimeout(() => {

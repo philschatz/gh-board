@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
@@ -14,7 +15,7 @@ const InnerMarkdown = React.createClass({
 
     if (!disableLinks) {
       // Wrap images with a link that opens them in a new tab
-      const images = this.getDOMNode().querySelectorAll('img:not(.emoji)');
+      const images = ReactDOM.findDOMNode(this).querySelectorAll('img:not(.emoji)');
       _.each(images, (img) => {
         const parent = img.parentNode;
         // Do not re-wrap if the image already has a link around it
@@ -28,14 +29,14 @@ const InnerMarkdown = React.createClass({
         link.setAttribute('href', href);
       });
 
-      const links = this.getDOMNode().querySelectorAll('a');
+      const links = ReactDOM.findDOMNode(this).querySelectorAll('a');
       _.each(links, (link) => {
         link.setAttribute('target', '_blank');
       });
     }
   },
   updateCheckboxes() {
-    const div = this.getDOMNode();
+    const div = ReactDOM.findDOMNode(this);
     function buildCheckbox(checked) {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
@@ -72,7 +73,7 @@ const InnerMarkdown = React.createClass({
     });
   },
   updateDOM() {
-    if (!this.getDOMNode()) { return; }
+    if (!ReactDOM.findDOMNode(this)) { return; }
     this.updateLinks();
     this.updateCheckboxes();
   },
