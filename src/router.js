@@ -24,12 +24,13 @@ const routes = [
         childRoutes: [
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
-          { path: 'milestone-review',
+          { path: 'milestone-review', onEnter: (state, replace) => replace(null, `/r/${state.params.repoStr}/gantt`) },
+          { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {
               require.ensure([], (require) => {
                 // Remember to add the `.default`!
-                callback(null, require('./components/milestone-review').default);
+                callback(null, require('./components/gantt-view').default);
               });
             }
           }
