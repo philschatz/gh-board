@@ -4,7 +4,6 @@ import * as BS from 'react-bootstrap';
 
 import {getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
-import {buildBipartiteGraph} from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
@@ -19,7 +18,7 @@ import GithubFlavoredMarkdown from './gfm';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {milestone, cards, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -27,7 +26,6 @@ const KanbanColumn = React.createClass({
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
           card={card}
-          graph={graph}
           columnRegExp={columnRegExp}
           />
       );
@@ -76,8 +74,6 @@ const ByMilestoneView = React.createClass({
   render() {
     const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
 
-    const graph = buildBipartiteGraph(cards);
-
     const uncategorizedCards = _.filter(cards, (card) => {
       return !card.issue.milestone;
     });
@@ -89,7 +85,6 @@ const ByMilestoneView = React.createClass({
     const uncategorizedColumn = (
       <KanbanColumn
         cards={uncategorizedCards}
-        graph={graph}
         primaryRepoName={primaryRepoName}
         columnRegExp={columnRegExp}
       />
@@ -114,7 +109,6 @@ const ByMilestoneView = React.createClass({
           key={kanbanColumnCount}
           milestone={milestone}
           cards={columnCards}
-          graph={graph}
           primaryRepoName={primaryRepoName}
           columnRegExp={columnRegExp}
         />

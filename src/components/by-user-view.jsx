@@ -3,7 +3,6 @@ import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
 import IssueStore from '../issue-store';
-import {buildBipartiteGraph} from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import {KANBAN_LABEL, getReposFromStr} from '../helpers';
@@ -16,7 +15,7 @@ import Board from './board';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {login, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {login, cards, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -24,7 +23,6 @@ const KanbanColumn = React.createClass({
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
           card={card}
-          graph={graph}
           columnRegExp={columnRegExp}
           />
       );
@@ -52,8 +50,8 @@ const KanbanColumn = React.createClass({
 
 const MilestonesView = React.createClass({
   render() {
-    const {columnData, cards, columnRegExp} = this.props;
-    const graph = buildBipartiteGraph(cards);
+    const {repoInfos, columnData, cards, columnRegExp} = this.props;
+    const [{repoName}] = repoInfos; // primaryRepoName
 
     let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
@@ -77,7 +75,6 @@ const MilestonesView = React.createClass({
         <KanbanColumn
           login={login}
           cards={columnCards}
-          graph={graph}
           primaryRepoName={repoName}
           columnRegExp={columnRegExp}
         />

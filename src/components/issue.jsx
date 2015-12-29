@@ -31,13 +31,13 @@ const issueSource = {
     }
 
     // When dropped on a compatible target, do something
-    const {card, graph, primaryRepoName} = monitor.getItem();
+    const {card, primaryRepoName} = monitor.getItem();
     const dropResult = monitor.getDropResult();
 
     if (dropResult.label) {
-      IssueStore.tryToMoveLabel(card, graph, primaryRepoName, dropResult.label);
+      IssueStore.tryToMoveLabel(card, primaryRepoName, dropResult.label);
     } else if (dropResult.milestone){
-      IssueStore.tryToMoveMilestone(card, graph, primaryRepoName, dropResult.milestone);
+      IssueStore.tryToMoveMilestone(card, primaryRepoName, dropResult.milestone);
     } else {
       throw new Error('BUG: Only know how to move to a kanban label or a milestone');
     }
@@ -99,7 +99,7 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, graph, primaryRepoName, columnRegExp} = this.props;
+    const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
 
@@ -222,38 +222,25 @@ let Issue = React.createClass({
     const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
 
-    let relatedIssues = null;
-    let relatedPullRequests = null;
-    if (graph) {
-      relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-        return (
-          <div className='related-issue'>
-            <IssueOrPullRequestBlurb
-              card={issueCard}
-              primaryRepoName={primaryRepoName}
-              context={edgeValue || 'related to'}/>
-          </div>
-        );
-      });
-      relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-        return (
-          <div className='related-issue'>
-            <IssueOrPullRequestBlurb
-              card={issueCard}
-              primaryRepoName={primaryRepoName}
-              context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
-          </div>
-        );
-      });
-    }
+    // TODO: Combine relatedIssues and relatedPullRequests
+    const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
+      const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
+      return (
+        <div className='related-issue'>
+          <IssueOrPullRequestBlurb
+            card={issueCard}
+            primaryRepoName={primaryRepoName}
+            context={context || 'related to'}/>
+        </div>
+      );
+    });
 
     const header = [
       <div className='issue-labels'>
         {labels}
       </div>,
       <div className='related-issues'>
-        {relatedIssues}
-        {relatedPullRequests}
+        {relatedCards}
       </div>,
       <a
         key='link'

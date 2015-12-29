@@ -53,11 +53,14 @@ export default class Card {
     }
   }
   getRelated() {
-    if (this.isPullRequest()) {
-      return this._graph.getB(this._graph.cardToKey(this));
-    } else {
-      return this._graph.getA(this._graph.cardToKey(this));
-    }
+    const key = this._graph.cardToKey(this);
+    return this._graph.getB(key).concat(this._graph.getA(key));
+  }
+  getRelatedIssues() {
+    return this._graph.getB(this._graph.cardToKey(this));
+  }
+  getRelatedPullRequests() {
+    return this._graph.getA(this._graph.cardToKey(this));
   }
   getUpdatedAt() {
     if (this.isPullRequest() && !this._pr) {

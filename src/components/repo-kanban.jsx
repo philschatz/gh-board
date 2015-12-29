@@ -4,7 +4,7 @@ import * as BS from 'react-bootstrap';
 
 import {KANBAN_LABEL, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
-import {filterCards, buildBipartiteGraph} from '../issue-store';
+import {filterCards} from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
@@ -32,7 +32,7 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {label, cards, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -40,7 +40,6 @@ const KanbanColumn = React.createClass({
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
           card={card}
-          graph={graph}
           columnRegExp={columnRegExp}
           />
       );
@@ -140,10 +139,6 @@ const KanbanRepo = React.createClass({
 
     const kanbanLabels = filterKanbanLabels(allLabels, columnRegExp);
 
-    const graph = buildBipartiteGraph(cards);
-
-
-
     let sortedCards = FilterStore.filterAndSort(cards);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
@@ -169,7 +164,6 @@ const KanbanRepo = React.createClass({
             key={label.name}
             label={label}
             cards={columnCards}
-            graph={graph}
             columnRegExp={columnRegExp}
             primaryRepoName={repoName}
           />
