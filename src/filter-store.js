@@ -7,24 +7,29 @@ import {filterCards} from './issue-store';
 import {contains} from './helpers';
 
 let userFilter = null;
-let milestoneFilter = null;
+let filteredMilestones = [];
 let filteredLabels = [];
 
-const filterReferencedCards = (graph, cards, isFilteringPullRequests) => {
+const filterReferencedCards = (cards, isFilteringPullRequests) => {
   const allPossiblyRelatedCards = {};
   _.each(cards, (card) => {
     // XOR
-    if (isFilteringPullRequests ? !card.issue.pullRequest : card.issue.pullRequest) {
-      allPossiblyRelatedCards[graph.cardToKey(card)] = true;
+    if (isFilteringPullRequests ? !card.isPullRequest() : card.isPullRequest()) {
+      allPossiblyRelatedCards[card.key()] = true;
     }
   });
   return _.filter(cards, (card) => {
     // XOR
-    if (isFilteringPullRequests ? card.issue.pullRequest : !card.issue.pullRequest) {
+    if (isFilteringPullRequests ? card.isPullRequest() : !card.isPullRequest()) {
       // loop through all the related PR's. If one matches, remove this issue
-      const graphGet = isFilteringPullRequests ? graph.getB : graph.getA;
-      const hasVisiblePullRequest = _.filter(graphGet.bind(graph)(graph.cardToKey(card)), ({vertex: otherCard}) => {
-        if (allPossiblyRelatedCards[graph.cardToKey(otherCard)]) {
+      let related = [];
+      if (isFilteringPullRequests &&  card.isPullRequest()) {
+        related = card.getRelatedIssues();
+      } else if (!isFilteringPullRequests && !card.isPullRequest()) {
+        related = card.getRelatedPullRequests();
+      }
+      const hasVisiblePullRequest = _.filter(related, ({vertex: otherCard}) => {
+        if (allPossiblyRelatedCards[otherCard.key()]) {
           return true;
         }
         return false;
@@ -45,7 +50,7 @@ class Store extends EventEmitter {
   }
   clearFilters() {
     userFilter = null;
-    milestoneFilter = null;
+    filteredMilestones = [];
     filteredLabels = [];
     this.emit('change');
   }
@@ -62,13 +67,37 @@ class Store extends EventEmitter {
   getUser() {
     return userFilter;
   }
-  getMilestone() {
-    return milestoneFilter;
+  getMilestones() {
+    return filteredMilestones;
   }
-  setMilestone(milestone) {
-    milestoneFilter = milestone;
+  toggleMilestone(milestone) {
+    const index = _.findIndex(filteredMilestones, (ms) => {
+      return milestone.title === ms.title;
+    });
+    if (index >= 0) {
+      // Remove the milestone from the list
+      filteredMilestones.splice(index, 1);
+    } else {
+      filteredMilestones.push(milestone);
+    }
     this.emit('change');
     this.emit('change:milestone', milestone);
+  }
+  clearMilestoneFilter() {
+    filteredMilestones = [];
+    this.emit('change');
+  }
+  setMilestones(milestones) {
+    filteredMilestones = milestones;
+    this.emit('change');
+  }
+  isMilestoneIncluded(milestone) {
+    if (!filteredMilestones.length) {
+      return true;
+    }
+    return !!_.filter(filteredMilestones, (ms) => {
+      return ms.title === milestone.title;
+    })[0];
   }
   addLabel(label) {
     const containsLabel = contains(filteredLabels, (l) => {
@@ -91,7 +120,7 @@ class Store extends EventEmitter {
     return filteredLabels;
   }
 
-  filterAndSort(graph, cards, isShowingMilestones) {
+  filterAndSort(cards, isShowingMilestones) {
 
     // Filter all the cards
     let filteredCards = cards;
@@ -105,10 +134,14 @@ class Store extends EventEmitter {
         }
       });
     }
-    if (milestoneFilter) {
+    if (filteredMilestones.length) {
       filteredCards = _.filter(filteredCards, (card) => {
         const issue = card.issue;
-        if ((isShowingMilestones && !issue.milestone) || (issue.milestone && issue.milestone.title === milestoneFilter.title)) {
+        if (isShowingMilestones && !issue.milestone) {
+          return true;
+        }
+        // Check if any of the milestones match
+        if (issue.milestone && this.isMilestoneIncluded(issue.milestone)) {
           return true;
         }
       });
@@ -126,7 +159,7 @@ class Store extends EventEmitter {
     // Filter out any Issues that are associated with at least one Pull request in the list of cards
     if (!SettingsStore.getRelatedShowAll()) {
       const isFilteringPullRequests = SettingsStore.getRelatedHidePullRequests();
-      sortedCards = filterReferencedCards(graph, sortedCards, isFilteringPullRequests);
+      sortedCards = filterReferencedCards(sortedCards, isFilteringPullRequests);
     }
     return sortedCards;
   }

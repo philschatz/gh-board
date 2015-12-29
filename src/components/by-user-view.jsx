@@ -3,10 +3,9 @@ import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
 import IssueStore from '../issue-store';
-import {buildBipartiteGraph} from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
-import {KANBAN_LABEL} from '../helpers';
+import {KANBAN_LABEL, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -16,7 +15,7 @@ import Board from './board';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {login, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {login, cards, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -24,7 +23,6 @@ const KanbanColumn = React.createClass({
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
           card={card}
-          graph={graph}
           columnRegExp={columnRegExp}
           />
       );
@@ -52,11 +50,10 @@ const KanbanColumn = React.createClass({
 
 const MilestonesView = React.createClass({
   render() {
-    const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
+    const {repoInfos, columnData, cards, columnRegExp} = this.props;
+    const [{repoName}] = repoInfos; // primaryRepoName
 
-    const graph = buildBipartiteGraph(cards);
-
-    let sortedCards = FilterStore.filterAndSort(graph, cards, true/*isShowingMilestones*/);
+    let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 
@@ -78,8 +75,7 @@ const MilestonesView = React.createClass({
         <KanbanColumn
           login={login}
           cards={columnCards}
-          graph={graph}
-          primaryRepoName={primaryRepoName}
+          primaryRepoName={repoName}
           columnRegExp={columnRegExp}
         />
       );
@@ -106,8 +102,8 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames, columnRegExp} = this.props.params;
-    repoNames = repoNames.split('|');
+    let {repoStr, columnRegExp} = this.props.params;
+    const repoInfos = getReposFromStr(repoStr);
 
     if (columnRegExp) {
       columnRegExp = new RegExp(columnRegExp);
@@ -116,7 +112,7 @@ const RepoKanbanShell = React.createClass({
     }
 
     const columnDataPromise =
-      IssueStore.fetchAllIssues(repoOwner, repoNames, false/*isForced*/)
+      IssueStore.fetchAllIssues(repoInfos, false/*isForced*/)
       .then((cards) => {
         const logins = new Set();
         for (const card of cards) {
@@ -132,8 +128,7 @@ const RepoKanbanShell = React.createClass({
 
     return (
       <Board {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
+        repoInfos={repoInfos}
         columnRegExp={columnRegExp}
         type={MilestonesView}
         columnDataPromise={columnDataPromise}

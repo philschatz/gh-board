@@ -13,7 +13,6 @@ const MoveModal = React.createClass({
     return {
       showModal: false,
       card: null,
-      graph: null,
       primaryRepoName: null,
       label: null,
       unCheckedCards: {}
@@ -26,16 +25,16 @@ const MoveModal = React.createClass({
   componentWillUnmount() {
     IssueStore.off('tryToMoveMilestone', this.onTryToMoveMilestone);
   },
-  onTryToMoveLabel(card, graph, primaryRepoName, label) {
-    this.setState({showModal: true, card, graph, primaryRepoName, label, milestone: null, unCheckedCards: {}});
+  onTryToMoveLabel(card, primaryRepoName, label) {
+    this.setState({showModal: true, card, primaryRepoName, label, milestone: null, unCheckedCards: {}});
   },
-  onTryToMoveMilestone(card, graph, primaryRepoName, milestone) {
-    this.setState({showModal: true, card, graph, primaryRepoName, label: null, milestone, unCheckedCards: {}});
+  onTryToMoveMilestone(card, primaryRepoName, milestone) {
+    this.setState({showModal: true, card, primaryRepoName, label: null, milestone, unCheckedCards: {}});
   },
   onToggleCheckbox(card) {
     return () => {
-      const {graph, unCheckedCards} = this.state;
-      const key = graph.cardToKey(card);
+      const {unCheckedCards} = this.state;
+      const key = card.key();
       if (!unCheckedCards[key]) {
         unCheckedCards[key] = card;
       } else {
@@ -45,11 +44,8 @@ const MoveModal = React.createClass({
     };
   },
   onClickMoveLabel() {
-    const {card, graph, label, unCheckedCards} = this.state;
-    const allOtherCards = _.union(
-      _.map(graph.getA(graph.cardToKey(card)), ({vertex}) => vertex),
-      _.map(graph.getB(graph.cardToKey(card)), ({vertex}) => vertex)
-    );
+    const {card, label, unCheckedCards} = this.state;
+    const allOtherCards = _.map(card.getRelated(), ({vertex}) => vertex);
     const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
 
     // Move the card and then all the others
@@ -61,11 +57,8 @@ const MoveModal = React.createClass({
   },
   // TODO: Copy/pasta from above
   onClickMoveMilestone() {
-    const {card, graph, milestone, unCheckedCards} = this.state;
-    const allOtherCards = _.union(
-      _.map(graph.getA(graph.cardToKey(card)), ({vertex}) => vertex),
-      _.map(graph.getB(graph.cardToKey(card)), ({vertex}) => vertex)
-    );
+    const {card, milestone, unCheckedCards} = this.state;
+    const allOtherCards = _.map(card.getRelated(), ({vertex}) => vertex);
     const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
 
     // Move the card and then all the others
@@ -77,14 +70,11 @@ const MoveModal = React.createClass({
   },
   render() {
     const {container} = this.props;
-    const {showModal, card, graph, primaryRepoName, label, milestone, unCheckedCards} = this.state;
+    const {showModal, card, primaryRepoName, label, milestone, unCheckedCards} = this.state;
     const close = () => this.setState({showModal: false});
 
     if (showModal) {
-      const related = _.union(
-        graph.getA(graph.cardToKey(card)),
-        graph.getB(graph.cardToKey(card))
-      );
+      const related = card.getRelated();
 
       let anonymousComment = null;
       const isAnonymous = !CurrentUserStore.getUser();
@@ -114,7 +104,7 @@ const MoveModal = React.createClass({
             <li className='related-issue'>
               <BS.Input
                 type='checkbox'
-                defaultChecked={!unCheckedCards[graph.cardToKey(vertex)]}
+                defaultChecked={!unCheckedCards[vertex.key()]}
                 wrapperClassName='select-related-issue'
                 onClick={this.onToggleCheckbox(vertex)}
                 label={checkLabel}/>

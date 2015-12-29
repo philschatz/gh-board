@@ -5,11 +5,12 @@ import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
 import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
+import Card from './card-model';
 
 const RELOAD_TIME = 30 * 1000;
 
-const toIssueKey = (repoOwner, repoName, issueNumber) => {
-  return repoOwner + '/' + repoName + '/issues/' + issueNumber;
+const toIssueKey = (repoOwner, repoName, number) => {
+  return `${repoOwner}/${repoName}#${number}`;
 };
 
 const delayedPromise = (fn) => {
@@ -23,6 +24,21 @@ const delayedPromise = (fn) => {
     }
   };
 };
+
+let GRAPH_CACHE = new BipartiteGraph();
+let CARD_CACHE = {};
+const cardFactory = (repoOwner, repoName, number, issue) => {
+  const key = toIssueKey(repoOwner, repoName, number);
+  let card = CARD_CACHE[key];
+  if (card) {
+    card.resetPromisesAndState(issue);
+    return card;
+  } else {
+    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue);
+    CARD_CACHE[key] = card;
+    return card;
+  }
+}
 
 
 export function filterCards(cards, labels) {
@@ -55,8 +71,7 @@ export function filterCards(cards, labels) {
   return filtered;
 }
 
-export function buildBipartiteGraph(cards) {
-  const graph = new BipartiteGraph();
+function _buildBipartiteGraph(graph, cards) {
   const allPullRequests = {};
   const allIssues = {};
 
@@ -72,22 +87,27 @@ export function buildBipartiteGraph(cards) {
   });
 
   _.each(cards, (card) => {
-    const cardPath = graph.cardToKey(card);
+    const cardPath = GRAPH_CACHE.cardToKey(card);
     const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
     if (card.issue.pullRequest) {
       // card is a Pull Request
       _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
-        const otherCardPath = graph.cardToKey({repoOwner, repoName, issue: {number}});
+        const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
         if (allIssues[otherCardPath]) {
-          graph.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card, fixes);
+          GRAPH_CACHE.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card, fixes);
         }
       });
     }
   });
+}
+
+export function buildBipartiteGraph(cards) {
+  const graph = new BipartiteGraph();
+  _buildBipartiteGraph(graph, cards);
   return graph;
 }
 
-let cacheCardsRepoNames = null;
+let cacheCardsRepoInfos = null;
 let cacheCards = null;
 let cacheLastViewed = {};
 const initialTimestamp = new Date();
@@ -102,7 +122,9 @@ class IssueStore extends EventEmitter {
   }
   clearCacheCards() {
     cacheCards = null;
-    cacheCardsRepoNames = null;
+    cacheCardsRepoInfos = null;
+    CARD_CACHE = {};
+    GRAPH_CACHE = new BipartiteGraph();
   }
   stopPolling() {
     isPollingEnabled = false;
@@ -110,21 +132,30 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
-  issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise=null) {
-    return {repoOwner, repoName, issue, pullRequestDelayedPromise};
+  issueNumberToCard(repoOwner, repoName, number, issue=null, pullRequestDelayedPromise=null) {
+    if (!(repoOwner && repoName && number)) {
+      throw new Error('BUG! Forgot to pass arguments in');
+    }
+    return cardFactory(repoOwner, repoName, number, issue);
   }
-  fetchAllIssues(repoOwner, repoNames, isForced) {
+  issueToCard(repoOwner, repoName, issue) {
+    if (!(repoOwner && repoName && issue)) {
+      throw new Error('BUG! Forgot to pass arguments in');
+    }
+    return cardFactory(repoOwner, repoName, issue.number, issue);
+  }
+  fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
       this.polling = setTimeout(() => {
         this.polling = null;
-        this.fetchAllIssues(repoOwner, repoNames, true /*isForced*/);
+        this.fetchAllIssues(repoInfos, true /*isForced*/);
       }, RELOAD_TIME);
     }
-    if (!isForced && cacheCards && cacheCardsRepoNames === repoOwner + JSON.stringify(repoNames)) {
+    if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);
     }
-    const allPromises = _.map(repoNames, (repoName) => {
+    const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
       return fetchAll(FETCHALL_MAX, issues)
       .then((vals) => {
@@ -148,17 +179,20 @@ class IssueStore extends EventEmitter {
               });
             };
             const pullRequestDelayedPromise = delayedPromise(fn);
-            return this.issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise);
+            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
           } else {
-            return this.issueToCard(repoOwner, repoName, issue);
+            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
           }
         });
       });
     });
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
+
+      _buildBipartiteGraph(GRAPH_CACHE, cards);
+
       cacheCards = cards;
-      cacheCardsRepoNames = repoOwner + JSON.stringify(repoNames);
+      cacheCardsRepoInfos = JSON.stringify(repoInfos);
       if (isForced) {
         this.emit('change');
       }
@@ -168,11 +202,11 @@ class IssueStore extends EventEmitter {
   fetchMilestones(repoOwner, repoName) {
     return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
   }
-  tryToMoveLabel(card, graph, primaryRepoName, label) {
-    this.emit('tryToMoveLabel', card, graph, primaryRepoName, label);
+  tryToMoveLabel(card, primaryRepoName, label) {
+    this.emit('tryToMoveLabel', card, primaryRepoName, label);
   }
-  tryToMoveMilestone(card, graph, primaryRepoName, milestone) {
-    this.emit('tryToMoveMilestone', card, graph, primaryRepoName, milestone);
+  tryToMoveMilestone(card, primaryRepoName, milestone) {
+    this.emit('tryToMoveMilestone', card, primaryRepoName, milestone);
   }
   moveLabel(repoOwner, repoName, issue, newLabel) {
     // Find all the labels, remove the kanbanLabel, and add the new label

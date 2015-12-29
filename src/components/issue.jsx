@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
@@ -30,13 +31,13 @@ const issueSource = {
     }
 
     // When dropped on a compatible target, do something
-    const {card, graph, primaryRepoName} = monitor.getItem();
+    const {card, primaryRepoName} = monitor.getItem();
     const dropResult = monitor.getDropResult();
 
     if (dropResult.label) {
-      IssueStore.tryToMoveLabel(card, graph, primaryRepoName, dropResult.label);
+      IssueStore.tryToMoveLabel(card, primaryRepoName, dropResult.label);
     } else if (dropResult.milestone){
-      IssueStore.tryToMoveMilestone(card, graph, primaryRepoName, dropResult.milestone);
+      IssueStore.tryToMoveMilestone(card, primaryRepoName, dropResult.milestone);
     } else {
       throw new Error('BUG: Only know how to move to a kanban label or a milestone');
     }
@@ -64,6 +65,17 @@ let Issue = React.createClass({
   getInitialState() {
     return {taskFinishedCount: 0, taskTotalCount: 0};
   },
+  componentWillMount() {
+    const {card} = this.props;
+    if (!card.isLoaded()) { card.load(); }
+    // TODO: Not sure why React no longer automatically binds all functions to `this`
+    this._changeListener = this.forceUpdate.bind(this);
+    card.onChange(this._changeListener);
+  },
+  componentWillUnmount() {
+    const {card} = this.props;
+    card.offChange(this._changeListener);
+  },
   update(issue) {
     this.setState({issue});
   },
@@ -77,7 +89,7 @@ let Issue = React.createClass({
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
     // so the element looks like it is being moved
-    const {style} = this.getDOMNode();
+    const {style} = ReactDOM.findDOMNode(this);
     style.transform = 'rotate(5deg)';
     style.webkitTransform = 'rotate(5deg)';
     setTimeout(() => {
@@ -87,7 +99,7 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, graph, pullRequest, status, primaryRepoName, columnRegExp} = this.props;
+    const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
 
@@ -95,8 +107,7 @@ let Issue = React.createClass({
     const { isDragging, connectDragSource } = this.props;
 
     // PR updatedAt is updated when commits are pushed
-    const updatedAt = pullRequest ? pullRequest.updatedAt : issue.updatedAt;
-    const isMergeable = pullRequest ? pullRequest.mergeable : false;
+    const updatedAt = card.getUpdatedAt();
 
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);
@@ -117,7 +128,7 @@ let Issue = React.createClass({
     });
     const labels = _.map(nonKanbanLabels, (label) => {
       const tooltip = (
-        <BS.Tooltip id="tooltip-${issue.id}-${label.name}">{label.name}. Click to filter</BS.Tooltip>
+        <BS.Tooltip id={`tooltip-${issue.id}-${label.name}`}>{label.name}. Click to filter</BS.Tooltip>
       );
       return (
         <BS.OverlayTrigger
@@ -135,7 +146,11 @@ let Issue = React.createClass({
     let taskCounts = null;
     if (taskTotalCount) {
       const taskListPopover = (
-        <BS.Popover id="popover-${issue.id}-task-list" className='task-list-details' title='Task List'>
+        <BS.Popover
+          key={`popover-${issue.id}-task-list`}
+          id={`popover-${issue.id}-task-list`}
+          className='task-list-details'
+          title='Task List'>
           <GithubFlavoredMarkdown
             disableLinks={false}
             repoOwner={repoOwner}
@@ -146,22 +161,20 @@ let Issue = React.createClass({
 
       taskCounts = (
         <BS.OverlayTrigger
+          key='task-list'
           rootClose
           trigger={['click', 'focus']}
           placement='bottom'
           overlay={taskListPopover}>
           <span className='task-list-overview'>
             <i className='octicon octicon-check'/>
-            {taskFinishedCount}/{taskTotalCount}
+            {`${taskFinishedCount}/${taskTotalCount}`}
           </span>
         </BS.OverlayTrigger>
       );
     }
     const shouldShowMilestone = (
-      issue.milestone && (
-        !FilterStore.getMilestone()
-        || (FilterStore.getMilestone().title !== issue.milestone.title)
-      )
+      issue.milestone && FilterStore.getMilestones().length !== 1
     );
     let milestone = null;
     if (shouldShowMilestone) {
@@ -169,7 +182,10 @@ let Issue = React.createClass({
       const closedCount = issue.milestone.closedIssues;
       const totalCount = openCount + closedCount;
       const milestonePopover = (
-        <BS.Popover id="popover-${issue.id}-milestone" className='milestone-details' title='Milestone Details'>
+        <BS.Popover
+          id={`popover-${issue.id}-milestone`}
+          className='milestone-details'
+          title='Milestone Details'>
           <h4>
             <a target='_blank' href={issue.milestone.html.url}>
               <GithubFlavoredMarkdown
@@ -214,32 +230,25 @@ let Issue = React.createClass({
     const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
     const isUpdated = lastViewed < updatedAt;
 
-    let relatedIssues = null;
-    let relatedPullRequests = null;
-    if (graph) {
-      relatedIssues = _.map(graph.getB(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-        return (
-          <div className='related-issue'>
-            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={edgeValue || 'related to'}/>
-          </div>
-        );
-      });
-      relatedPullRequests = _.map(graph.getA(graph.cardToKey(card)), ({vertex: issueCard, edgeValue}) => {
-        return (
-          <div className='related-issue'>
-            <IssueOrPullRequestBlurb card={issueCard} primaryRepoName={primaryRepoName} context={PULL_REQUEST_ISSUE_RELATION[edgeValue] || 'related to'}/>
-          </div>
-        );
-      });
-    }
+    // TODO: Combine relatedIssues and relatedPullRequests
+    const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
+      const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
+      return (
+        <div key={issueCard.key()} className='related-issue'>
+          <IssueOrPullRequestBlurb
+            card={issueCard}
+            primaryRepoName={primaryRepoName}
+            context={context || 'related to'}/>
+        </div>
+      );
+    });
 
     const header = [
-      <div className='issue-labels'>
+      <div key='labels' className='issue-labels'>
         {labels}
       </div>,
-      <div className='related-issues'>
-        {relatedIssues}
-        {relatedPullRequests}
+      <div key='related' className='related-issues'>
+        {relatedCards}
       </div>,
       <a
         key='link'
@@ -258,14 +267,14 @@ let Issue = React.createClass({
       'issue': true,
       'is-dragging': isDragging,
       'is-updated': isUpdated,
-      'is-pull-request': !!pullRequest,
-      'is-mergeable': isMergeable
+      'is-pull-request': card.isPullRequest(),
+      'is-mergeable': card.isPullRequest() && card.isPullRequestMergeable()
     };
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
-          key={issue.id}
-          data-status-state={status ? status.state : null}
+          key={card.repoOwner + card.repoName + issue.id}
+          data-status-state={card.isPullRequest() ? card.getPullRequestStatus() : null}
           header={header}
           onDragStart={this.onDragStart}
           className={classnames(classes)}
@@ -275,7 +284,9 @@ let Issue = React.createClass({
             <Time key='time' className='updated-at' dateTime={updatedAt}/>
             {assignedAvatar}
           </span>
-          <IssueOrPullRequestBlurb card={card} primaryRepoName={primaryRepoName} />
+          <IssueOrPullRequestBlurb
+            card={card}
+            primaryRepoName={primaryRepoName} />
           {taskCounts}
           {milestone}
 
@@ -296,22 +307,21 @@ Issue = DragSource(ItemTypes.CARD, issueSource, collect)(Issue);
 const IssueShell = React.createClass({
   render() {
     const {card} = this.props;
-    const {issue, pullRequestDelayedPromise} = card;
-    if (pullRequestDelayedPromise) {
+    const {repoOwner, repoName, number} = card;
+    if (card.isLoaded()) {
       return (
-        <Loadable key={issue.id}
-          promise={pullRequestDelayedPromise()}
-          renderLoading={() => <Issue key={issue.id} {...this.props}/>}
-          renderError={() => <Issue key={issue.id} {...this.props}/>}
-          renderLoaded={({pullRequest, statuses}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={statuses ? statuses[0] : null}/> }
-        />
+        <Issue key={card.key()} {...this.props}/>
       );
     } else {
       return (
-        <Issue key={issue.id} {...this.props}/>
-      );
+        <Loadable
+          key={card.key()}
+          promise={card.load()}
+          loadingText={card.key()}
+          renderLoaded={() => <Issue key={repoOwner + repoName + number} {...this.props} />}
+        />
+      )
     }
-
   }
 });
 
