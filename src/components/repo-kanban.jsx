@@ -144,7 +144,7 @@ const KanbanRepo = React.createClass({
 
 
 
-    let sortedCards = FilterStore.filterAndSort(graph, cards);
+    let sortedCards = FilterStore.filterAndSort(cards);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 

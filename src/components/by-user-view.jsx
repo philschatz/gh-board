@@ -55,7 +55,7 @@ const MilestonesView = React.createClass({
     const {columnData, cards, columnRegExp} = this.props;
     const graph = buildBipartiteGraph(cards);
 
-    let sortedCards = FilterStore.filterAndSort(graph, cards, true/*isShowingMilestones*/);
+    let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 

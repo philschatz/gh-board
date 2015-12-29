@@ -10,21 +10,25 @@ let userFilter = null;
 let filteredMilestones = [];
 let filteredLabels = [];
 
-const filterReferencedCards = (graph, cards, isFilteringPullRequests) => {
+const filterReferencedCards = (cards, isFilteringPullRequests) => {
   const allPossiblyRelatedCards = {};
   _.each(cards, (card) => {
     // XOR
-    if (isFilteringPullRequests ? !card.issue.pullRequest : card.issue.pullRequest) {
-      allPossiblyRelatedCards[graph.cardToKey(card)] = true;
+    if (isFilteringPullRequests ? !card.isPullRequest() : card.isPullRequest()) {
+      allPossiblyRelatedCards[card.key()] = true;
     }
   });
   return _.filter(cards, (card) => {
     // XOR
-    if (isFilteringPullRequests ? card.issue.pullRequest : !card.issue.pullRequest) {
+    if (isFilteringPullRequests ? card.isPullRequest() : !card.isPullRequest()) {
       // loop through all the related PR's. If one matches, remove this issue
-      const graphGet = isFilteringPullRequests ? graph.getB : graph.getA;
-      const hasVisiblePullRequest = _.filter(graphGet.bind(graph)(graph.cardToKey(card)), ({vertex: otherCard}) => {
-        if (allPossiblyRelatedCards[graph.cardToKey(otherCard)]) {
+      let related = [];
+      if ( ( isFilteringPullRequests &&  card.isPullRequest())
+        || (!isFilteringPullRequests && !card.isPullRequest())) {
+        related = card.getRelated();
+      }
+      const hasVisiblePullRequest = _.filter(related, ({vertex: otherCard}) => {
+        if (allPossiblyRelatedCards[otherCard.key()]) {
           return true;
         }
         return false;
@@ -115,7 +119,7 @@ class Store extends EventEmitter {
     return filteredLabels;
   }
 
-  filterAndSort(graph, cards, isShowingMilestones) {
+  filterAndSort(cards, isShowingMilestones) {
 
     // Filter all the cards
     let filteredCards = cards;
@@ -154,7 +158,7 @@ class Store extends EventEmitter {
     // Filter out any Issues that are associated with at least one Pull request in the list of cards
     if (!SettingsStore.getRelatedShowAll()) {
       const isFilteringPullRequests = SettingsStore.getRelatedHidePullRequests();
-      sortedCards = filterReferencedCards(graph, sortedCards, isFilteringPullRequests);
+      sortedCards = filterReferencedCards(sortedCards, isFilteringPullRequests);
     }
     return sortedCards;
   }

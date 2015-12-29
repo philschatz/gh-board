@@ -82,7 +82,7 @@ const ByMilestoneView = React.createClass({
       return !card.issue.milestone;
     });
 
-    let sortedCards = FilterStore.filterAndSort(graph, cards, true/*isShowingMilestones*/);
+    let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 
