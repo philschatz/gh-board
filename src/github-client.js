@@ -68,7 +68,7 @@ const cacheHandler = new class CacheHandler {
 class Client extends EventEmitter {
   constructor() {
     super();
-    this.LOW_RATE_LIMIT = 10;
+    this.LOW_RATE_LIMIT = 60;
   }
   off() { // EventEmitter has `.on` but no matching `.off`
     const slice = [].slice;

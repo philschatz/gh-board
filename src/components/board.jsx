@@ -52,7 +52,7 @@ const Board = React.createClass({
         promise={Promise.all([columnDataPromise, cardsPromise])}
         loadingText='Loading GitHub Issues and Pull Requests...'
         renderLoaded={this.renderKanbanRepos(repoInfos)}
-        renderError={() => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.</span>)}
+        renderError={(err) => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API. {err}</span>)}
       />
     );
   }

@@ -65,6 +65,17 @@ let Issue = React.createClass({
   getInitialState() {
     return {taskFinishedCount: 0, taskTotalCount: 0};
   },
+  componentWillMount() {
+    const {card} = this.props;
+    if (!card.isLoaded()) { card.load(); }
+    // TODO: Not sure why React no longer automatically binds all functions to `this`
+    this._changeListener = this.forceUpdate.bind(this);
+    card.onChange(this._changeListener);
+  },
+  componentWillUnmount() {
+    const {card} = this.props;
+    card.offChange(this._changeListener);
+  },
   update(issue) {
     this.setState({issue});
   },
@@ -88,7 +99,7 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, graph, pullRequest, status, primaryRepoName, columnRegExp} = this.props;
+    const {card, graph, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
 
@@ -96,8 +107,7 @@ let Issue = React.createClass({
     const { isDragging, connectDragSource } = this.props;
 
     // PR updatedAt is updated when commits are pushed
-    const updatedAt = pullRequest ? pullRequest.updatedAt : issue.updatedAt;
-    const isMergeable = pullRequest ? pullRequest.mergeable : false;
+    const updatedAt = card.getUpdatedAt();
 
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);
@@ -262,14 +272,14 @@ let Issue = React.createClass({
       'issue': true,
       'is-dragging': isDragging,
       'is-updated': isUpdated,
-      'is-pull-request': !!pullRequest,
-      'is-mergeable': isMergeable
+      'is-pull-request': card.isPullRequest(),
+      'is-mergeable': card.isPullRequest() && card.isPullRequestMergeable()
     };
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
           key={card.repoOwner + card.repoName + issue.id}
-          data-status-state={status ? status.state : null}
+          data-status-state={card.isPullRequest() ? card.getPullRequestStatus() : null}
           header={header}
           onDragStart={this.onDragStart}
           className={classnames(classes)}
@@ -302,22 +312,21 @@ Issue = DragSource(ItemTypes.CARD, issueSource, collect)(Issue);
 const IssueShell = React.createClass({
   render() {
     const {card} = this.props;
-    const {issue, pullRequestDelayedPromise} = card;
-    if (pullRequestDelayedPromise) {
+    const {repoOwner, repoName, number} = card;
+    if (card.isLoaded()) {
       return (
-        <Loadable key={issue.id}
-          promise={pullRequestDelayedPromise()}
-          renderLoading={() => <Issue key={issue.id} {...this.props}/>}
-          renderError={() => <Issue key={issue.id} {...this.props}/>}
-          renderLoaded={({pullRequest, statuses}) => <Issue key={issue.id} {...this.props} pullRequest={pullRequest} status={statuses ? statuses[0] : null}/> }
-        />
+        <Issue key={card.key()} {...this.props}/>
       );
     } else {
       return (
-        <Issue key={issue.id} {...this.props}/>
-      );
+        <Loadable
+          key={card.key()}
+          promise={card.load()}
+          loadingText={card.key()}
+          renderLoaded={() => <Issue key={repoOwner + repoName + number} {...this.props} />}
+        />
+      )
     }
-
   }
 });
 

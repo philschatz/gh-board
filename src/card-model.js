@@ -1,0 +1,145 @@
+import Client from './github-client';
+import {getTaskCounts} from './gfm-dom';
+
+const MAX_LISTENERS = 5;
+
+export default class Card {
+  constructor(repoOwner, repoName, number, issue, graph) {
+    if (!repoOwner) { throw new Error('BUG! missing repoOwner'); }
+    if (!repoName) { throw new Error('BUG! missing repoName'); }
+    if (!number) { throw new Error('BUG! missing number'); }
+    this.repoOwner = repoOwner;
+    this.repoName = repoName;
+    this.number = number;
+    this.issue = issue;
+    this._graph = graph;
+    this._pr = null;
+    this._prPromise = null;
+    this._changeListeners = [];
+  }
+  key() {
+    const {repoOwner, repoName, number} = this;
+    return `${repoOwner}/${repoName}#${number}`;
+  }
+  onChange(listener, context) {
+    const len = this._changeListeners.length;
+    if (len > MAX_LISTENERS) {
+      console.warn('MAX_LISTENERS reached. Maybe a bug?', len);
+    }
+    this._changeListeners.push(listener);
+  }
+  offChange(listener) {
+    this._changeListeners = this._changeListeners.filter(item => item !== listener);
+  }
+  isPullRequest() {
+    return !!this.issue.pullRequest;
+  }
+  isPullRequestMergeable() {
+    if (this._pr) {
+      return this._pr.mergeable || this._pr.mergedAt;
+    } else {
+      return false; // return false for now just to be safe
+    }
+  }
+  getPullRequestStatus() {
+    if (!this._prStatuses) {
+      return null;
+    }
+    // TODO: check when there are multiple statuses
+    if (this._prStatuses.length) {
+      return this._prStatuses[0].state;
+    } else {
+      return null;
+    }
+  }
+  getRelated() {
+    if (this.isPullRequest()) {
+      return this._graph.getA(this._graph.cardToKey(card));
+    } else {
+      return this._graph.getB(this._graph.cardToKey(card));
+    }
+  }
+  getUpdatedAt() {
+    if (this.isPullRequest() && !this._pr) {
+      // TODO: Fetch the Pull Request Promise
+    }
+    if (this.isPullRequest() && this._pr) {
+      return this._pr.updatedAt;
+    } else {
+      return this.issue.updatedAt;
+    }
+  }
+  getTaskCounts() {
+    if (!this._taskCounts) {
+      this._taskCounts = getTaskCounts(this.issue.body);
+    }
+    return this._taskCounts;
+  }
+  _getOcto() {
+    return Client.getOcto().repos(this.repoOwner, this.repoName);
+  }
+  fetchPR() {
+    if (!this.isPullRequest()) { throw new Error('BUG! Should not be fetching PR for an Issue'); }
+    if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
+    if (!this._prPromise) {
+      return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
+        this._pr = pr;
+        this._emitChange();
+      });
+    }
+    return this._prPromise;
+  }
+  fetchPRStatuses() {
+    if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
+    return this.fetchPR().then(() => {
+      if (!this._prStatusesPromise) {
+        this._prStatusesPromise = this._getOcto().commits(this._pr.head.sha).statuses.fetch().then((statuses) => {
+          this._prStatuses = statuses;
+          this._emitChange();
+        });
+      }
+    });
+  }
+  fetchIssue() {
+    return this._getOcto().issues(this.number).fetch().then((issue) => {
+      this.issue = issue;
+    });
+  }
+  resetPromisesAndState(issue, graph) {
+    this.issue = issue;
+    this.graph = graph;
+    const {_pr, _prStatuses} = this; // squirrel so UI doesn't see blips
+    delete this._prPromise;
+    delete this._prStatusesPromise;
+    if (_prStatuses) {
+      this.fetchPRStatuses(); // Trigger fetching PR and status
+    } else if (_pr) {
+      this.fetchPR(); // Trigger fetching PR
+    }
+    this._emitChange();
+  }
+  _emitChange() {
+    this._changeListeners.forEach(function (listener) {
+      listener();
+    });
+  }
+  isLoaded() {
+    if (!this.issue) { return false; }
+    if (this.isPullRequest()) {
+      // Check if the statuses are loaded
+      return !!this._prStatuses;
+    }
+    return true; // It is an issue and is loaded
+  }
+  load() {
+    if (this.issue) {
+      if (this.isPullRequest()) {
+        return Promise.all([this.fetchIssue(), this.fetchPRStatuses()]);
+      } else {
+        return this.fetchIssue(); // fetch it again
+      }
+    } else {
+      return this.fetchIssue();
+    }
+  }
+}

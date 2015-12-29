@@ -5,11 +5,12 @@ import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
 import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
+import Card from './card-model';
 
 const RELOAD_TIME = 30 * 1000;
 
-const toIssueKey = (repoOwner, repoName, issueNumber) => {
-  return repoOwner + '/' + repoName + '/issues/' + issueNumber;
+const toIssueKey = (repoOwner, repoName, number) => {
+  return `${repoOwner}/${repoName}#${number}`;
 };
 
 const delayedPromise = (fn) => {
@@ -23,6 +24,20 @@ const delayedPromise = (fn) => {
     }
   };
 };
+
+let CARD_CACHE = {};
+const cardFactory = (repoOwner, repoName, number, issue, graph) => {
+  const key = toIssueKey(repoOwner, repoName, number);
+  let card = CARD_CACHE[key];
+  if (card) {
+    card.resetPromisesAndState(issue, graph);
+    return card;
+  } else {
+    card = new Card(repoOwner, repoName, number, issue, graph);
+    CARD_CACHE[key] = card;
+    return card;
+  }
+}
 
 
 export function filterCards(cards, labels) {
@@ -55,8 +70,7 @@ export function filterCards(cards, labels) {
   return filtered;
 }
 
-export function buildBipartiteGraph(cards) {
-  const graph = new BipartiteGraph();
+function _buildBipartiteGraph(graph, cards) {
   const allPullRequests = {};
   const allIssues = {};
 
@@ -84,6 +98,11 @@ export function buildBipartiteGraph(cards) {
       });
     }
   });
+}
+
+export function buildBipartiteGraph(cards) {
+  const graph = new BipartiteGraph();
+  _buildBipartiteGraph(graph, cards);
   return graph;
 }
 
@@ -103,6 +122,7 @@ class IssueStore extends EventEmitter {
   clearCacheCards() {
     cacheCards = null;
     cacheCardsRepoInfos = null;
+    CARD_CACHE = {};
   }
   stopPolling() {
     isPollingEnabled = false;
@@ -110,8 +130,17 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
-  issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise=null) {
-    return {repoOwner, repoName, issue, pullRequestDelayedPromise};
+  issueNumberToCard(repoOwner, repoName, number, issue=null, graph=null, pullRequestDelayedPromise=null) {
+    if (!(repoOwner && repoName && number)) {
+      throw new Error('BUG! Forgot to pass arguments in');
+    }
+    return cardFactory(repoOwner, repoName, number, issue, graph);
+  }
+  issueToCard(repoOwner, repoName, issue, graph) {
+    if (!(repoOwner && repoName && issue)) {
+      throw new Error('BUG! Forgot to pass arguments in');
+    }
+    return cardFactory(repoOwner, repoName, issue.number, issue, graph);
   }
   fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
@@ -124,6 +153,7 @@ class IssueStore extends EventEmitter {
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);
     }
+    const graph = new BipartiteGraph();
     const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
       return fetchAll(FETCHALL_MAX, issues)
@@ -148,15 +178,19 @@ class IssueStore extends EventEmitter {
               });
             };
             const pullRequestDelayedPromise = delayedPromise(fn);
-            return this.issueToCard(repoOwner, repoName, issue, pullRequestDelayedPromise);
+            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, graph);
           } else {
-            return this.issueToCard(repoOwner, repoName, issue);
+            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, graph);
           }
         });
       });
     });
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
+
+      CARD_CACHE = {};
+      _buildBipartiteGraph(graph, cards);
+
       cacheCards = cards;
       cacheCardsRepoInfos = JSON.stringify(repoInfos);
       if (isForced) {

@@ -11,24 +11,14 @@ import Issue from './issue';
 const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 
 const MergedSince = React.createClass({
-  renderCard(repoOwner, repoName, issue) {
-    const card = IssueStore.issueToCard(repoOwner, repoName, issue);
-    return (
-      <Issue card={card}/>
-    );
-  },
-  renderPullRequest(pr) {
-    const {repoOwner, repoName} = this.props;
+  renderPullRequest(repoOwner, repoName, pr) {
     const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
     if (relatedIssues.length) {
       const relatedIssuesHtml = relatedIssues.map((related) => {
         const {repoOwner, repoName, number} = related;
+        const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
         return (
-          <Loadable
-            key={repoOwner + repoName + number}
-            promise={Client.getOcto().repos(repoOwner, repoName).issues(number).fetch()}
-            renderLoaded={(issue) => this.renderCard(repoOwner, repoName, issue)}
-          />
+          <Issue card={card}/>
         );
       });
       return (
@@ -68,9 +58,10 @@ const MergedSince = React.createClass({
         // Try and fetch the issue the PR fixed
         return (
           <Loadable
-            key={number}
+            key={repoOwner + repoName + number}
             promise={Client.getOcto().repos(repoOwner, repoName).issues(number).fetch()}
-            renderLoaded={this.renderPullRequest}
+            renderLoaded={(pr) => this.renderPullRequest(repoOwner, repoName, pr)}
+            loadingText={`Loading ${repoOwner}/${repoName}#${number}...`}
           />
         );
       }

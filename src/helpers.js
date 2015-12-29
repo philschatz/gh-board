@@ -3,7 +3,7 @@ export const FETCHALL_MAX = 10;
 export function fetchAll(maxRequests, fn, args) {
   let acc = [];
   if (!args) {
-    args = {perPage: 100};
+    args = {per_page: 100};
   }
   let p = new Promise((resolve, reject) => {
     fn(args).then((val) => {
