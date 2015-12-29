@@ -4,7 +4,7 @@
   "description": "kanban board using just GitHub",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --hot --progress --colors --display-chunks --display-modules --display-origins",
+    "start": "webpack-dev-server --progress --colors --display-chunks --display-modules --display-origins",
     "build": "eslint src; NODE_ENV=production webpack --optimize-minimize --progress --colors"
   },
   "author": "",
