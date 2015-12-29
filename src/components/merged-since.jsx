@@ -81,7 +81,9 @@ const MergedSinceShell = React.createClass({
     const repoInfos = getReposFromStr(repoStr);
 
     startShas = startShas.split('|');
-    if (!endShas) {
+    if (endShas) {
+      endShas = endShas.split('|');
+    } else {
       endShas = [];
       repoInfos.forEach(() => {
         endShas.push('master');
