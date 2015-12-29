@@ -4,7 +4,7 @@
   "description": "kanban board using just GitHub",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --hot --progress --colors --display-chunks --display-modules --display-origins",
+    "start": "webpack-dev-server --progress --colors --display-chunks --display-modules --display-origins",
     "build": "eslint src; NODE_ENV=production webpack --optimize-minimize --progress --colors"
   },
   "author": "",
@@ -21,6 +21,7 @@
     "eslint-plugin-react": "^2.5.0",
     "extract-text-webpack-plugin": "^0.8.2",
     "file-loader": "^0.8.5",
+    "json-loader": "^0.5.4",
     "less": "^2.5.3",
     "less-loader": "^2.2.2",
     "node-libs-browser": "^0.5.2",
@@ -34,6 +35,7 @@
     "classnames": "^2.2.1",
     "d3": "^3.5.12",
     "gfm-linkify": "^0.1.0",
+    "mermaid": "^0.5.6",
     "moment": "2.10.3",
     "octicons": "github/octicons#v3.1.0",
     "octokat": "^0.4.12",
