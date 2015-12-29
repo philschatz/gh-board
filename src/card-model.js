@@ -1,3 +1,4 @@
+import SettingsStore from './settings-store';
 import Client from './github-client';
 import {getTaskCounts} from './gfm-dom';
 
@@ -84,6 +85,7 @@ export default class Card {
   }
   fetchPR() {
     if (!this.isPullRequest()) { throw new Error('BUG! Should not be fetching PR for an Issue'); }
+    if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     if (!this._prPromise) {
       return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
@@ -94,6 +96,7 @@ export default class Card {
     return this._prPromise;
   }
   fetchPRStatuses() {
+    if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     return this.fetchPR().then(() => {
       if (!this._prStatusesPromise) {
