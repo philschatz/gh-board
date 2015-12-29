@@ -118,8 +118,9 @@ export default class Card {
       this.fetchPRStatuses(); // Trigger fetching PR and status
     } else if (_pr) {
       this.fetchPR(); // Trigger fetching PR
+    } else {
+      this._emitChange();
     }
-    this._emitChange();
   }
   _emitChange() {
     this._changeListeners.forEach(function (listener) {

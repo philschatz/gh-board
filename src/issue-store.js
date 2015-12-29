@@ -188,7 +188,6 @@ class IssueStore extends EventEmitter {
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
 
-      CARD_CACHE = {};
       _buildBipartiteGraph(graph, cards);
 
       cacheCards = cards;
