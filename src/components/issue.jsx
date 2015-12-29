@@ -128,7 +128,7 @@ let Issue = React.createClass({
     });
     const labels = _.map(nonKanbanLabels, (label) => {
       const tooltip = (
-        <BS.Tooltip id="tooltip-${issue.id}-${label.name}">{label.name}. Click to filter</BS.Tooltip>
+        <BS.Tooltip id={`tooltip-${issue.id}-${label.name}`}>{label.name}. Click to filter</BS.Tooltip>
       );
       return (
         <BS.OverlayTrigger
@@ -146,7 +146,11 @@ let Issue = React.createClass({
     let taskCounts = null;
     if (taskTotalCount) {
       const taskListPopover = (
-        <BS.Popover id="popover-${issue.id}-task-list" className='task-list-details' title='Task List'>
+        <BS.Popover
+          key={`popover-${issue.id}-task-list`}
+          id={`popover-${issue.id}-task-list`}
+          className='task-list-details'
+          title='Task List'>
           <GithubFlavoredMarkdown
             disableLinks={false}
             repoOwner={repoOwner}
@@ -157,13 +161,14 @@ let Issue = React.createClass({
 
       taskCounts = (
         <BS.OverlayTrigger
+          key='task-list'
           rootClose
           trigger={['click', 'focus']}
           placement='bottom'
           overlay={taskListPopover}>
           <span className='task-list-overview'>
             <i className='octicon octicon-check'/>
-            {taskFinishedCount}/{taskTotalCount}
+            {`${taskFinishedCount}/${taskTotalCount}`}
           </span>
         </BS.OverlayTrigger>
       );
@@ -177,7 +182,10 @@ let Issue = React.createClass({
       const closedCount = issue.milestone.closedIssues;
       const totalCount = openCount + closedCount;
       const milestonePopover = (
-        <BS.Popover id="popover-${issue.id}-milestone" className='milestone-details' title='Milestone Details'>
+        <BS.Popover
+          id={`popover-${issue.id}-milestone`}
+          className='milestone-details'
+          title='Milestone Details'>
           <h4>
             <a target='_blank' href={issue.milestone.html.url}>
               <GithubFlavoredMarkdown
@@ -226,7 +234,7 @@ let Issue = React.createClass({
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
       return (
-        <div className='related-issue'>
+        <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
             card={issueCard}
             primaryRepoName={primaryRepoName}
@@ -236,10 +244,10 @@ let Issue = React.createClass({
     });
 
     const header = [
-      <div className='issue-labels'>
+      <div key='labels' className='issue-labels'>
         {labels}
       </div>,
-      <div className='related-issues'>
+      <div key='related' className='related-issues'>
         {relatedCards}
       </div>,
       <a

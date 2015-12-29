@@ -156,15 +156,15 @@ const MilestonesDropdown = React.createClass({
       let dueDate;
       if (milestone.dueOn) {
         dueDate = (
-          <span className='due-at'>
+          <span key='due-at' className='due-at'>
             {' due '}
             <Time dateTime={new Date(milestone.dueOn)}/>
           </span>
         );
       }
       return [
-        <i className='milestone-icon octicon octicon-milestone'/>,
-        <span className='milestone-title'>
+        <i key='icon' className='milestone-icon octicon octicon-milestone'/>,
+        <span key='milestone-title' className='milestone-title'>
           <GithubFlavoredMarkdown
             inline
             disableLinks={true}
@@ -188,7 +188,7 @@ const MilestonesDropdown = React.createClass({
       let clearMilestoneFilter;
       if (FilterStore.getMilestones().length) {
         clearMilestoneFilter = (
-          <BS.MenuItem key='2' onSelect={this.onClearMilestones}>Clear Milestone Filter</BS.MenuItem>
+          <BS.MenuItem key='clear' onSelect={this.onClearMilestones}>Clear Milestone Filter</BS.MenuItem>
         );
       }
 
@@ -319,7 +319,7 @@ const AppNav = React.createClass({
           src={info.avatar.url}/>
       );
       loginButton = (
-        <BS.NavDropdown id='signin-dropdown' title={avatarImage}>
+        <BS.NavDropdown key='signin-dropdown' id='signin-dropdown' title={avatarImage}>
           <BS.MenuItem key='1' header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
           <BS.MenuItem key='2' onSelect={this.starThisProject}>Click to <i className='octicon octicon-star icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
           <BS.MenuItem key='3' divider/>
@@ -350,7 +350,7 @@ const AppNav = React.createClass({
         repoNameItems = _.map(repoInfos, ({repoOwner, repoName}, index) => {
           const repoLink = `/r/${repoOwner}:${repoName}`;
           return (
-            <span className='repo-name-wrap'>
+            <span key={repoLink} className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
               <Link to={repoLink} className='repo-name'>{repoName}</Link>
             </span>
@@ -379,7 +379,7 @@ const AppNav = React.createClass({
     let managerMenu;
     if (repoInfos.length) {
       managerMenu = (
-        <BS.MenuItem href={'#' + repoLink}>Manager (Issues by User)</BS.MenuItem>
+        <BS.MenuItem key='manager' href={'#' + repoLink}>Manager (Issues by User)</BS.MenuItem>
       );
     }
 
@@ -389,16 +389,16 @@ const AppNav = React.createClass({
           <BS.Navbar.Header>
             <BS.Navbar.Brand>{brand}</BS.Navbar.Brand>
           </BS.Navbar.Header>
-          <BS.Nav>
+          <BS.Nav key='repo-details'>
             {repoDetails}
             <BS.NavItem className='active-filter'>
               {filtering}
             </BS.NavItem>
           </BS.Nav>
-          <BS.Nav pullRight>
+          <BS.Nav key='right' pullRight>
             {milestonesDropdown}
-            <BS.NavDropdown id='display-settings' title={settingsTitle}>
-              <BS.MenuItem header>Display Settings</BS.MenuItem>
+            <BS.NavDropdown key='settings' id='display-settings' title={settingsTitle}>
+              <BS.MenuItem key='display' header>Display Settings</BS.MenuItem>
               <SettingsItem
                 key='HideUncategorized'
                 onSelect={SettingsStore.toggleHideUncategorized.bind(SettingsStore)}
@@ -420,8 +420,8 @@ const AppNav = React.createClass({
                 >
                 Use Table Layout
               </SettingsItem>
-              <BS.MenuItem divider/>
-              <BS.MenuItem header>Viewing Mode
+              <BS.MenuItem key='divider' divider/>
+              <BS.MenuItem key='viewing-mode' header>Viewing Mode
                 <button
                   className='btn btn-xs btn-default'
                   onClick={settingsMenuHelp}
@@ -451,8 +451,8 @@ const AppNav = React.createClass({
                 Combined
               </SettingsItem>
               {managerMenu}
-              <BS.MenuItem divider/>
-              <BS.MenuItem header>GitHub API Settings</BS.MenuItem>
+              <BS.MenuItem key='divider2' divider/>
+              <BS.MenuItem key='api-settings' header>GitHub API Settings</BS.MenuItem>
               <SettingsItem
                 key='ShowPullRequestData'
                 onSelect={SettingsStore.toggleShowPullRequestData.bind(SettingsStore)}
