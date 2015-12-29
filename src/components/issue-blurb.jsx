@@ -53,9 +53,16 @@ const IssueOrPullRequestBlurb = React.createClass({
       );
     }
 
+    let blurbContext;
+    if (context) {
+      blurbContext = (
+        <span className='blurb-context'>{context}</span>
+      );
+    }
+
     return (
       <span className='issue-blurb'>
-        <span className='blurb-context'>{context}</span>
+        {blurbContext}
         <BS.OverlayTrigger
           rootClose
           trigger={['click', 'focus']}
