@@ -2,11 +2,21 @@ import React from 'react';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
-import mermaid, {mermaidAPI} from 'mermaid';
+// import mermaid, {mermaidAPI} from 'mermaid';
+// import mermaidAPI from 'mermaid/dist/mermaidAPI';
 
 // import Client from '../github-client';
 // import Loadable from './loadable';
 import CurrentUserStore from '../user-store';
+
+const insertAfter = (newNode, node) => {
+  if (node.nextElementSibling) {
+    node.parentElement.insertBefore(newNode, node.nextElementSibling);
+  } else {
+    node.parentElement.appendChild(newNode);
+  }
+}
+
 
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',
@@ -73,14 +83,27 @@ const InnerMarkdown = React.createClass({
     });
   },
   updateMermaid() {
+    this._mermaidCount = this._mermaidCount || 0;
     const root = this.getDOMNode();
     _.each(root.querySelectorAll('pre > code.lang-mermaid'), (code) => {
-      const text = code.textContent;
-      mermaidAPI.render('mermaid Diagram', text, (html) => {
+
+      // Only import the mermaid chunk if actually used
+      /*eslint-disable no-undef */
+      require.ensure([], (require) => {
+        const mermaidAPI = require('mermaid/dist/mermaidAPI');
+        /*eslint-enable no-undef */
+
+        this._mermaidCount += 1;
+        const text = code.textContent;
         const div = document.createElement('div');
-        div.innerHTML = html;
-        code.parentNode.replaceWith(div);
-      }, root);
+        insertAfter(div, code.parentElement);
+        // Create a new element just beloe the code with the diagram
+        mermaidAPI.render(`mermaid-diagram-${this._mermaidCount}`, text, (html) => {
+          // hide the code when successful
+          code.parentElement.remove();
+          div.innerHTML = html;
+        }, div);
+      });
     });
   },
   updateDOM() {
