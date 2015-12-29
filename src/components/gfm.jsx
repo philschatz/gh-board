@@ -97,7 +97,7 @@ const InnerMarkdown = React.createClass({
   },
   updateMermaid() {
     this._mermaidCount = this._mermaidCount || 0;
-    const root = this.getDOMNode();
+    const root = ReactDOM.findDOMNode(this);
     _.each(root.querySelectorAll('pre > code.lang-mermaid'), (code) => {
 
       // Only import the mermaid chunk if actually used
