@@ -26,11 +26,11 @@ const MoveModal = React.createClass({
   componentWillUnmount() {
     IssueStore.off('tryToMoveMilestone', this.onTryToMoveMilestone);
   },
-  onTryToMoveLabel(card, graph, primaryRepoName, label) {
-    this.setState({showModal: true, card, graph, primaryRepoName, label, milestone: null, unCheckedCards: {}});
+  onTryToMoveLabel(card, primaryRepoName, label) {
+    this.setState({showModal: true, card, primaryRepoName, label, milestone: null, unCheckedCards: {}});
   },
-  onTryToMoveMilestone(card, graph, primaryRepoName, milestone) {
-    this.setState({showModal: true, card, graph, primaryRepoName, label: null, milestone, unCheckedCards: {}});
+  onTryToMoveMilestone(card, primaryRepoName, milestone) {
+    this.setState({showModal: true, card, primaryRepoName, label: null, milestone, unCheckedCards: {}});
   },
   onToggleCheckbox(card) {
     return () => {

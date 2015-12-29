@@ -4,10 +4,11 @@ import {getTaskCounts} from './gfm-dom';
 const MAX_LISTENERS = 5;
 
 export default class Card {
-  constructor(repoOwner, repoName, number, issue, graph) {
+  constructor(repoOwner, repoName, number, graph, issue) {
     if (!repoOwner) { throw new Error('BUG! missing repoOwner'); }
     if (!repoName) { throw new Error('BUG! missing repoName'); }
     if (!number) { throw new Error('BUG! missing number'); }
+    if (!graph) { throw new Error('BUG! missing graph'); }
     this.repoOwner = repoOwner;
     this.repoName = repoName;
     this.number = number;
@@ -108,9 +109,8 @@ export default class Card {
       this.issue = issue;
     });
   }
-  resetPromisesAndState(issue, graph) {
+  resetPromisesAndState(issue) {
     this.issue = issue;
-    this.graph = graph;
     const {_pr, _prStatuses} = this; // squirrel so UI doesn't see blips
     delete this._prPromise;
     delete this._prStatusesPromise;

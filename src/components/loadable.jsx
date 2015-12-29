@@ -39,7 +39,10 @@ export default React.createClass({
   renderLoading() {
     const {loadingText} = this.props;
     return (
-      <span className='loadable is-loading'><i className='octicon octicon-sync icon-spin'/>{' ' + (loadingText || 'Loading...')}</span>
+      <span className='loadable is-loading'>
+        <i className='octicon octicon-sync icon-spin'/>
+        {' ' + (loadingText || 'Loading...')}
+      </span>
     );
   },
   render() {

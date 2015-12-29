@@ -25,15 +25,16 @@ const delayedPromise = (fn) => {
   };
 };
 
+let GRAPH_CACHE = new BipartiteGraph();
 let CARD_CACHE = {};
-const cardFactory = (repoOwner, repoName, number, issue, graph) => {
+const cardFactory = (repoOwner, repoName, number, issue) => {
   const key = toIssueKey(repoOwner, repoName, number);
   let card = CARD_CACHE[key];
   if (card) {
-    card.resetPromisesAndState(issue, graph);
+    card.resetPromisesAndState(issue);
     return card;
   } else {
-    card = new Card(repoOwner, repoName, number, issue, graph);
+    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue);
     CARD_CACHE[key] = card;
     return card;
   }
@@ -86,14 +87,14 @@ function _buildBipartiteGraph(graph, cards) {
   });
 
   _.each(cards, (card) => {
-    const cardPath = graph.cardToKey(card);
+    const cardPath = GRAPH_CACHE.cardToKey(card);
     const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
     if (card.issue.pullRequest) {
       // card is a Pull Request
       _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
-        const otherCardPath = graph.cardToKey({repoOwner, repoName, issue: {number}});
+        const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
         if (allIssues[otherCardPath]) {
-          graph.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card, fixes);
+          GRAPH_CACHE.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card, fixes);
         }
       });
     }
@@ -123,6 +124,7 @@ class IssueStore extends EventEmitter {
     cacheCards = null;
     cacheCardsRepoInfos = null;
     CARD_CACHE = {};
+    GRAPH_CACHE = new BipartiteGraph();
   }
   stopPolling() {
     isPollingEnabled = false;
@@ -130,17 +132,17 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
-  issueNumberToCard(repoOwner, repoName, number, issue=null, graph=null, pullRequestDelayedPromise=null) {
+  issueNumberToCard(repoOwner, repoName, number, issue=null, pullRequestDelayedPromise=null) {
     if (!(repoOwner && repoName && number)) {
       throw new Error('BUG! Forgot to pass arguments in');
     }
-    return cardFactory(repoOwner, repoName, number, issue, graph);
+    return cardFactory(repoOwner, repoName, number, issue);
   }
-  issueToCard(repoOwner, repoName, issue, graph) {
+  issueToCard(repoOwner, repoName, issue) {
     if (!(repoOwner && repoName && issue)) {
       throw new Error('BUG! Forgot to pass arguments in');
     }
-    return cardFactory(repoOwner, repoName, issue.number, issue, graph);
+    return cardFactory(repoOwner, repoName, issue.number, issue);
   }
   fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
@@ -153,7 +155,6 @@ class IssueStore extends EventEmitter {
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);
     }
-    const graph = new BipartiteGraph();
     const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
       const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
       return fetchAll(FETCHALL_MAX, issues)
@@ -178,9 +179,9 @@ class IssueStore extends EventEmitter {
               });
             };
             const pullRequestDelayedPromise = delayedPromise(fn);
-            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, graph);
+            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
           } else {
-            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, graph);
+            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
           }
         });
       });
@@ -188,7 +189,7 @@ class IssueStore extends EventEmitter {
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
 
-      _buildBipartiteGraph(graph, cards);
+      _buildBipartiteGraph(GRAPH_CACHE, cards);
 
       cacheCards = cards;
       cacheCardsRepoInfos = JSON.stringify(repoInfos);
@@ -201,11 +202,11 @@ class IssueStore extends EventEmitter {
   fetchMilestones(repoOwner, repoName) {
     return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
   }
-  tryToMoveLabel(card, graph, primaryRepoName, label) {
-    this.emit('tryToMoveLabel', card, graph, primaryRepoName, label);
+  tryToMoveLabel(card, primaryRepoName, label) {
+    this.emit('tryToMoveLabel', card, primaryRepoName, label);
   }
-  tryToMoveMilestone(card, graph, primaryRepoName, milestone) {
-    this.emit('tryToMoveMilestone', card, graph, primaryRepoName, milestone);
+  tryToMoveMilestone(card, primaryRepoName, milestone) {
+    this.emit('tryToMoveMilestone', card, primaryRepoName, milestone);
   }
   moveLabel(repoOwner, repoName, issue, newLabel) {
     // Find all the labels, remove the kanbanLabel, and add the new label
