@@ -8,8 +8,7 @@ import Loadable from './loadable';
 const Board = React.createClass({
   propTypes: {
     type: React.PropTypes.func.isRequired, // A React Component
-    repoOwner: React.PropTypes.string.isRequired,
-    repoNames: React.PropTypes.array.isRequired,
+    repoInfos: React.PropTypes.array.isRequired,
     columnDataPromise: React.PropTypes.object.isRequired
   },
   componentDidMount() {
@@ -35,26 +34,25 @@ const Board = React.createClass({
     this.setState({});
   },
   // Curried func to squirrell the primaryRepoName var
-  renderKanbanRepos(primaryRepoName) {
+  renderKanbanRepos(repoInfos) {
     const {type, columnRegExp} = this.props;
 
     return ([columnData, cards]) => {
 
-      return React.createElement(type, {columnData, cards, primaryRepoName, columnRegExp});
+      return React.createElement(type, {columnData, cards, repoInfos, columnRegExp});
 
     };
   },
   render() {
-    const {repoOwner, repoNames, columnDataPromise} = this.props;
-    const primaryRepoName = repoNames[0];
-    const cardsPromise = IssueStore.fetchAllIssues(repoOwner, repoNames);
+    const {repoInfos, columnDataPromise} = this.props;
+    const cardsPromise = IssueStore.fetchAllIssues(repoInfos);
 
     return (
-      <Loadable key="${repoOwner}/${repoNames}"
+      <Loadable key="${repoInfos}"
         promise={Promise.all([columnDataPromise, cardsPromise])}
         loadingText='Loading GitHub Issues and Pull Requests...'
-        renderLoaded={this.renderKanbanRepos(primaryRepoName)}
-        renderError={() => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.</span>)}
+        renderLoaded={this.renderKanbanRepos(repoInfos)}
+        renderError={(err) => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API. {JSON.stringify(err)}</span>)}
       />
     );
   }

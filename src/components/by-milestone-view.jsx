@@ -2,8 +2,8 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
+import {getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
-import {buildBipartiteGraph} from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
@@ -18,7 +18,7 @@ import GithubFlavoredMarkdown from './gfm';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, graph, primaryRepoName, columnRegExp} = this.props;
+    const {milestone, cards, primaryRepoName, columnRegExp} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -26,7 +26,6 @@ const KanbanColumn = React.createClass({
           key={card.issue.id}
           primaryRepoName={primaryRepoName}
           card={card}
-          graph={graph}
           columnRegExp={columnRegExp}
           />
       );
@@ -35,7 +34,7 @@ const KanbanColumn = React.createClass({
     let heading;
     if (milestone) {
       heading = (
-        <span className='milestone-title' onClick={() => FilterStore.setMilestone(milestone)}>
+        <span className='milestone-title' onClick={() => FilterStore.setMilestones([milestone])}>
           <i className='octicon octicon-milestone'/>
           <GithubFlavoredMarkdown
             inline
@@ -47,11 +46,9 @@ const KanbanColumn = React.createClass({
       heading = 'No Milestone';
     }
 
-    const milestoneFilter = FilterStore.getMilestone();
     const isShowingColumn = (
-        issueComponents.length
-      || SettingsStore.getShowEmptyColumns()
-      || (milestone && milestoneFilter && milestone.title === milestoneFilter.title)
+         (!milestone && !SettingsStore.getHideUncategorized())
+      || (milestone && FilterStore.isMilestoneIncluded(milestone))
     );
 
     if (isShowingColumn) {
@@ -77,20 +74,17 @@ const ByMilestoneView = React.createClass({
   render() {
     const {columnData, cards, primaryRepoName, columnRegExp} = this.props;
 
-    const graph = buildBipartiteGraph(cards);
-
     const uncategorizedCards = _.filter(cards, (card) => {
       return !card.issue.milestone;
     });
 
-    let sortedCards = FilterStore.filterAndSort(graph, cards, true/*isShowingMilestones*/);
+    let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 
     const uncategorizedColumn = (
       <KanbanColumn
         cards={uncategorizedCards}
-        graph={graph}
         primaryRepoName={primaryRepoName}
         columnRegExp={columnRegExp}
       />
@@ -112,9 +106,9 @@ const ByMilestoneView = React.createClass({
       /*HACK: Column should handle milestones */
       return (
         <KanbanColumn
+          key={kanbanColumnCount}
           milestone={milestone}
           cards={columnCards}
-          graph={graph}
           primaryRepoName={primaryRepoName}
           columnRegExp={columnRegExp}
         />
@@ -142,10 +136,11 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoOwner, repoNames, columnRegExp} = this.props.params;
-    repoNames = repoNames.split('|');
+    let {repoStr, columnRegExp} = this.props.params;
+    const repoInfos = getReposFromStr(repoStr);
 
-    const primaryRepoName = repoNames[0];
+    // pull out the primaryRepoName
+    const [{repoOwner, repoName}] = repoInfos;
 
     if (columnRegExp) {
       columnRegExp = new RegExp(columnRegExp);
@@ -155,11 +150,10 @@ const RepoKanbanShell = React.createClass({
 
     return (
       <Board {...this.props}
-        repoOwner={repoOwner}
-        repoNames={repoNames}
+        repoInfos={repoInfos}
         columnRegExp={columnRegExp}
         type={ByMilestoneView}
-        columnDataPromise={Client.getOcto().repos(repoOwner, primaryRepoName).milestones.fetch()}
+        columnDataPromise={Client.getOcto().repos(repoOwner, repoName).milestones.fetch()}
       />
     );
   },

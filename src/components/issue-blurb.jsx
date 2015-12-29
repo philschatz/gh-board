@@ -47,15 +47,22 @@ const IssueOrPullRequestBlurb = React.createClass({
         'octicon-issue-opened': issue.state === 'open' && !issue.closedBy,
         'octicon-issue-reopened': issue.state === 'open' && issue.closedBy,
         'octicon-issue-closed': issue.state === 'closed'
-      }
+      };
       icon = (
         <i title='Click for Issue Details' className={classnames(classes)} onClick={this.onClickIcon}/>
       );
     }
 
+    let blurbContext;
+    if (context) {
+      blurbContext = (
+        <span className='blurb-context'>{context}</span>
+      );
+    }
+
     return (
       <span className='issue-blurb'>
-        <span className='blurb-context'>{context}</span>
+        {blurbContext}
         <BS.OverlayTrigger
           rootClose
           trigger={['click', 'focus']}

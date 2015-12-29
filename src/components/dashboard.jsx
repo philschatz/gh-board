@@ -34,7 +34,7 @@ const ListGroupWithMore = React.createClass({
     let partialChildren;
     if (initial + morePressedCount * multiple < children.length) {
       const moreButton = (
-        <BS.ListGroupItem onClick={this.onClickMore}>
+        <BS.ListGroupItem key='more' onClick={this.onClickMore}>
           {children.length - morePressedCount * multiple} more...
         </BS.ListGroupItem>
       );
@@ -98,7 +98,7 @@ const RepoItem = React.createClass({
       );
     }
 
-    const repoLink = `/r/${repoOwner}/${repoNames}`;
+    const repoLink = `/r/${repoOwner}:${repoNames}`;
     return (
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         <i className={'repo-icon octicon ' + iconClass}/>
@@ -133,7 +133,7 @@ const RepoGroup = React.createClass({
     const {repoOwner} = this.props;
     const {selectedRepos} = this.state;
     const repoNames = Object.keys(selectedRepos).join('|');
-    this.history.pushState(null, `/r/${repoOwner}/${repoNames}`);
+    this.history.pushState(null, `/r/${repoOwner}:${repoNames}`);
   },
   render() {
     let {repoOwner, repos, index} = this.props;
@@ -148,6 +148,7 @@ const RepoGroup = React.createClass({
 
       return (
         <RepoItem
+          key={repoOwner + repoName}
           repoOwner={repoOwner}
           repoName={repoName}
           repo={repo}
@@ -224,7 +225,11 @@ const Dashboard = React.createClass({
     const repoOwnersNodes = _.map(sortedRepoOwners, ({repoOwner /*,updatedAt*/}, index) => {
       const groupRepos = reposByOwner[repoOwner];
       return (
-        <RepoGroup repoOwner={repoOwner} repos={groupRepos} index={index}/>
+        <RepoGroup
+          key={repoOwner}
+          repoOwner={repoOwner}
+          repos={groupRepos}
+          index={index}/>
       );
     });
 
@@ -245,7 +250,7 @@ const CustomRepoModal = React.createClass({
   },
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
-    this.history.pushState(null, `/r/${repoOwner}/${repoName}`);
+    this.history.pushState(null, `/r/${repoOwner}:${repoName}`);
   },
   render() {
     const {customRepoName} = this.state;
@@ -304,7 +309,7 @@ const ExamplesPanel = React.createClass({
     return (
       <BS.Panel key='example-repos' header={examplesHeader}>
         <BS.ListGroup>
-          {_.map(SAMPLE_REPOS, (props) => <RepoItem {...props}/>)}
+          {_.map(SAMPLE_REPOS, (props) => <RepoItem key={JSON.stringify(props)} {...props}/>)}
           <BS.ListGroupItem className='repo-item' onClick={this.onClickMore}>
             <i className='repo-icon octicon octicon-repo'/>
             Choose your own...

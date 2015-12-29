@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Router from 'react-router';
-import { Route, Redirect, IndexRoute } from 'react-router';
 
 import history from './history';
 import App from './components/app';
@@ -20,21 +19,23 @@ const routes = [
     component: App,
     indexRoute: { component: Dashboard },
     childRoutes: [
-      { path: '/r/:repoOwner/:repoNames', component: RepoKanban },
-      { path: '/r/:repoOwner/:repoNames/by/:columnRegExp', component: RepoKanban },
-      { path: '/r/:repoOwner/:repoNames/by-milestone', component: ByMilestoneView },
-      { path: '/r/:repoOwner/:repoNames/by-user', component: ByUserView },
-      { path: '/r/:repoOwner/:repoNames/since/:shaStart', component: MergedSince },
-      { path: '/r/:repoOwner/:repoNames/since/:shaStart/:shaEnd', component: MergedSince },
-      { path: '/r/:repoOwner/:repoNames/milestone-review',
-        // Keep the review page as a separate chunk because it contains d3
-        getComponent(location, callback) {
-          require.ensure([], (require) => {
-            // Remember to add the `.default`!
-            callback(null, require('./components/milestone-review').default);
-          })
-        }
-      }
+      { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)',
+        indexRoute: {component: RepoKanban},
+        childRoutes: [
+          { path: 'since/:startShas(/:endShas)', component: MergedSince },
+          { path: 'by-milestone', component: ByMilestoneView },
+          { path: 'by-user', component: ByUserView },
+          { path: 'milestone-review', onEnter: (state, replace) => replace(null, `/r/${state.params.repoStr}/gantt`) },
+          { path: 'gantt',
+            // Keep the review page as a separate chunk because it contains d3
+            getComponent(location, callback) {
+              require.ensure([], (require) => {
+                // Remember to add the `.default`!
+                callback(null, require('./components/gantt-view').default);
+              });
+            }
+          }
+      ] },
     ],
   }
 ];
