@@ -59,7 +59,7 @@ export function getCardColumn(card) {
     }
   }
   // not found. Must be uncategorized
-  return {name: UNCATEGORIZED_NAME};
+  return {name: UNCATEGORIZED_NAME, color: 'cccccc'};
 }
 
 export function getReposFromStr(repoStr) {
