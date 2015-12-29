@@ -40,6 +40,10 @@ export default function(milestoneCount) {
     var rectTransformRemaining = function(d) {
 	     return "translate(" + (x(d.startDate) + d.percent * (x(d.endDate)-x(d.startDate))) + "," + y(d.taskName) + ")";
     };
+    var rectTransformSegment = function({task, segment, total, prev}) {
+      const percent = prev / total;
+	     return "translate(" + (x(task.startDate) + percent * (x(task.endDate)-x(task.startDate))) + "," + y(task.taskName) + ")";
+    };
 
     var x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
 
@@ -106,35 +110,44 @@ var PHIL =
     .style({stroke:'rgb(0,0,255)', 'stroke-width':2})
     ;
 
-   PHIL.selectAll('rect.milestone-completed').data(tasks, keyFunction).enter()
-  	 .append("rect")
+   PHIL.selectAll('g.milestone-bars').data(tasks, keyFunction).enter()
+  	 .append("g")
   	//  .attr("rx", 5)
     //        .attr("ry", 5)
-  	 .attr("class", function(d){
-  	     return 'milestone-completed ' + d.status;
-  	     })
-  	 .attr("y", 0)
-  	 .attr("transform", rectTransformCompleted)
-  	 .attr("height", function(d) { return y.rangeBand(); })
-  	 .attr("width", function(d) {
-  	     return d.percent * (x(d.endDate) - x(d.startDate));
-       });
+  	 .attr("class", 'milestone-bars')
+  	//  .attr("y", 0)
+  	//  .attr("transform", rectTransformCompleted)
+  	//  .attr("height", function(d) { return y.rangeBand(); })
+  	//  .attr("width", function(d) {
+  	//      return d.percent * (x(d.endDate) - x(d.startDate));
+    //    })
+     .selectAll('rect').data((task) => {task.segments.map((segment) => {task, segment})}).enter()
+      .append('rect')
+      .attr('class', 'milestone-segment')
+      .style(({task, segment}) => {fill: segment.color})
+      .attr('transform', rectTransformSegment)
+      .attr("height", function(d) { return y.rangeBand(); })
+      .attr("width", ({task, total, segment}) => {
+        const percent = segment.count / total;
+    	  return percent * (x(task.endDate) - x(task.startDate));
+    	});
+
 
    // PHIL: Copy-pasta to show the 2nd half of the milestone (unfinished)
-   PHIL.selectAll('rect.milestone-remaining').data(tasks, keyFunction).enter()
-
- 	 .append("rect")
- // 	 .attr("rx", 5)
-  //         .attr("ry", 5)
- 	 .attr("class", function(d){
- 	     return 'milestone-remaining ' + d.status;
- 	     })
- 	 .attr("y", 0)
- 	 .attr("transform", rectTransformRemaining)
- 	 .attr("height", function(d) { return y.rangeBand(); })
- 	 .attr("width", function(d) {
- 	     return (1-d.percent) * (x(d.endDate) - x(d.startDate));
- 	     });
+ //   PHIL.selectAll('rect.milestone-remaining').data(tasks, keyFunction).enter()
+ //
+ // 	 .append("rect")
+ // // 	 .attr("rx", 5)
+ //  //         .attr("ry", 5)
+ // 	 .attr("class", function(d){
+ // 	     return 'milestone-remaining ' + d.status;
+ // 	     })
+ // 	 .attr("y", 0)
+ // 	 .attr("transform", rectTransformRemaining)
+ // 	 .attr("height", function(d) { return y.rangeBand(); })
+ // 	 .attr("width", function(d) {
+ // 	     return (1-d.percent) * (x(d.endDate) - x(d.startDate));
+ // 	     });
 
 
 	 svg.append("g")
@@ -157,58 +170,88 @@ var PHIL =
         var svg = d3.select(".chart");
 
         var ganttChartGroup = svg.select(".gantt-chart");
-        var rect = ganttChartGroup.selectAll("rect.milestone-completed").data(tasks, keyFunction);
+        var rect = ganttChartGroup.selectAll("g.milestone-bars").data(tasks, keyFunction);
 
         rect.enter()
-         .append("rect")
-        //  .attr("rx", 5)
-        //  .attr("ry", 5)
-	 .attr("class", function(d){
-	     return 'milestone-completed ' +d.status;
-	     })
-	 .transition()
-	 .attr("y", 0)
-	 .attr("transform", rectTransformCompleted)
-	 .attr("height", function(d) { return y.rangeBand(); })
-	 .attr("width", function(d) {
-	     return d.percent*(x(d.endDate) - x(d.startDate));
-	     });
+       	 .append("g")
+       	 .attr("class", 'milestone-bars')
+       // 	 .attr("y", 0)
+       // 	 .attr("transform", rectTransformCompleted)
+       // 	 .attr("height", function(d) { return y.rangeBand(); })
+       // 	 .attr("width", function(d) {
+       // 	     return d.percent * (x(d.endDate) - x(d.startDate));
+        //     })
+            .selectAll('rect').data((task) => {
+              const total = task.segments.reduce((acc, segment) => { return acc + segment.count; }, 0);
+              let prev = 0;
+              const segments = task.segments.map((segment) => {
+                const ret = {task, segment, prev, total};
+                prev += segment.count;
+                return ret;
+              });
+              return segments;
+            }).enter()
+           .append('rect')
+          //  .attr('class', 'milestone-segment')
+           .style('fill', ({task, segment}) => {return `#${segment.color}`; })
+          // .attr('class', ({task, segment}) => {return {fill: segment.color}; })
+           // .transform()
+           .attr('transform', rectTransformSegment)
+           .attr("height", function(d) { return y.rangeBand(); })
+           .attr("width", ({task, total, segment}) => {
+             const percent = segment.count / total;
+         	   return percent * (x(task.endDate) - x(task.startDate));
+         	});
 
-        rect.transition()
-          .attr("transform", rectTransform)
-	 .attr("height", function(d) { return y.rangeBand(); })
-	 .attr("width", function(d) {
-	     return d.percent*(x(d.endDate) - x(d.startDate));
-	     });
 
-	rect.exit().remove();
+  //       rect.enter()
+  //        .append("rect")
+	//  .attr("class", function(d){
+	//      return 'milestone-bars ' +d.status;
+	//      })
+	//  .transition()
+	//  .attr("y", 0)
+	//  .attr("transform", rectTransformCompleted)
+	//  .attr("height", function(d) { return y.rangeBand(); })
+	//  .attr("width", function(d) {
+	//      return d.percent*(x(d.endDate) - x(d.startDate));
+	//      });
+   //
+  //       rect.transition()
+  //         .attr("transform", rectTransform)
+	//  .attr("height", function(d) { return y.rangeBand(); })
+	//  .attr("width", function(d) {
+	//      return d.percent*(x(d.endDate) - x(d.startDate));
+	//      });
 
-  //PHIL Copy-pasta
-  var rect = ganttChartGroup.selectAll("rect.milestone-remaining").data(tasks, keyFunction);
-
-  rect.enter()
-   .append("rect")
-   .attr("rx", 5)
-   .attr("ry", 5)
-.attr("class", function(d){
- return 'milestone-remaining ' +d.status;
- })
-.transition()
-.attr("y", 0)
-.attr("transform", rectTransformRemaining)
-.attr("height", function(d) { return y.rangeBand(); })
-.attr("width", function(d) {
- return (1-d.percent)*(x(d.endDate) - x(d.startDate));
- });
-
-  rect.transition()
-    .attr("transform", rectTransformRemaining)
-.attr("height", function(d) { return y.rangeBand(); })
-.attr("width", function(d) {
- return (1-d.percent)*(x(d.endDate) - x(d.startDate));
- });
-
-rect.exit().remove();
+// 	rect.exit().remove();
+//
+//   //PHIL Copy-pasta
+//   var rect = ganttChartGroup.selectAll("rect.milestone-remaining").data(tasks, keyFunction);
+//
+//   rect.enter()
+//    .append("rect")
+//    .attr("rx", 5)
+//    .attr("ry", 5)
+// .attr("class", function(d){
+//  return 'milestone-remaining ' +d.status;
+//  })
+// .transition()
+// .attr("y", 0)
+// .attr("transform", rectTransformRemaining)
+// .attr("height", function(d) { return y.rangeBand(); })
+// .attr("width", function(d) {
+//  return (1-d.percent)*(x(d.endDate) - x(d.startDate));
+//  });
+//
+//   rect.transition()
+//     .attr("transform", rectTransformRemaining)
+// .attr("height", function(d) { return y.rangeBand(); })
+// .attr("width", function(d) {
+//  return (1-d.percent)*(x(d.endDate) - x(d.startDate));
+//  });
+//
+// rect.exit().remove();
 
 
 	svg.select(".x").transition().call(xAxis);

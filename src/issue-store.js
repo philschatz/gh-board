@@ -101,12 +101,6 @@ function _buildBipartiteGraph(graph, cards) {
   });
 }
 
-export function buildBipartiteGraph(cards) {
-  const graph = new BipartiteGraph();
-  _buildBipartiteGraph(graph, cards);
-  return graph;
-}
-
 let cacheCardsRepoInfos = null;
 let cacheCards = null;
 let cacheLastViewed = {};

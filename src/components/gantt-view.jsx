@@ -1,18 +1,45 @@
 import React from 'react';
+import _ from 'underscore';
 
 import IssueStore from '../issue-store';
 import Client from '../github-client';
-import {getReposFromStr} from '../helpers';
+import {getReposFromStr, getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
 import Loadable from './loadable';
+import LabelBadge from './label-badge';
 
 import d3 from 'd3';
 import gantt from '../gantt-chart';
 
 
+const filterByMilestoneAndKanbanColumn = (cards) => {
+  const data = {};
+  const columns = {};
+  const add = (card) => {
+    if (card.issue.milestone) {
+      const column = getCardColumn(card);
+      const columnName = column.name;
+      columns[columnName] = column;
+      const msCounts = data[card.issue.milestone.title] || {};
+      data[card.issue.milestone.title] = msCounts;
+      msCounts[columnName] = msCounts[columnName] || 0;
+      msCounts[columnName] += 1;
+    } else {
+      // TODO: SHould account for issues not in a milestone somehow
+    }
+  };
+
+  cards.forEach((card) => {
+    add(card);
+  })
+  return {data, columns: _.values(columns)};
+}
+
+
 const GanttChart = React.createClass({
   componentDidMount() {
-    const {milestones} = this.props;
+    const {milestones, data, columns} = this.props;
     const now = new Date();
+
     const tasks = milestones.map((milestone) => {
       const {createdAt, dueOn, title, state, closedIssues, openIssues} = milestone;
       const dueAt = dueOn ? new Date(dueOn) : null;
@@ -28,14 +55,24 @@ const GanttChart = React.createClass({
       } else {
         percent = Math.random(); //TODO: HACK to just show something "interesting"
       }
+      const segments = [];
+      if (closedIssues) {
+        segments.push({count: closedIssues, color: '#333', title: 'Closed Issues'});
+      }
+      _.each(columns, ({name, color}) => {
+        if (data[milestone.title]) {
+          const count = data[milestone.title][name] || 0;
+          if (count) {
+            segments.push({count, color, title:name});
+          }
+        }
+      });
       return {
         startDate: createdAt,
         endDate: dueAt || now,
         taskName: title,
         status: status,
-        percent: percent,
-        progress: closedIssues,
-        progressTotal: closedIssues + openIssues
+        segments: segments
       };
     });
 
@@ -100,8 +137,21 @@ const GanttChart = React.createClass({
 
   },
   render() {
+    const {columns} = this.props;
+
+    const legend = columns.map((label) => {
+      return (
+        <LabelBadge key={label.name} label={label}/>
+      );
+    });
     return (
-      <div ref='ganttWrapper' id='the-gantt-chart'/>
+      <div className='-gantt-chart-and-legend'>
+        <div ref='ganttWrapper' id='the-gantt-chart'/>
+        <h3>Legend</h3>
+        <p>Blue vertical line is Today</p>
+        <LabelBadge key='completed' label={{name:'0 - Completed', color: '333'}}/>
+        {legend}
+      </div>
     );
   }
 
@@ -115,9 +165,22 @@ const RepoKanbanShell = React.createClass({
   componentWillUnmount() {
     IssueStore.stopPolling();
   },
-  renderLoaded(allMilestones) {
+  renderLoaded([allMilestones, cards]) {
+    let {data, columns} = filterByMilestoneAndKanbanColumn(cards);
+    // COPYPASTA: Taken from repo-kanban
+    columns = _.sortBy(columns, ({name}) => {
+      if (name === UNCATEGORIZED_NAME) {
+        // make sure Uncategorized is the left-most column
+        return -1;
+      } else {
+        const result = /^(\d+)/.exec(name);
+        return result && result[1] || name;
+      }
+    });
+    columns = columns.reverse();
+
     return (
-      <GanttChart milestones={allMilestones}/>
+      <GanttChart milestones={allMilestones} data={data} columns={columns}/>
     );
   },
   render() {
@@ -127,11 +190,11 @@ const RepoKanbanShell = React.createClass({
     const [{repoOwner, repoName}] = repoInfos;
 
     // TODO: Actually do all the milestones
-    const allMilestones = Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
+    const allPromises = Promise.all([Client.getOcto().repos(repoOwner, repoName).milestones.fetch(), IssueStore.fetchAllIssues(repoInfos)]);
 
     return (
       <Loadable
-        promise={allMilestones}
+        promise={allPromises}
         renderLoaded={this.renderLoaded}
       />
     );
