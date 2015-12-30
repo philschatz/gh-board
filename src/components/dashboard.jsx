@@ -101,7 +101,7 @@ const RepoItem = React.createClass({
       );
     }
 
-    const repoLink = buildRoute(null, {repoInfos});
+    const repoLink = buildRoute('kanban', {repoInfos});
     return (
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         <i className={'repo-icon octicon ' + iconClass}/>
@@ -138,7 +138,7 @@ const RepoGroup = React.createClass({
     const repoInfos = Object.keys(selectedRepos).map((repoName) => {
       return {repoOwner, repoName};
     });
-    this.history.pushState(null, buildRoute(null, {repoInfos}));
+    this.history.pushState(null, buildRoute('kanban', {repoInfos}));
   },
   render() {
     let {repoOwner, repos, index} = this.props;
@@ -257,7 +257,7 @@ const CustomRepoModal = React.createClass({
     const [repoOwner, repoName] = customRepoName.split('/');
     const repoInfos = [{repoOwner, repoName}];
     // TODO: Just make this a simple Link and no fancy history.pushState
-    this.history.pushState(null, buildRoute(null, {repoInfos}));
+    this.history.pushState(null, buildRoute('kanban', {repoInfos}));
   },
   render() {
     const {customRepoName} = this.state;

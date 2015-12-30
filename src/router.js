@@ -10,12 +10,12 @@ import ByMilestoneView from './components/by-milestone-view';
 import ByUserView from './components/by-user-view';
 import MergedSince from './components/merged-since';
 
-import {parseRoute, setFilters} from './route-utils';
+import {parseRoute, buildRoute, setFilters} from './route-utils';
 
 const routes = [
   // Redirect from `/dashboard` to `/`
   { path: '/dashboard',
-    onEnter: (nextState, replaceState) => replaceState(null, '/')
+    onEnter: (state, replace) => replace(null, '/')
   },
   { path: '/',
     component: App,
@@ -26,11 +26,15 @@ const routes = [
         onEnter: setFilters,
         indexRoute: {component: RepoKanban},
         childRoutes: [
+          // Redirect from `/r/.../kanban` to `/r/...` . keep 'kanban' in the code so it is clear where the link is going
+          { path: 'kanban',
+            onEnter: ({params}, replace) => replace(null, buildRoute('', parseRoute(params)))
+          },
           { path: 'since/:startShas(/:endShas)', component: MergedSince },
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
           // Redirect to the gantt URL
-          { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state.params))) },
+          { path: 'milestone-review', onEnter: ({params}, replace) => replace(null, buildRoute('gantt', parseRoute(params))) },
           { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {
