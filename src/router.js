@@ -10,6 +10,12 @@ import ByMilestoneView from './components/by-milestone-view';
 import ByUserView from './components/by-user-view';
 import MergedSince from './components/merged-since';
 
+import {parseRoute} from './route-utils';
+
+const setFilters = (nextState/*,replaceState,callback*/) => {
+  console.log('TheRouteFilters', parseRoute(nextState.params));
+};
+
 const routes = [
   // Redirect from `/dashboard` to `/`
   { path: '/dashboard',
@@ -20,11 +26,14 @@ const routes = [
     indexRoute: { component: Dashboard },
     childRoutes: [
       { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:userName)(/x/:columnRegExpStr)',
+        // Save all the filter criteria
+        onEnter: setFilters,
         indexRoute: {component: RepoKanban},
         childRoutes: [
           { path: 'since/:startShas(/:endShas)', component: MergedSince },
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
+          // Redirect to the gantt URL
           { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state.params))) },
           { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
