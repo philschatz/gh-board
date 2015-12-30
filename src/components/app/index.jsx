@@ -5,11 +5,11 @@ import * as BS from 'react-bootstrap';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 
+import {setRouterHistory} from '../../route-utils';
 import SettingsStore from '../../settings-store';
 import Client from '../../github-client';
 import NewVersionChecker from '../../new-version-checker';
 import CurrentUserStore from '../../user-store';
-import FilterStore from '../../filter-store';
 import IssueStore from '../../issue-store';
 import history from '../../history';
 import {getReposFromStr, convertRepoInfosToStr} from '../../helpers';
@@ -24,6 +24,7 @@ import AppNav from './nav';
 import Footer from './footer';
 
 const App = React.createClass({
+  mixins: [History],
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
     this._historyListener = history.listen(this.storeHistory);
@@ -31,6 +32,7 @@ const App = React.createClass({
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
+    setRouterHistory(this.history);
   },
   componentWillUnmount() {
     this._historyListener();

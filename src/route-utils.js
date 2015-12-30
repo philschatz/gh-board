@@ -1,7 +1,11 @@
 import _ from 'underscore';
-import {getReposFromStr, convertRepoInfosToStr, KANBAN_LABEL} from './helpers';
+import {getReposFromStr, convertRepoInfosToStr, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 
 const RELEVANT_PATH_SEGMENT = 2;
+let ROUTER_HISTORY = null;
+export function setRouterHistory(history) {
+  ROUTER_HISTORY = history;
+}
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
@@ -53,6 +57,59 @@ export function parseRoute({params, routes}) {
   return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName};
 }
 
+class FilterState {
+  constructor(state) {
+    this.state = state;
+  }
+  _chain(obj) {
+    return new FilterState(_.defaults(obj, this.state));
+  }
+  _toggleKey(key, value) {
+    let current = this.state[key];
+    const i = current.indexOf(value);
+    if (i < 0) {
+      current = current.concat(value);
+    } else {
+      current = current.slice(0, i).concat(current.slice(i+1)); // or _.without(current, value)
+    }
+    const obj = {};
+    obj[key] = current;
+    return this._chain(obj);
+  }
+  // addMilestone(ms)
+  // removeMilestone(ms)
+  toggleMilestoneTitle(title) {
+    return this._toggleKey('milestoneTitles', title);
+  }
+  clearMilestoneTitles() {
+    return this._chain({milestoneTitles: []});
+  }
+  // addTag(tag)
+  // removeTag(tag)
+  toggleTagName(tagName) {
+    return this._toggleKey('tagNames', tagName);
+  }
+  // setUser(user)
+  // clearUser()
+  toggleUserName(name) {
+    const {userName} = this.state;
+    if (userName) {
+      name = null;
+    }
+    return this._chain({userName: name});
+  }
+  // setColumnRegExp(reStr)
+  setRouteName(routeSegmentName) {
+    return this._chain({routeSegmentName});
+  }
+  go() {
+    ROUTER_HISTORY.pushState(null, this.url());
+  }
+  url() {
+    return buildRoute(null, this.state);
+  }
+}
+
 const DEFAULTS = {
   repoInfos: [],
   milestoneTitles: [],
@@ -60,24 +117,33 @@ const DEFAULTS = {
   columnRegExp: KANBAN_LABEL
 };
 
-let FILTERS = DEFAULTS;
+let FILTER_STATE = new FilterState(DEFAULTS);
 // method signature is from react-router onEnter:
 // https://github.com/rackt/react-router/blob/master/docs/API.md#onenternextstate-replacestate-callback
 export function setFilters(routerState/*,replaceState,callback*/) {
-  FILTERS = _.defaults({}, parseRoute(routerState), DEFAULTS);
+  FILTER_STATE = new FilterState(_.defaults(parseRoute(routerState), DEFAULTS));
 }
+
+window.getFiltersPHIL = () => { return FILTER_STATE; }
 
 export function getFilters() {
   // TODO: inject defaults from localStorage (esp the checkboxes)
-  return FILTERS;
+  return FILTER_STATE;
 }
+
+export const LABEL_CACHE = {}; // keys are label names and values are the label object (contains color)
 
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
-  const {milestoneTitles, tagNames, userName} = getFilters();
+  const {milestoneTitles, userName, columnRegExp} = getFilters().state;
+  let {tagNames} = getFilters().state; // We might remove UNCATEGORIZED_NAME from the list
   return cards.filter((card) => {
     const {issue} = card;
+    // Add all the labels for lookup later
+    issue.labels.forEach((label) => {
+      LABEL_CACHE[label.name] = label;
+    });
     // issue must match the user if one is selected (either assignee or creator (if none))
     if (userName) {
       if (issue.assignee) {
@@ -90,9 +156,19 @@ export function filterCardsByFilter(cards) {
       if (!issue.milestone) { return false; } // TODO: Read the settings to see if no milestones are allowed
       if (milestoneTitles.indexOf(issue.milestone.title) < 0) { return false; }
     }
+    // If one of the tagNames is UNCATEGORIZED_NAME then do something special
+    if (tagNames.indexOf(UNCATEGORIZED_NAME) >= 0) {
+      let isUnlabeled = true;
+      issue.labels.forEach((label) => {
+        if (columnRegExp.test(label.name)) {
+          isUnlabeled = false;
+        }
+      });
+      if (!isUnlabeled) { return false; }
+    }
     const labelNames = issue.labels.map((label) => { return label.name; });
-    // issue must have all the tags
-    if (_.difference(tagNames, labelNames).length > 0) { return false; }
+    // issue must have all the tags (except UNCATEGORIZED_NAME)
+    if (_.difference(_.without(tagNames, UNCATEGORIZED_NAME), labelNames).length > 0) { return false; }
     return true;
   });
 }

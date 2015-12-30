@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
+import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
 import {getReposFromStr} from '../helpers';
@@ -35,13 +36,13 @@ const KanbanColumn = React.createClass({
     let heading;
     if (milestone) {
       heading = (
-        <span className='milestone-title' onClick={() => FilterStore.setMilestones([milestone])}>
+        <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(milestone.title).url()}>
           <i className='octicon octicon-milestone'/>
           <GithubFlavoredMarkdown
             inline
             disableLinks={true}
             text={milestone.title}/>
-        </span>
+        </Link>
       );
     } else {
       heading = 'No Milestone';
@@ -49,7 +50,9 @@ const KanbanColumn = React.createClass({
 
     const isShowingColumn = (
          (!milestone && !SettingsStore.getHideUncategorized())
-      || (milestone && FilterStore.isMilestoneIncluded(milestone))
+      || (milestone && (
+             getFilters().state.milestoneTitles.length == 0
+          || getFilters().state.milestoneTitles.indexOf(milestone.title) >= 0))
     );
 
     if (isShowingColumn) {
@@ -137,7 +140,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    const {repoInfos, columnRegExp} = getFilters();
+    const {repoInfos, columnRegExp} = getFilters().state;
     // pull out the primaryRepoName
     const [{repoOwner, repoName}] = repoInfos;
 

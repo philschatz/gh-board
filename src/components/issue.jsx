@@ -4,9 +4,10 @@ import * as BS from 'react-bootstrap';
 import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 import classnames from 'classnames';
+import {Link} from 'react-router';
 
+import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import FilterStore from '../filter-store';
 import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
@@ -114,12 +115,13 @@ let Issue = React.createClass({
     }
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
-      <img
-        key='avatar'
-        className='avatar-image'
-        title={'Click to filter on ' + user.login}
-        onClick={() => FilterStore.setUser(user)}
-        src={user.avatar.url}/>
+      <Link to={getFilters().toggleUserName(user.login).url()}>
+        <img
+          key='avatar'
+          className='avatar-image'
+          title={'Click to filter on ' + user.login}
+          src={user.avatar.url}/>
+      </Link>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
       if (!columnRegExp || !columnRegExp.test(label.name)) {
@@ -136,10 +138,7 @@ let Issue = React.createClass({
           placement='top'
           delayShow={1000}
           overlay={tooltip}>
-          <LabelBadge
-            label={label}
-            onClick={() => FilterStore.addLabel(label)}
-            />
+          <LabelBadge isClickable label={label}/>
         </BS.OverlayTrigger>
       );
     });
@@ -174,7 +173,7 @@ let Issue = React.createClass({
       );
     }
     const shouldShowMilestone = (
-      issue.milestone && FilterStore.getMilestones().length !== 1
+      issue.milestone && getFilters().state.milestoneTitles.length !== 1
     );
     let milestone = null;
     if (shouldShowMilestone) {
@@ -214,14 +213,14 @@ let Issue = React.createClass({
             overlay={milestonePopover}>
             <i className='milestone-icon octicon octicon-milestone'/>
           </BS.OverlayTrigger>
-          <span className='milestone-title'>
+          <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(issue.milestone.title).url()}>
             <GithubFlavoredMarkdown
               inline
               disableLinks={true}
               repoOwner={repoOwner}
               repoName={repoName}
               text={issue.milestone.title}/>
-          </span>
+          </Link>
         </span>
       );
     }

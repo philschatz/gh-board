@@ -32,6 +32,7 @@ body { background-color: #f3f3f3; }
     cursor: pointer;
     box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12); // From GH Issues
     &.is-light { color: black; }
+    &:not(.is-light) { color: white; }
   }
   .avatar-image {
     display: inline-block;
@@ -217,6 +218,7 @@ body { background-color: #f3f3f3; }
       /* Support filtering on a single kanban column */
       .label-title,
       .milestone-title {
+        color: inherit; // It's an <a> but don't make it blue
         cursor: pointer;
 
         .octicon { padding-right: 1rem; }
@@ -325,7 +327,10 @@ body { background-color: #f3f3f3; }
         display: block;
         .emoji { height: 1.5rem; } // same as font size
 
-        .milestone-title { padding-left: .5rem; }
+        .milestone-title {
+          color:inherit; // it's an <a> but don't make it blue
+          padding-left: .5rem;
+        }
       }
 
       time.updated-at {

@@ -41,7 +41,6 @@ const cardFactory = (repoOwner, repoName, number, issue) => {
   }
 }
 
-
 export function filterCards(cards, labels) {
   let filtered = cards;
   // Curry the fn so it is not declared inside a loop
@@ -141,7 +140,7 @@ class IssueStore extends EventEmitter {
   }
   // Fetch all the issues and then filter based on the URL
   fetchIssues() {
-    const {repoInfos} = getFilters();
+    const {repoInfos} = getFilters().state;
     return this._fetchAllIssues(repoInfos).then((cards) => {
       return filterCardsByFilter(cards);
     });

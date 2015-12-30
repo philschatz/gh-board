@@ -28,7 +28,7 @@ const routes = [
     indexRoute: { component: Dashboard },
     childRoutes: [
       { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:userName)(/x/:columnRegExpStr)',
-        // Save all the filter criteria
+        // Remember: Save all the filter criteria by adding onEnter
         onEnter: setFilters,
         indexRoute: {component: RepoKanban},
         // If you change these children (or the parents) make sure you edit RELEVANT_PATH_SEGMENT in another file.
@@ -37,12 +37,12 @@ const routes = [
           { path: 'kanban',
             onEnter: (state, replace) => replace(null, buildRoute('', parseRoute(state)))
           },
-          { path: 'since/:startShas(/:endShas)', component: MergedSince },
-          { path: 'by-milestone', component: ByMilestoneView },
-          { path: 'by-user', component: ByUserView },
+          { path: 'since/:startShas(/:endShas)', onEnter: setFilters, component: MergedSince},
+          { path: 'by-milestone', onEnter: setFilters, component: ByMilestoneView },
+          { path: 'by-user', onEnter: setFilters, component: ByUserView },
           // Redirect to the gantt URL
-          { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
-          { path: 'gantt',
+          { path: 'milestone-review', onEnter: setFilters, onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
+          { path: 'gantt', onEnter: setFilters,
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {
               require.ensure([], (require) => {

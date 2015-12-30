@@ -335,9 +335,6 @@ const DashboardShell = React.createClass({
   getInitialState() {
     return {repos: null};
   },
-  componentDidMount() {
-    FilterStore.clearFilters();
-  },
   render() {
     let {repos} = this.state;
 
