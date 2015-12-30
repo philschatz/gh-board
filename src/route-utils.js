@@ -1,13 +1,20 @@
 import _ from 'underscore';
 import {getReposFromStr, convertRepoInfosToStr, KANBAN_LABEL} from './helpers';
 
+const RELEVANT_PATH_SEGMENT = 2;
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
-export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName, columnRegExp}={}, ...otherFields) {
+export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName}={}, ...otherFields) {
   repoInfos = repoInfos || [];
   milestoneTitles = milestoneTitles || [];
   tagNames = tagNames || [];
+
+  // when not changing the page then keep the original path segment
+  // **BUT:** Allow setting '' explicitly to override this
+  if (name === null) {
+    name = routeSegmentName;
+  }
 
   const repoStr = convertRepoInfosToStr(repoInfos);
   const milestonesStr = milestoneTitles.join('|');
@@ -26,7 +33,14 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName
   return encodeURI(parts.join(''));
 }
 
-export function parseRoute({repoStr, milestonesStr, tagsStr, userName, columnRegExpStr}={}) {
+export function parseRoute({params, routes}) {
+  const {repoStr, milestonesStr, tagsStr, userName, columnRegExpStr} = params;
+  // Note: routeSegmentName can be null if it's the index path (the kanban view)
+  if (!routes[RELEVANT_PATH_SEGMENT]) { throw new Error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
+  const routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
+  if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
+    throw new Error('BUG! the path segment should be simple so we can create links with it');
+  }
   let repoInfos = [];
   let milestoneTitles = [];
   let tagNames = [];
@@ -36,7 +50,7 @@ export function parseRoute({repoStr, milestonesStr, tagsStr, userName, columnReg
   if (tagsStr) { tagNames = tagsStr.split('|'); }
   if (columnRegExpStr) { columnRegExp = new RegExp(columnRegExpStr); }
 
-  return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp};
+  return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName};
 }
 
 const DEFAULTS = {
@@ -49,8 +63,8 @@ const DEFAULTS = {
 let FILTERS = DEFAULTS;
 // method signature is from react-router onEnter:
 // https://github.com/rackt/react-router/blob/master/docs/API.md#onenternextstate-replacestate-callback
-export function setFilters({params}/*,replaceState,callback*/) {
-  FILTERS = _.defaults({}, parseRoute(params), DEFAULTS);
+export function setFilters(routerState/*,replaceState,callback*/) {
+  FILTERS = _.defaults({}, parseRoute(routerState), DEFAULTS);
 }
 
 export function getFilters() {
