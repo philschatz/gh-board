@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
+import {parseRoute, buildRoute} from '../route-utils';
 import {KANBAN_LABEL, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards} from '../issue-store';
@@ -195,16 +196,9 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoStr, columnRegExp} = this.props.params;
-    const repoInfos = getReposFromStr(repoStr);
+    const {repoInfos, columnRegExp} = parseRoute(this.props.params);
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
-
-    if (columnRegExp) {
-      columnRegExp = new RegExp(columnRegExp);
-    } else {
-      columnRegExp = KANBAN_LABEL;
-    }
 
     return (
       <Board {...this.props}

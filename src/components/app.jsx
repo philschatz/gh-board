@@ -12,6 +12,7 @@ import CurrentUserStore from '../user-store';
 import FilterStore from '../filter-store';
 import IssueStore from '../issue-store';
 import history from '../history';
+import {parseRoute, buildRoute} from '../route-utils';
 import {getReposFromStr, convertRepoInfosToStr} from '../helpers';
 
 import LoginModal from './login-modal';
@@ -146,7 +147,7 @@ const MilestonesDropdown = React.createClass({
   onSelectMilestonePlanning() {
     const {repoInfos} = this.props;
 
-    this.history.pushState(null, `/r/${convertRepoInfosToStr(repoInfos)}/by-milestone`);
+    this.history.pushState(null, buildRoute('by-milestone', {repoInfos}));
   },
   render() {
     const {milestones} = this.props;
@@ -283,19 +284,15 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let {repoStr} = this.props.params || {};
+    let routeInfo = parseRoute(this.props.params);
+    let {repoInfos} = routeInfo;
     const {info, showModal} = this.state;
 
-    // The dashboard page does not have a list of repos
-    let repoInfos = [];
-    if (repoStr) {
-      repoInfos = getReposFromStr(repoStr);
-    }
-
+    // Note: The dashboard page does not have a list of repos
     const close = () => this.setState({ showModal: false});
 
     const brand = (
-      <Link to='/dashboard'><i className='octicon octicon-home'/></Link>
+      <Link to={buildRoute('dashboard')}><i className='octicon octicon-home'/></Link>
     );
     const filtering = _.map(FilterStore.getLabels(), (label) => {
       return (
@@ -348,7 +345,8 @@ const AppNav = React.createClass({
         );
       } else {
         repoNameItems = _.map(repoInfos, ({repoOwner, repoName}, index) => {
-          const repoLink = `/r/${repoOwner}:${repoName}`;
+          const repoInfos = [{repoOwner, repoName}];
+          const repoLink = buildRoute(null, {repoInfos});
           return (
             <span key={repoLink} className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
@@ -375,7 +373,7 @@ const AppNav = React.createClass({
       /*eslint-enable no-alert */
     };
 
-    const repoLink = `/r/${repoStr}/by-user`;
+    const repoLink = buildRoute('by-user', {repoInfos});
     let managerMenu;
     if (repoInfos.length) {
       managerMenu = (

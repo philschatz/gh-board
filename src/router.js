@@ -19,13 +19,13 @@ const routes = [
     component: App,
     indexRoute: { component: Dashboard },
     childRoutes: [
-      { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)',
+      { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:userName)(/x/:columnRegExpStr)',
         indexRoute: {component: RepoKanban},
         childRoutes: [
           { path: 'since/:startShas(/:endShas)', component: MergedSince },
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
-          { path: 'milestone-review', onEnter: (state, replace) => replace(null, `/r/${state.params.repoStr}/gantt`) },
+          { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state.params))) },
           { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {

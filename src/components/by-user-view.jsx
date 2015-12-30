@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
+import {parseRoute, buildRoute} from '../route-utils';
 import IssueStore from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
@@ -102,14 +103,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoStr, columnRegExp} = this.props.params;
-    const repoInfos = getReposFromStr(repoStr);
-
-    if (columnRegExp) {
-      columnRegExp = new RegExp(columnRegExp);
-    } else {
-      columnRegExp = KANBAN_LABEL;
-    }
+    const {repoInfos, columnRegExp} = parseRoute(this.props.params);
 
     const columnDataPromise =
       IssueStore.fetchAllIssues(repoInfos, false/*isForced*/)
