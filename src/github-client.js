@@ -2,6 +2,8 @@ import _ from 'underscore';
 import EventEmitter from 'events';
 import Octo from 'octokat';
 
+const MAX_CACHED_URLS = 2000;
+
 let cachedClient = null;
 
 const cacheHandler = new class CacheHandler {
@@ -42,7 +44,7 @@ const cacheHandler = new class CacheHandler {
     }
 
     this.cachedETags[method + ' ' + path] = {eTag, data, status, linkRelations};
-    if (Object.keys(this.cachedETags).length > 1000) {
+    if (Object.keys(this.cachedETags).length > MAX_CACHED_URLS) {
       // stop saving. blow the storage cache because
       // stringifying JSON and saving is slow
       this.storage.removeItem('octokat-cache');

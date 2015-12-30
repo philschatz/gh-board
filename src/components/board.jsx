@@ -35,20 +35,20 @@ const Board = React.createClass({
   },
   // Curried func to squirrell the primaryRepoName var
   renderKanbanRepos(repoInfos) {
-    const {type, columnRegExp} = this.props;
+    const {type} = this.props;
 
     return ([columnData, cards]) => {
 
-      return React.createElement(type, {columnData, cards, repoInfos, columnRegExp});
+      return React.createElement(type, {columnData, cards, repoInfos});
 
     };
   },
   render() {
     const {repoInfos, columnDataPromise} = this.props;
-    const cardsPromise = IssueStore.fetchAllIssues(repoInfos);
+    const cardsPromise = IssueStore.fetchIssues();
 
     return (
-      <Loadable key="${repoInfos}"
+      <Loadable key='board'
         promise={Promise.all([columnDataPromise, cardsPromise])}
         loadingText='Loading GitHub Issues and Pull Requests...'
         renderLoaded={this.renderKanbanRepos(repoInfos)}

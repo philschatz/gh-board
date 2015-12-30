@@ -2,7 +2,7 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 
 import SettingsStore from './settings-store';
-import {filterCards} from './issue-store';
+// import {filterCards} from './issue-store';
 
 import {contains} from './helpers';
 
@@ -48,17 +48,17 @@ class Store extends EventEmitter {
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
   }
-  clearFilters() {
-    userFilter = null;
-    filteredMilestones = [];
-    filteredLabels = [];
-    this.emit('change');
-  }
-  clearUser() {
-    userFilter = null;
-    this.emit('change');
-    this.emit('change:user', null);
-  }
+  // clearFilters() {
+  //   userFilter = null;
+  //   filteredMilestones = [];
+  //   filteredLabels = [];
+  //   this.emit('change');
+  // }
+  // clearUser() {
+  //   userFilter = null;
+  //   this.emit('change');
+  //   this.emit('change:user', null);
+  // }
   setUser(user) {
     userFilter = user;
     this.emit('change');
@@ -120,34 +120,34 @@ class Store extends EventEmitter {
     return filteredLabels;
   }
 
-  filterAndSort(cards, isShowingMilestones) {
+  filterAndSort(cards) {
 
     // Filter all the cards
     let filteredCards = cards;
-    if (userFilter) {
-      filteredCards = _.filter(filteredCards, (card) => {
-        const issue = card.issue;
-        if (issue.assignee && issue.assignee.login === userFilter.login) {
-          return true;
-        } else if (issue.user.login === userFilter.login) {
-          return true;
-        }
-      });
-    }
-    if (filteredMilestones.length) {
-      filteredCards = _.filter(filteredCards, (card) => {
-        const issue = card.issue;
-        if (isShowingMilestones && !issue.milestone) {
-          return true;
-        }
-        // Check if any of the milestones match
-        if (issue.milestone && this.isMilestoneIncluded(issue.milestone)) {
-          return true;
-        }
-      });
-    }
-
-    filteredCards = filterCards(filteredCards, this.getLabels());
+    // if (userFilter) {
+    //   filteredCards = _.filter(filteredCards, (card) => {
+    //     const issue = card.issue;
+    //     if (issue.assignee && issue.assignee.login === userFilter.login) {
+    //       return true;
+    //     } else if (issue.user.login === userFilter.login) {
+    //       return true;
+    //     }
+    //   });
+    // }
+    // if (filteredMilestones.length) {
+    //   filteredCards = _.filter(filteredCards, (card) => {
+    //     const issue = card.issue;
+    //     if (isShowingMilestones && !issue.milestone) {
+    //       return true;
+    //     }
+    //     // Check if any of the milestones match
+    //     if (issue.milestone && this.isMilestoneIncluded(issue.milestone)) {
+    //       return true;
+    //     }
+    //   });
+    // }
+    //
+    // filteredCards = filterCards(filteredCards, this.getLabels());
 
     // Sort the cards by `updatedAt`
     let sortedCards = _.sortBy(filteredCards, (card) => {

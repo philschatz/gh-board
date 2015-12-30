@@ -1,14 +1,14 @@
 import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
+import {Link} from 'react-router';
 
-import {getReposFromStr} from '../helpers';
+import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import Client from '../github-client';
-import {KANBAN_LABEL} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -34,13 +34,13 @@ const KanbanColumn = React.createClass({
     let heading;
     if (milestone) {
       heading = (
-        <span className='milestone-title' onClick={() => FilterStore.setMilestones([milestone])}>
+        <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(milestone.title).url()}>
           <i className='octicon octicon-milestone'/>
           <GithubFlavoredMarkdown
             inline
             disableLinks={true}
             text={milestone.title}/>
-        </span>
+        </Link>
       );
     } else {
       heading = 'No Milestone';
@@ -48,7 +48,9 @@ const KanbanColumn = React.createClass({
 
     const isShowingColumn = (
          (!milestone && !SettingsStore.getHideUncategorized())
-      || (milestone && FilterStore.isMilestoneIncluded(milestone))
+      || (milestone && (
+             getFilters().getState().milestoneTitles.length == 0
+          || getFilters().getState().milestoneTitles.indexOf(milestone.title) >= 0))
     );
 
     if (isShowingColumn) {
@@ -136,17 +138,9 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoStr, columnRegExp} = this.props.params;
-    const repoInfos = getReposFromStr(repoStr);
-
+    const {repoInfos, columnRegExp} = getFilters().getState();
     // pull out the primaryRepoName
     const [{repoOwner, repoName}] = repoInfos;
-
-    if (columnRegExp) {
-      columnRegExp = new RegExp(columnRegExp);
-    } else {
-      columnRegExp = KANBAN_LABEL;
-    }
 
     return (
       <Board {...this.props}

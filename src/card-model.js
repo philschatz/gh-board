@@ -23,10 +23,12 @@ export default class Card {
     const {repoOwner, repoName, number} = this;
     return `${repoOwner}/${repoName}#${number}`;
   }
-  onChange(listener, context) {
+  onChange(listener) {
     const len = this._changeListeners.length;
     if (len > MAX_LISTENERS) {
+      /*eslint-disable no-console */
       console.warn('MAX_LISTENERS reached. Maybe a bug?', len);
+      /*eslint-enable no-console */
     }
     this._changeListeners.push(listener);
   }
@@ -89,6 +91,7 @@ export default class Card {
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     if (!this._prPromise) {
       return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
+        if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
         this._pr = pr;
         this._emitChange();
       });

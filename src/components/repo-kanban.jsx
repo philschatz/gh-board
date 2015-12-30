@@ -1,8 +1,10 @@
 import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
+import {Link} from 'react-router';
 
-import {KANBAN_LABEL, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
+import {getFilters} from '../route-utils';
+import {UNCATEGORIZED_NAME} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards} from '../issue-store';
 import SettingsStore from '../settings-store';
@@ -32,7 +34,8 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, primaryRepoName, columnRegExp} = this.props;
+    const {label, cards, primaryRepoName} = this.props;
+    const {columnRegExp} = getFilters().getState();
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -45,9 +48,6 @@ const KanbanColumn = React.createClass({
       );
     });
 
-    let onClick;
-    onClick = () => FilterStore.addLabel(label);
-
     let icon;
     let name;
     if (columnRegExp.test(label.name)) {
@@ -58,10 +58,10 @@ const KanbanColumn = React.createClass({
       name = label.name;
     }
     const title = (
-      <span className='label-title' onClick={onClick}>
+      <Link className='label-title' to={getFilters().toggleTagName(label.name).url()}>
         {icon}
         {name}
-      </span>
+      </Link>
     );
 
     if (issueComponents.length || SettingsStore.getShowEmptyColumns()) {
@@ -124,7 +124,8 @@ const AnonymousModal = React.createClass({
 
 const KanbanRepo = React.createClass({
   render() {
-    const {columnData, cards, repoInfos, columnRegExp} = this.props;
+    const {columnData, cards, repoInfos} = this.props;
+    const {columnRegExp} = getFilters().getState();
 
     // Get the primary repoOwner and repoName
     const [{repoName}] = repoInfos;
@@ -143,9 +144,7 @@ const KanbanRepo = React.createClass({
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 
-    const isFilteringByColumn = _.filter(FilterStore.getLabels(), (label) => {
-      return columnRegExp.test(label.name);
-    })[0];
+    const isFilteringByColumn = false;
 
     const kanbanColumns = _.map(kanbanLabels, (label) => {
       // If we are filtering by a kanban column then only show that column
@@ -164,7 +163,6 @@ const KanbanRepo = React.createClass({
             key={label.name}
             label={label}
             cards={columnCards}
-            columnRegExp={columnRegExp}
             primaryRepoName={repoName}
           />
         );
@@ -195,21 +193,13 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoStr, columnRegExp} = this.props.params;
-    const repoInfos = getReposFromStr(repoStr);
+    const {repoInfos} = getFilters().getState();
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
-
-    if (columnRegExp) {
-      columnRegExp = new RegExp(columnRegExp);
-    } else {
-      columnRegExp = KANBAN_LABEL;
-    }
 
     return (
       <Board {...this.props}
         repoInfos={repoInfos}
-        columnRegExp={columnRegExp}
         type={KanbanRepo}
         columnDataPromise={Client.getOcto().repos(repoOwner, repoName).labels.fetch()}
       />

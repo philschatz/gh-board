@@ -2,10 +2,10 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
+import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
-import {KANBAN_LABEL, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -102,17 +102,10 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    let {repoStr, columnRegExp} = this.props.params;
-    const repoInfos = getReposFromStr(repoStr);
-
-    if (columnRegExp) {
-      columnRegExp = new RegExp(columnRegExp);
-    } else {
-      columnRegExp = KANBAN_LABEL;
-    }
+    const {repoInfos, columnRegExp} = getFilters().getState();
 
     const columnDataPromise =
-      IssueStore.fetchAllIssues(repoInfos, false/*isForced*/)
+      IssueStore.fetchIssues()
       .then((cards) => {
         const logins = new Set();
         for (const card of cards) {

@@ -88,5 +88,5 @@ export function convertRepoInfosToStr(repoInfos) {
       lastRepoOwner = repoOwner;
       return [repoOwner, repoName].join(':');
     }
-  });
+  }).join('|');
 }

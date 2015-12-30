@@ -1,9 +1,9 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
-import SettingsStore from './settings-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
+import {getFilters, filterCardsByFilter} from './route-utils';
 import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 
@@ -11,18 +11,6 @@ const RELOAD_TIME = 30 * 1000;
 
 const toIssueKey = (repoOwner, repoName, number) => {
   return `${repoOwner}/${repoName}#${number}`;
-};
-
-const delayedPromise = (fn) => {
-  let promise = null;
-  return () => {
-    if (promise) {
-      return promise;
-    } else {
-      promise = fn();
-      return promise;
-    }
-  };
 };
 
 let GRAPH_CACHE = new BipartiteGraph();
@@ -38,8 +26,7 @@ const cardFactory = (repoOwner, repoName, number, issue) => {
     CARD_CACHE[key] = card;
     return card;
   }
-}
-
+};
 
 export function filterCards(cards, labels) {
   let filtered = cards;
@@ -126,7 +113,7 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
-  issueNumberToCard(repoOwner, repoName, number, issue=null, pullRequestDelayedPromise=null) {
+  issueNumberToCard(repoOwner, repoName, number, issue=null) {
     if (!(repoOwner && repoName && number)) {
       throw new Error('BUG! Forgot to pass arguments in');
     }
@@ -138,12 +125,19 @@ class IssueStore extends EventEmitter {
     }
     return cardFactory(repoOwner, repoName, issue.number, issue);
   }
-  fetchAllIssues(repoInfos, isForced) {
+  // Fetch all the issues and then filter based on the URL
+  fetchIssues() {
+    const {repoInfos} = getFilters().getState();
+    return this._fetchAllIssues(repoInfos).then((cards) => {
+      return filterCardsByFilter(cards);
+    });
+  }
+  _fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
       this.polling = setTimeout(() => {
         this.polling = null;
-        this.fetchAllIssues(repoInfos, true /*isForced*/);
+        this._fetchAllIssues(repoInfos, true /*isForced*/);
       }, RELOAD_TIME);
     }
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
@@ -154,29 +148,7 @@ class IssueStore extends EventEmitter {
       return fetchAll(FETCHALL_MAX, issues)
       .then((vals) => {
         return _.map(vals, (issue) => {
-          // If this is a Pull Request fetch the data and the CI status.
-          // Add the promise to the card
-          if (issue.pullRequest && SettingsStore.getShowPullRequestData()) {
-            const fn = () => {
-              if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
-                return Promise.resolve({});
-              }
-
-              return Client.getOcto().repos(repoOwner, repoName).pulls(issue.number).fetch().then((pullRequest) => {
-                // TODO: Check if we still have a bunch of karma before getting merge conflict status and updated dates.
-                if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) {
-                  return {pullRequest};
-                }
-                return Client.getOcto().repos(repoOwner, repoName).commits(pullRequest.head.sha).statuses.fetch().then((statuses) => {
-                  return {pullRequest, statuses};
-                });
-              });
-            };
-            const pullRequestDelayedPromise = delayedPromise(fn);
-            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
-          } else {
-            return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
-          }
+          return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
         });
       });
     });

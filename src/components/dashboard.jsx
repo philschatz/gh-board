@@ -4,9 +4,9 @@ import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 
+import {buildRoute} from '../route-utils';
 import Client from '../github-client';
 import CurrentUserStore from '../user-store';
-import FilterStore from '../filter-store';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import AsyncButton from './async-button';
 import Time from './time';
@@ -61,10 +61,12 @@ const RepoItem = React.createClass({
     repo = repo || {};
     if (repoNames) {
       repoName = repoNames.join(' & ');
-      repoNames = repoNames.join('|');
     } else {
-      repoNames = repoNames || repoName;
+      repoNames = [repoName];
     }
+    const repoInfos = repoNames.map((name) => {
+      return {repoOwner, repoName: name};
+    });
 
 
     let iconClass;
@@ -98,7 +100,7 @@ const RepoItem = React.createClass({
       );
     }
 
-    const repoLink = `/r/${repoOwner}:${repoNames}`;
+    const repoLink = buildRoute('kanban', {repoInfos});
     return (
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         <i className={'repo-icon octicon ' + iconClass}/>
@@ -132,8 +134,10 @@ const RepoGroup = React.createClass({
   goToBoard() {
     const {repoOwner} = this.props;
     const {selectedRepos} = this.state;
-    const repoNames = Object.keys(selectedRepos).join('|');
-    this.history.pushState(null, `/r/${repoOwner}:${repoNames}`);
+    const repoInfos = Object.keys(selectedRepos).map((repoName) => {
+      return {repoOwner, repoName};
+    });
+    this.history.pushState(null, buildRoute('kanban', {repoInfos}));
   },
   render() {
     let {repoOwner, repos, index} = this.props;
@@ -250,7 +254,9 @@ const CustomRepoModal = React.createClass({
   },
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
-    this.history.pushState(null, `/r/${repoOwner}:${repoName}`);
+    const repoInfos = [{repoOwner, repoName}];
+    // TODO: Just make this a simple Link and no fancy history.pushState
+    this.history.pushState(null, buildRoute('kanban', {repoInfos}));
   },
   render() {
     const {customRepoName} = this.state;
@@ -327,9 +333,6 @@ let allMyReposHack = null;
 const DashboardShell = React.createClass({
   getInitialState() {
     return {repos: null};
-  },
-  componentDidMount() {
-    FilterStore.clearFilters();
   },
   render() {
     let {repos} = this.state;

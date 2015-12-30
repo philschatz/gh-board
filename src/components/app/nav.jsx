@@ -2,123 +2,32 @@ import _ from 'underscore';
 import React from 'react';
 import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
-import HTML5Backend from 'react-dnd-html5-backend';
-import { DragDropContext } from 'react-dnd';
 
-import SettingsStore from '../settings-store';
-import Client from '../github-client';
-import NewVersionChecker from '../new-version-checker';
-import CurrentUserStore from '../user-store';
-import FilterStore from '../filter-store';
-import IssueStore from '../issue-store';
-import history from '../history';
-import {getReposFromStr, convertRepoInfosToStr} from '../helpers';
+import SettingsStore from '../../settings-store';
+import Client from '../../github-client';
+import CurrentUserStore from '../../user-store';
+import IssueStore from '../../issue-store';
+import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
 
-import LoginModal from './login-modal';
-import LabelBadge from './label-badge';
-import MoveModal from './move-modal';
-import Time from './time';
-import Loadable from './loadable';
-import GithubFlavoredMarkdown from './gfm';
-
-import GameModal from './game-modal';
-
-
-const KarmaWarning = React.createClass({
-  getInitialState() {
-    return {timer: null, limit: null, remaining: null, newestVersion: null};
-  },
-  componentDidMount() {
-    NewVersionChecker.on('change', this.updateNewestVersion);
-    Client.on('request', this.updateRateLimit);
-  },
-  componentWillUnmount() {
-    NewVersionChecker.off('change', this.updateNewestVersion);
-    Client.off('request', this.updateRateLimit);
-  },
-  updateRateLimit({rate: {remaining, limit, reset}} /*, method, path, data, options */) {
-    this.setState({remaining, limit, reset: new Date(reset * 1000)});
-  },
-  updateNewestVersion(newestVersion) {
-    this.setState({newestVersion});
-  },
-  showGameModal() {
-    this.setState({isGameOpen: true});
-  },
-  onHideGameModal() {
-    this.setState({isGameOpen: false});
-  },
-  render() {
-    const {remaining, limit, reset, newestVersion, isGameOpen} = this.state;
-    let karmaText;
-    let resetText;
-    if (reset) {
-      resetText = (
-        <span className='reset-at'>Resets <Time dateTime={reset}/></span>
-      );
-    }
-
-    let isKarmaLow = true;
-    if (limit) {
-      if (remaining / limit < .2) {
-        karmaText = (
-          <BS.Button bsStyle='danger' bsSize='sm'>{remaining} / {limit}. Sign In to avoid this. {resetText}</BS.Button>
-        );
-        resetText = null;
-      } else {
-        isKarmaLow = false;
-        const percent = Math.floor(remaining * 1000 / limit) / 10;
-        let bsStyle = 'danger';
-        if (percent >= 75) { bsStyle = 'success'; }
-        else if (percent >= 40) { bsStyle = 'warning'; }
-        karmaText = (
-          <BS.ProgressBar
-            className='karma-progress'
-            title={'Rate Limit for the GitHub API (' + remaining + '/' + limit + ')'}
-            now={remaining}
-            max={limit}
-            bsStyle={bsStyle}
-            label={percent + '% (' + remaining + ')'} />
-        );
-      }
-    }
-
-    let newestText = null;
-    if (newestVersion) {
-      newestText = (
-        <button className='btn btn-primary' onClick={() => window.location.reload(true)}>New Version released <Time dateTime={new Date(newestVersion.date)}/>. Click to Reload</button>
-      );
-    }
-    return (
-      <BS.Navbar fixedBottom className='bottombar-nav'>
-        <BS.Nav>
-          <li>
-            <span className={'karma-stats' + (isKarmaLow && ' is-karma-low' || '')}>
-              <i className='octicon octicon-cloud-download' title='GitHub API'/>
-              {' API Requests Left: '}
-              {karmaText}
-              {resetText}
-            </span>
-          </li>
-          {newestText}
-        </BS.Nav>
-        <BS.Nav pullRight>
-          <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><i className='octicon octicon-gift' title='Oooh, a present!'/></BS.NavItem>
-          <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
-        </BS.Nav>
-        <GameModal show={isGameOpen} onHide={this.onHideGameModal}/>
-      </BS.Navbar>
-    );
-  }
-});
+import LoginModal from '../login-modal';
+import LabelBadge from '../label-badge';
+import MoveModal from '../move-modal';
+import Time from '../time';
+import Loadable from '../loadable';
+import GithubFlavoredMarkdown from '../gfm';
 
 
 const SettingsItem = React.createClass({
   render() {
-    const {key, onSelect, isChecked, className, children} = this.props;
+    const {key, onSelect, isChecked, className, to, children} = this.props;
+    let {href} = this.props;
+
+    if (!href && to) {
+      href = `#${to}`; // Link
+    }
 
     return (
-      <BS.MenuItem key={key} onSelect={onSelect} className={className}>
+      <BS.MenuItem key={key} href={href} onSelect={onSelect} className={className}>
         <span className='settings-item-checkbox' data-checked={isChecked}>{children}</span></BS.MenuItem>
     );
   }
@@ -126,31 +35,12 @@ const SettingsItem = React.createClass({
 
 const MilestonesDropdown = React.createClass({
   mixins: [History],
-  componentDidMount() {
-    FilterStore.on('change:milestone', this.update);
-  },
-  componentWillUnmount() {
-    FilterStore.off('change:milestone', this.update);
-  },
   update() {
     this.forceUpdate();
   },
-  onSelectMilestone(milestone) {
-    return () => {
-      FilterStore.toggleMilestone(milestone);
-    };
-  },
-  onClearMilestones() {
-    FilterStore.clearMilestoneFilter();
-  },
-  onSelectMilestonePlanning() {
-    const {repoInfos} = this.props;
-
-    this.history.pushState(null, `/r/${convertRepoInfosToStr(repoInfos)}/by-milestone`);
-  },
   render() {
     const {milestones} = this.props;
-    const selectedMilestones = FilterStore.getMilestones();
+    const selectedMilestoneTitles = getFilters().getState().milestoneTitles;
 
     const renderMilestone = (milestone) => {
       let dueDate;
@@ -180,25 +70,25 @@ const MilestonesDropdown = React.createClass({
           <SettingsItem
             className='milestone-item'
             key={milestone.title}
-            isChecked={FilterStore.getMilestones().length && FilterStore.isMilestoneIncluded(milestone)}
-            onSelect={this.onSelectMilestone(milestone)}
+            isChecked={getFilters().getState().milestoneTitles.length && getFilters().getState().milestoneTitles.indexOf(milestone.title) >= 0}
+            to={getFilters().toggleMilestoneTitle(milestone.title).url()}
           >{renderMilestone(milestone)}</SettingsItem>
         );
       });
       let clearMilestoneFilter;
-      if (FilterStore.getMilestones().length) {
+      if (getFilters().getState().milestoneTitles.length > 0) {
         clearMilestoneFilter = (
-          <BS.MenuItem key='clear' onSelect={this.onClearMilestones}>Clear Milestone Filter</BS.MenuItem>
+          <SettingsItem key='clear' to={getFilters().clearMilestoneTitles().url()}>Clear Milestone Filter</SettingsItem>
         );
       }
 
       let selectedMilestoneItem;
-      if (selectedMilestones.length) {
-        if (selectedMilestones.length > 1) {
-          selectedMilestoneItem = `${selectedMilestones.length} milestones`;
+      if (selectedMilestoneTitles.length) {
+        if (selectedMilestoneTitles.length > 1) {
+          selectedMilestoneItem = `${selectedMilestoneTitles.length} milestones`;
         } else {
           // Only 1 milestone is selected so show the milestone title
-          selectedMilestoneItem = renderMilestone(selectedMilestones[0]);
+          selectedMilestoneItem = renderMilestone({title: selectedMilestoneTitles[0]});
         }
       } else {
         selectedMilestoneItem = 'All Issues and Pull Requests';
@@ -211,7 +101,8 @@ const MilestonesDropdown = React.createClass({
           <BS.MenuItem key='3' divider/>
           <BS.MenuItem key='4' disabled>Not in a Milestone</BS.MenuItem>
           <BS.MenuItem key='5' divider/>
-          <BS.MenuItem key='6' onSelect={this.onSelectMilestonePlanning}>Milestone Planning View</BS.MenuItem>
+          <SettingsItem key='6' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
+          <SettingsItem key='7' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
         </BS.NavDropdown>
       );
     } else {
@@ -241,7 +132,6 @@ const AppNav = React.createClass({
     return {info: null, showModal: false};
   },
   componentDidMount() {
-    FilterStore.on('change', this.update);
     SettingsStore.on('change', this.update);
     SettingsStore.on('change:showPullRequestData', this.update);
     SettingsStore.on('change:tableLayout', this.update);
@@ -249,7 +139,6 @@ const AppNav = React.createClass({
     this.onChangeToken();
   },
   componentWillUnmount() {
-    FilterStore.off('change', this.update);
     SettingsStore.off('change', this.update);
     SettingsStore.off('change:showPullRequestData', this.update);
     SettingsStore.off('change:tableLayout', this.update);
@@ -283,30 +172,33 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let {repoStr} = this.props.params || {};
+    let routeInfo = getFilters().getState();
+    let {repoInfos} = routeInfo;
     const {info, showModal} = this.state;
 
-    // The dashboard page does not have a list of repos
-    let repoInfos = [];
-    if (repoStr) {
-      repoInfos = getReposFromStr(repoStr);
-    }
-
+    // Note: The dashboard page does not have a list of repos
     const close = () => this.setState({ showModal: false});
 
     const brand = (
-      <Link to='/dashboard'><i className='octicon octicon-home'/></Link>
+      <Link to={buildRoute('dashboard')}><i className='octicon octicon-home'/></Link>
     );
-    const filtering = _.map(FilterStore.getLabels(), (label) => {
+    const filtering = _.map(getFilters().getState().tagNames, (tagName) => {
+      // TODO: HACK. Find a better way to update the color of labels
+      const label = LABEL_CACHE[tagName] || {name: tagName, color: 'ffffff'};
       return (
-        <LabelBadge label={label} onClick={() => FilterStore.removeLabel(label)}/>
+        <LabelBadge key={tagName} isClickable label={label}/>
       );
     });
 
-    const filterUser = FilterStore.getUser();
-    if (filterUser) {
+    const {userName} = getFilters().getState();
+    if (userName) {
       filtering.push(
-        <BS.Badge key='user' onClick={() => FilterStore.clearUser()}>{filterUser.login}</BS.Badge>
+        <Link
+          key='user'
+          className='badge'
+          to={getFilters().toggleUserName(userName).url()}
+          >{userName}
+        </Link>
       );
     }
 
@@ -348,7 +240,8 @@ const AppNav = React.createClass({
         );
       } else {
         repoNameItems = _.map(repoInfos, ({repoOwner, repoName}, index) => {
-          const repoLink = `/r/${repoOwner}:${repoName}`;
+          const repoInfos = [{repoOwner, repoName}];
+          const repoLink = buildRoute('kanban', {repoInfos});
           return (
             <span key={repoLink} className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
@@ -364,22 +257,22 @@ const AppNav = React.createClass({
           {repoNameItems}
         </li>
       );
+    }
+    if (repoInfos.length) {
       milestonesDropdown = (
         <MilestonesDropdownShell repoInfos={repoInfos}/>
       );
     }
-
     const settingsMenuHelp = () => {
       /*eslint-disable no-alert */
       alert('When an Issue and Pull Request are linked (by writing "fixes #123" in the Pull Request description) the related Issue/Pull request is removed from the list.\n Developers will probably want to see the Pull Request in their board (since they created it) while QA would probably rather see the Issue (since they created it).');
       /*eslint-enable no-alert */
     };
 
-    const repoLink = `/r/${repoStr}/by-user`;
     let managerMenu;
     if (repoInfos.length) {
       managerMenu = (
-        <BS.MenuItem key='manager' href={'#' + repoLink}>Manager (Issues by User)</BS.MenuItem>
+        <SettingsItem key='manager' to={getFilters().setRouteName('by-user').url()}>Manager (Issues by User)</SettingsItem>
       );
     }
 
@@ -391,9 +284,11 @@ const AppNav = React.createClass({
           </BS.Navbar.Header>
           <BS.Nav key='repo-details'>
             {repoDetails}
-            <BS.NavItem className='active-filter'>
-              {filtering}
-            </BS.NavItem>
+            <li key='active-filter' className='active-filter'>
+              <span className='-just-here-because-bootstrap-pads-anchor-children-in-the-nav'>
+                {filtering}
+              </span>
+            </li>
           </BS.Nav>
           <BS.Nav key='right' pullRight>
             {milestonesDropdown}
@@ -470,46 +365,6 @@ const AppNav = React.createClass({
     );
   }
 
-
 });
 
-const App = React.createClass({
-  componentDidMount() {
-    SettingsStore.on('change:tableLayout', this.onChange);
-    this._historyListener = history.listen(this.storeHistory);
-    this.storeHistory({path: this.props.route.path});
-  },
-  componentWillMount() {
-    SettingsStore.off('change:tableLayout', this.onChange);
-  },
-  componentWillUnmount() {
-    this._historyListener();
-  },
-  storeHistory(locationChangeEvent) {
-    if (window.ga) {
-      window.ga('set', 'page', '/gh-board' + locationChangeEvent.pathname);
-      window.ga('send', 'pageview');
-    }
-  },
-  onChange() {
-    this.forceUpdate();
-  },
-  render() {
-    const {params} = this.props;
-    const classes = ['app'];
-    if (SettingsStore.getTableLayout()) {
-      classes.push('is-table-layout');
-    }
-
-    return (
-      <div className={classes.join(' ')}>
-        <AppNav params={params}/>
-        {/* Subroutes are added here */}
-        {this.props.children}
-        <KarmaWarning/>
-      </div>
-    );
-  }
-});
-
-export default DragDropContext(HTML5Backend)(App);
+export default AppNav;
