@@ -45,10 +45,10 @@ const Board = React.createClass({
   },
   render() {
     const {repoInfos, columnDataPromise} = this.props;
-    const cardsPromise = IssueStore.fetchAllIssues(repoInfos);
+    const cardsPromise = IssueStore.fetchIssues();
 
     return (
-      <Loadable key="${repoInfos}"
+      <Loadable key='board'
         promise={Promise.all([columnDataPromise, cardsPromise])}
         loadingText='Loading GitHub Issues and Pull Requests...'
         renderLoaded={this.renderKanbanRepos(repoInfos)}

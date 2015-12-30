@@ -35,7 +35,6 @@ export function parseRoute({repoStr, milestonesStr, tagsStr, userName, columnReg
   if (milestonesStr) { milestoneTitles = milestonesStr.split('|'); }
   if (tagsStr) { tagNames = tagsStr.split('|'); }
   if (columnRegExpStr) { columnRegExp = new RegExp(columnRegExpStr); }
-  else { columnRegExp = KANBAN_LABEL; }
 
   return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp};
 }
@@ -57,4 +56,29 @@ export function setFilters({params}/*,replaceState,callback*/) {
 export function getFilters() {
   // TODO: inject defaults from localStorage (esp the checkboxes)
   return FILTERS;
+}
+
+// Filters the list of cards by the criteria set in the URL.
+// Used by IssueStore.fetchIssues()
+export function filterCardsByFilter(cards) {
+  const {milestoneTitles, tagNames, userName} = getFilters();
+  return cards.filter((card) => {
+    const {issue} = card;
+    // issue must match the user if one is selected (either assignee or creator (if none))
+    if (userName) {
+      if (issue.assignee) {
+        if (issue.assignee.login !== userName) { return false; }
+      }
+      if (issue.user.login !== userName) { return false; }
+    }
+    // issue must be in one of the milestones (if milestones are selected)
+    if (milestoneTitles.length > 0) {
+      if (!issue.milestone) { return false; } // TODO: Read the settings to see if no milestones are allowed
+      if (milestoneTitles.indexOf(issue.milestone.title) < 0) { return false; }
+    }
+    const labelNames = issue.labels.map((label) => { return label.name; });
+    // issue must have all the tags
+    if (_.difference(tagNames, labelNames).length > 0) { return false; }
+    return true;
+  });
 }

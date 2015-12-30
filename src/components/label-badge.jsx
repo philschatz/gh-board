@@ -6,11 +6,12 @@ import {KANBAN_LABEL, isLight} from '../helpers';
 const LabelBadge = React.createClass({
   propTypes: {
     label: React.PropTypes.object.isRequired,
-    className: React.PropTypes.string
+    className: React.PropTypes.string,
+    extra: React.PropTypes.string
   },
   render() {
     const {label} = this.props;
-    let {className} = this.props;
+    let {className, extra} = this.props;
 
     let name;
     let icon;
@@ -26,8 +27,9 @@ const LabelBadge = React.createClass({
       className = className || '';
       className += ' ' + 'is-light';
     }
-
-
+    if (extra) {
+      extra = ` (${extra})`;
+    }
 
     return (
       <BS.Badge
@@ -37,6 +39,7 @@ const LabelBadge = React.createClass({
         style={{backgroundColor: '#' + label.color}}>
         {icon}
         {name}
+        {extra}
       </BS.Badge>
     );
   }

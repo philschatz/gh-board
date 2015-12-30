@@ -4,6 +4,7 @@ import SettingsStore from './settings-store';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
+import {getFilters, filterCardsByFilter} from './route-utils';
 import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 
@@ -138,12 +139,19 @@ class IssueStore extends EventEmitter {
     }
     return cardFactory(repoOwner, repoName, issue.number, issue);
   }
-  fetchAllIssues(repoInfos, isForced) {
+  // Fetch all the issues and then filter based on the URL
+  fetchIssues() {
+    const {repoInfos} = getFilters();
+    return this._fetchAllIssues(repoInfos).then((cards) => {
+      return filterCardsByFilter(cards);
+    });
+  }
+  _fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
       this.polling = setTimeout(() => {
         this.polling = null;
-        this.fetchAllIssues(repoInfos, true /*isForced*/);
+        this._fetchAllIssues(repoInfos, true /*isForced*/);
       }, RELOAD_TIME);
     }
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {

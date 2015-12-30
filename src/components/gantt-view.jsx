@@ -15,6 +15,7 @@ import gantt from '../gantt-chart';
 const filterByMilestoneAndKanbanColumn = (cards) => {
   const data = {};
   const columns = {};
+  const columnCounts = {}; // key is columnName
   const add = (card) => {
     if (card.issue.milestone) {
       const column = getCardColumn(card);
@@ -24,15 +25,18 @@ const filterByMilestoneAndKanbanColumn = (cards) => {
       data[card.issue.milestone.title] = msCounts;
       msCounts[columnName] = msCounts[columnName] || 0;
       msCounts[columnName] += 1;
+
+      columnCounts[columnName] = columnCounts[columnName] || 0;
+      columnCounts[columnName] += 1;
     } else {
-      // TODO: SHould account for issues not in a milestone somehow
+      // TODO: Should account for issues not in a milestone somehow
     }
   };
 
   cards.forEach((card) => {
     add(card);
   })
-  return {data, columns: _.values(columns)};
+  return {data, columns: _.values(columns), columnCounts};
 }
 
 
@@ -138,11 +142,11 @@ const GanttChart = React.createClass({
 
   },
   render() {
-    const {columns} = this.props;
+    const {columns, columnCounts} = this.props;
 
     const legend = columns.map((label) => {
       return (
-        <LabelBadge key={label.name} label={label}/>
+        <LabelBadge key={label.name} label={label} extra={columnCounts[label.name]}/>
       );
     });
     return (
@@ -152,6 +156,8 @@ const GanttChart = React.createClass({
         <p>Blue vertical line is Today</p>
         <LabelBadge key='completed' label={{name:'0 - Completed', color: '333'}}/>
         {legend}
+        <br/>{/* Add breaks to increase padding because I'm lazy and don't want to add CSS margins */}
+        <br/>
       </div>
     );
   }
@@ -167,7 +173,9 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded([allMilestones, cards]) {
-    let {data, columns} = filterByMilestoneAndKanbanColumn(cards);
+    const {milestoneTitles} = getFilters();
+
+    let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(cards);
     // COPYPASTA: Taken from repo-kanban
     columns = _.sortBy(columns, ({name}) => {
       if (name === UNCATEGORIZED_NAME) {
@@ -180,8 +188,18 @@ const RepoKanbanShell = React.createClass({
     });
     columns = columns.reverse();
 
+    // Remove milestones that are not in the URL filter
+    let milestones;
+    if (milestoneTitles.length > 0) {
+      milestones = allMilestones.filter((milestone) => {
+        return milestoneTitles.indexOf(milestone.title) >= 0;
+      });
+    } else {
+      milestones = allMilestones;
+    }
+
     return (
-      <GanttChart milestones={allMilestones} data={data} columns={columns}/>
+      <GanttChart milestones={milestones} data={data} columns={columns} columnCounts={columnCounts}/>
     );
   },
   render() {
@@ -190,7 +208,7 @@ const RepoKanbanShell = React.createClass({
     const [{repoOwner, repoName}] = repoInfos;
 
     // TODO: Actually do all the milestones
-    const allPromises = Promise.all([Client.getOcto().repos(repoOwner, repoName).milestones.fetch(), IssueStore.fetchAllIssues(repoInfos)]);
+    const allPromises = Promise.all([Client.getOcto().repos(repoOwner, repoName).milestones.fetch(), IssueStore.fetchIssues()]);
 
     return (
       <Loadable

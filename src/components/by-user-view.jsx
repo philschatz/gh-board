@@ -106,7 +106,7 @@ const RepoKanbanShell = React.createClass({
     const {repoInfos, columnRegExp} = getFilters();
 
     const columnDataPromise =
-      IssueStore.fetchAllIssues(repoInfos, false/*isForced*/)
+      IssueStore.fetchIssues()
       .then((cards) => {
         const logins = new Set();
         for (const card of cards) {
