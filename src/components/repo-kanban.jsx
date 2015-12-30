@@ -4,7 +4,7 @@ import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
-import {KANBAN_LABEL, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
+import {UNCATEGORIZED_NAME} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards} from '../issue-store';
 import SettingsStore from '../settings-store';

@@ -16,7 +16,7 @@ const insertAfter = (newNode, node) => {
   } else {
     node.parentElement.appendChild(newNode);
   }
-}
+};
 
 const EMOJI_RE = /(:\+?\-?[\+a-z0-9_\-]+:)/g;
 
@@ -29,7 +29,7 @@ const camelize = (string) => {
   } else {
     return '';
   }
-}
+};
 
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',

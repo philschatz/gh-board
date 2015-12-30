@@ -23,10 +23,12 @@ export default class Card {
     const {repoOwner, repoName, number} = this;
     return `${repoOwner}/${repoName}#${number}`;
   }
-  onChange(listener, context) {
+  onChange(listener) {
     const len = this._changeListeners.length;
     if (len > MAX_LISTENERS) {
+      /*eslint-disable no-console */
       console.warn('MAX_LISTENERS reached. Maybe a bug?', len);
+      /*eslint-enable no-console */
     }
     this._changeListeners.push(listener);
   }

@@ -6,7 +6,6 @@ import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
-import {KANBAN_LABEL, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';

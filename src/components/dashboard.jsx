@@ -7,7 +7,6 @@ import classnames from 'classnames';
 import {buildRoute} from '../route-utils';
 import Client from '../github-client';
 import CurrentUserStore from '../user-store';
-import FilterStore from '../filter-store';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import AsyncButton from './async-button';
 import Time from './time';

@@ -4,13 +4,11 @@ import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
-import {getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
 import Client from '../github-client';
-import {KANBAN_LABEL} from '../helpers';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';

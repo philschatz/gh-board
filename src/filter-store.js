@@ -2,7 +2,7 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 
 import SettingsStore from './settings-store';
-import {filterCards} from './issue-store';
+// import {filterCards} from './issue-store';
 
 import {contains} from './helpers';
 
@@ -120,7 +120,7 @@ class Store extends EventEmitter {
     return filteredLabels;
   }
 
-  filterAndSort(cards, isShowingMilestones) {
+  filterAndSort(cards) {
 
     // Filter all the cards
     let filteredCards = cards;

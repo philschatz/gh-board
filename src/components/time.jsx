@@ -37,7 +37,9 @@ export default React.createClass({
     try {
       dateTimeString = dateTime.toISOString();
     } catch (e) {
-      console.log('Invalid dateTime. Probably from octokat');
+      /*eslint-disable no-console */
+      console.warn('Invalid dateTime. Probably from octokat');
+      /*eslint-enable no-console */
       dateTimeString = '';
     }
 

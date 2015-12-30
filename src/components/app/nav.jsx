@@ -2,17 +2,12 @@ import _ from 'underscore';
 import React from 'react';
 import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
-import HTML5Backend from 'react-dnd-html5-backend';
-import { DragDropContext } from 'react-dnd';
 
 import SettingsStore from '../../settings-store';
 import Client from '../../github-client';
-import NewVersionChecker from '../../new-version-checker';
 import CurrentUserStore from '../../user-store';
 import IssueStore from '../../issue-store';
-import history from '../../history';
 import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
-import {getReposFromStr, convertRepoInfosToStr} from '../../helpers';
 
 import LoginModal from '../login-modal';
 import LabelBadge from '../label-badge';

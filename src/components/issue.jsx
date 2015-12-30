@@ -319,7 +319,7 @@ const IssueShell = React.createClass({
           loadingText={card.key()}
           renderLoaded={() => <Issue key={repoOwner + repoName + number} {...this.props} />}
         />
-      )
+      );
     }
   }
 });

@@ -3,7 +3,7 @@ import _ from 'underscore';
 import Client from '../github-client';
 
 import {getFilters} from '../route-utils';
-import {fetchAll, FETCHALL_MAX, getReposFromStr} from '../helpers';
+import {fetchAll, FETCHALL_MAX} from '../helpers';
 import Loadable from './loadable';
 import {getRelatedIssues} from '../gfm-dom';
 import IssueStore from '../issue-store';
@@ -40,7 +40,7 @@ const MergedSince = React.createClass({
 
     let prCommits = [];
     _.each(comparisons, (comparison, i) => {
-      const {repoOwner, repoName} = repoInfos[i]
+      const {repoOwner, repoName} = repoInfos[i];
       _.each(comparison[0].commits, (commit) => {
         const msg = commit.commit.message;
         const match = msg.match(MERGE_PULL_REQUEST_MESSAGE_REGEXP);
@@ -92,7 +92,9 @@ const MergedSinceShell = React.createClass({
       });
     }
     if (startShas.length !== repoInfos.length || endShas.length !== repoInfos.length) {
+      /*eslint-disable no-alert */
       alert('The number of shas to compare does not match the number of repositories');
+      /*eslint-enable no-alert */
     }
 
     const allPromise = Promise.all(_.map(repoInfos, ({repoOwner, repoName}, i) => {

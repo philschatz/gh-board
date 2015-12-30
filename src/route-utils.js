@@ -33,7 +33,7 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName
   if (name) { parts.push(`/${name}`); }
   otherFields.forEach((field) => {
     parts.push(`/${field}`);
-  })
+  });
   return encodeURI(parts.join(''));
 }
 
@@ -123,8 +123,6 @@ let FILTER_STATE = new FilterState(DEFAULTS);
 export function setFilters(routerState/*,replaceState,callback*/) {
   FILTER_STATE = new FilterState(_.defaults(parseRoute(routerState), DEFAULTS));
 }
-
-window.getFiltersPHIL = () => { return FILTER_STATE; }
 
 export function getFilters() {
   // TODO: inject defaults from localStorage (esp the checkboxes)

@@ -4,7 +4,7 @@ import _ from 'underscore';
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import Client from '../github-client';
-import {getReposFromStr, getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
+import {getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
 import Loadable from './loadable';
 import LabelBadge from './label-badge';
 
@@ -35,9 +35,9 @@ const filterByMilestoneAndKanbanColumn = (cards) => {
 
   cards.forEach((card) => {
     add(card);
-  })
+  });
   return {data, columns: _.values(columns), columnCounts};
-}
+};
 
 
 const GanttChart = React.createClass({
@@ -53,12 +53,6 @@ const GanttChart = React.createClass({
         status = 'milestone-status-overdue';
       } else {
         status = `milestone-status-${state}`;
-      }
-      let percent;
-      if (closedIssues + openIssues) {
-        percent = closedIssues / (closedIssues + openIssues);
-      } else {
-        percent = Math.random(); //TODO: HACK to just show something "interesting"
       }
       const segments = [];
       if (closedIssues) {
