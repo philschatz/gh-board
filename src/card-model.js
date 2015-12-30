@@ -89,6 +89,7 @@ export default class Card {
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     if (!this._prPromise) {
       return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
+        if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
         this._pr = pr;
         this._emitChange();
       });

@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import Client from '../github-client';
 
-import {parseRoute, buildRoute} from '../route-utils';
+import {getFilters} from '../route-utils';
 import {fetchAll, FETCHALL_MAX, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import {getRelatedIssues} from '../gfm-dom';
@@ -80,7 +80,7 @@ const MergedSince = React.createClass({
 const MergedSinceShell = React.createClass({
   render() {
     let {startShas, endShas} = this.props.params;
-    const {repoInfos} = parseRoute(this.props.params);
+    const {repoInfos} = getFilters();
 
     startShas = startShas.split('|');
     if (endShas) {

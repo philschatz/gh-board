@@ -4,7 +4,7 @@ import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 
-import {parseRoute, buildRoute} from '../route-utils';
+import {buildRoute} from '../route-utils';
 import Client from '../github-client';
 import CurrentUserStore from '../user-store';
 import FilterStore from '../filter-store';
@@ -256,6 +256,7 @@ const CustomRepoModal = React.createClass({
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
     const repoInfos = [{repoOwner, repoName}];
+    // TODO: Just make this a simple Link and no fancy history.pushState
     this.history.pushState(null, buildRoute(null, {repoInfos}));
   },
   render() {

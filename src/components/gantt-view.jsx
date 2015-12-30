@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 
-import {parseRoute, buildRoute} from '../route-utils';
+import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import Client from '../github-client';
 import {getReposFromStr, getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
@@ -185,7 +185,7 @@ const RepoKanbanShell = React.createClass({
     );
   },
   render() {
-    const {repoInfos} = parseRoute(this.props.params);
+    const {repoInfos} = getFilters();
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
 

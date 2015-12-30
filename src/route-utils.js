@@ -1,3 +1,4 @@
+import _ from 'underscore';
 import {getReposFromStr, convertRepoInfosToStr, KANBAN_LABEL} from './helpers';
 
 
@@ -37,4 +38,23 @@ export function parseRoute({repoStr, milestonesStr, tagsStr, userName, columnReg
   else { columnRegExp = KANBAN_LABEL; }
 
   return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp};
+}
+
+const DEFAULTS = {
+  repoInfos: [],
+  milestoneTitles: [],
+  tagNames: [],
+  columnRegExp: KANBAN_LABEL
+};
+
+let FILTERS = DEFAULTS;
+// method signature is from react-router onEnter:
+// https://github.com/rackt/react-router/blob/master/docs/API.md#onenternextstate-replacestate-callback
+export function setFilters({params}/*,replaceState,callback*/) {
+  FILTERS = _.defaults({}, parseRoute(params), DEFAULTS);
+}
+
+export function getFilters() {
+  // TODO: inject defaults from localStorage (esp the checkboxes)
+  return FILTERS;
 }

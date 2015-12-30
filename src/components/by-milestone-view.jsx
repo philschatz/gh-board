@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 
-import {parseRoute, buildRoute} from '../route-utils';
+import {getFilters} from '../route-utils';
 import {getReposFromStr} from '../helpers';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
@@ -137,7 +137,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    const {repoInfos, columnRegExp} = parseRoute(this.props.params);
+    const {repoInfos, columnRegExp} = getFilters();
     // pull out the primaryRepoName
     const [{repoOwner, repoName}] = repoInfos;
 

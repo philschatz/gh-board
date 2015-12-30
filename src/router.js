@@ -10,11 +10,7 @@ import ByMilestoneView from './components/by-milestone-view';
 import ByUserView from './components/by-user-view';
 import MergedSince from './components/merged-since';
 
-import {parseRoute} from './route-utils';
-
-const setFilters = (nextState/*,replaceState,callback*/) => {
-  console.log('TheRouteFilters', parseRoute(nextState.params));
-};
+import {parseRoute, setFilters} from './route-utils';
 
 const routes = [
   // Redirect from `/dashboard` to `/`

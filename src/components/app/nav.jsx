@@ -12,7 +12,7 @@ import CurrentUserStore from '../../user-store';
 import FilterStore from '../../filter-store';
 import IssueStore from '../../issue-store';
 import history from '../../history';
-import {parseRoute, buildRoute} from '../../route-utils';
+import {getFilters, buildRoute} from '../../route-utils';
 import {getReposFromStr, convertRepoInfosToStr} from '../../helpers';
 
 import LoginModal from '../login-modal';
@@ -193,7 +193,7 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let routeInfo = parseRoute(this.props.params);
+    let routeInfo = getFilters();
     let {repoInfos} = routeInfo;
     const {info, showModal} = this.state;
 

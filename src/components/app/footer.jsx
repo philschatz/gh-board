@@ -12,7 +12,6 @@ import CurrentUserStore from '../../user-store';
 import FilterStore from '../../filter-store';
 import IssueStore from '../../issue-store';
 import history from '../../history';
-import {parseRoute, buildRoute} from '../../route-utils';
 import {getReposFromStr, convertRepoInfosToStr} from '../../helpers';
 
 import LoginModal from '../login-modal';
