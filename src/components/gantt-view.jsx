@@ -167,7 +167,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded([allMilestones, cards]) {
-    const {milestoneTitles} = getFilters().state;
+    const {milestoneTitles} = getFilters().getState();
 
     let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(cards);
     // COPYPASTA: Taken from repo-kanban
@@ -197,7 +197,7 @@ const RepoKanbanShell = React.createClass({
     );
   },
   render() {
-    const {repoInfos} = getFilters().state;
+    const {repoInfos} = getFilters().getState();
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
 

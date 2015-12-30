@@ -40,7 +40,7 @@ const MilestonesDropdown = React.createClass({
   },
   render() {
     const {milestones} = this.props;
-    const selectedMilestoneTitles = getFilters().state.milestoneTitles;
+    const selectedMilestoneTitles = getFilters().getState().milestoneTitles;
 
     const renderMilestone = (milestone) => {
       let dueDate;
@@ -70,13 +70,13 @@ const MilestonesDropdown = React.createClass({
           <SettingsItem
             className='milestone-item'
             key={milestone.title}
-            isChecked={getFilters().state.milestoneTitles.length && getFilters().state.milestoneTitles.indexOf(milestone.title) >= 0}
+            isChecked={getFilters().getState().milestoneTitles.length && getFilters().getState().milestoneTitles.indexOf(milestone.title) >= 0}
             to={getFilters().toggleMilestoneTitle(milestone.title).url()}
           >{renderMilestone(milestone)}</SettingsItem>
         );
       });
       let clearMilestoneFilter;
-      if (getFilters().state.milestoneTitles.length > 0) {
+      if (getFilters().getState().milestoneTitles.length > 0) {
         clearMilestoneFilter = (
           <SettingsItem key='clear' to={getFilters().clearMilestoneTitles().url()}>Clear Milestone Filter</SettingsItem>
         );
@@ -172,7 +172,7 @@ const AppNav = React.createClass({
     });
   },
   render() {
-    let routeInfo = getFilters().state;
+    let routeInfo = getFilters().getState();
     let {repoInfos} = routeInfo;
     const {info, showModal} = this.state;
 
@@ -182,7 +182,7 @@ const AppNav = React.createClass({
     const brand = (
       <Link to={buildRoute('dashboard')}><i className='octicon octicon-home'/></Link>
     );
-    const filtering = _.map(getFilters().state.tagNames, (tagName) => {
+    const filtering = _.map(getFilters().getState().tagNames, (tagName) => {
       // TODO: HACK. Find a better way to update the color of labels
       const label = LABEL_CACHE[tagName] || {name: tagName, color: 'ffffff'};
       return (
@@ -190,7 +190,7 @@ const AppNav = React.createClass({
       );
     });
 
-    const {userName} = getFilters().state;
+    const {userName} = getFilters().getState();
     if (userName) {
       filtering.push(
         <Link

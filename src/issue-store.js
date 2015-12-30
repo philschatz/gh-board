@@ -127,7 +127,7 @@ class IssueStore extends EventEmitter {
   }
   // Fetch all the issues and then filter based on the URL
   fetchIssues() {
-    const {repoInfos} = getFilters().state;
+    const {repoInfos} = getFilters().getState();
     return this._fetchAllIssues(repoInfos).then((cards) => {
       return filterCardsByFilter(cards);
     });

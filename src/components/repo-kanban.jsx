@@ -34,7 +34,8 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, primaryRepoName, columnRegExp} = this.props;
+    const {label, cards, primaryRepoName} = this.props;
+    const {columnRegExp} = getFilters().getState();
 
     const issueComponents = _.map(cards, (card) => {
       return (
@@ -123,7 +124,8 @@ const AnonymousModal = React.createClass({
 
 const KanbanRepo = React.createClass({
   render() {
-    const {columnData, cards, repoInfos, columnRegExp} = this.props;
+    const {columnData, cards, repoInfos} = this.props;
+    const {columnRegExp} = getFilters().getState();
 
     // Get the primary repoOwner and repoName
     const [{repoName}] = repoInfos;
@@ -161,7 +163,6 @@ const KanbanRepo = React.createClass({
             key={label.name}
             label={label}
             cards={columnCards}
-            columnRegExp={columnRegExp}
             primaryRepoName={repoName}
           />
         );
@@ -192,14 +193,13 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    const {repoInfos, columnRegExp} = getFilters().state;
+    const {repoInfos} = getFilters().getState();
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
 
     return (
       <Board {...this.props}
         repoInfos={repoInfos}
-        columnRegExp={columnRegExp}
         type={KanbanRepo}
         columnDataPromise={Client.getOcto().repos(repoOwner, repoName).labels.fetch()}
       />

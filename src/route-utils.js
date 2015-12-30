@@ -108,13 +108,16 @@ class FilterState {
   url() {
     return buildRoute(null, this.state);
   }
+  getState() {
+    return _.defaults({}, this.state, {columnRegExp: KANBAN_LABEL});
+  }
 }
 
 const DEFAULTS = {
   repoInfos: [],
   milestoneTitles: [],
   tagNames: [],
-  columnRegExp: KANBAN_LABEL
+  columnRegExp: undefined
 };
 
 let FILTER_STATE = new FilterState(DEFAULTS);
@@ -134,8 +137,8 @@ export const LABEL_CACHE = {}; // keys are label names and values are the label 
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
-  const {milestoneTitles, userName, columnRegExp} = getFilters().state;
-  let {tagNames} = getFilters().state; // We might remove UNCATEGORIZED_NAME from the list
+  const {milestoneTitles, userName, columnRegExp} = getFilters().getState();
+  let {tagNames} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
   return cards.filter((card) => {
     const {issue} = card;
     // Add all the labels for lookup later

@@ -80,7 +80,7 @@ const MergedSince = React.createClass({
 const MergedSinceShell = React.createClass({
   render() {
     let {startShas, endShas} = this.props.params;
-    const {repoInfos} = getFilters().state;
+    const {repoInfos} = getFilters().getState();
 
     startShas = startShas.split('|');
     if (endShas) {

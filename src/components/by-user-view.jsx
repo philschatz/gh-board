@@ -102,7 +102,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    const {repoInfos, columnRegExp} = getFilters().state;
+    const {repoInfos, columnRegExp} = getFilters().getState();
 
     const columnDataPromise =
       IssueStore.fetchIssues()

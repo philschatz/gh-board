@@ -173,7 +173,7 @@ let Issue = React.createClass({
       );
     }
     const shouldShowMilestone = (
-      issue.milestone && getFilters().state.milestoneTitles.length !== 1
+      issue.milestone && getFilters().getState().milestoneTitles.length !== 1
     );
     let milestone = null;
     if (shouldShowMilestone) {

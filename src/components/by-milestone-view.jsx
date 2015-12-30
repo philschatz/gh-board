@@ -49,8 +49,8 @@ const KanbanColumn = React.createClass({
     const isShowingColumn = (
          (!milestone && !SettingsStore.getHideUncategorized())
       || (milestone && (
-             getFilters().state.milestoneTitles.length == 0
-          || getFilters().state.milestoneTitles.indexOf(milestone.title) >= 0))
+             getFilters().getState().milestoneTitles.length == 0
+          || getFilters().getState().milestoneTitles.indexOf(milestone.title) >= 0))
     );
 
     if (isShowingColumn) {
@@ -138,7 +138,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded() {
-    const {repoInfos, columnRegExp} = getFilters().state;
+    const {repoInfos, columnRegExp} = getFilters().getState();
     // pull out the primaryRepoName
     const [{repoOwner, repoName}] = repoInfos;
 
