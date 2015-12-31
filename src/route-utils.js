@@ -66,7 +66,17 @@ class FilterState {
   }
   _toggleKey(key, value) {
     let current = this.state[key];
-    const i = current.indexOf(value);
+    let i = current.indexOf(value);
+    // if the string isn't found, try adding/removing the '-' to see if
+    // there is an exclusion string that we can still remove
+    // if (i < 0) {
+    //   if (value[0] === '-') {
+    //     i = current.indexOf(value.substring(1));
+    //   } else {
+    //     i = current.indexOf(`-${value}`);
+    //   }
+    // }
+
     if (i < 0) {
       current = current.concat(value);
     } else {
@@ -134,28 +144,51 @@ export function getFilters() {
 
 export const LABEL_CACHE = {}; // keys are label names and values are the label object (contains color)
 
+
+function isUser(issue, userName) {
+  if (issue.assignee) {
+    if (issue.assignee.login !== userName) { return false; }
+  }
+  if (issue.user.login !== userName) { return false; }
+  return true;
+};
+
+
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
   const {milestoneTitles, userName, columnRegExp} = getFilters().getState();
   let {tagNames} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
+  const includedTagNames = tagNames.filter((tagName) => { return tagName[0] !== '-'; });
+  const excludedTagNames = tagNames.filter((tagName) => { return tagName[0] === '-'; }).map((tagName) => { return tagName.substring(1); });
+
+  const includedMilestoneTitles = milestoneTitles.filter((milestoneTitle) => { return milestoneTitle[0] !== '-'; });
+  const excludedMilestoneTitles = milestoneTitles.filter((milestoneTitle) => { return milestoneTitle[0] === '-'; }).map((milestoneTitle) => { return milestoneTitle.substring(1); });
+
   return cards.filter((card) => {
     const {issue} = card;
-    // Add all the labels for lookup later
+    // Add all the labels for lookup later (like the color)
     issue.labels.forEach((label) => {
       LABEL_CACHE[label.name] = label;
     });
     // issue must match the user if one is selected (either assignee or creator (if none))
     if (userName) {
-      if (issue.assignee) {
-        if (issue.assignee.login !== userName) { return false; }
+      // Support negating the username
+      if (userName[0] === '-') {
+        if (isUser(issue, userName.substring(1))) { return false; }
+      } else {
+        if (!isUser(issue, userName)) { return false; }
       }
-      if (issue.user.login !== userName) { return false; }
     }
     // issue must be in one of the milestones (if milestones are selected)
     if (milestoneTitles.length > 0) {
-      if (!issue.milestone) { return false; } // TODO: Read the settings to see if no milestones are allowed
-      if (milestoneTitles.indexOf(issue.milestone.title) < 0) { return false; }
+      if (includedMilestoneTitles.length > 0) {
+        if (!issue.milestone) { return false; } // TODO: Read the settings to see if no milestones are allowed
+      }
+      if (issue.milestone) {
+        if (includedMilestoneTitles.length > 0 && includedMilestoneTitles.indexOf(issue.milestone.title) < 0) { return false; }
+        if (excludedMilestoneTitles.length > 0 && excludedMilestoneTitles.indexOf(issue.milestone.title) >= 0) { return false; }
+      }
     }
     // If one of the tagNames is UNCATEGORIZED_NAME then do something special
     if (tagNames.indexOf(UNCATEGORIZED_NAME) >= 0) {
@@ -169,7 +202,9 @@ export function filterCardsByFilter(cards) {
     }
     const labelNames = issue.labels.map((label) => { return label.name; });
     // issue must have all the tags (except UNCATEGORIZED_NAME)
-    if (_.difference(_.without(tagNames, UNCATEGORIZED_NAME), labelNames).length > 0) { return false; }
+    // and MUST NOT have any of the excluded tags
+    if (_.difference(_.without(includedTagNames, UNCATEGORIZED_NAME), labelNames).length > 0) { return false; }
+    if (_.intersection(excludedTagNames, labelNames).length > 0) { return false; }
     return true;
   });
 }

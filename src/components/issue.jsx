@@ -173,7 +173,10 @@ let Issue = React.createClass({
       );
     }
     const shouldShowMilestone = (
-      issue.milestone && getFilters().getState().milestoneTitles.length !== 1
+      // issue.milestone && getFilters().getState().milestoneTitles.length !== 1
+      // Make this always show the milestone since they can be excluded so
+      // checking if there is only 1 item in the array is not enough
+      issue.milestone
     );
     let milestone = null;
     if (shouldShowMilestone) {
