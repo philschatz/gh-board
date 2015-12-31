@@ -37,11 +37,11 @@ const routes = [
           { path: 'kanban',
             onEnter: (state, replace) => replace(null, buildRoute('', parseRoute(state)))
           },
-          { path: 'since/:startShas(/:endShas)', onEnter: setFilters, component: MergedSince},
+          { path: 'since/:startShas(/:endShas)', component: MergedSince},
           { path: 'by-milestone', onEnter: setFilters, component: ByMilestoneView },
           { path: 'by-user', onEnter: setFilters, component: ByUserView },
           // Redirect to the gantt URL
-          { path: 'milestone-review', onEnter: setFilters, onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
+          { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
           { path: 'gantt', onEnter: setFilters,
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {
