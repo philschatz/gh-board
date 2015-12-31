@@ -18,6 +18,11 @@
   background-size: 1pc 1pc;
 }
 
+.x-font-and-emoji(@size) {
+  font-size: @size;
+  .emoji { height: @size; }
+}
+
 body { background-color: #f3f3f3; }
 
 .app {
@@ -31,8 +36,10 @@ body { background-color: #f3f3f3; }
   .badge {
     cursor: pointer;
     box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12); // From GH Issues
+    font-size: 1.25rem;
     &.is-light { color: black; }
     &:not(.is-light) { color: white; }
+    .x-font-and-emoji(1.25rem);
   }
   .avatar-image {
     display: inline-block;
@@ -69,7 +76,7 @@ body { background-color: #f3f3f3; }
 
     .milestone-dropdown {
       .milestone-title {
-        .emoji { height: 14px; } // from the item styling
+        .x-font-and-emoji(14px); // from the item styling
       }
 
       .milestone-item {
@@ -211,7 +218,7 @@ body { background-color: #f3f3f3; }
     .column-title {
       padding: 10px 15px;
 
-      .emoji { height: 16px; } // This is what is set on the <h2>
+      .x-font-and-emoji(16px); // This is what is set on the <h2>
 
       &:not(.is-light) { color: white; }
 
@@ -267,7 +274,7 @@ body { background-color: #f3f3f3; }
       padding-top: 1rem;
       background-color: white;
 
-      .emoji { height: 18px; } // This is what is set on the <h4>
+      .x-font-and-emoji(18px); // This is what is set on the <h4>
 
       .related-issues .issue-blurb {
         color: #999;
@@ -325,7 +332,7 @@ body { background-color: #f3f3f3; }
 
       .issue-milestone {
         display: block;
-        .emoji { height: 1.5rem; } // same as font size
+        .x-font-and-emoji(1.5rem); // same as font size
 
         .milestone-title {
           color:inherit; // it's an <a> but don't make it blue
@@ -408,7 +415,7 @@ body { background-color: #f3f3f3; }
     /* Make sure images are scaled to fit in the modal */
     img { max-width: 100%; }
 
-    .emoji { width: 20px; height: 20px; }
+    .x-font-and-emoji(1.5rem);
 
     // only apply padding to the top-most task list
     > .task-list {

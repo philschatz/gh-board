@@ -4,6 +4,7 @@ import React from 'react';
 import {Link} from 'react-router';
 import {getFilters} from '../route-utils';
 import {KANBAN_LABEL, isLight} from '../helpers';
+import GithubFlavoredMarkdown from './gfm';
 
 const LabelBadge = React.createClass({
   propTypes: {
@@ -43,7 +44,12 @@ const LabelBadge = React.createClass({
           {...this.props}
           className={className}
           style={{backgroundColor: '#' + label.color}}>
-          {icon}{name}{extra}
+          {icon}
+          <GithubFlavoredMarkdown
+            inline
+            text={name}
+          />
+          {extra}
         </Link>
       );
     } else {
@@ -53,7 +59,12 @@ const LabelBadge = React.createClass({
           {...this.props}
           className={className}
           style={{backgroundColor: '#' + label.color}}>
-          {icon}{name}{extra}
+          {icon}
+          <GithubFlavoredMarkdown
+            inline
+            text={name}
+          />
+          {extra}
         </BS.Badge>
       );
     }
