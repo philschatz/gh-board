@@ -52,6 +52,8 @@ const routes = [
             }
           }
       ] },
+      // Catch for people blindly replacing "https://github.com/..." with "gh-board/#..."
+      { path: '/:repoOwner/:repoName', onEnter: ({params}, replace) => replace(null, `/r/${params.repoOwner}:${params.repoName}`) }
     ],
   }
 ];
