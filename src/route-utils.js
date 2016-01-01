@@ -7,6 +7,41 @@ export function setRouterHistory(history) {
   ROUTER_HISTORY = history;
 }
 
+
+function toQueryString(options) {
+  if (!options || options === {}) {
+    return '';
+  }
+  let params = [];
+  const ref = options || {};
+  for (const key in ref) {
+    let values = ref[key];
+    if (!Array.isArray(values)) {
+      values = [values];
+    }
+    values.forEach((val) => {
+      params.push(key + "=" + (encodeURIComponent(val)));
+    });
+  }
+  if (params.length > 0) {
+    return `?${params.join('&')}`;
+  } else {
+    return '';
+  }
+};
+
+function addParams(options, key, vals) {
+  const arr = options[key] || [];
+  if (Array.isArray(vals)) {
+    options[key] = arr.concat(vals);
+  } else if (vals) {
+    arr.push(vals);
+    options[key] = arr;
+  } else {
+    // it was null, so ignore it
+  }
+};
+
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
 export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName}={}, ...otherFields) {
@@ -21,24 +56,45 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName
   }
 
   const repoStr = convertRepoInfosToStr(repoInfos);
+
+  const options = {};
+  addParams(options, 'm', milestoneTitles);
+  addParams(options, 'l', tagNames);
+  addParams(options, 'u', userName);
+  if (columnRegExp) {
+    const re = columnRegExp.toString();
+    // Strip off the wrapping `/` marks
+    addParams(options, 'x', re.substring(1, re.length-1));
+  }
+
+
+
   const milestonesStr = milestoneTitles.join('|');
   const tagsStr = tagNames.join('|');
   const parts = [];
   if (repoStr) { parts.push(`/r/${repoStr}`); }
-  if (milestonesStr) { parts.push(`/m/${milestonesStr}`); }
-  if (tagsStr) { parts.push(`/t/${tagsStr}`); }
-  if (userName) { parts.push(`/u/${userName}`); }
-  if (columnRegExp) { parts.push(`/x/${columnRegExp}`); }
+  // if (milestonesStr) { parts.push(`/m/${milestonesStr}`); }
+  // if (tagsStr) { parts.push(`/t/${tagsStr}`); }
+  // if (userName) { parts.push(`/u/${userName}`); }
+  // if (columnRegExp) { parts.push(`/x/${columnRegExp}`); }
 
   if (name) { parts.push(`/${name}`); }
   otherFields.forEach((field) => {
     parts.push(`/${field}`);
   });
-  return encodeURI(parts.join(''));
+  return encodeURI(parts.join('')) + toQueryString(options);
 }
 
-export function parseRoute({params, routes}) {
-  const {repoStr, milestonesStr, tagsStr, userName, columnRegExpStr} = params;
+function parseArray(x) {
+  if (Array.isArray(x)) {
+    return x;
+  } else {
+    return [x];
+  }
+}
+
+export function parseRoute({params, routes, location}) {
+  let {repoStr, milestonesStr, tagsStr, userName, columnRegExpStr} = params;
   // Note: routeSegmentName can be null if it's the index path (the kanban view)
   if (!routes[RELEVANT_PATH_SEGMENT]) { throw new Error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
   const routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
@@ -53,6 +109,12 @@ export function parseRoute({params, routes}) {
   if (milestonesStr) { milestoneTitles = milestonesStr.split('|'); }
   if (tagsStr) { tagNames = tagsStr.split('|'); }
   if (columnRegExpStr) { columnRegExp = new RegExp(columnRegExpStr); }
+
+  const {query} = location;
+  if (query.m) { milestoneTitles = parseArray(query.m); }
+  if (query.l) { tagNames = parseArray(query.l); }
+  if (query.u) { userName = query.u; }
+  if (query.x) { columnRegExp = new RegExp(query.x); }
 
   return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName};
 }

@@ -3,7 +3,7 @@ import {History} from 'react-router';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 
-import {setRouterHistory} from '../../route-utils';
+import {setRouterHistory, setFilters} from '../../route-utils';
 import SettingsStore from '../../settings-store';
 import history from '../../history';
 
@@ -20,6 +20,10 @@ const App = React.createClass({
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
     setRouterHistory(this.history);
+    setFilters(this.props);
+  },
+  componentWillUpdate(newProps) {
+    setFilters(newProps);
   },
   componentWillUnmount() {
     this._historyListener();
