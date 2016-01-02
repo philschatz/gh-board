@@ -309,7 +309,6 @@ Issue = DragSource(ItemTypes.CARD, issueSource, collect)(Issue);
 const IssueShell = React.createClass({
   render() {
     const {card} = this.props;
-    const {repoOwner, repoName, number} = card;
     if (card.isLoaded()) {
       return (
         <Issue key={card.key()} {...this.props}/>

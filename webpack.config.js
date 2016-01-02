@@ -6,6 +6,7 @@ var isBuild = process.env['NODE_ENV'] === 'production';
 
 var config = {
     // devtool: '#eval-source-map',
+    devtool: 'source-map',
     context: path.resolve(__dirname),
     entry: [
       // The following is added when `isBuild = falsy`
@@ -56,7 +57,6 @@ if (isBuild) {
 } else {
   config.debug = true;
   config.output.publicPath = '/dist/'; // Dev server needs this to not have a dot.
-  config.devtool = 'inline-source-map';
   // config.entry.unshift('webpack/hot/only-dev-server');
   config.entry.unshift('webpack-dev-server/client?http://0.0.0.0:8080');
   config.devServer.hotComponents = true;
