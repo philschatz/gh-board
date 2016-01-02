@@ -258,6 +258,15 @@ export function filterCardsByFilter(cards) {
       });
       if (!isUnlabeled) { return false; }
     }
+    if (tagNames.indexOf(`-${UNCATEGORIZED_NAME}`) >= 0) {
+      let isUnlabeled = true;
+      issue.labels.forEach((label) => {
+        if (columnRegExp.test(label.name)) {
+          isUnlabeled = false;
+        }
+      });
+      if (isUnlabeled) { return false; }
+    }
     const labelNames = issue.labels.map((label) => { return label.name; });
     // issue must have all the tags (except UNCATEGORIZED_NAME)
     // and MUST NOT have any of the excluded tags
