@@ -24,9 +24,9 @@ const filterReferencedCards = (cards, isFilteringPullRequests) => {
       // loop through all the related PR's. If one matches, remove this issue
       let related = [];
       if (isFilteringPullRequests &&  card.isPullRequest()) {
-        related = card.getRelated().filter(({vertex}) => { return !vertex.isPullRequest()});
+        related = card.getRelated().filter(({vertex}) => { return !vertex.isPullRequest(); });
       } else if (!isFilteringPullRequests && !card.isPullRequest()) {
-        related = card.getRelated().filter(({vertex}) => { return vertex.isPullRequest()});
+        related = card.getRelated().filter(({vertex}) => { return vertex.isPullRequest(); });
       }
       const hasVisiblePullRequest = _.filter(related, ({vertex: otherCard}) => {
         if (allPossiblyRelatedCards[otherCard.key()]) {

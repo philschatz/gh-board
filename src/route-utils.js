@@ -20,7 +20,7 @@ function toQueryString(options) {
       values = [values];
     }
     values.forEach((val) => {
-      params.push(key + "=" + (encodeURIComponent(val)));
+      params.push(`${key}=${encodeURIComponent(val)}`);
     });
   }
   if (params.length > 0) {
@@ -69,14 +69,8 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName
 
 
 
-  const milestonesStr = milestoneTitles.join('|');
-  const tagsStr = tagNames.join('|');
   const parts = [];
   if (repoStr) { parts.push(`/r/${repoStr}`); }
-  // if (milestonesStr) { parts.push(`/m/${milestonesStr}`); }
-  // if (tagsStr) { parts.push(`/t/${tagsStr}`); }
-  // if (userName) { parts.push(`/u/${userName}`); }
-  // if (columnRegExp) { parts.push(`/x/${columnRegExp}`); }
 
   if (name) { parts.push(`/${name}`); }
   otherFields.forEach((field) => {
@@ -105,6 +99,8 @@ export function parseRoute({params, routes, location}) {
   let milestoneTitles = [];
   let tagNames = [];
   let columnRegExp;
+
+  // TODO: remove these fallbacks once URL's are updated.
   if (repoStr) { repoInfos = getReposFromStr(repoStr); }
   if (milestonesStr) { milestoneTitles = milestonesStr.split('|'); }
   if (tagsStr) { tagNames = tagsStr.split('|'); }
