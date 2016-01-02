@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'underscore';
 
 import {getFilters} from '../route-utils';
@@ -42,8 +43,17 @@ const filterByMilestoneAndKanbanColumn = (cards) => {
 
 const GanttChart = React.createClass({
   componentDidMount() {
+    this.renderChart();
+  },
+  componentDidUpdate() {
+    this.renderChart();
+  },
+  renderChart() {
     const {milestones, data, columns} = this.props;
+    const {ganttWrapper} = this.refs;
     const now = new Date();
+
+    ReactDOM.findDOMNode(ganttWrapper).innerHTML = '';
 
     const tasks = milestones.map((milestone) => {
       const {createdAt, dueOn, title, state, closedIssues, openIssues} = milestone;
@@ -56,16 +66,21 @@ const GanttChart = React.createClass({
       }
       const segments = [];
       if (closedIssues) {
-        segments.push({count: closedIssues, color: '#333', title: 'Closed Issues'});
+        segments.push({count: closedIssues, color: '666666', title: 'Closed Issues'});
       }
+      let accountedForCount = 0;
       _.each(columns, ({name, color}) => {
         if (data[milestone.title]) {
           const count = data[milestone.title][name] || 0;
           if (count) {
+            accountedForCount += count;
             segments.push({count, color, title:name});
           }
         }
       });
+      if (accountedForCount !== openIssues) {
+        segments.push({count: openIssues - accountedForCount, color: 'ffffff', title: 'Other Open Issues'});
+      }
       return {
         startDate: createdAt,
         endDate: dueAt || now,
@@ -148,7 +163,7 @@ const GanttChart = React.createClass({
         <div ref='ganttWrapper' id='the-gantt-chart'/>
         <h3>Legend</h3>
         <p>Blue vertical line is Today</p>
-        <LabelBadge key='completed' label={{name:'0 - Completed', color: '333'}}/>
+        <LabelBadge key='completed' label={{name:'0 - Closed', color: '666666'}}/>
         {legend}
         <br/>{/* Add breaks to increase padding because I'm lazy and don't want to add CSS margins */}
         <br/>
