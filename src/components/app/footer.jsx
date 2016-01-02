@@ -8,6 +8,7 @@ import Time from '../time';
 
 import GameModal from '../game-modal';
 
+import SavedFiltersButton from './saved-filters';
 
 const KarmaWarning = React.createClass({
   getInitialState() {
@@ -90,6 +91,7 @@ const KarmaWarning = React.createClass({
         <BS.Nav pullRight>
           <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><i className='octicon octicon-gift' title='Oooh, a present!'/></BS.NavItem>
           <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
+          <SavedFiltersButton/>
         </BS.Nav>
         <GameModal show={isGameOpen} onHide={this.onHideGameModal}/>
       </BS.Navbar>
