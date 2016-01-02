@@ -93,9 +93,10 @@ export function parseRoute({params, routes, location}) {
   if (!routes[RELEVANT_PATH_SEGMENT]) { console.error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
   let routeSegmentName;
   if (routes[RELEVANT_PATH_SEGMENT]) {
-    routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
     if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
-      throw new Error('BUG! the path segment should be simple so we can create links with it');
+      console.error('BUG! the path segment should be simple so we can create links with it');
+    } else {
+      routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
     }
   }
   let repoInfos = [];
