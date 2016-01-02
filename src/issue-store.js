@@ -76,15 +76,18 @@ function _buildBipartiteGraph(graph, cards) {
   _.each(cards, (card) => {
     const cardPath = GRAPH_CACHE.cardToKey(card);
     const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
-    if (card.issue.pullRequest) {
+    // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
+    // TODO: Refactor to simplify this datastructure
+    //if (card.issue.pullRequest) {
       // card is a Pull Request
       _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
         const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
-        if (allIssues[otherCardPath]) {
-          GRAPH_CACHE.addEdge(otherCardPath, cardPath, allIssues[otherCardPath], card, fixes);
+        const otherCard = allIssues[otherCardPath] || allPullRequests[otherCardPath];
+        if (otherCard) {
+          GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
         }
       });
-    }
+    //}
   });
 }
 

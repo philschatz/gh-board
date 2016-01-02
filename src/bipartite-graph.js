@@ -3,7 +3,9 @@ import _ from 'underscore';
 class BipartiteGraph {
   constructor() {
     this.edgesA = {};
-    this.edgesB = {};
+    // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
+    // TODO: Refactor to simplify this datastructure
+    this.edgesB = this.edgesA; // = {};
   }
   cardToKey(card) {
     return card.repoOwner + '/' + card.repoName + '#' + card.issue.number;
