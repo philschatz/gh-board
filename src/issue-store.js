@@ -7,11 +7,20 @@ import {getFilters, filterCardsByFilter} from './route-utils';
 import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 
-const RELOAD_TIME = 30 * 1000;
+const RELOAD_TIME_SHORT = 30 * 1000;
+const RELOAD_TIME_LONG = 5 * 60 * 1000;
 
 const toIssueKey = (repoOwner, repoName, number) => {
   return `${repoOwner}/${repoName}#${number}`;
 };
+
+function getReloadTime() {
+  if (document.hidden) {
+    return RELOAD_TIME_LONG;
+  } else {
+    return RELOAD_TIME_SHORT;
+  }
+}
 
 let GRAPH_CACHE = new BipartiteGraph();
 let CARD_CACHE = {};
@@ -99,6 +108,17 @@ const initialTimestamp = new Date();
 let isPollingEnabled = false;
 
 class IssueStore extends EventEmitter {
+  constructor() {
+    super();
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        clearTimeout(this.polling);
+        if (isPollingEnabled) {
+          this._fetchAllIssues(); // start Polling again
+        }
+      }
+    });
+  }
   off() { // EventEmitter has `.on` but no matching `.off`
     const slice = [].slice;
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
@@ -141,7 +161,7 @@ class IssueStore extends EventEmitter {
       this.polling = setTimeout(() => {
         this.polling = null;
         this._fetchAllIssues(repoInfos, true /*isForced*/);
-      }, RELOAD_TIME);
+      }, getReloadTime());
     }
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);

@@ -58,7 +58,8 @@ export default class Card {
   }
   getRelated() {
     const key = this._graph.cardToKey(this);
-    return this._graph.getB(key).concat(this._graph.getA(key));
+    // return this._graph.getB(key).concat(this._graph.getA(key));
+    return this._graph.getB(key);
   }
   getRelatedIssues() {
     return this._graph.getB(this._graph.cardToKey(this));
