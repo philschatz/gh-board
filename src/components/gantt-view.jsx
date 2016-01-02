@@ -151,19 +151,23 @@ const GanttChart = React.createClass({
 
   },
   render() {
-    const {columns, columnCounts} = this.props;
+    const {columns, columnCounts, milestones} = this.props;
 
     const legend = columns.map((label) => {
       return (
         <LabelBadge key={label.name} label={label} extra={columnCounts[label.name]}/>
       );
     });
+    let closedCount = 0;
+    milestones.forEach((milestone) => {
+      closedCount += milestone.closedIssues;
+    });
     return (
       <div className='-gantt-chart-and-legend'>
         <div ref='ganttWrapper' id='the-gantt-chart'/>
         <h3>Legend</h3>
         <p>Blue vertical line is Today</p>
-        <LabelBadge key='completed' label={{name:'0 - Closed', color: '666666'}}/>
+        <LabelBadge key='completed' label={{name:'0 - Closed', color: '666666'}} extra={closedCount}/>
         {legend}
         <br/>{/* Add breaks to increase padding because I'm lazy and don't want to add CSS margins */}
         <br/>
