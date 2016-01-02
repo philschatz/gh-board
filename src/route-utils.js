@@ -90,10 +90,13 @@ function parseArray(x) {
 export function parseRoute({params, routes, location}) {
   let {repoStr, milestonesStr, tagsStr, userName, columnRegExpStr} = params;
   // Note: routeSegmentName can be null if it's the index path (the kanban view)
-  if (!routes[RELEVANT_PATH_SEGMENT]) { throw new Error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
-  const routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
-  if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
-    throw new Error('BUG! the path segment should be simple so we can create links with it');
+  if (!routes[RELEVANT_PATH_SEGMENT]) { console.error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
+  let routeSegmentName;
+  if (routes[RELEVANT_PATH_SEGMENT]) {
+    routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
+    if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
+      throw new Error('BUG! the path segment should be simple so we can create links with it');
+    }
   }
   let repoInfos = [];
   let milestoneTitles = [];
