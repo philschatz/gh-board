@@ -23,7 +23,7 @@ const KanbanColumn = React.createClass({
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
-          key={card.issue.id}
+          key={card.key()}
           primaryRepoName={primaryRepoName}
           card={card}
           columnRegExp={columnRegExp}

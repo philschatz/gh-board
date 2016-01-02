@@ -130,7 +130,7 @@ let Issue = React.createClass({
     });
     const labels = _.map(nonKanbanLabels, (label) => {
       const tooltip = (
-        <BS.Tooltip id={`tooltip-${issue.id}-${label.name}`}>{label.name}. Click to filter</BS.Tooltip>
+        <BS.Tooltip id={`tooltip-${card.key()}-${label.name}`}>{label.name}. Click to filter</BS.Tooltip>
       );
       return (
         <BS.OverlayTrigger
@@ -146,8 +146,8 @@ let Issue = React.createClass({
     if (taskTotalCount) {
       const taskListPopover = (
         <BS.Popover
-          key={`popover-${issue.id}-task-list`}
-          id={`popover-${issue.id}-task-list`}
+          key={`popover-${card.key()}-task-list`}
+          id={`popover-${card.key()}-task-list`}
           className='task-list-details'
           title='Task List'>
           <GithubFlavoredMarkdown
@@ -185,7 +185,7 @@ let Issue = React.createClass({
       const totalCount = openCount + closedCount;
       const milestonePopover = (
         <BS.Popover
-          id={`popover-${issue.id}-milestone`}
+          id={`popover-${card.key()}-milestone`}
           className='milestone-details'
           title='Milestone Details'>
           <h4>
@@ -275,7 +275,7 @@ let Issue = React.createClass({
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
-          key={card.repoOwner + card.repoName + issue.id}
+          key={card.key()}
           data-status-state={card.isPullRequest() ? card.getPullRequestStatus() : null}
           header={header}
           onDragStart={this.onDragStart}
@@ -320,7 +320,7 @@ const IssueShell = React.createClass({
           key={card.key()}
           promise={card.load()}
           loadingText={card.key()}
-          renderLoaded={() => <Issue key={repoOwner + repoName + number} {...this.props} />}
+          renderLoaded={() => <Issue key={card.key()} {...this.props} />}
         />
       );
     }
