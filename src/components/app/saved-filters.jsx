@@ -60,7 +60,7 @@ const SavedFiltersButton = React.createClass({
     );
     return (
       <li className='-saved-filters'>
-        <BS.SplitButton title={addFilter}>
+        <BS.SplitButton id='saved-filters' title={addFilter}>
           <BS.MenuItem header>Apply Saved Filter</BS.MenuItem>
           {filters}
         </BS.SplitButton>
