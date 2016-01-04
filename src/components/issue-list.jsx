@@ -2,7 +2,10 @@ import React from 'react';
 import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 
+import SettingsStore from '../settings-store';
 import {isLight} from '../helpers';
+
+const MIN_CHILDREN_TO_SHOW = 10;
 
 const ItemTypes = {
   CARD: 'card'
@@ -25,10 +28,18 @@ function collect(connect, monitor) {
 
 const IssueList = React.createClass({
   displayName: 'IssueList',
+  getInitialState() {
+    // Initially, expand all issues only if tableLayout is true
+    return {showAllIssues: SettingsStore.getTableLayout()};
+  },
+  showAllIssues() {
+    this.setState({showAllIssues: true});
+  },
   render() {
     const {title, backgroundColor, children} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
+    const {showAllIssues} = this.state;
 
     let headerStyle;
     let className = 'column-title';
@@ -52,12 +63,26 @@ const IssueList = React.createClass({
       'is-over': isOver
     };
 
+    let filteredChildren;
+    let showAllButton;
+    if (children.length > MIN_CHILDREN_TO_SHOW + 1 && !showAllIssues) {
+      filteredChildren = children.slice(0, MIN_CHILDREN_TO_SHOW);
+      showAllButton = (
+        <BS.Button onClick={this.showAllIssues} className='list-group-item'>
+          Show {children.length - MIN_CHILDREN_TO_SHOW} more...
+        </BS.Button>
+      );
+    } else {
+      filteredChildren = children;
+    }
+
     return connectDropTarget(
       <div className='-drop-target'>
         <BS.Panel className={classes} header={header}>
           <BS.ListGroup fill>
             <BS.ListGroupItem key='dnd-placeholder' className='dnd-placeholder'/>
-            {children}
+            {filteredChildren}
+            {showAllButton}
           </BS.ListGroup>
         </BS.Panel>
       </div>
