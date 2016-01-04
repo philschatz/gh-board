@@ -4,7 +4,7 @@ import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
-import {UNCATEGORIZED_NAME} from '../helpers';
+import {UNCATEGORIZED_NAME, fetchAll, FETCHALL_MAX} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards} from '../issue-store';
 import SettingsStore from '../settings-store';
@@ -201,7 +201,7 @@ const RepoKanbanShell = React.createClass({
       <Board {...this.props}
         repoInfos={repoInfos}
         type={KanbanRepo}
-        columnDataPromise={Client.getOcto().repos(repoOwner, repoName).labels.fetch()}
+        columnDataPromise={fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoName).labels.fetch)}
       />
     );
   },
