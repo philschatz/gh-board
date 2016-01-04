@@ -230,7 +230,8 @@ let Issue = React.createClass({
 
 
     const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
-    const isUpdated = lastViewed < updatedAt;
+    // stop highlighting after 30min
+    const isUpdated = lastViewed < updatedAt && (Date.now() - updatedAt.getTime() < 30 * 60 * 1000);
 
     // TODO: Combine relatedIssues and relatedPullRequests
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
