@@ -113,6 +113,7 @@ class IssueStore extends EventEmitter {
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
         clearTimeout(this.polling);
+        delete this.polling;
         if (isPollingEnabled) {
           this._fetchAllIssues(); // start Polling again
         }
