@@ -13,10 +13,10 @@ const IssueOrPullRequestBlurb = React.createClass({
     evt.stopPropagation();
     IssueStore.setLastViewed(repoOwner, repoName, issue.number);
   },
-  onClickIcon(evt) {
-    evt.stopPropagation();
-    evt.preventDefault(); // because it could be in a label for a checkbox
-  },
+  // onClickIcon(evt) {
+  //   evt.stopPropagation();
+  //   evt.preventDefault(); // because it could be in a label for a checkbox
+  // },
   render() {
     const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
@@ -60,24 +60,31 @@ const IssueOrPullRequestBlurb = React.createClass({
       );
     }
 
+    const classes = {
+      'issue-blurb': true,
+      'is-pull-request': isPullRequest
+    };
+
     return (
-      <span className='issue-blurb'>
-        {blurbContext}
-        <BS.OverlayTrigger
-          rootClose
-          trigger={['click', 'focus']}
-          placement='bottom'
-          overlay={bodyPopover}>
-          {icon}
-        </BS.OverlayTrigger>
+      <span className={classnames(classes)}>
         <a className='blurb-number-link'
           target='_blank'
           href={issue.htmlUrl}
           onClick={this.onClickNumber}
           >
-          <span className='blurb-secondary-repo'>{multipleRepoName}</span>
-          <span className='blurb-number'>{'#' + issue.number}</span>
+          <span className='blurb-number'>{issue.number}</span>
         </a>
+        <BS.OverlayTrigger
+          rootClose
+          trigger={['click', 'focus']}
+          placement='bottom'
+          overlay={bodyPopover}>
+          <span className='-just-for-overlay-trigger'>
+            {icon}
+            <span className='blurb-secondary-repo'>{multipleRepoName}</span>
+            {blurbContext}
+          </span>
+        </BS.OverlayTrigger>
       </span>
     );
   }
