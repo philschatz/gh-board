@@ -43,7 +43,7 @@ export function isLight(hexColor) {
   //    color.g * color.g * .587 +
   //    color.b * color.b * .114) >= 130;
   return Math.sqrt(
-     color.r * color.r * .199 +
+     color.r * color.r * .099 +
      color.g * color.g * .587 +
      color.b * color.b * .114) >= 130;
 }
