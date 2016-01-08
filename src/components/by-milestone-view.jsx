@@ -55,7 +55,7 @@ const KanbanColumn = React.createClass({
 
     if (isShowingColumn) {
       return (
-        <BS.Col key={milestone && milestone.title || 'no-milestone'} md={4} className='kanban-board-column'>
+        <BS.Col key={milestone && milestone.title || 'no-milestone'} md={3} className='kanban-board-column'>
           <IssueList
             title={heading}
             milestone={milestone}

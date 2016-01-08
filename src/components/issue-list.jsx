@@ -36,23 +36,34 @@ const IssueList = React.createClass({
     this.setState({showAllIssues: true});
   },
   render() {
-    const {title, backgroundColor, children} = this.props;
+    const {icon, title, backgroundColor, children} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
     const {showAllIssues} = this.state;
 
-    let headerStyle;
     let className = 'column-title';
+    if (icon) {
+      className += ' has-icon';
+    }
+    let headerStyle;
+    let iconIsLight = 'column-icon';
     if (backgroundColor) {
       headerStyle = {backgroundColor: '#' + backgroundColor};
       if (isLight(backgroundColor)) {
-        className += ' ' + 'is-light';
+        iconIsLight += ' is-light';
       }
     } else {
-      className += ' ' + 'is-light';
+      iconIsLight += ' is-light';
+    }
+    let iconEl;
+    if (icon) {
+      iconEl = (
+        <span className={iconIsLight} style={headerStyle}>{icon}</span>
+      );
     }
     const header = (
-      <h2 className={className} style={headerStyle}>
+      <h2 className={className}>
+        {iconEl}
         {title}
         {' (' + children.length + ')'}
       </h2>

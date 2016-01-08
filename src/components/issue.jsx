@@ -158,6 +158,11 @@ let Issue = React.createClass({
         </BS.Popover>
       );
 
+      const taskCountsClasses = {
+        'task-list-overview': true,
+        'pull-right': true,
+        'is-done': taskFinishedCount === taskTotalCount,
+      };
       taskCounts = (
         <BS.OverlayTrigger
           key='task-list'
@@ -165,7 +170,7 @@ let Issue = React.createClass({
           trigger={['click', 'focus']}
           placement='bottom'
           overlay={taskListPopover}>
-          <span className='task-list-overview'>
+          <span className={classnames(taskCountsClasses)}>
             <i className='octicon octicon-check'/>
             {`${taskFinishedCount}/${taskTotalCount}`}
           </span>
@@ -208,7 +213,7 @@ let Issue = React.createClass({
         </BS.Popover>
       );
       milestone = (
-        <span className='issue-milestone'>
+        <span className='issue-milestone badge'>
           <BS.OverlayTrigger
             rootClose
             trigger={['click', 'focus']}
@@ -235,36 +240,22 @@ let Issue = React.createClass({
 
     // TODO: Combine relatedIssues and relatedPullRequests
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
-      const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
+      const context = edgeValue;
       return (
         <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
             card={issueCard}
             primaryRepoName={primaryRepoName}
-            context={context || 'related to'}/>
+            context={context || 'related'}/>
         </div>
       );
     });
 
     const header = [
-      <div key='labels' className='issue-labels'>
-        {labels}
-      </div>,
-      <div key='related' className='related-issues'>
-        {relatedCards}
-      </div>,
-      <a
-        key='link'
-        target='_blank'
-        href={issue.html.url}
-        onClick={this.onClickNumber}>
-        <GithubFlavoredMarkdown
-          inline
-          disableLinks={true}
-          repoOwner={repoOwner}
-          repoName={repoName}
-          text={issue.title}/>
-      </a>
+      <IssueOrPullRequestBlurb key='issue-blurb'
+        card={card}
+        primaryRepoName={primaryRepoName} />,
+      taskCounts
     ];
     const classes = {
       'issue': true,
@@ -283,17 +274,34 @@ let Issue = React.createClass({
           className={classnames(classes)}
           data-state={issue.state}>
 
-          <span key='right-footer' className='pull-right'>
-            <Time key='time' className='updated-at' dateTime={updatedAt}/>
-            {assignedAvatar}
-          </span>
-          <IssueOrPullRequestBlurb
-            card={card}
-            primaryRepoName={primaryRepoName} />
-          {taskCounts}
-          {milestone}
+          <a
+            key='link'
+            className='issue-title'
+            target='_blank'
+            href={issue.html.url}
+            onClick={this.onClickNumber}>
+            <GithubFlavoredMarkdown
+              inline
+              disableLinks={true}
+              repoOwner={repoOwner}
+              repoName={repoName}
+              text={issue.title}/>
+          </a>
 
+          <span key='labels' className='issue-labels'>
+            {milestone}
+            {labels}
+          </span>
+          <span className='issue-footer'>
+            <span key='right-footer' className='issue-time-and-user'>
+              <Time key='time' className='updated-at' dateTime={updatedAt}/>
+              {assignedAvatar}
+            </span>
+          </span>
         </BS.ListGroupItem>
+        <div key='related' className='related-issues'>
+          {relatedCards}
+        </div>
       </div>
     );
   }
