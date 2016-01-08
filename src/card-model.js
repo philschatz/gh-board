@@ -47,13 +47,13 @@ export default class Card {
   }
   getPullRequestStatus() {
     if (!this._prStatuses) {
-      return null;
+      return {};
     }
     // TODO: check when there are multiple statuses
     if (this._prStatuses.length) {
-      return this._prStatuses[0].state;
+      return this._prStatuses[0];
     } else {
-      return null;
+      return {};
     }
   }
   getRelated() {

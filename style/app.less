@@ -358,7 +358,7 @@ body { background-color: #ddd; }
       // background-color: white;
       padding-left: 1rem;
       padding-right: 1rem;
-      padding-bottom: 1.5rem;
+      padding-bottom: 1rem;
 
       font-size: 2rem;
 
@@ -439,6 +439,17 @@ body { background-color: #ddd; }
         display: block;
         min-height: 2rem;
 
+        // a.issue-status:hover { text-decoration: none; }
+        .issue-status {
+          font-size: 1rem;
+
+          &[data-status-state='success'] { color: #6cdf44; }
+          &[data-status-state='pending'] { color: #fb0; }
+          &[data-status-state='error'],
+          &[data-status-state='failure'] { color: #d00; font-weight: bold; }
+
+          .status-icon { }
+        }
 
         .issue-time-and-user {
           display: block;
@@ -466,6 +477,12 @@ body { background-color: #ddd; }
 
     // Elements that can occur anywhere in an issue
 
+    /* When a Pull Request is not mergeable then make the background a light gray with slashes */
+    /* Default merge conflict color when no CI status */
+    &.is-pull-request {
+      // &:not(.is-mergeable) .list-group-item-heading .issue-blurb .blurb-icon { .x-stripes(#ccc; .8); }
+      &:not(.is-mergeable) { .x-stripes(#fcfcfc; .9); }
+    }
 
     /* Color the blurb icon to be gray if there is an issue */
     // &.is-pull-request {

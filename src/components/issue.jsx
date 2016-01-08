@@ -264,6 +264,39 @@ let Issue = React.createClass({
       'is-pull-request': card.isPullRequest(),
       'is-mergeable': card.isPullRequest() && card.isPullRequestMergeable()
     };
+    let statusBlurb;
+    if (card.isPullRequest()) {
+      const statusClasses = {
+        'issue-status': true,
+        'is-mergeable': card.isPullRequestMergeable()
+      };
+      const status = card.getPullRequestStatus();
+      let statusIcon;
+      let statusText;
+      // pending, success, error, or failure
+      switch (status.state) {
+        case 'pending':
+          statusIcon = (<i className='status-icon octicon octicon-primitive-dot'/>);
+          statusText = 'Testing...';
+          break;
+        case 'error':
+        case 'failure':
+          statusIcon = (<i className='status-icon octicon octicon-x'/>);
+          statusText = 'Tests Failed';
+          break;
+        default:
+
+      }
+      if (statusIcon || statusText) {
+        if (status.targetUrl) {
+          statusBlurb = (<a target='_blank' className={classnames(statusClasses)} data-status-state={status.state} href={status.targetUrl} title={status.description}>{statusIcon}{' '}{statusText}</a>);
+        } else {
+          statusBlurb = (<span className={classnames(statusClasses)} data-status-state={status.state} title={status.description}>{statusIcon}{' '}{statusText}</span>);
+        }
+
+      }
+
+    }
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
@@ -293,6 +326,7 @@ let Issue = React.createClass({
             {labels}
           </span>
           <span className='issue-footer'>
+            {statusBlurb}
             <span key='right-footer' className='issue-time-and-user'>
               <Time key='time' className='updated-at' dateTime={updatedAt}/>
               {assignedAvatar}
