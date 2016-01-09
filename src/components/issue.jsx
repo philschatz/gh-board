@@ -8,7 +8,7 @@ import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
+import {getTaskCounts, getIssueDueAt, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 import Time from './time';
@@ -102,7 +102,9 @@ let Issue = React.createClass({
   render() {
     const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
+    // TODO: Maybe the following 2 should be methods on the card
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
+    const issueDueAt = getIssueDueAt(issue.body);
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -171,7 +173,7 @@ let Issue = React.createClass({
           placement='bottom'
           overlay={taskListPopover}>
           <span className={classnames(taskCountsClasses)}>
-            <i className='octicon octicon-check'/>
+            <i className='octicon octicon-checklist'/>
             {`${taskFinishedCount}/${taskTotalCount}`}
           </span>
         </BS.OverlayTrigger>
@@ -295,8 +297,24 @@ let Issue = React.createClass({
         }
 
       }
-
     }
+
+    let dueAt;
+    if (issueDueAt) {
+      const dueAtClasses = {
+        'issue-due-at': true,
+        'is-overdue': issueDueAt < Date.now(),
+        'is-near': issueDueAt > Date.now() && issueDueAt - Date.now() < 7 * 24 * 60 * 60 * 1000 // set it to be 1 week
+      }
+      dueAt = (
+        <span className={classnames(dueAtClasses)}>
+          <i className='octicon octicon-calendar'/>
+          {' due '}
+          <Time dateTime={issueDueAt}/>
+        </span>
+      );
+    }
+
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
@@ -327,6 +345,7 @@ let Issue = React.createClass({
           </span>
           <span className='issue-footer'>
             {statusBlurb}
+            {dueAt}
             <span key='right-footer' className='issue-time-and-user'>
               <Time key='time' className='updated-at' dateTime={updatedAt}/>
               {assignedAvatar}
