@@ -35,6 +35,24 @@ export function getTaskCounts(text) {
   return {taskFinishedCount, taskTotalCount};
 }
 
+export function getIssueDueAt(text) {
+  // TODO: Maybe parse using the local timezone
+  const div = getElement(text);
+  const el = div.querySelector('date.due');
+  if (el) {
+    // either use the datetime attribute, or the text
+    const attr = el.getAttribute('datetime');
+    if (attr) {
+      return Date.parse(attr); // TODO: Parse the date and make sure it is valid
+    } else if (el.textContent){
+      return Date.parse(el.textContent);
+    } else {
+      console.error('Invalid due date format')
+    }
+  }
+  return null;
+}
+
 // From https://help.github.com/articles/closing-issues-via-commit-messages/
 export const PULL_REQUEST_ISSUE_RELATION = {
   'close': 'closed by',

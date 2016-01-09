@@ -451,6 +451,14 @@ body { background-color: #ddd; }
           .status-icon { }
         }
 
+        .issue-due-at {
+          &.is-overdue { color: #d00; font-weight: bold; }
+          &.is-near { color: #fb0; }
+          &:not(.is-near):not(.is-overdue) { color: #ccc; }
+
+          font-size: 1rem;
+        }
+
         .issue-time-and-user {
           display: block;
           float: right;
