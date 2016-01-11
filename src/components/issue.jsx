@@ -248,7 +248,8 @@ let Issue = React.createClass({
           <IssueOrPullRequestBlurb
             card={issueCard}
             primaryRepoName={primaryRepoName}
-            context={context || 'related'}/>
+            context={context}/>
+          <span className='related-issue-title'>{issueCard.issue.title}</span>
         </div>
       );
     });
