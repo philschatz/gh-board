@@ -102,7 +102,6 @@ function _buildBipartiteGraph(graph, cards) {
 
 let cacheCardsRepoInfos = null;
 let cacheCards = null;
-let cacheLastViewed = {};
 const initialTimestamp = new Date();
 
 let isPollingEnabled = false;
@@ -216,8 +215,6 @@ class IssueStore extends EventEmitter {
     return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({labels: labelNames})
     .then(() => {
 
-      this.setLastViewed(repoOwner, repoName, issue.number);
-
       // invalidate the issues list
       cacheCards = null;
       this.emit('change');
@@ -236,8 +233,6 @@ class IssueStore extends EventEmitter {
       return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({milestone: matchingMilestone.number})
       .then(() => {
 
-        this.setLastViewed(repoOwner, repoName, issue.number);
-
         // invalidate the issues list
         cacheCards = null;
         this.emit('change');
@@ -248,20 +243,6 @@ class IssueStore extends EventEmitter {
   }
   createLabel(repoOwner, repoName, opts) {
     return Client.getOcto().repos(repoOwner, repoName).labels.create(opts);
-  }
-  setLastViewed(repoOwner, repoName, issueNumber) {
-    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
-    let now = new Date();
-    now = new Date(now.getTime() + 5 * 1000); // Add 5 sec just in case
-    const isNew = !cacheLastViewed[issueKey] || (now.getTime() - cacheLastViewed[issueKey].getTime() > 10000);
-    cacheLastViewed[issueKey] = now;
-    if (isNew) {
-      this.emit('change:' + issueKey);
-    }
-  }
-  getLastViewed(repoOwner, repoName, issueNumber) {
-    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
-    return cacheLastViewed[issueKey] || initialTimestamp;
   }
 }
 

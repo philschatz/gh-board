@@ -308,9 +308,7 @@ body { background-color: #ddd; }
     &[data-state='closed'] { opacity: 0.5; }
 
     // When remotely updated since you last looked, mark the issue as yellow
-    &.is-updated,
-    &.is-updated .list-group-item-heading,
-    &.is-updated .list-group-item-text { background-color: #ffc; }
+    &.is-updated { background-color: #ffc; }
 
 
     // The little `[4/5]` section
@@ -489,7 +487,8 @@ body { background-color: #ddd; }
     /* Default merge conflict color when no CI status */
     &.is-pull-request {
       // &:not(.is-mergeable) .list-group-item-heading .issue-blurb .blurb-icon { .x-stripes(#ccc; .8); }
-      &:not(.is-mergeable) { .x-stripes(#fcfcfc; .9); }
+      &:not(.is-mergeable):not(.is-updated) { .x-stripes(#fcfcfc; .9); }
+      &:not(.is-mergeable).is-updated       { .x-stripes(#ffc; .9); }
     }
 
     /* Color the blurb icon to be gray if there is an issue */
