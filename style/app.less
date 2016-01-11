@@ -318,7 +318,7 @@ body { background-color: #ddd; }
       cursor: pointer;
       font-size: 1.2rem;
       &.is-done { color: #0c0; }
-      &:not(.is-done) { color: #eee; }
+      &:not(.is-done) { color: #ccc; }
     }
 
     .list-group-item-heading {
@@ -536,6 +536,14 @@ body { background-color: #ddd; }
 
     box-shadow: inset 0 2px 7px -5px #333;
 
+    .related-issue {
+
+      overflow: hidden;
+      white-space: nowrap;
+      // max-width: 100%;
+      text-overflow: ellipsis;
+    }
+
   }
 
 }
@@ -587,6 +595,7 @@ body { background-color: #ddd; }
   .blurb-context,
   .blurb-icon { margin-left: .5rem; }
   .blurb-icon { cursor: pointer; }
+  .blurb-context { margin-right: .5rem; }
   .blurb-number-link {
     // color: #66f;
     &:hover { text-decoration: none; }
