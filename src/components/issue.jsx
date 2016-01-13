@@ -230,7 +230,7 @@ let Issue = React.createClass({
 
 
     // stop highlighting after 5min
-    const isUpdated = Date.now() - updatedAt.getTime() < 5 * 60 * 1000;
+    const isUpdated = Date.now() - updatedAt.getTime() < 2 * 60 * 1000;
 
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
