@@ -6,17 +6,6 @@ import IssueStore from '../issue-store';
 import GithubFlavoredMarkdown from './gfm';
 
 const IssueOrPullRequestBlurb = React.createClass({
-  onClickNumber(evt) {
-    const {card} = this.props;
-    const {repoOwner, repoName, issue} = card;
-
-    evt.stopPropagation();
-    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
-  },
-  // onClickIcon(evt) {
-  //   evt.stopPropagation();
-  //   evt.preventDefault(); // because it could be in a label for a checkbox
-  // },
   render() {
     const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
@@ -75,7 +64,6 @@ const IssueOrPullRequestBlurb = React.createClass({
         <a className='blurb-number-link'
           target='_blank'
           href={issue.htmlUrl}
-          onClick={this.onClickNumber}
           >
           <span className='blurb-number'>{issue.number}</span>
         </a>

@@ -80,13 +80,6 @@ let Issue = React.createClass({
   update(issue) {
     this.setState({issue});
   },
-  onClickNumber(evt) {
-    const {card} = this.props;
-    const {repoOwner, repoName, issue} = card;
-
-    evt.stopPropagation();
-    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
-  },
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
     // so the element looks like it is being moved
@@ -236,18 +229,16 @@ let Issue = React.createClass({
     }
 
 
-    const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
-    // stop highlighting after 30min
-    const isUpdated = lastViewed < updatedAt && (Date.now() - updatedAt.getTime() < 30 * 60 * 1000);
+    // stop highlighting after 5min
+    const isUpdated = Date.now() - updatedAt.getTime() < 2 * 60 * 1000;
 
-    // TODO: Combine relatedIssues and relatedPullRequests
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
-      const context = edgeValue;
+      const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
       return (
         <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
             card={issueCard}
-            primaryRepoName={primaryRepoName}
+            primaryRepoName={card.repoName}
             context={context}/>
           <span className='related-issue-title'>{issueCard.issue.title}</span>
         </div>
@@ -330,8 +321,7 @@ let Issue = React.createClass({
             key='link'
             className='issue-title'
             target='_blank'
-            href={issue.html.url}
-            onClick={this.onClickNumber}>
+            href={issue.html.url}>
             <GithubFlavoredMarkdown
               inline
               disableLinks={true}
