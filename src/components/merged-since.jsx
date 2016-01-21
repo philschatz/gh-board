@@ -15,25 +15,25 @@ const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 const MergedSince = React.createClass({
   renderPullRequest(repoOwner, repoName, pr) {
     const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
-    if (relatedIssues.length) {
-      const relatedIssuesHtml = relatedIssues.map((related) => {
-        const {repoOwner, repoName, number} = related;
-        const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-        return (
-          <Issue card={card}/>
-        );
-      });
-      return (
-        <div className='-issues-related-to-the-pull-request'>
-          {relatedIssuesHtml}
-        </div>
-      );
-    } else {
+    // if (relatedIssues.length) {
+    //   const relatedIssuesHtml = relatedIssues.map((related) => {
+    //     const {repoOwner, repoName, number} = related;
+    //     const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
+    //     return (
+    //       <Issue card={card}/>
+    //     );
+    //   });
+    //   return (
+    //     <div className='-issues-related-to-the-pull-request'>
+    //       {relatedIssuesHtml}
+    //     </div>
+    //   );
+    // } else {
       const card = IssueStore.issueToCard(repoOwner, repoName, pr);
       return (
         <Issue card={card}/>
       );
-    }
+    // }
   },
   render() {
     const {comparisons, repoInfos, startShas, endShas} = this.props;
