@@ -33,18 +33,8 @@ export default React.createClass({
   render() {
     const {dateTime, className} = this.props;
     const humanized = Moment(dateTime).fromNow();
-    let dateTimeString;
-    try {
-      dateTimeString = dateTime.toISOString();
-    } catch (e) {
-      /*eslint-disable no-console */
-      console.warn('Invalid dateTime. Probably from octokat');
-      /*eslint-enable no-console */
-      dateTimeString = '';
-    }
-
     return (
-      <time {...this.props} dateTime={dateTimeString} className={className}>{humanized}</time>
+      <time {...this.props} dateTime={dateTime} className={className}>{humanized}</time>
     );
   }
 });

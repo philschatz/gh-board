@@ -208,7 +208,7 @@ const AppNav = React.createClass({
         <img
           alt={'@' + info.login}
           className='avatar-image'
-          src={info.avatar.url}/>
+          src={info.avatarUrl}/>
       );
       loginButton = (
         <BS.NavDropdown key='signin-dropdown' id='signin-dropdown' title={avatarImage}>

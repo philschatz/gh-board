@@ -115,7 +115,7 @@ let Issue = React.createClass({
           key='avatar'
           className='avatar-image'
           title={'Click to filter on ' + user.login}
-          src={user.avatar.url}/>
+          src={user.avatarUrl}/>
       </Link>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
@@ -189,7 +189,7 @@ let Issue = React.createClass({
           className='milestone-details'
           title='Milestone Details'>
           <h4>
-            <a target='_blank' href={issue.milestone.html.url}>
+            <a target='_blank' href={issue.milestone.htmlUrl}>
               <GithubFlavoredMarkdown
                 inline
                 disableLinks={true}
@@ -230,7 +230,7 @@ let Issue = React.createClass({
 
 
     // stop highlighting after 5min
-    const isUpdated = Date.now() - updatedAt.getTime() < 2 * 60 * 1000;
+    const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000;
 
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
@@ -321,7 +321,7 @@ let Issue = React.createClass({
             key='link'
             className='issue-title'
             target='_blank'
-            href={issue.html.url}>
+            href={issue.htmlUrl}>
             <GithubFlavoredMarkdown
               inline
               disableLinks={true}
