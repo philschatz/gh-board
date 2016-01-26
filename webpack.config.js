@@ -26,10 +26,10 @@ var config = {
     ],
     module: {
         preLoaders: [
-          { test: /\.jsx?$/, loader: 'eslint-loader', exclude: /node_modules|gantt-chart.*/ },
+          { test: /\.jsx?$/, loader: 'eslint-loader', exclude: [/node_modules|gantt-chart.*/, /octokat\.js/] },
         ],
         loaders: [
-            { test: /\.jsx?$/, loader: 'babel', exclude: [/node_modules/, /puzzle-script/], query: { presets: ['react', 'es2015']} },
+            { test: /\.jsx?$/, loader: 'babel', exclude: [/node_modules/, /puzzle-script/, /octokat\.js/], query: { presets: ['react', 'es2015']} },
             { test: /\.json$/, loader: 'json-loader'},
             { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
             { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},

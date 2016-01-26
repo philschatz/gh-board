@@ -95,6 +95,9 @@ let Issue = React.createClass({
   render() {
     const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
+    if (!issue) {
+      return (<span>Maybe moving Issue...</span>);
+    }
     // TODO: Maybe the following 2 should be methods on the card
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
     const issueDueAt = getIssueDueAt(issue.body);
@@ -105,9 +108,8 @@ let Issue = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = card.getUpdatedAt();
 
-    if (!issue) {
-      return (<span>Maybe moving Issue...</span>);
-    }
+    const {comments: commentsCount} = issue; // count of comments
+
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
       <Link to={getFilters().toggleUserName(user.login).url()}>
@@ -115,7 +117,7 @@ let Issue = React.createClass({
           key='avatar'
           className='avatar-image'
           title={'Click to filter on ' + user.login}
-          src={user.avatar.url}/>
+          src={user.avatarUrl}/>
       </Link>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
@@ -189,7 +191,7 @@ let Issue = React.createClass({
           className='milestone-details'
           title='Milestone Details'>
           <h4>
-            <a target='_blank' href={issue.milestone.html.url}>
+            <a target='_blank' href={issue.milestone.htmlUrl}>
               <GithubFlavoredMarkdown
                 inline
                 disableLinks={true}
@@ -230,7 +232,7 @@ let Issue = React.createClass({
 
 
     // stop highlighting after 5min
-    const isUpdated = Date.now() - updatedAt.getTime() < 2 * 60 * 1000;
+    const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000;
 
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
@@ -244,6 +246,16 @@ let Issue = React.createClass({
         </div>
       );
     });
+
+    let comments;
+    if (commentsCount) {
+      comments = (
+        <span className='comments-count'>
+          <span className='comments-count-number'>{commentsCount}</span>
+          <i className='octicon octicon-comment'/>
+        </span>
+      );
+    }
 
     const header = [
       <IssueOrPullRequestBlurb key='issue-blurb'
@@ -321,7 +333,7 @@ let Issue = React.createClass({
             key='link'
             className='issue-title'
             target='_blank'
-            href={issue.html.url}>
+            href={issue.htmlUrl}>
             <GithubFlavoredMarkdown
               inline
               disableLinks={true}
@@ -339,6 +351,7 @@ let Issue = React.createClass({
             {dueAt}
             <span key='right-footer' className='issue-time-and-user'>
               <Time key='time' className='updated-at' dateTime={updatedAt}/>
+              {comments}
               {assignedAvatar}
             </span>
           </span>

@@ -1,6 +1,11 @@
 import _ from 'underscore';
 import EventEmitter from 'events';
-import Octo from 'octokat';
+import Octo from 'octokat/dist/node/base';
+import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
+import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
+import AuthorizationPlugin from 'octokat/dist/node/plugins/authorization';
+import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case';
+
 
 const MAX_CACHED_URLS = 2000;
 
@@ -79,6 +84,7 @@ class Client extends EventEmitter {
   }
   getCredentials() {
     return {
+      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin],
       token: window.localStorage.getItem('gh-token'),
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
