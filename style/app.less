@@ -461,14 +461,19 @@ body { background-color: #ddd; }
           display: block;
           float: right;
 
-          time.updated-at {
+          time.updated-at,
+          .comments-count {
             font-size: 1.2rem;
             color: #999;
             padding-right: 1rem;
-
             display: inline-block;
             white-space: nowrap;
             vertical-align: middle;
+          }
+
+          .comments-count-number { padding-right: .5rem; }
+
+          time.updated-at {
             max-width: 9rem;
             overflow-x: hidden;
             text-overflow: ellipsis;

@@ -95,6 +95,9 @@ let Issue = React.createClass({
   render() {
     const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
+    if (!issue) {
+      return (<span>Maybe moving Issue...</span>);
+    }
     // TODO: Maybe the following 2 should be methods on the card
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
     const issueDueAt = getIssueDueAt(issue.body);
@@ -105,9 +108,8 @@ let Issue = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = card.getUpdatedAt();
 
-    if (!issue) {
-      return (<span>Maybe moving Issue...</span>);
-    }
+    const {comments: commentsCount} = issue; // count of comments
+
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
       <Link to={getFilters().toggleUserName(user.login).url()}>
@@ -245,6 +247,16 @@ let Issue = React.createClass({
       );
     });
 
+    let comments;
+    if (commentsCount) {
+      comments = (
+        <span className='comments-count'>
+          <span className='comments-count-number'>{commentsCount}</span>
+          <i className='octicon octicon-comment'/>
+        </span>
+      );
+    }
+
     const header = [
       <IssueOrPullRequestBlurb key='issue-blurb'
         card={card}
@@ -339,6 +351,7 @@ let Issue = React.createClass({
             {dueAt}
             <span key='right-footer' className='issue-time-and-user'>
               <Time key='time' className='updated-at' dateTime={updatedAt}/>
+              {comments}
               {assignedAvatar}
             </span>
           </span>
