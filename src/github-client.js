@@ -5,7 +5,7 @@ import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
 import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
 import AuthorizationPlugin from 'octokat/dist/node/plugins/authorization';
 import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case';
-
+import CacheHandlerPlugin from 'octokat/dist/node/plugins/cache-handler';
 
 const MAX_CACHED_URLS = 2000;
 
@@ -23,6 +23,10 @@ const cacheHandler = new class CacheHandler {
     }
     // Async save once now new JSON has been fetched after X seconds
     this.pendingTimeout = null;
+  }
+  _dumpCache() {
+    console.log('github-client: Dumping localStorage cache because it is too big');
+    this.storage.removeItem('octokat-cache');
   }
   get(method, path) {
     const ret = this.cachedETags[method + ' ' + path];
@@ -48,26 +52,28 @@ const cacheHandler = new class CacheHandler {
       });
     }
 
-    this.cachedETags[method + ' ' + path] = {eTag, data, status, linkRelations};
-    if (Object.keys(this.cachedETags).length > MAX_CACHED_URLS) {
-      // stop saving. blow the storage cache because
-      // stringifying JSON and saving is slow
-      this.storage.removeItem('octokat-cache');
-    } else {
-      if (this.pendingTimeout) {
-        clearTimeout(this.pendingTimeout);
-      }
-      const saveCache = () => {
-        this.pendingTimeout = null;
-        // If localStorage fills up, just blow it away.
-        try {
-          this.storage.setItem('octokat-cache', JSON.stringify(this.cachedETags));
-        } catch (e) {
-          this.cachedETags = {};
-          this.storage.removeItem('octokat-cache');
+    if (status !== 403) { // do not cache if you do not have permissions
+      this.cachedETags[method + ' ' + path] = {eTag, data, status, linkRelations};
+      if (Object.keys(this.cachedETags).length > MAX_CACHED_URLS) {
+        // stop saving. blow the storage cache because
+        // stringifying JSON and saving is slow
+        this._dumpCache();
+      } else {
+        if (this.pendingTimeout) {
+          clearTimeout(this.pendingTimeout);
         }
-      };
-      this.pendingTimeout = setTimeout(saveCache, 5 * 1000);
+        const saveCache = () => {
+          this.pendingTimeout = null;
+          // If localStorage fills up, just blow it away.
+          try {
+            this.storage.setItem('octokat-cache', JSON.stringify(this.cachedETags));
+          } catch (e) {
+            this.cachedETags = {};
+            this._dumpCache();
+          }
+        };
+        this.pendingTimeout = setTimeout(saveCache, 5 * 1000);
+      }
     }
   }
 };
@@ -84,12 +90,12 @@ class Client extends EventEmitter {
   }
   getCredentials() {
     return {
-      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin],
+      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, CacheHandlerPlugin],
       token: window.localStorage.getItem('gh-token'),
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
       cacheHandler,
-      emitter: this
+      emitter: this.emit.bind(this)
     };
   }
   hasCredentials() {
