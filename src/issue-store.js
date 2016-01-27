@@ -114,7 +114,7 @@ class IssueStore extends EventEmitter {
         clearTimeout(this.polling);
         delete this.polling;
         if (isPollingEnabled) {
-          this._fetchAllIssues(); // start Polling again
+          this.fetchIssues(); // start Polling again
         }
       }
     });
@@ -155,6 +155,15 @@ class IssueStore extends EventEmitter {
       return filterCardsByFilter(cards);
     });
   }
+  _fetchAllIssuesForRepo(repoOwner, repoName) {
+    const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
+    return fetchAll(FETCHALL_MAX, issues)
+    .then((vals) => {
+      return _.map(vals, (issue) => {
+        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
+      });
+    });
+  }
   _fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
@@ -166,14 +175,33 @@ class IssueStore extends EventEmitter {
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);
     }
+    const explicitlyListedRepos = {};
+    repoInfos.forEach(({repoOwner, repoName}) => {
+      if (repoName !== '*') {
+        explicitlyListedRepos[`${repoOwner}/${repoName}`] = true;
+      }
+    });
+
     const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
-      const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
-      return fetchAll(FETCHALL_MAX, issues)
-      .then((vals) => {
-        return _.map(vals, (issue) => {
-          return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
-        });
-      });
+      if (repoName === '*') {
+        // Fetch all the repos, and then concat them
+        return fetchAll(FETCHALL_MAX, Client.getOcto().orgs(repoOwner).repos.fetch)
+        .then((repos) => {
+          return Promise.all(repos.map((repo) => {
+            // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
+            if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
+              return null;
+            }
+            return this._fetchAllIssuesForRepo(repoOwner, repo.name);
+          }));
+        })
+        .then((issuesByRepo) => {
+          // exclude the null repos (ones that were explicitly listed in the URL)
+          return _.flatten(_.filter(issuesByRepo, (v) => { return v; }), true/*shallow*/);
+        })
+      } else {
+        return this._fetchAllIssuesForRepo(repoOwner, repoName);
+      }
     });
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
