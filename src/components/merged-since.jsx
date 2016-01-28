@@ -1,7 +1,8 @@
 import React from 'react';
 import _ from 'underscore';
-import Client from '../github-client';
+import {Link} from 'react-router';
 
+import Client from '../github-client';
 import {getFilters} from '../route-utils';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import Loadable from './loadable';
@@ -15,25 +16,25 @@ const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 const MergedSince = React.createClass({
   renderPullRequest(repoOwner, repoName, pr) {
     const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
-    if (relatedIssues.length) {
-      const relatedIssuesHtml = relatedIssues.map((related) => {
-        const {repoOwner, repoName, number} = related;
-        const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-        return (
-          <Issue card={card}/>
-        );
-      });
-      return (
-        <div className='-issues-related-to-the-pull-request'>
-          {relatedIssuesHtml}
-        </div>
-      );
-    } else {
+    // if (relatedIssues.length) {
+    //   const relatedIssuesHtml = relatedIssues.map((related) => {
+    //     const {repoOwner, repoName, number} = related;
+    //     const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
+    //     return (
+    //       <Issue card={card}/>
+    //     );
+    //   });
+    //   return (
+    //     <div className='-issues-related-to-the-pull-request'>
+    //       {relatedIssuesHtml}
+    //     </div>
+    //   );
+    // } else {
       const card = IssueStore.issueToCard(repoOwner, repoName, pr);
       return (
         <Issue card={card}/>
       );
-    }
+    // }
   },
   render() {
     const {comparisons, repoInfos, startShas, endShas} = this.props;
@@ -108,6 +109,77 @@ const MergedSinceShell = React.createClass({
         promise={allPromise}
         renderLoaded={(comparisons) => <MergedSince comparisons={comparisons} repoInfos={repoInfos} startShas={startShas} endShas={endShas}/>}
       />
+    );
+  }
+});
+
+
+export const MergedSinceFormShell = React.createClass({
+  onChangeInput() {
+    this.forceUpdate();
+  },
+  isValid() {
+    const filters = getFilters();
+    const {repoInfos} = filters.getState();
+    let isValid = true;
+    repoInfos.forEach((repoInfo, i) => {
+      const node = this.refs[`start-${i}`];
+      if (!node || !/[0-9a-f]+/.test(node.value)) { isValid = false; }
+    });
+    const ends = repoInfos.map((repoInfo, i) => {
+      const node = this.refs[`end-${i}`];
+      if (!node || !/[0-9a-f]+/.test(node.value)) { isValid = false; }
+    });
+    return isValid;
+  },
+  buildHref() {
+    const filters = getFilters();
+    const {repoInfos} = filters.getState();
+    const starts = repoInfos.map((repoInfo, i) => {
+      const node = this.refs[`start-${i}`];
+      return node.value;
+    });
+    const ends = repoInfos.map((repoInfo, i) => {
+      const node = this.refs[`end-${i}`];
+      return node.value;
+    });
+    return `${filters.url()}/${starts.join(':')}/${ends.join(':')}`;
+  },
+  renderRow({repoName}, i) {
+    return (
+      <tr key={repoName}>
+        <td>{repoName}</td>
+        <td><input ref={`start-${i}`} onChange={this.onChangeInput}/></td>
+        <td><input ref={`end-${i}`} onChange={this.onChangeInput}/></td>
+      </tr>
+    );
+  },
+  render() {
+    const {repoInfos} = getFilters().getState();
+    let showDiffsButton;
+    if (this.isValid()) {
+      const href = this.buildHref();
+      showDiffsButton = (
+        <Link to={href}>Show differences</Link>
+      );
+    } else {
+      showDiffsButton = (
+        <span className='-invalid-commits'>Show differences (validation error)</span>
+      );
+    }
+    return (
+      <div>
+        <p><strong>Note:</strong> These would eventually come directly from the manifest file</p>
+        <table>
+          <thead>
+            <tr><th>Repo</th><th>Start Sha</th><th>End Sha</th></tr>
+          </thead>
+          <tbody>
+            {repoInfos.map(this.renderRow)}
+          </tbody>
+        </table>
+        {showDiffsButton}
+      </div>
     );
   }
 });

@@ -8,7 +8,7 @@ import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import {getTaskCounts, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
+import {getTaskCounts, getIssueDueAt, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 import Time from './time';
@@ -80,13 +80,6 @@ let Issue = React.createClass({
   update(issue) {
     this.setState({issue});
   },
-  onClickNumber(evt) {
-    const {card} = this.props;
-    const {repoOwner, repoName, issue} = card;
-
-    evt.stopPropagation();
-    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
-  },
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
     // so the element looks like it is being moved
@@ -102,7 +95,12 @@ let Issue = React.createClass({
   render() {
     const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
+    if (!issue) {
+      return (<span>Maybe moving Issue...</span>);
+    }
+    // TODO: Maybe the following 2 should be methods on the card
     const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
+    const issueDueAt = getIssueDueAt(issue.body);
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -110,9 +108,8 @@ let Issue = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = card.getUpdatedAt();
 
-    if (!issue) {
-      return (<span>Maybe moving Issue...</span>);
-    }
+    const {comments: commentsCount} = issue; // count of comments
+
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
       <Link to={getFilters().toggleUserName(user.login).url()}>
@@ -120,7 +117,7 @@ let Issue = React.createClass({
           key='avatar'
           className='avatar-image'
           title={'Click to filter on ' + user.login}
-          src={user.avatar.url}/>
+          src={user.avatarUrl}/>
       </Link>
     );
     const nonKanbanLabels = _.filter(issue.labels, (label) => {
@@ -158,6 +155,11 @@ let Issue = React.createClass({
         </BS.Popover>
       );
 
+      const taskCountsClasses = {
+        'task-list-overview': true,
+        'pull-right': true,
+        'is-done': taskFinishedCount === taskTotalCount,
+      };
       taskCounts = (
         <BS.OverlayTrigger
           key='task-list'
@@ -165,8 +167,8 @@ let Issue = React.createClass({
           trigger={['click', 'focus']}
           placement='bottom'
           overlay={taskListPopover}>
-          <span className='task-list-overview'>
-            <i className='octicon octicon-check'/>
+          <span className={classnames(taskCountsClasses)}>
+            <i className='octicon octicon-checklist'/>
             {`${taskFinishedCount}/${taskTotalCount}`}
           </span>
         </BS.OverlayTrigger>
@@ -189,7 +191,7 @@ let Issue = React.createClass({
           className='milestone-details'
           title='Milestone Details'>
           <h4>
-            <a target='_blank' href={issue.milestone.html.url}>
+            <a target='_blank' href={issue.milestone.htmlUrl}>
               <GithubFlavoredMarkdown
                 inline
                 disableLinks={true}
@@ -208,7 +210,7 @@ let Issue = React.createClass({
         </BS.Popover>
       );
       milestone = (
-        <span className='issue-milestone'>
+        <span className='issue-milestone badge'>
           <BS.OverlayTrigger
             rootClose
             trigger={['click', 'focus']}
@@ -229,42 +231,37 @@ let Issue = React.createClass({
     }
 
 
-    const lastViewed = IssueStore.getLastViewed(repoOwner, repoName, issue.number);
-    // stop highlighting after 30min
-    const isUpdated = lastViewed < updatedAt && (Date.now() - updatedAt.getTime() < 30 * 60 * 1000);
+    // stop highlighting after 5min
+    const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000;
 
-    // TODO: Combine relatedIssues and relatedPullRequests
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
       return (
         <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
             card={issueCard}
-            primaryRepoName={primaryRepoName}
-            context={context || 'related to'}/>
+            primaryRepoName={card.repoName}
+            context={context}/>
+          <span className='related-issue-title'>{issueCard.issue.title}</span>
         </div>
       );
     });
 
+    let comments;
+    if (commentsCount) {
+      comments = (
+        <span className='comments-count'>
+          <span className='comments-count-number'>{commentsCount}</span>
+          <i className='octicon octicon-comment'/>
+        </span>
+      );
+    }
+
     const header = [
-      <div key='labels' className='issue-labels'>
-        {labels}
-      </div>,
-      <div key='related' className='related-issues'>
-        {relatedCards}
-      </div>,
-      <a
-        key='link'
-        target='_blank'
-        href={issue.html.url}
-        onClick={this.onClickNumber}>
-        <GithubFlavoredMarkdown
-          inline
-          disableLinks={true}
-          repoOwner={repoOwner}
-          repoName={repoName}
-          text={issue.title}/>
-      </a>
+      <IssueOrPullRequestBlurb key='issue-blurb'
+        card={card}
+        primaryRepoName={primaryRepoName} />,
+      taskCounts
     ];
     const classes = {
       'issue': true,
@@ -273,6 +270,55 @@ let Issue = React.createClass({
       'is-pull-request': card.isPullRequest(),
       'is-mergeable': card.isPullRequest() && card.isPullRequestMergeable()
     };
+    let statusBlurb;
+    if (card.isPullRequest()) {
+      const statusClasses = {
+        'issue-status': true,
+        'is-mergeable': card.isPullRequestMergeable()
+      };
+      const status = card.getPullRequestStatus();
+      let statusIcon;
+      let statusText;
+      // pending, success, error, or failure
+      switch (status.state) {
+        case 'pending':
+          statusIcon = (<i className='status-icon octicon octicon-primitive-dot'/>);
+          statusText = 'Testing...';
+          break;
+        case 'error':
+        case 'failure':
+          statusIcon = (<i className='status-icon octicon octicon-x'/>);
+          statusText = 'Tests Failed';
+          break;
+        default:
+
+      }
+      if (statusIcon || statusText) {
+        if (status.targetUrl) {
+          statusBlurb = (<a target='_blank' className={classnames(statusClasses)} data-status-state={status.state} href={status.targetUrl} title={status.description}>{statusIcon}{' '}{statusText}</a>);
+        } else {
+          statusBlurb = (<span className={classnames(statusClasses)} data-status-state={status.state} title={status.description}>{statusIcon}{' '}{statusText}</span>);
+        }
+
+      }
+    }
+
+    let dueAt;
+    if (issueDueAt) {
+      const dueAtClasses = {
+        'issue-due-at': true,
+        'is-overdue': issueDueAt < Date.now(),
+        'is-near': issueDueAt > Date.now() && issueDueAt - Date.now() < 7 * 24 * 60 * 60 * 1000 // set it to be 1 week
+      }
+      dueAt = (
+        <span className={classnames(dueAtClasses)}>
+          <i className='octicon octicon-calendar'/>
+          {' due '}
+          <Time dateTime={issueDueAt}/>
+        </span>
+      );
+    }
+
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
@@ -283,17 +329,36 @@ let Issue = React.createClass({
           className={classnames(classes)}
           data-state={issue.state}>
 
-          <span key='right-footer' className='pull-right'>
-            <Time key='time' className='updated-at' dateTime={updatedAt}/>
-            {assignedAvatar}
-          </span>
-          <IssueOrPullRequestBlurb
-            card={card}
-            primaryRepoName={primaryRepoName} />
-          {taskCounts}
-          {milestone}
+          <a
+            key='link'
+            className='issue-title'
+            target='_blank'
+            href={issue.htmlUrl}>
+            <GithubFlavoredMarkdown
+              inline
+              disableLinks={true}
+              repoOwner={repoOwner}
+              repoName={repoName}
+              text={issue.title}/>
+          </a>
 
+          <span key='labels' className='issue-labels'>
+            {milestone}
+            {labels}
+          </span>
+          <span className='issue-footer'>
+            {statusBlurb}
+            {dueAt}
+            <span key='right-footer' className='issue-time-and-user'>
+              <Time key='time' className='updated-at' dateTime={updatedAt}/>
+              {comments}
+              {assignedAvatar}
+            </span>
+          </span>
         </BS.ListGroupItem>
+        <div key='related' className='related-issues'>
+          {relatedCards}
+        </div>
       </div>
     );
   }

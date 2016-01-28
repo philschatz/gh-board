@@ -35,24 +35,42 @@ const IssueList = React.createClass({
   showAllIssues() {
     this.setState({showAllIssues: true});
   },
+  getInitialState() {
+    return {morePressedCount: 0};
+  },
+  onClickMore() {
+    this.setState({morePressedCount: this.state.morePressedCount + 1});
+  },
   render() {
-    const {title, backgroundColor, children} = this.props;
+    const {icon, title, backgroundColor, children} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
-    const {showAllIssues} = this.state;
+    const {showAllIssues, morePressedCount} = this.state;
+    const multiple = 50; // Add 50 results at a time
 
-    let headerStyle;
     let className = 'column-title';
+    if (icon) {
+      className += ' has-icon';
+    }
+    let headerStyle;
+    let iconIsLight = 'column-icon';
     if (backgroundColor) {
       headerStyle = {backgroundColor: '#' + backgroundColor};
       if (isLight(backgroundColor)) {
-        className += ' ' + 'is-light';
+        iconIsLight += ' is-light';
       }
     } else {
-      className += ' ' + 'is-light';
+      iconIsLight += ' is-light';
+    }
+    let iconEl;
+    if (icon) {
+      iconEl = (
+        <span className={iconIsLight} style={headerStyle}>{icon}</span>
+      );
     }
     const header = (
-      <h2 className={className} style={headerStyle}>
+      <h2 className={className}>
+        {iconEl}
         {title}
         {' (' + children.length + ')'}
       </h2>
@@ -63,17 +81,17 @@ const IssueList = React.createClass({
       'is-over': isOver
     };
 
-    let filteredChildren;
-    let showAllButton;
-    if (children.length > MIN_CHILDREN_TO_SHOW + 1 && !showAllIssues) {
-      filteredChildren = children.slice(0, MIN_CHILDREN_TO_SHOW);
-      showAllButton = (
-        <BS.Button onClick={this.showAllIssues} className='list-group-item'>
-          Show {children.length - MIN_CHILDREN_TO_SHOW} more...
+    let partialChildren;
+    let moreButton;
+    if (!showAllIssues && MIN_CHILDREN_TO_SHOW + 1 + morePressedCount * multiple < children.length) {
+      partialChildren = children.slice(0, MIN_CHILDREN_TO_SHOW + morePressedCount * multiple);
+      moreButton = (
+        <BS.Button onClick={this.onClickMore} className='list-group-item'>
+          {children.length - morePressedCount * multiple} more...
         </BS.Button>
       );
     } else {
-      filteredChildren = children;
+      partialChildren = children;
     }
 
     return connectDropTarget(
@@ -81,8 +99,8 @@ const IssueList = React.createClass({
         <BS.Panel className={classes} header={header}>
           <BS.ListGroup fill>
             <BS.ListGroupItem key='dnd-placeholder' className='dnd-placeholder'/>
-            {filteredChildren}
-            {showAllButton}
+            {partialChildren}
+            {moreButton}
           </BS.ListGroup>
         </BS.Panel>
       </div>

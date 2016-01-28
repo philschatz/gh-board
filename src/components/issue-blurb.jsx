@@ -6,24 +6,18 @@ import IssueStore from '../issue-store';
 import GithubFlavoredMarkdown from './gfm';
 
 const IssueOrPullRequestBlurb = React.createClass({
-  onClickNumber(evt) {
-    const {card} = this.props;
-    const {repoOwner, repoName, issue} = card;
-
-    evt.stopPropagation();
-    IssueStore.setLastViewed(repoOwner, repoName, issue.number);
-  },
-  onClickIcon(evt) {
-    evt.stopPropagation();
-    evt.preventDefault(); // because it could be in a label for a checkbox
-  },
   render() {
     const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
 
     const isPullRequest = !!issue.pullRequest || !!issue.base; // use .base in case we are given the PR JSON (which does not contain labels)
     const multipleRepoName = primaryRepoName === repoName ? null : repoName;
-    const popoverTitle = isPullRequest ? 'Pull Request Description' : 'Issue Description';
+    const popoverTitle = (
+      <GithubFlavoredMarkdown
+        disableLinks={true}
+        inline={true}
+        text={issue.title}/>
+    );
 
     const bodyPopover = (
       <BS.Popover id="popover-${issue.id}" className='issue-body' title={popoverTitle}>
@@ -60,24 +54,30 @@ const IssueOrPullRequestBlurb = React.createClass({
       );
     }
 
+    const classes = {
+      'issue-blurb': true,
+      'is-pull-request': isPullRequest
+    };
+
     return (
-      <span className='issue-blurb'>
-        {blurbContext}
+      <span className={classnames(classes)}>
+        <a className='blurb-number-link'
+          target='_blank'
+          href={issue.htmlUrl}
+          >
+          <span className='blurb-number'>{issue.number}</span>
+        </a>
         <BS.OverlayTrigger
           rootClose
           trigger={['click', 'focus']}
           placement='bottom'
           overlay={bodyPopover}>
-          {icon}
+          <span className='-just-for-overlay-trigger'>
+            {icon}
+            <span className='blurb-secondary-repo'>{multipleRepoName}</span>
+            {blurbContext}
+          </span>
         </BS.OverlayTrigger>
-        <a className='blurb-number-link'
-          target='_blank'
-          href={issue.htmlUrl}
-          onClick={this.onClickNumber}
-          >
-          <span className='blurb-secondary-repo'>{multipleRepoName}</span>
-          <span className='blurb-number'>{'#' + issue.number}</span>
-        </a>
       </span>
     );
   }

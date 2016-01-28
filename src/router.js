@@ -9,6 +9,7 @@ import RepoKanban from './components/repo-kanban';
 import ByMilestoneView from './components/by-milestone-view';
 import ByUserView from './components/by-user-view';
 import MergedSince from './components/merged-since';
+import {MergedSinceFormShell} from './components/merged-since';
 
 import {parseRoute, buildRoute} from './route-utils';
 
@@ -35,6 +36,7 @@ const routes = [
           { path: 'kanban',
             onEnter: (state, replace) => replace(null, buildRoute('', parseRoute(state)))
           },
+          { path: 'since', component: MergedSinceFormShell},
           { path: 'since/:startShas(/:endShas)', component: MergedSince},
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },

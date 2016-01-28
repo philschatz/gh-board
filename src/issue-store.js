@@ -102,7 +102,6 @@ function _buildBipartiteGraph(graph, cards) {
 
 let cacheCardsRepoInfos = null;
 let cacheCards = null;
-let cacheLastViewed = {};
 const initialTimestamp = new Date();
 
 let isPollingEnabled = false;
@@ -115,7 +114,7 @@ class IssueStore extends EventEmitter {
         clearTimeout(this.polling);
         delete this.polling;
         if (isPollingEnabled) {
-          this._fetchAllIssues(); // start Polling again
+          this.fetchIssues(); // start Polling again
         }
       }
     });
@@ -156,6 +155,15 @@ class IssueStore extends EventEmitter {
       return filterCardsByFilter(cards);
     });
   }
+  _fetchAllIssuesForRepo(repoOwner, repoName) {
+    const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
+    return fetchAll(FETCHALL_MAX, issues)
+    .then((vals) => {
+      return _.map(vals, (issue) => {
+        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
+      });
+    });
+  }
   _fetchAllIssues(repoInfos, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
@@ -167,14 +175,33 @@ class IssueStore extends EventEmitter {
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
       return Promise.resolve(cacheCards);
     }
+    const explicitlyListedRepos = {};
+    repoInfos.forEach(({repoOwner, repoName}) => {
+      if (repoName !== '*') {
+        explicitlyListedRepos[`${repoOwner}/${repoName}`] = true;
+      }
+    });
+
     const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
-      const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
-      return fetchAll(FETCHALL_MAX, issues)
-      .then((vals) => {
-        return _.map(vals, (issue) => {
-          return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
-        });
-      });
+      if (repoName === '*') {
+        // Fetch all the repos, and then concat them
+        return fetchAll(FETCHALL_MAX, Client.getOcto().orgs(repoOwner).repos.fetch)
+        .then((repos) => {
+          return Promise.all(repos.map((repo) => {
+            // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
+            if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
+              return null;
+            }
+            return this._fetchAllIssuesForRepo(repoOwner, repo.name);
+          }));
+        })
+        .then((issuesByRepo) => {
+          // exclude the null repos (ones that were explicitly listed in the URL)
+          return _.flatten(_.filter(issuesByRepo, (v) => { return v; }), true/*shallow*/);
+        })
+      } else {
+        return this._fetchAllIssuesForRepo(repoOwner, repoName);
+      }
     });
     return Promise.all(allPromises).then((issues) => {
       const cards = _.flatten(issues, true /*shallow*/);
@@ -216,8 +243,6 @@ class IssueStore extends EventEmitter {
     return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({labels: labelNames})
     .then(() => {
 
-      this.setLastViewed(repoOwner, repoName, issue.number);
-
       // invalidate the issues list
       cacheCards = null;
       this.emit('change');
@@ -236,8 +261,6 @@ class IssueStore extends EventEmitter {
       return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({milestone: matchingMilestone.number})
       .then(() => {
 
-        this.setLastViewed(repoOwner, repoName, issue.number);
-
         // invalidate the issues list
         cacheCards = null;
         this.emit('change');
@@ -248,20 +271,6 @@ class IssueStore extends EventEmitter {
   }
   createLabel(repoOwner, repoName, opts) {
     return Client.getOcto().repos(repoOwner, repoName).labels.create(opts);
-  }
-  setLastViewed(repoOwner, repoName, issueNumber) {
-    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
-    let now = new Date();
-    now = new Date(now.getTime() + 5 * 1000); // Add 5 sec just in case
-    const isNew = !cacheLastViewed[issueKey] || (now.getTime() - cacheLastViewed[issueKey].getTime() > 10000);
-    cacheLastViewed[issueKey] = now;
-    if (isNew) {
-      this.emit('change:' + issueKey);
-    }
-  }
-  getLastViewed(repoOwner, repoName, issueNumber) {
-    const issueKey = toIssueKey(repoOwner, repoName, issueNumber);
-    return cacheLastViewed[issueKey] || initialTimestamp;
   }
 }
 

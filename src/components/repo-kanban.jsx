@@ -59,15 +59,15 @@ const KanbanColumn = React.createClass({
     }
     const title = (
       <Link className='label-title' to={getFilters().toggleTagName(label.name).url()}>
-        {icon}
         {name}
       </Link>
     );
 
     if (issueComponents.length || SettingsStore.getShowEmptyColumns()) {
       return (
-        <BS.Col key={label.name} md={4} className='kanban-board-column'>
+        <BS.Col key={label.name} md={3} className='kanban-board-column'>
           <IssueList
+            icon={icon}
             title={title}
             backgroundColor={label.color}
             label={label}

@@ -37,7 +37,7 @@ const KanbanColumn = React.createClass({
     );
 
     return (
-      <BS.Col key={login} md={4} className='kanban-board-column'>
+      <BS.Col key={login} md={3} className='kanban-board-column'>
         <IssueList title={heading}>
           {issueComponents}
         </IssueList>

@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import moment from 'moment';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
 
@@ -33,6 +34,28 @@ export function getTaskCounts(text) {
   });
   const taskTotalCount = taskFinishedCount + taskUnfinishedCount;
   return {taskFinishedCount, taskTotalCount};
+}
+
+export function getIssueDueAt(text) {
+  // TODO: Maybe parse using the local timezone
+  const div = getElement(text);
+  const el = div.querySelector('date.due');
+  if (el) {
+    // either use the datetime attribute, or the text
+    const str = el.getAttribute('datetime') || el.textContent;
+    if (str) {
+      let date = moment(str, 'MM/DD');
+      if (date.isValid()) {
+        return date.toDate().getTime();
+      } else {
+        // fall back to parsing using the Date object
+        return Date.parse(attr);
+      }
+    } else {
+      console.error(`Invalid due date format for "${el.outerHTML}"`);
+    }
+  }
+  return null;
 }
 
 // From https://help.github.com/articles/closing-issues-via-commit-messages/
