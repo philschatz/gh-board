@@ -319,6 +319,11 @@ body { background-color: #ddd; }
       &:not(.is-done) { color: #ccc; }
     }
 
+    // Hide the Issue icon if it is an Issue
+    &:not(:hover) .issue-blurb:not(.is-pull-request) .blurb-icon {
+      visibility: hidden;
+    }
+
     .list-group-item-heading {
       margin-bottom: 1rem;
       padding-left: 1rem;
@@ -331,10 +336,6 @@ body { background-color: #ddd; }
 
       .issue-blurb {
         .blurb-number-link { color: #337ab7; } // bootstrap link color
-      }
-      // Hide the Issue icon if it is an Issue
-      &:not(:hover) .issue-blurb:not(.is-pull-request) .blurb-icon {
-        visibility: hidden;
       }
 
 
