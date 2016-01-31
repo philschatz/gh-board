@@ -83,6 +83,14 @@ export default class Card {
     }
     return this._taskCounts;
   }
+  getCommentCount() {
+    let count = this.issue.comments;
+    // include comments on code in the count
+    if (this._pr) {
+      count += this._pr.reviewComments;
+    }
+    return count;
+  }
   _getOcto() {
     return Client.getOcto().repos(this.repoOwner, this.repoName);
   }
