@@ -108,7 +108,7 @@ let Issue = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = card.getUpdatedAt();
 
-    const {comments: commentsCount} = issue; // count of comments
+    const commentsCount = card.getCommentCount();
 
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
@@ -250,7 +250,7 @@ let Issue = React.createClass({
     let comments;
     if (commentsCount) {
       comments = (
-        <span className='comments-count'>
+        <span className='comments-count' title='Comments'>
           <span className='comments-count-number'>{commentsCount}</span>
           <i className='octicon octicon-comment'/>
         </span>
@@ -309,7 +309,7 @@ let Issue = React.createClass({
         'issue-due-at': true,
         'is-overdue': issueDueAt < Date.now(),
         'is-near': issueDueAt > Date.now() && issueDueAt - Date.now() < 7 * 24 * 60 * 60 * 1000 // set it to be 1 week
-      }
+      };
       dueAt = (
         <span className={classnames(dueAtClasses)}>
           <i className='octicon octicon-calendar'/>
