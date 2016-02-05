@@ -81,7 +81,7 @@ export function getRelatedIssues(text, repoOwner1, repoName1) {
   _.each(div.querySelectorAll('a[href^="https://github.com/"]'), (link) => {
     const href = link.getAttribute('href');
     // match `https://github.com/[repoOwner]/[repoName]/issues/[number]`
-    const matches = href.match(/^https\:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(pulls|issues)\/(\d+)$/);
+    const matches = href.match(/^https\:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(pull|issues)\/(\d+)$/);
     if (matches) {
       const [, repoOwner, repoName, , number] = matches;
       // Check if the previous node ends with "fixes" or "closes"
