@@ -251,8 +251,9 @@ let Issue = React.createClass({
     if (commentsCount) {
       comments = (
         <span className='comments-count' title='Comments'>
-          <span className='comments-count-number'>{commentsCount}</span>
           <i className='octicon octicon-comment'/>
+          {' '}
+          <span className='comments-count-number'>{commentsCount}</span>
         </span>
       );
     }
