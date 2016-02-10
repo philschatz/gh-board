@@ -125,6 +125,9 @@ export default class Card {
     });
   }
   resetPromisesAndState(issue) {
+    if (!issue) {
+      throw new Error('BUG: resetPromisesAndState requires an issue arg');
+    }
     this.issue = issue;
     const {_pr, _prStatuses} = this; // squirrel so UI doesn't see blips
     delete this._prPromise;

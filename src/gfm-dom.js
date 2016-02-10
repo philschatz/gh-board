@@ -72,32 +72,39 @@ export const PULL_REQUEST_ISSUE_RELATION = {
 };
 
 const CLOSE_STRINGS = Object.keys(PULL_REQUEST_ISSUE_RELATION);
+const POSSIBLE_RELATED_ISSUE_SELECTOR = 'a[href^="https://github.com/"]';
+const RELATED_ISSUE_RE = /^https\:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(pull|issues)\/(\d+)$/;
 
+export function forEachRelatedIssue(div, fn) {
+  _.each(div.querySelectorAll(POSSIBLE_RELATED_ISSUE_SELECTOR), (link) => {
+    const href = link.getAttribute('href');
+    // match `https://github.com/[repoOwner]/[repoName]/issues/[number]`
+    const matches = href.match(RELATED_ISSUE_RE);
+    if (matches) {
+      const [, repoOwner, repoName, , number] = matches;
+      fn({repoOwner, repoName, number}, link);
+    }
+  });
+}
 
 // Find all links in the Issue body to other issues or Pull Requests
 export function getRelatedIssues(text, repoOwner1, repoName1) {
   const div = getElement(text, repoOwner1, repoName1);
   const relatedIssues = [];
-  _.each(div.querySelectorAll('a[href^="https://github.com/"]'), (link) => {
-    const href = link.getAttribute('href');
-    // match `https://github.com/[repoOwner]/[repoName]/issues/[number]`
-    const matches = href.match(/^https\:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(pull|issues)\/(\d+)$/);
-    if (matches) {
-      const [, repoOwner, repoName, , number] = matches;
-      // Check if the previous node ends with "fixes" or "closes"
-      let fixes = false;
-      let prevWord = null;
-      const prevNode = link.previousSibling;
-      if (prevNode && prevNode.nodeType === Node.TEXT_NODE) {
-        // pull out the last word
-        const prevTexts = prevNode.textContent.trimRight().split(' ');
-        prevWord = prevTexts[prevTexts.length - 1].toLowerCase();
-        if (CLOSE_STRINGS.indexOf(prevWord) >= 0) {
-          fixes = prevWord;
-        }
+  forEachRelatedIssue(div, ({repoOwner, repoName, number}, link) => {
+    // Check if the previous node ends with "fixes" or "closes"
+    let fixes = false;
+    let prevWord = null;
+    const prevNode = link.previousSibling;
+    if (prevNode && prevNode.nodeType === Node.TEXT_NODE) {
+      // pull out the last word
+      const prevTexts = prevNode.textContent.trimRight().split(' ');
+      prevWord = prevTexts[prevTexts.length - 1].toLowerCase();
+      if (CLOSE_STRINGS.indexOf(prevWord) >= 0) {
+        fixes = prevWord;
       }
-      relatedIssues.push({repoOwner, repoName, number, fixes, prevWord});
     }
+    relatedIssues.push({repoOwner, repoName, number, fixes, prevWord});
   });
   return relatedIssues;
 }
