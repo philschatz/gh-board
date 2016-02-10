@@ -8,11 +8,13 @@ import linkify from 'gfm-linkify';
 
 // import Client from '../github-client';
 // import Loadable from './loadable';
+import IssueStore from '../issue-store';
 import CurrentUserStore from '../user-store';
+import {forEachRelatedIssue} from '../gfm-dom';
 
 const insertAfter = (newNode, node) => {
-  if (node.nextElementSibling) {
-    node.parentElement.insertBefore(newNode, node.nextElementSibling);
+  if (node.nextSibling) {
+    node.parentElement.insertBefore(newNode, node.nextSibling);
   } else {
     node.parentElement.appendChild(newNode);
   }
@@ -31,14 +33,62 @@ const camelize = (string) => {
   }
 };
 
+
+// Construct the little [Open], [Closed], [Merged] badge next to a PR/Issue number
+// Done in the DOM instead of React because it is injected into arbitrary HTML.
+const buildStatusBadge = (card) => {
+  const newNode = document.createElement('span');
+  newNode.classList.add('issue-status-badge');
+  if (card.issue) {
+    const isPullRequest = card.isPullRequest();
+    const state = card.issue.state; // open, closed, reopened
+
+    const iconNode = document.createElement('i');
+    iconNode.classList.add('octicon');
+    let iconClassName;
+    let msg;
+    if (isPullRequest) {
+      iconClassName = 'octicon-git-pull-request';
+      if (state === 'open') {
+        msg = 'Open';
+      } else {
+        msg = 'Closed';
+      }
+    } else {
+      if (state === 'open') {
+        iconClassName = 'octicon-issue-opened';
+        msg = 'Open';
+      } else if (state === 'closed') {
+        iconClassName = 'octicon-issue-closed';
+        msg = 'Closed';
+      } else if (state === 'reopened') {
+        iconClassName = 'octicon-issue-reopened';
+        msg = 'Reopened';
+      } else {
+        throw new Error('BUG! Invalid Issue state');
+      }
+    }
+    const textNode = document.createTextNode(` ${msg}`);
+    iconNode.classList.add(iconClassName);
+
+    newNode.setAttribute('data-state', state);
+    newNode.appendChild(iconNode);
+    newNode.appendChild(textNode);
+  } else {
+    newNode.textContent = 'Closed?';
+  }
+  return newNode;
+}
+
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',
   updateLinks() {
     const {disableLinks} = this.props;
 
     if (!disableLinks) {
+      const root = ReactDOM.findDOMNode(this);
       // Wrap images with a link that opens them in a new tab
-      const images = ReactDOM.findDOMNode(this).querySelectorAll('img:not(.emoji)');
+      const images = root.querySelectorAll('img:not(.emoji)');
       _.each(images, (img) => {
         const parent = img.parentNode;
         // Do not re-wrap if the image already has a link around it
@@ -52,9 +102,19 @@ const InnerMarkdown = React.createClass({
         link.setAttribute('href', href);
       });
 
-      const links = ReactDOM.findDOMNode(this).querySelectorAll('a');
+      const links = root.querySelectorAll('a');
       _.each(links, (link) => {
         link.setAttribute('target', '_blank');
+      });
+
+      // Find links to Issues/PR's and add the title, open/closed state, and kanban column
+      // First, remove all badges from the DOM
+      _.each(root.querySelectorAll('.issue-status-badge'), (node) => node.remove());
+
+      forEachRelatedIssue(root, ({repoOwner, repoName, number}, link) => {
+        const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
+        const newNode = buildStatusBadge(card);
+        insertAfter(newNode, link);
       });
     }
   },

@@ -363,11 +363,12 @@ body { background-color: #ddd; }
 
       .issue-title {
         display: block;
-        font-size: 1.5rem;
         // it's a link
         color: black;
         font-weight: normal;
         text-decoration: none;
+
+        .x-font-and-emoji(1.5rem);
         &:hover { text-decoration: none; }
       }
 
@@ -576,6 +577,25 @@ body { background-color: #ddd; }
     img { max-width: 100%; }
 
     .x-font-and-emoji(1.5rem);
+
+    // Mostly from GH Issues and PRs
+    .issue-status-badge {
+      &[data-state='reopened'],
+      &[data-state='open']   { background-color: #6cc644; }
+      &[data-state='closed'] { background-color: #bd2c00; }
+      &[data-state='merged'] { background-color: #6e5494; }
+
+      background-color: #666; // default (no state)
+      color: white;
+      display: inline-block;
+      white-space: nowrap;
+      margin-left: .5rem;
+      padding: 1px 5px;
+      font-size: 12px;
+      border-radius: 3px;
+      text-align: center;
+      font-weight: bold;
+    }
 
     // only apply padding to the top-most task list
     > .task-list {

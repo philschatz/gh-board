@@ -27,8 +27,10 @@ let CARD_CACHE = {};
 const cardFactory = (repoOwner, repoName, number, issue) => {
   const key = toIssueKey(repoOwner, repoName, number);
   let card = CARD_CACHE[key];
-  if (card) {
+  if (card && issue) {
     card.resetPromisesAndState(issue);
+    return card;
+  } else if (card) {
     return card;
   } else {
     card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue);
