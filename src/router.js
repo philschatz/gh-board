@@ -37,7 +37,9 @@ const routes = [
             onEnter: (state, replace) => replace(null, buildRoute('', parseRoute(state)))
           },
           { path: 'since', component: MergedSinceFormShell},
+          { path: 'compare', component: MergedSinceFormShell},
           { path: 'since/:startShas(/:endShas)', component: MergedSince},
+          { path: 'compare/:startShas(/:endShas)', component: MergedSince},
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
           // Redirect to the gantt URL
