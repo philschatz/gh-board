@@ -143,14 +143,14 @@ export const MergedSinceFormShell = React.createClass({
       const node = this.refs[`end-${i}`];
       return node.value;
     });
-    return `${filters.url()}/${starts.join(':')}/${ends.join(':')}`;
+    return `${filters.url()}/${starts.join('|')}/${ends.join('|')}`;
   },
   renderRow({repoName}, i) {
     return (
       <tr key={repoName}>
         <td>{repoName}</td>
-        <td><input ref={`start-${i}`} onChange={this.onChangeInput}/></td>
-        <td><input ref={`end-${i}`} onChange={this.onChangeInput}/></td>
+        <td>From: <input ref={`start-${i}`} onChange={this.onChangeInput}/></td>
+        <td>To: <input ref={`end-${i}`} onChange={this.onChangeInput}/></td>
       </tr>
     );
   },
