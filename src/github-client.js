@@ -114,6 +114,9 @@ class Client extends EventEmitter {
     }
     return cachedClient;
   }
+  getAnonymousOcto() {
+    return new Octo();
+  }
   readMessage() {
     return this.getOcto().zen.read();
   }

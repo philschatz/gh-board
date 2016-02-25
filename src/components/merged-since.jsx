@@ -78,20 +78,10 @@ const MergedSince = React.createClass({
   }
 });
 
-const MergedSinceShell = React.createClass({
+export const MergedSinceInner = React.createClass({
   render() {
-    let {startShas, endShas} = this.props.params;
-    const {repoInfos} = getFilters().getState();
+    let {startShas, endShas, repoInfos} = this.props;
 
-    startShas = startShas.split('|');
-    if (endShas) {
-      endShas = endShas.split('|');
-    } else {
-      endShas = [];
-      repoInfos.forEach(() => {
-        endShas.push('master');
-      });
-    }
     if (startShas.length !== repoInfos.length || endShas.length !== repoInfos.length) {
       /*eslint-disable no-alert */
       alert('The number of shas to compare does not match the number of repositories');
@@ -109,6 +99,27 @@ const MergedSinceShell = React.createClass({
         promise={allPromise}
         renderLoaded={(comparisons) => <MergedSince comparisons={comparisons} repoInfos={repoInfos} startShas={startShas} endShas={endShas}/>}
       />
+    );
+
+  }
+});
+
+const MergedSinceShell = React.createClass({
+  render() {
+    let {startShas, endShas} = this.props.params;
+    const {repoInfos} = getFilters().getState();
+
+    startShas = startShas.split('|');
+    if (endShas) {
+      endShas = endShas.split('|');
+    } else {
+      endShas = [];
+      repoInfos.forEach(() => {
+        endShas.push('master');
+      });
+    }
+    return (
+      <MergedSinceInner startShas={startShas} endShas={endShas} repoInfos={repoInfos}/>
     );
   }
 });
