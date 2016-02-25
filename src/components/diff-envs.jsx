@@ -11,9 +11,9 @@ const DiffEnvs = React.createClass({
       const shaInfos = {};
       textFile.split('\n').forEach((line) => {
         let [repoName, updatedStr, toStr, sha] = line.split(' ');
-        if (updatedStr !== 'updated') { throw new Error('BUG! looks like rev.txt is malformed'); }
-        if (toStr !== 'to')           { throw new Error('BUG! looks like rev.txt is malformed'); }
         if (repoName && sha) {
+          if (updatedStr !== 'updated') { throw new Error('BUG! looks like rev.txt is malformed'); }
+          if (toStr !== 'to')           { throw new Error('BUG! looks like rev.txt is malformed'); }
           // HACK: to account for the fact that rev.txt uses the old name for tutor-server
           if (repoName === 'tutor') {
             repoName = 'tutor-server';
