@@ -11,6 +11,7 @@ import ByUserView from './components/by-user-view';
 import MergedSince from './components/merged-since';
 import {MergedSinceFormShell} from './components/merged-since';
 import DiffEnvs from './components/diff-envs';
+import EtherpadShell from './components/etherpad';
 
 import {parseRoute, buildRoute} from './route-utils';
 
@@ -30,6 +31,7 @@ const routes = [
     indexRoute: { component: Dashboard },
     childRoutes: [
       { path: '/diff-envs/:startHost/:endHost', component: DiffEnvs},
+      { path: '/p-issue/:repoOwner/:repoName/:number', component: EtherpadShell},
       { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:userName)(/x/:columnRegExpStr)',
         indexRoute: {component: RepoKanban},
         // If you change these children (or the parents) make sure you edit RELEVANT_PATH_SEGMENT in another file.

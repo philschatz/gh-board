@@ -36,6 +36,7 @@
     "bootstrap": "^3.3.4",
     "classnames": "^2.2.1",
     "d3": "^3.5.12",
+    "etherpad-lite-client": "^0.8.0",
     "gfm-linkify": "^0.1.0",
     "mermaid": "^0.5.6",
     "moment": "2.10.3",
