@@ -73,18 +73,18 @@ const Etherpad = React.createClass({
   render() {
     const {text, isSaving} = this.state;
     const src = this.getUrl();
-    let buttons;
+    let saveButton;
     if (UserStore.getUser()) {
-      buttons = (
-        <div className='etherpad-operations'>
-          <BS.Button onClick={this.loadIssueBody}>Load Issue into Editor</BS.Button>
-          <BS.Button disabled={isSaving} onClick={this.saveIssueBody}>Save Changes to Issue</BS.Button>
-        </div>
+      saveButton = (
+        <BS.Button disabled={isSaving} onClick={this.saveIssueBody}>Save Changes to Issue</BS.Button>
       );
     }
     return (
       <div>
-        {buttons}
+        <div className='etherpad-operations'>
+          <BS.Button onClick={this.loadIssueBody}>Load Issue into Editor</BS.Button>
+          {saveButton}
+        </div>
         <div className='etherpad-wrapper'>
             <iframe className='etherpad-frame' src={src} />
             <GithubFlavoredMarkdown text={text}/>
