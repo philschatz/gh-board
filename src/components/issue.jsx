@@ -258,10 +258,12 @@ let Issue = React.createClass({
       );
     }
 
+    const etherpadHref = `/p-issue/${repoOwner}/${repoName}/${issue.number}`;
     const header = [
       <IssueOrPullRequestBlurb key='issue-blurb'
         card={card}
         primaryRepoName={primaryRepoName} />,
+      <Link key='etherpad' to={etherpadHref}><i className='octicon octicon-pencil'/></Link>,
       taskCounts
     ];
     const classes = {
