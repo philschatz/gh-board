@@ -802,3 +802,15 @@ i.icon-spin {
 }
 
 .navbar-brand { height: 20px; }
+
+.etherpad-wrapper {
+  display: table;
+  width: 100%;
+  // .etherpad-inner {
+    // display: table-row;
+    .etherpad-frame { min-height: 600px; display: table-cell; min-width: 600px; vertical-align: top; }
+    .rendered-markdown { min-height: 600px; overflow-y: scroll; display: table-cell; vertical-align: top; }
+  // }
+  // display: flex;
+  // flex-direction: row;
+}
