@@ -353,6 +353,8 @@ body { background-color: #ddd; }
       // }
     }
 
+    &:not(:hover) .list-group-item-heading .etherpad-issue-edit { display: none; }
+
     .list-group-item-text {
       // background-color: white;
       padding-left: 1rem;
@@ -565,50 +567,51 @@ body { background-color: #ddd; }
     .task-list li:not(.task-list-item) { display: none; }
   }
 
-  // Move this into a mixin if we use it outside of popovers
-  .rendered-markdown {
-    &.is-empty {
-      color: #ccc;
-      font-style: italic;
-      &::before { content: 'No Content provided.'; }
-    }
+}
 
-    /* Make sure images are scaled to fit in the modal */
-    img { max-width: 100%; }
+// Move this into a mixin if we use it outside of popovers
+.rendered-markdown {
+  &.is-empty {
+    color: #ccc;
+    font-style: italic;
+    &::before { content: 'No Content provided.'; }
+  }
 
-    .x-font-and-emoji(1.5rem);
+  /* Make sure images are scaled to fit in the modal */
+  img { max-width: 100%; }
 
-    // Mostly from GH Issues and PRs
-    .issue-status-badge {
-      &[data-state='reopened'],
-      &[data-state='open']   { background-color: #6cc644; }
-      &[data-state='closed'] { background-color: #bd2c00; }
-      &[data-state='merged'] { background-color: #6e5494; }
+  .x-font-and-emoji(1.5rem);
 
-      background-color: #666; // default (no state)
-      color: white;
-      display: inline-block;
-      white-space: nowrap;
-      margin-left: .5rem;
-      padding: 1px 5px;
-      font-size: 12px;
-      border-radius: 3px;
-      text-align: center;
-      font-weight: bold;
-    }
+  // Mostly from GH Issues and PRs
+  .issue-status-badge {
+    &[data-state='reopened'],
+    &[data-state='open']   { background-color: #6cc644; }
+    &[data-state='closed'] { background-color: #bd2c00; }
+    &[data-state='merged'] { background-color: #6e5494; }
 
-    // only apply padding to the top-most task list
-    > .task-list {
-      padding-left: 0;
+    background-color: #666; // default (no state)
+    color: white;
+    display: inline-block;
+    white-space: nowrap;
+    margin-left: .5rem;
+    padding: 1px 5px;
+    font-size: 12px;
+    border-radius: 3px;
+    text-align: center;
+    font-weight: bold;
+  }
 
-      .task-list-item {
-        list-style-type: none;
+  // only apply padding to the top-most task list
+  > .task-list {
+    padding-left: 0;
 
-        .task-list-item-checkbox {
-          cursor: default;
-          vertical-align: middle;
-          margin-right: .5rem;
-        }
+    .task-list-item {
+      list-style-type: none;
+
+      .task-list-item-checkbox {
+        cursor: default;
+        vertical-align: middle;
+        margin-right: .5rem;
       }
     }
   }

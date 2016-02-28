@@ -263,7 +263,7 @@ let Issue = React.createClass({
       <IssueOrPullRequestBlurb key='issue-blurb'
         card={card}
         primaryRepoName={primaryRepoName} />,
-      <Link key='etherpad' to={etherpadHref}><i className='octicon octicon-pencil'/></Link>,
+      <Link key='etherpad' to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>,
       taskCounts
     ];
     const classes = {

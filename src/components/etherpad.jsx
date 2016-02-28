@@ -9,12 +9,7 @@ import EtherpadClient from 'etherpad-lite-client';
 
 const Etherpad = React.createClass({
   getInitialState() {
-    const {repoOwner, repoName, number} = this.props;
-    const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-    if (card.issue) {
-      return {isSaving: false, text: card.issue.body};
-    }
-    return {isSaving: false, text: 'Not loaded yet???'};
+    return {isSaving: false, text: 'Please wait, it may take 30sec for the free Heroku site to spin up. See [Heroku Free Dynos](https://blog.heroku.com/archives/2015/5/7/heroku-free-dynos)'};
   },
   componentDidMount() {
     this.poll();
@@ -71,6 +66,7 @@ const Etherpad = React.createClass({
     });
   },
   render() {
+    const {repoOwner, repoName} = this.props;
     const {text, isSaving} = this.state;
     const src = this.getUrl();
     let saveButton;
@@ -87,7 +83,7 @@ const Etherpad = React.createClass({
         </div>
         <div className='etherpad-wrapper'>
             <iframe className='etherpad-frame' src={src} />
-            <GithubFlavoredMarkdown text={text}/>
+            <GithubFlavoredMarkdown text={text} repoOwner={repoOwner} repoName={repoName} />
         </div>
       </div>
     );
