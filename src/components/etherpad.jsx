@@ -81,9 +81,11 @@ const Etherpad = React.createClass({
           <BS.Button onClick={this.loadIssueBody}>Load Issue into Editor</BS.Button>
           {saveButton}
         </div>
-        <div className='etherpad-wrapper'>
-            <iframe className='etherpad-frame' src={src} />
+        <div className='etherpad-wrapper col-xs-12'>
+          <iframe className='etherpad-frame col-xs-6' src={src} />
+          <div className='etherpad-preview col-xs-6'>
             <GithubFlavoredMarkdown text={text} repoOwner={repoOwner} repoName={repoName} />
+          </div>
         </div>
       </div>
     );
