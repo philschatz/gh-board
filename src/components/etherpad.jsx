@@ -1,5 +1,6 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
+import history from '../history';
 
 import GithubFlavoredMarkdown from './gfm';
 import Client from '../github-client';
@@ -14,6 +15,9 @@ const Etherpad = React.createClass({
   componentDidMount() {
     this.poll();
   },
+  componentWillUnmount() {
+    clearTimeout(this.__timeout); // stop polling for the new markdown to generate the preview
+  },
   poll() {
     // Start polling
     Client.getAnonymousOcto().fromUrl(`${this.getUrl()}/export/txt`).read().then((text) => {
@@ -25,7 +29,7 @@ const Etherpad = React.createClass({
           this.poll(); // Should be guaranteed to no longer be "This is an empty pad"
         })
       } else {
-        setTimeout(this.poll, 2000);
+        this.__timeout = setTimeout(this.poll, 2000);
       }
     });
   },
@@ -44,6 +48,8 @@ const Etherpad = React.createClass({
     const {repoOwner, repoName, number} = this.props;
 
     const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
+
+
 
     // refetch the Issue body (esp if it hasn't been loaded yet)
     return card.fetchIssue().then(() => {
@@ -74,21 +80,45 @@ const Etherpad = React.createClass({
       this.setState({isSaving: false});
     });
   },
+  getIssueBody() {
+    const {repoOwner, repoName, number} = this.props;
+    const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
+    if (card.issue) {
+      return card.issue.body;
+    } else {
+      return ''; // return '' so it can be trimmed when comparing
+    }
+  },
+  promptLoadIssueBody() {
+    if (confirm('Are you sure you want to discard the current collaborative edits and replace it with what is currently in GitHub?')) {
+      this.loadIssueBody();
+    }
+  },
   render() {
     const {repoOwner, repoName} = this.props;
     const {text, isSaving} = this.state;
     const src = this.getUrl();
-    let saveButton;
-    if (UserStore.getUser()) {
-      saveButton = (
-        <BS.Button disabled={isSaving} onClick={this.saveIssueBody}>Save Changes to Issue</BS.Button>
+    let goBack;
+    if (window.history.length) {
+      goBack = (
+        <BS.Button onClick={() => history.goBack()}>Go Back</BS.Button>
       );
+    }
+    let isLoadEnabled = false;
+    let isSaveEnabled = false;
+    if (text.trim() !== this.getIssueBody().trim()) {
+      isLoadEnabled = true;
+      // Only if the text changed and the user is authenticated should we allow saving
+      if (UserStore.getUser()) {
+        isSaveEnabled = !isSaving;
+      }
     }
     return (
       <div>
         <div className='etherpad-operations'>
-          <BS.Button onClick={this.loadIssueBody}>Load Issue into Editor</BS.Button>
-          {saveButton}
+          {goBack}
+          <BS.Button disabled={!isLoadEnabled} onClick={this.promptLoadIssueBody} title='Discards Edits and replaces the editor with what is currently on GitHub'>Reset Editor</BS.Button>
+          <BS.Button disabled={!isSaveEnabled} onClick={this.saveIssueBody} title='Save changed made here back to GitHub (you must be logged in to gh-board)'>Save to GitHub</BS.Button>
         </div>
         <div className='etherpad-wrapper col-xs-12'>
           <iframe className='etherpad-frame col-xs-6' src={src} />
