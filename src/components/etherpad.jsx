@@ -15,6 +15,9 @@ const Etherpad = React.createClass({
   componentDidMount() {
     this.poll();
   },
+  componentWillUnmount() {
+    clearTimeout(this.__timeout); // stop polling for the new markdown to generate the preview
+  },
   poll() {
     // Start polling
     Client.getAnonymousOcto().fromUrl(`${this.getUrl()}/export/txt`).read().then((text) => {
@@ -26,7 +29,7 @@ const Etherpad = React.createClass({
           this.poll(); // Should be guaranteed to no longer be "This is an empty pad"
         })
       } else {
-        setTimeout(this.poll, 2000);
+        this.__timeout = setTimeout(this.poll, 2000);
       }
     });
   },
