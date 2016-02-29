@@ -217,20 +217,20 @@ const InnerMarkdown = React.createClass({
         // (ie for a title)
         const inlineHtml = html.replace(/^<p>/, '').replace(/<\/p>\n$/, '');
         const props = {
-          className: 'rendered-markdown',
+          className: 'markdown-body',
           dangerouslySetInnerHTML: {__html: inlineHtml}
         };
         return (<span {...props}/>);
       } else {
         const props = {
-          className: 'rendered-markdown',
+          className: 'markdown-body',
           dangerouslySetInnerHTML: {__html: html}
         };
         return (<div {...props}/>);
       }
     } else {
       return (
-        <div className='rendered-markdown is-empty'></div>
+        <div className='markdown-body is-empty'></div>
       );
     }
 
