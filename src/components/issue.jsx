@@ -263,7 +263,9 @@ let Issue = React.createClass({
       <IssueOrPullRequestBlurb key='issue-blurb'
         card={card}
         primaryRepoName={primaryRepoName} />,
-      <Link key='etherpad' to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil' title='Edit collaboratively'/></Link>,
+      <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip>Click to Edit Collaboratively (real realtime)!</BS.Tooltip>}>
+        <Link to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>
+      </BS.OverlayTrigger>,
       taskCounts
     ];
     const classes = {
