@@ -18,7 +18,15 @@ const Etherpad = React.createClass({
     // Start polling
     Client.getAnonymousOcto().fromUrl(`${this.getUrl()}/export/txt`).read().then((text) => {
       this.setState({text});
-      setTimeout(this.poll, 2000);
+      // This is the magic text inside a newly-created pad.
+      // Defined in `etherpad-lite-heroku`'s settings file
+      if (text.indexOf('Welcome to Etherpad!') >= 0) {
+        this.loadIssueBody().then(() => {
+          this.poll(); // Should be guaranteed to no longer be "This is an empty pad"
+        })
+      } else {
+        setTimeout(this.poll, 2000);
+      }
     });
   },
   getPadName() {
@@ -38,7 +46,7 @@ const Etherpad = React.createClass({
     const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
 
     // refetch the Issue body (esp if it hasn't been loaded yet)
-    card.fetchIssue().then(() => {
+    return card.fetchIssue().then(() => {
 
       // const url = `${hostName}/api/1/setText?apiKey=${secret}&padID=${this.getPad()}&text=`;
       const etherpad = EtherpadClient.connect({
@@ -53,6 +61,7 @@ const Etherpad = React.createClass({
         console.log(err);
         console.log(val);
       });
+      return card.issue.body; // just in case someone uses this promise
 
     });
   },
@@ -81,9 +90,11 @@ const Etherpad = React.createClass({
           <BS.Button onClick={this.loadIssueBody}>Load Issue into Editor</BS.Button>
           {saveButton}
         </div>
-        <div className='etherpad-wrapper'>
-            <iframe className='etherpad-frame' src={src} />
+        <div className='etherpad-wrapper col-xs-12'>
+          <iframe className='etherpad-frame col-xs-6' src={src} />
+          <div className='etherpad-preview col-xs-6'>
             <GithubFlavoredMarkdown text={text} repoOwner={repoOwner} repoName={repoName} />
+          </div>
         </div>
       </div>
     );

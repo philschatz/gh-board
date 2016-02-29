@@ -807,12 +807,27 @@ i.icon-spin {
 .navbar-brand { height: 20px; }
 
 .etherpad-wrapper {
-  display: table;
-  width: 100%;
+  // display: table;
+  // width: 100%;
   // .etherpad-inner {
     // display: table-row;
-    .etherpad-frame { min-height: 600px; display: table-cell; min-width: 600px; vertical-align: top; }
-    .rendered-markdown { min-height: 600px; overflow-y: scroll; display: table-cell; vertical-align: top; }
+    // .etherpad-edit {
+    //   // display: table-cell;
+    //   // vertical-align: top;
+    //   iframe {
+    //     min-width: 600px;
+    //     height: 600px;
+    //   }
+    // }
+    iframe { height: 600px; }
+    .etherpad-preview {
+      // display: table-cell;
+      // vertical-align: top;
+      .rendered-markdown {
+        height: 600px;
+        overflow-y: auto;
+      }
+    }
   // }
   // display: flex;
   // flex-direction: row;
