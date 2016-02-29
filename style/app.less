@@ -1,5 +1,6 @@
 @import './vendor';
 @import (inline) '../node_modules/recordo/recordo.css';
+@import './markdown-primer';
 
 .user-select(@type) {
   -webkit-user-select: @type;
@@ -561,7 +562,7 @@ body { background-color: #ddd; }
   max-width: 500px;
 
   // When looking at the task-list popover only show the task lists
-  &.task-list-details .rendered-markdown {
+  &.task-list-details .markdown-body {
     > :not(.task-list),
     // also hide any child list items that do not have a checkbox
     .task-list li:not(.task-list-item) { display: none; }
@@ -570,7 +571,7 @@ body { background-color: #ddd; }
 }
 
 // Move this into a mixin if we use it outside of popovers
-.rendered-markdown {
+.markdown-body {
   &.is-empty {
     color: #ccc;
     font-style: italic;
@@ -581,6 +582,9 @@ body { background-color: #ddd; }
   img { max-width: 100%; }
 
   .x-font-and-emoji(1.5rem);
+
+  // Style code blocks similar to GitHub (Override bootstrap's default)
+  code { color: initial; }
 
   // Mostly from GH Issues and PRs
   .issue-status-badge {
@@ -823,9 +827,12 @@ i.icon-spin {
     .etherpad-preview {
       // display: table-cell;
       // vertical-align: top;
-      .rendered-markdown {
+      .markdown-body {
         height: 600px;
         overflow-y: auto;
+
+        background-color: #fff;
+        padding: 1em;
       }
     }
   // }
