@@ -6,7 +6,13 @@ export default React.createClass({
   displayName: 'Login',
   onSave() {
     const {token} = this.refs;
-    const tokenVal = token.getValue();
+    let tokenVal = token.getValue();
+    if (tokenVal) {
+      // needs trimming because just copying the token
+      // from GitHub (by double-clicking the string instead of
+      // clicking the Copy button) adds a leading space character
+      tokenVal = tokenVal.trim();
+    }
     Client.setToken(tokenVal);
     // Close the modal
     this.onCancel();
