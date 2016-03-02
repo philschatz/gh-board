@@ -58,7 +58,7 @@ const KanbanColumn = React.createClass({
       name = label.name;
     }
     const title = (
-      <Link className='label-title' to={getFilters().toggleTagName(label.name).url()}>
+      <Link className='label-title' to={getFilters().toggleColumnLabel(label.name).url()}>
         {name}
       </Link>
     );

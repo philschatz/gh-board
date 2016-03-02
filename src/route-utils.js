@@ -44,7 +44,7 @@ function addParams(options, key, vals) {
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
-export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName}={}, ...otherFields) {
+export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName}={}, ...otherFields) {
   repoInfos = repoInfos || [];
   milestoneTitles = milestoneTitles || [];
   tagNames = tagNames || [];
@@ -60,6 +60,7 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, userName
   const options = {};
   addParams(options, 'm', milestoneTitles);
   addParams(options, 'l', tagNames);
+  addParams(options, 'c', columnLabels);
   addParams(options, 'u', userName);
   if (columnRegExp) {
     const re = columnRegExp.toString();
@@ -88,7 +89,7 @@ function parseArray(x) {
 }
 
 export function parseRoute({params, routes, location}) {
-  let {repoStr, milestonesStr, tagsStr, userName, columnRegExpStr} = params;
+  let {repoStr, milestonesStr, columnsStr, tagsStr, userName, columnRegExpStr} = params;
   // Note: routeSegmentName can be null if it's the index path (the kanban view)
   if (!routes[RELEVANT_PATH_SEGMENT]) { console.error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
   let routeSegmentName;
@@ -102,6 +103,7 @@ export function parseRoute({params, routes, location}) {
   let repoInfos = [];
   let milestoneTitles = [];
   let tagNames = [];
+  let columnLabels = [];
   let columnRegExp;
 
   // TODO: remove these fallbacks once URL's are updated.
@@ -113,10 +115,11 @@ export function parseRoute({params, routes, location}) {
   const {query} = location;
   if (query.m) { milestoneTitles = parseArray(query.m); }
   if (query.l) { tagNames = parseArray(query.l); }
+  if (query.c) { columnLabels = parseArray(query.c); }
   if (query.u) { userName = query.u; }
   if (query.x) { columnRegExp = new RegExp(query.x); }
 
-  return {repoInfos, milestoneTitles, tagNames, userName, columnRegExp, routeSegmentName};
+  return {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName};
 }
 
 class FilterState {
@@ -161,6 +164,9 @@ class FilterState {
   toggleTagName(tagName) {
     return this._toggleKey('tagNames', tagName);
   }
+  toggleColumnLabel(columnLabel) {
+    return this._toggleKey('columnLabels', columnLabel);
+  }
   // setUser(user)
   // clearUser()
   toggleUserName(name) {
@@ -189,6 +195,7 @@ const DEFAULTS = {
   repoInfos: [],
   milestoneTitles: [],
   tagNames: [],
+  columnLabels: [],
   columnRegExp: undefined
 };
 
@@ -220,7 +227,7 @@ function isUser(issue, userName) {
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
   const {milestoneTitles, userName, columnRegExp} = getFilters().getState();
-  let {tagNames} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
+  let {tagNames, columnLabels} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
   const includedTagNames = tagNames.filter((tagName) => { return tagName[0] !== '-'; });
   const excludedTagNames = tagNames.filter((tagName) => { return tagName[0] === '-'; }).map((tagName) => { return tagName.substring(1); });
 
@@ -274,6 +281,14 @@ export function filterCardsByFilter(cards) {
     const labelNames = issue.labels.map((label) => { return label.name; });
     // issue must have all the tags (except UNCATEGORIZED_NAME)
     // and MUST NOT have any of the excluded tags
+    // and must have at least 1 of the columnLabels (but one of those might be UNCATEGORIZED_NAME)
+    let issueColumnNames = labelNames.filter((tagName) => { return columnRegExp.test(tagName); });
+    // If the issue does not have a column then add UNCATEGORIZED_NAME to the set of columns to check if they are filtered
+    if (issueColumnNames.length === 0) {
+      issueColumnNames = [UNCATEGORIZED_NAME].concat(issueColumnNames);
+    }
+    const hasAColumn = _.intersection(columnLabels, issueColumnNames).length > 0;
+    if (columnLabels.length && !hasAColumn) { return false; }
     if (_.difference(_.without(includedTagNames, UNCATEGORIZED_NAME), labelNames).length > 0) { return false; }
     if (_.intersection(excludedTagNames, labelNames).length > 0) { return false; }
     return true;
