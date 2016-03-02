@@ -561,6 +561,11 @@ body { background-color: #ddd; }
 .popover {
   max-width: 500px;
 
+  .popover-content {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
   // When looking at the task-list popover only show the task lists
   &.task-list-details .markdown-body {
     > :not(.task-list),
