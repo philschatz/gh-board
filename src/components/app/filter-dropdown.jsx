@@ -212,6 +212,28 @@ const FilterDropdown = React.createClass({
   render() {
     const {milestones, labels} = this.props;
 
+    const renderMilestone = (milestone) => {
+      let dueDate;
+      if (milestone.dueOn) {
+        dueDate = (
+          <span key='due-at' className='due-at'>
+            {' due '}
+            <Time dateTime={new Date(milestone.dueOn)}/>
+          </span>
+        );
+      }
+      return [
+        <i key='icon' className='milestone-icon octicon octicon-milestone'/>,
+        <span key='milestone-title' className='milestone-title'>
+          <GithubFlavoredMarkdown
+            inline
+            disableLinks={true}
+            text={milestone.title}/>
+        </span>,
+        dueDate
+      ];
+    };
+
     const footer = (
       <BS.ButtonGroup>
         <BS.Button disabled>Issue Only</BS.Button>
@@ -220,36 +242,40 @@ const FilterDropdown = React.createClass({
       </BS.ButtonGroup>
     );
 
-    const popover = (
-      <BS.Popover className='filter-popover'>
-        <BS.Panel header='Filters' footer={footer} className='filter-panel'>
-          <BS.Accordion>
-            <BS.Panel className='filter-category' header='Labels' eventKey='1'>
-              {this.renderTagNames(labels)}
-            </BS.Panel>
-            <BS.Panel className='filter-category' header='Milestones' eventKey='2'>
-              {this.renderMilestones(milestones)}
-            </BS.Panel>
-            <BS.Panel className='filter-category' header='Columns' eventKey='3'>
-              {this.renderColumnNames(labels)}
-            </BS.Panel>
-          </BS.Accordion>
-        </BS.Panel>
-      </BS.Popover>
-    )
+    const panel = (
+      <BS.Panel header='Filters' footer={footer} className='filter-panel'>
+        <BS.Accordion>
+          <BS.Panel className='filter-category' header='Labels' eventKey='1'>
+            {this.renderTagNames(labels)}
+          </BS.Panel>
+          <BS.Panel className='filter-category' header='Milestones' eventKey='2'>
+            {this.renderMilestones(milestones)}
+          </BS.Panel>
+          <BS.Panel className='filter-category' header='Columns' eventKey='3'>
+            {this.renderColumnNames(labels)}
+          </BS.Panel>
+        </BS.Accordion>
+      </BS.Panel>
+    );
+
+    const {milestoneTitles} = getFilters().getState();
+    let selectedMilestoneItem;
+    if (milestoneTitles.length) {
+      if (milestoneTitles.length > 1) {
+        selectedMilestoneItem = `${milestoneTitles.length} milestones`;
+      } else {
+        // Only 1 milestone is selected so show the milestone title
+        selectedMilestoneItem = renderMilestone({title: milestoneTitles[0]});
+      }
+    } else {
+      selectedMilestoneItem = 'All Issues and Pull Requests';
+    }
+
 
     return (
-      <BS.OverlayTrigger
-        trigger='click'
-        placement='bottom'
-        rootClose
-        overlay={popover}>
-        <span className='-search-select'>
-          <i className='octicon octicon-search'/>
-          <span className='caret'/>
-        </span>
-      </BS.OverlayTrigger>
-
+      <BS.NavDropdown className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem}<i className='octicon octicon-search'/></span>}>
+        {panel}
+      </BS.NavDropdown>
     );
   }
 

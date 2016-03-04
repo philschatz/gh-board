@@ -34,99 +34,6 @@ const SettingsItem = React.createClass({
   }
 });
 
-const MilestonesDropdown = React.createClass({
-  mixins: [History],
-  update() {
-    this.forceUpdate();
-  },
-  render() {
-    const {milestones} = this.props;
-    const selectedMilestoneTitles = getFilters().getState().milestoneTitles;
-
-    const renderMilestone = (milestone) => {
-      let dueDate;
-      if (milestone.dueOn) {
-        dueDate = (
-          <span key='due-at' className='due-at'>
-            {' due '}
-            <Time dateTime={new Date(milestone.dueOn)}/>
-          </span>
-        );
-      }
-      return [
-        <i key='icon' className='milestone-icon octicon octicon-milestone'/>,
-        <span key='milestone-title' className='milestone-title'>
-          <GithubFlavoredMarkdown
-            inline
-            disableLinks={true}
-            text={milestone.title}/>
-        </span>,
-        dueDate
-      ];
-    };
-
-    if (milestones.length) {
-      const milestonesItems = _.map(milestones, (milestone) => {
-        return (
-          <SettingsItem
-            className='milestone-item'
-            key={milestone.title}
-            isChecked={getFilters().getState().milestoneTitles.length && getFilters().getState().milestoneTitles.indexOf(milestone.title) >= 0}
-            to={getFilters().toggleMilestoneTitle(milestone.title).url()}
-          >{renderMilestone(milestone)}</SettingsItem>
-        );
-      });
-      let clearMilestoneFilter;
-      if (getFilters().getState().milestoneTitles.length > 0) {
-        clearMilestoneFilter = (
-          <SettingsItem key='clear' to={getFilters().clearMilestoneTitles().url()}>Clear Milestone Filter</SettingsItem>
-        );
-      }
-
-      let selectedMilestoneItem;
-      if (selectedMilestoneTitles.length) {
-        if (selectedMilestoneTitles.length > 1) {
-          selectedMilestoneItem = `${selectedMilestoneTitles.length} milestones`;
-        } else {
-          // Only 1 milestone is selected so show the milestone title
-          selectedMilestoneItem = renderMilestone({title: selectedMilestoneTitles[0]});
-        }
-      } else {
-        selectedMilestoneItem = 'All Issues and Pull Requests';
-      }
-      return (
-        <BS.NavDropdown id='milestone-dropdown' className='milestone-dropdown' title={<span className='selected-milestone'>{selectedMilestoneItem}</span>}>
-          <BS.MenuItem key='1' header>Filter by Milestone</BS.MenuItem>
-          {milestonesItems}
-          {clearMilestoneFilter}
-          <BS.MenuItem key='3' divider/>
-          <BS.MenuItem key='4' disabled>Not in a Milestone</BS.MenuItem>
-          <BS.MenuItem key='5' divider/>
-          <SettingsItem key='6' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
-          <SettingsItem key='7' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
-        </BS.NavDropdown>
-      );
-    } else {
-      return null;
-    }
-
-  }
-});
-
-const MilestonesDropdownShell = React.createClass({
-  render() {
-    const {repoInfos} = this.props;
-    // Use primary repo
-    const [{repoOwner, repoName}] = repoInfos;
-
-    return (
-      <Loadable
-        promise={IssueStore.fetchMilestones(repoOwner, repoName)}
-        renderLoaded={(milestones) => <MilestonesDropdown repoInfos={repoInfos} milestones={milestones}/>}
-        />
-    );
-  }
-});
 
 const AppNav = React.createClass({
   getInitialState() {
@@ -230,7 +137,6 @@ const AppNav = React.createClass({
     );
 
     let repoDetails = null;
-    let milestonesDropdown = null;
     if (!filtering.length && repoInfos.length) {
       // Grab the 1st repo
       const [{repoOwner, repoName}] = repoInfos;
@@ -257,11 +163,6 @@ const AppNav = React.createClass({
           {'/'}
           {repoNameItems}
         </li>
-      );
-    }
-    if (repoInfos.length) {
-      milestonesDropdown = (
-        <MilestonesDropdownShell repoInfos={repoInfos}/>
       );
     }
     const settingsMenuHelp = () => {
@@ -293,7 +194,6 @@ const AppNav = React.createClass({
           </BS.Nav>
           <BS.Nav key='right' pullRight>
             <FilterDropdown repoInfos={repoInfos}/>
-            {milestonesDropdown}
 
             <BS.NavDropdown key='settings' id='display-settings' title={settingsTitle}>
               <BS.MenuItem key='display' header>Display Settings</BS.MenuItem>
@@ -358,6 +258,12 @@ const AppNav = React.createClass({
                 >
                 Show More Pull Request Info
               </SettingsItem>
+
+              <BS.MenuItem key='divider3' divider/>
+              <BS.MenuItem key='manager-pages' header>Manager Pages</BS.MenuItem>
+              <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
+              <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
+
             </BS.NavDropdown>
             {loginButton}
           </BS.Nav>
