@@ -82,7 +82,7 @@ const KarmaWarning = React.createClass({
     let newestText = null;
     if (newestVersion) {
       newestText = (
-        <button className='btn btn-primary' onClick={() => window.location.reload(true)}>New Version released <Time dateTime={new Date(newestVersion.date)}/>. Click to Reload</button>
+        <button className='btn btn-primary' onClick={() => window.location.reload(true)}>gh-board updated <Time dateTime={new Date(newestVersion.date)}/>: "{newestVersion.message}". Click to Reload</button>
       );
     }
     return (
