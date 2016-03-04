@@ -271,6 +271,8 @@ const FilterDropdownShell = React.createClass({
       return (
         <Loadable promise={promise} renderLoaded={([milestones, labels]) => <FilterDropdown milestones={milestones} labels={labels}/>} />
       )
+    } else {
+      return null;
     }
 
   }
