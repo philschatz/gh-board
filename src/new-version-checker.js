@@ -35,7 +35,7 @@ class NewVersionChecker extends EventEmitter {
           this.emit('change', this.newestVersion);
         }
       }
-      return {sha, date};
+      return {sha, date, message};
     });
   }
 }
