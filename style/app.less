@@ -844,3 +844,81 @@ i.icon-spin {
   // display: flex;
   // flex-direction: row;
 }
+
+
+.filter-popover {
+  .popover-content {
+    padding: 0; // override bootstrap
+    max-height: none; // override most popovers max height of `300px`
+
+    .filter-panel {
+      margin-bottom: 0; // override bootstrap
+
+      > .panel-body {
+        // padding: 0; //override bootstrap
+      }
+      .filter-category {
+        .panel-body {
+          padding: 0; //override bootstrap
+        }
+
+        .form-group,
+        .list-group {
+          margin-bottom: 0; // override bootstrap
+        }
+
+        //...
+        .list-group {
+          // allow vertical scrolling
+          max-height: 500px; // TODO: have this be calculated by the page height
+          overflow-y: auto;
+
+          .list-group-item {
+
+            padding: 5px 10px; // make it narrower than bootstrap's default
+
+            &:hover { background-color: #eee; }
+
+            // padd just enough for the missing octicon-check
+            &:not(.is-selected) { padding-left: 3.1rem; }
+
+            // Hide the exclude button unless hovering over the item
+            &:not(.is-excluded):not(:hover) .item-toggle-exclude { display: none; }
+
+            // Make selected (or excluded) items bold
+            &.is-selected,
+            &.is-excluded {
+              .item-text { font-weight: bold; }
+            }
+
+            .item-checkmark { margin-right: 1rem; }
+
+            .item-text {
+              display: inline-block;
+              margin-left: 1rem;
+
+              color: inherit; // override the blue link color
+
+              // milestones are long; truncate them
+              max-width: 21rem;
+              white-space: nowrap;
+              overflow-x: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .item-toggle-exclude { float: right; }
+
+            .item-icon {
+              width: 1em;
+              height: 1em;
+              display: inline-block;
+              border-radius: 3px;
+            }
+          }
+
+        }
+      }
+
+    }
+  }
+}

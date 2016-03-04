@@ -221,6 +221,9 @@ class IssueStore extends EventEmitter {
   fetchMilestones(repoOwner, repoName) {
     return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
   }
+  fetchLabels(repoOwner, repoName) {
+    return Client.getOcto().repos(repoOwner, repoName).labels.fetch();
+  }
   tryToMoveLabel(card, primaryRepoName, label) {
     this.emit('tryToMoveLabel', card, primaryRepoName, label);
   }
