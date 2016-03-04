@@ -5,9 +5,8 @@ import Client from '../../github-client';
 import NewVersionChecker from '../../new-version-checker';
 
 import Time from '../time';
-
 import GameModal from '../game-modal';
-
+import GithubFlavoredMarkdown from '../gfm';
 import SavedFiltersButton from './saved-filters';
 
 const KarmaWarning = React.createClass({
@@ -82,7 +81,7 @@ const KarmaWarning = React.createClass({
     let newestText = null;
     if (newestVersion) {
       newestText = (
-        <button className='btn btn-primary' onClick={() => window.location.reload(true)}>New Version released <Time dateTime={new Date(newestVersion.date)}/>. Click to Reload</button>
+        <button className='btn btn-primary' onClick={() => window.location.reload(true)}>gh-board updated <Time dateTime={new Date(newestVersion.date)}/>: "<GithubFlavoredMarkdown text={newestVersion.message} inline={true} repoOwner='philschatz' repoName='gh-pages' />". Click to Reload</button>
       );
     }
     return (
