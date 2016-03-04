@@ -15,6 +15,7 @@ import MoveModal from '../move-modal';
 import Time from '../time';
 import Loadable from '../loadable';
 import GithubFlavoredMarkdown from '../gfm';
+import FilterDropdown from './filter-dropdown';
 
 
 const SettingsItem = React.createClass({
@@ -291,7 +292,9 @@ const AppNav = React.createClass({
             </li>
           </BS.Nav>
           <BS.Nav key='right' pullRight>
+            <FilterDropdown repoInfos={repoInfos}/>
             {milestonesDropdown}
+
             <BS.NavDropdown key='settings' id='display-settings' title={settingsTitle}>
               <BS.MenuItem key='display' header>Display Settings</BS.MenuItem>
               <SettingsItem
