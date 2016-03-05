@@ -129,7 +129,7 @@ const FilterDropdown = React.createClass({
     const state = filters.getState();
 
     // Add the "UNCATEGORIZED_NAME" label into the mix
-    items.push({name: UNCATEGORIZED_NAME});
+    items = items.concat({name: UNCATEGORIZED_NAME});
 
     items = items.map((item) => {
 
@@ -273,7 +273,7 @@ const FilterDropdown = React.createClass({
 
 
     return (
-      <BS.NavDropdown className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem}<i className='octicon octicon-search'/></span>}>
+      <BS.NavDropdown id='filter-dropdown' className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem}<i className='octicon octicon-search'/></span>}>
         {panel}
       </BS.NavDropdown>
     );
