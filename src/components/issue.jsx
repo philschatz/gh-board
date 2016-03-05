@@ -273,13 +273,13 @@ let Issue = React.createClass({
       'is-dragging': isDragging,
       'is-updated': isUpdated,
       'is-pull-request': card.isPullRequest(),
-      'is-mergeable': card.isPullRequest() && card.isPullRequestMergeable()
+      'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict()
     };
     let statusBlurb;
     if (card.isPullRequest()) {
       const statusClasses = {
         'issue-status': true,
-        'is-mergeable': card.isPullRequestMergeable()
+        'is-merge-conflict': card.hasMergeConflict()
       };
       const status = card.getPullRequestStatus();
       let statusIcon;

@@ -38,9 +38,9 @@ export default class Card {
   isPullRequest() {
     return !!this.issue.pullRequest;
   }
-  isPullRequestMergeable() {
+  hasMergeConflict() {
     if (this._pr) {
-      return this._pr.mergeable || this._pr.mergedAt;
+      return !this._pr.mergeable;
     } else {
       return false; // return false for now just to be safe
     }
