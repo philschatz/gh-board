@@ -5,6 +5,8 @@ import * as BS from 'react-bootstrap';
 import SettingsStore from '../settings-store';
 import {isLight} from '../helpers';
 
+import ColoredIcon from './colored-icon';
+
 const MIN_CHILDREN_TO_SHOW = 10;
 
 const ItemTypes = {
@@ -52,20 +54,11 @@ const IssueList = React.createClass({
     if (icon) {
       className += ' has-icon';
     }
-    let headerStyle;
-    let iconIsLight = 'column-icon';
-    if (backgroundColor) {
-      headerStyle = {backgroundColor: '#' + backgroundColor};
-      if (isLight(backgroundColor)) {
-        iconIsLight += ' is-light';
-      }
-    } else {
-      iconIsLight += ' is-light';
-    }
+
     let iconEl;
     if (icon) {
       iconEl = (
-        <span className={iconIsLight} style={headerStyle}>{icon}</span>
+        <ColoredIcon className='column-icon' color={backgroundColor}>{icon}</ColoredIcon>
       );
     }
     const header = (

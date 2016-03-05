@@ -61,7 +61,6 @@ body { background-color: #ddd; }
     width: 2rem;
   }
 
-  .topbar-nav,
   .bottombar-nav { opacity: .9; }
 
   .topbar-nav {
@@ -258,6 +257,8 @@ body { background-color: #ddd; }
       .column-icon {
         display: inline-block;
         padding: 10px 15px;
+        margin: 0; // override colored-icon has a margin
+        border-radius: 0; //override colored-icon
         &:not(.is-light) { color: white; }
       }
 
@@ -335,8 +336,11 @@ body { background-color: #ddd; }
 
       .x-font-and-emoji(14px); // This is what is set on the <h4>
 
-      .issue-blurb {
+      > .issue-blurb {
         .blurb-number-link { color: #337ab7; } // bootstrap link color
+
+        // all blurbs contain the column they are in, so hide it here
+        .colored-icon { display: none; }
       }
 
 
@@ -497,8 +501,8 @@ body { background-color: #ddd; }
     /* Default merge conflict color when no CI status */
     &.is-pull-request {
       // &:not(.is-mergeable) .list-group-item-heading .issue-blurb .blurb-icon { .x-stripes(#ccc; .8); }
-      &:not(.is-mergeable):not(.is-updated) { .x-stripes(#fcfcfc; .9); }
-      &:not(.is-mergeable).is-updated       { .x-stripes(#fcfcd9; .9); }
+      &.is-merge-conflict:not(.is-updated) { .x-stripes(#fcfcfc; .9); }
+      &.is-merge-conflict.is-updated       { .x-stripes(#fcfcd9; .9); }
     }
 
     /* Color the blurb icon to be gray if there is an issue */
@@ -551,6 +555,9 @@ body { background-color: #ddd; }
       white-space: nowrap;
       // max-width: 100%;
       text-overflow: ellipsis;
+
+      .colored-icon { opacity: .5; }
+
     }
 
   }
@@ -659,6 +666,8 @@ body { background-color: #ddd; }
     list-style: none;
 
     .select-related-issue { margin-left: -20px; }
+
+    .issue-blurb .colored-icon { display: none; }
   }
 }
 
@@ -874,7 +883,7 @@ i.icon-spin {
         //...
         .list-group {
           // allow vertical scrolling
-          max-height: 500px; // TODO: have this be calculated by the page height
+          max-height: 380px; // TODO: have this be calculated by the page height
           overflow-y: auto;
 
           .list-group-item {
@@ -925,4 +934,16 @@ i.icon-spin {
 
     }
   }
+}
+
+
+
+
+.colored-icon {
+  display: inline-block;
+  // padding: 3px 8px;
+  padding: 1px 6px;
+  margin: 2px;
+  border-radius: 3px;
+  &:not(.is-light) { color: white; }
 }

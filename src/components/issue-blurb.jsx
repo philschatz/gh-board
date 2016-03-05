@@ -4,6 +4,8 @@ import classnames from 'classnames';
 
 import IssueStore from '../issue-store';
 import GithubFlavoredMarkdown from './gfm';
+import ColoredIcon from './colored-icon';
+import {getFilters} from '../route-utils';
 
 const IssueOrPullRequestBlurb = React.createClass({
   render() {
@@ -59,8 +61,22 @@ const IssueOrPullRequestBlurb = React.createClass({
       'is-pull-request': isPullRequest
     };
 
+    let kanbanColumnIcon;
+    const kanbanColumn = issue.labels.filter((label) => {
+      return getFilters().getState().columnRegExp.test(label.name);
+    })[0];
+    if (kanbanColumn) {
+      const {color, name} = kanbanColumn;
+      kanbanColumnIcon = (
+        <ColoredIcon color={color} name={name}>
+          <i className='octicon octicon-list-unordered'/>
+        </ColoredIcon>
+      );
+    }
+
     return (
       <span className={classnames(classes)}>
+        {kanbanColumnIcon}
         <a className='blurb-number-link'
           target='_blank'
           href={issue.htmlUrl}
