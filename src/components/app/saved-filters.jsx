@@ -2,11 +2,6 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 import {History} from 'react-router';
 
-import Client from '../../github-client';
-import NewVersionChecker from '../../new-version-checker';
-import Time from '../time';
-import GameModal from '../game-modal';
-
 const LOCALSTORAGE_KEY = 'saved-filters';
 
 const AddFilterModal = React.createClass({

@@ -1,12 +1,11 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link, History} from 'react-router';
+import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 
 import IssueStore from '../../issue-store';
-import FilterStore from '../../filter-store';
-import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
+import {getFilters} from '../../route-utils';
 import {UNCATEGORIZED_NAME} from '../../helpers';
 
 import Loadable from '../loadable';
@@ -25,7 +24,7 @@ const FilterCategory = React.createClass({
         return text.toLowerCase().indexOf(filterStr.toLowerCase()) >= 0;
       }
       return true;
-    })
+    });
   },
   onFilterInputChange() {
     const {filterInput} = this.refs;
@@ -163,7 +162,7 @@ const FilterDropdown = React.createClass({
     items = _.sortBy(items, 'text');
     items = items.map(({text, isSelected, isExcluded, iconNode, toggleHref, excludeHref}) => {
       text = text.replace(state.columnRegExp, '');
-      return {text, isSelected, isExcluded, iconNode, toggleHref, excludeHref}
+      return {text, isSelected, isExcluded, iconNode, toggleHref, excludeHref};
     });
 
     return (
@@ -296,7 +295,7 @@ const FilterDropdownShell = React.createClass({
       const promise = Promise.all([milestones, labels]);
       return (
         <Loadable promise={promise} renderLoaded={([milestones, labels]) => <FilterDropdown milestones={milestones} labels={labels}/>} />
-      )
+      );
     } else {
       return null;
     }

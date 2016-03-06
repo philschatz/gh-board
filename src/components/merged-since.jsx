@@ -6,7 +6,7 @@ import Client from '../github-client';
 import {getFilters} from '../route-utils';
 import {fetchAll, FETCHALL_MAX} from '../helpers';
 import Loadable from './loadable';
-import {getRelatedIssues} from '../gfm-dom';
+// import {getRelatedIssues} from '../gfm-dom';
 import IssueStore from '../issue-store';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -15,7 +15,8 @@ const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 
 const MergedSince = React.createClass({
   renderPullRequest(repoOwner, repoName, pr) {
-    const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
+    // TODO: Show the related issue for testing to see
+    // const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
     // if (relatedIssues.length) {
     //   const relatedIssuesHtml = relatedIssues.map((related) => {
     //     const {repoOwner, repoName, number} = related;
@@ -135,10 +136,6 @@ export const MergedSinceFormShell = React.createClass({
     let isValid = true;
     repoInfos.forEach((repoInfo, i) => {
       const node = this.refs[`start-${i}`];
-      if (!node || !/[0-9a-f]+/.test(node.value)) { isValid = false; }
-    });
-    const ends = repoInfos.map((repoInfo, i) => {
-      const node = this.refs[`end-${i}`];
       if (!node || !/[0-9a-f]+/.test(node.value)) { isValid = false; }
     });
     return isValid;

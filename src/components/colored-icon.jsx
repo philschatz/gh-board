@@ -26,6 +26,6 @@ const ColoredIcon = React.createClass({
     );
 
   }
-})
+});
 
 export default ColoredIcon;

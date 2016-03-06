@@ -89,13 +89,19 @@ function parseArray(x) {
 }
 
 export function parseRoute({params, routes, location}) {
-  let {repoStr, milestonesStr, columnsStr, tagsStr, userName, columnRegExpStr} = params;
+  let {repoStr} = params;
   // Note: routeSegmentName can be null if it's the index path (the kanban view)
-  if (!routes[RELEVANT_PATH_SEGMENT]) { console.error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria'); }
+  if (!routes[RELEVANT_PATH_SEGMENT]) {
+    /* eslint-disable no-console */
+    console.error('BUG! looks like you are calling parseRoute (or setFilters) outside of the "magic" route which contains all the filter criteria');
+    /* eslint-enable no-console */
+  }
   let routeSegmentName;
   if (routes[RELEVANT_PATH_SEGMENT]) {
     if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
+      /* eslint-disable no-console */
       console.error('BUG! the path segment should be simple so we can create links with it');
+      /* eslint-enable no-console */
     } else {
       routeSegmentName = routes[RELEVANT_PATH_SEGMENT].path; // kanban is the "index" path
     }
@@ -104,13 +110,11 @@ export function parseRoute({params, routes, location}) {
   let milestoneTitles = [];
   let tagNames = [];
   let columnLabels = [];
+  let userName;
   let columnRegExp;
 
   // TODO: remove these fallbacks once URL's are updated.
   if (repoStr) { repoInfos = getReposFromStr(repoStr); }
-  if (milestonesStr) { milestoneTitles = milestonesStr.split('|'); }
-  if (tagsStr) { tagNames = tagsStr.split('|'); }
-  if (columnRegExpStr) { columnRegExp = new RegExp(columnRegExpStr); }
 
   const {query} = location;
   if (query.m) { milestoneTitles = parseArray(query.m); }

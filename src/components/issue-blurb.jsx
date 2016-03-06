@@ -2,7 +2,6 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 
-import IssueStore from '../issue-store';
 import GithubFlavoredMarkdown from './gfm';
 import ColoredIcon from './colored-icon';
 import {getFilters} from '../route-utils';
