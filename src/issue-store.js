@@ -104,8 +104,6 @@ function _buildBipartiteGraph(graph, cards) {
 
 let cacheCardsRepoInfos = null;
 let cacheCards = null;
-const initialTimestamp = new Date();
-
 let isPollingEnabled = false;
 
 class IssueStore extends EventEmitter {
@@ -200,7 +198,7 @@ class IssueStore extends EventEmitter {
         .then((issuesByRepo) => {
           // exclude the null repos (ones that were explicitly listed in the URL)
           return _.flatten(_.filter(issuesByRepo, (v) => { return v; }), true/*shallow*/);
-        })
+        });
       } else {
         return this._fetchAllIssuesForRepo(repoOwner, repoName);
       }

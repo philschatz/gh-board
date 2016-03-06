@@ -27,7 +27,7 @@ const Etherpad = React.createClass({
       if (text.indexOf('Welcome to Etherpad!') >= 0) {
         this.loadIssueBody().then(() => {
           this.poll(); // Should be guaranteed to no longer be "This is an empty pad"
-        })
+        });
       } else {
         this.__timeout = setTimeout(this.poll, 2000);
       }
@@ -44,7 +44,6 @@ const Etherpad = React.createClass({
     return `${hostName}/p/${padName}`;
   },
   loadIssueBody() {
-    const {hostName, secret} = this.props;
     const {repoOwner, repoName, number} = this.props;
 
     const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
@@ -62,10 +61,11 @@ const Etherpad = React.createClass({
         protocol: 'https:', //because browserify's `https` module is really `http`
         ssl: true
       });
-      etherpad.setText({padID: this.getPadName(), text: card.issue.body}, (err, val) => {
+      etherpad.setText({padID: this.getPadName(), text: card.issue.body}, (err) => {
+        /* eslint-disable no-console */
         console.log('Because of CORS this returns an error but actually succeeeds');
         console.log(err);
-        console.log(val);
+        /* eslint-enable no-console */
       });
       return card.issue.body; // just in case someone uses this promise
 
@@ -75,7 +75,7 @@ const Etherpad = React.createClass({
     const {text} = this.state;
     const {repoOwner, repoName, number} = this.props;
     this.setState({isSaving: true});
-    Client.getOcto().repos(repoOwner, repoName).issues(number).update({body: text}).then((resp) => {
+    Client.getOcto().repos(repoOwner, repoName).issues(number).update({body: text}).then(() => {
       // TODO: un-disable the state
       this.setState({isSaving: false});
     });

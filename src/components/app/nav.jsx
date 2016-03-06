@@ -1,20 +1,16 @@
 import _ from 'underscore';
 import React from 'react';
-import {Link, History} from 'react-router';
+import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 
 import SettingsStore from '../../settings-store';
 import Client from '../../github-client';
 import CurrentUserStore from '../../user-store';
-import IssueStore from '../../issue-store';
 import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
 
 import LoginModal from '../login-modal';
 import LabelBadge from '../label-badge';
 import MoveModal from '../move-modal';
-import Time from '../time';
-import Loadable from '../loadable';
-import GithubFlavoredMarkdown from '../gfm';
 import FilterDropdown from './filter-dropdown';
 
 
@@ -174,7 +170,7 @@ const AppNav = React.createClass({
     let managerMenu;
     if (repoInfos.length) {
       managerMenu = (
-        <SettingsItem key='manager' to={getFilters().setRouteName('by-user').url()}>Manager (Issues by User)</SettingsItem>
+        <SettingsItem key='manager' to={getFilters().setRouteName('by-user').url()}>Issues by User</SettingsItem>
       );
     }
 
@@ -248,7 +244,6 @@ const AppNav = React.createClass({
                 >
                 Combined
               </SettingsItem>
-              {managerMenu}
               <BS.MenuItem key='divider2' divider/>
               <BS.MenuItem key='api-settings' header>GitHub API Settings</BS.MenuItem>
               <SettingsItem
@@ -260,7 +255,8 @@ const AppNav = React.createClass({
               </SettingsItem>
 
               <BS.MenuItem key='divider3' divider/>
-              <BS.MenuItem key='manager-pages' header>Manager Pages</BS.MenuItem>
+              <BS.MenuItem key='manager-pages' header>Manager-ish Pages</BS.MenuItem>
+              {managerMenu}
               <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
               <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
 

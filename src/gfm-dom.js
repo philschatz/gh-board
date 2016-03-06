@@ -6,14 +6,14 @@ import linkify from 'gfm-linkify';
 const DIV = document.createElement('div');
 
 function getElement(text, repoOwner, repoName) {
-  DIV.innerHTML = '';
-  if (!text) { return DIV; }
-  let html = null;
-  if (repoOwner) {
-    const context = repoOwner + '/' + repoName;
-    html = ultramarked(linkify(text, context));
-  } else {
-    html = ultramarked(linkify(text));
+  let html = '';
+  if (text) {
+    if (repoOwner) {
+      const context = repoOwner + '/' + repoName;
+      html = ultramarked(linkify(text, context));
+    } else {
+      html = ultramarked(linkify(text));
+    }
   }
   DIV.innerHTML = html;
   return DIV;
@@ -21,8 +21,7 @@ function getElement(text, repoOwner, repoName) {
 
 // Calculates the task list count by rendering the Markdown in the DOM and
 // then counting the number of `<li>[x] ...</li>` elements
-export function getTaskCounts(text) {
-  const div = getElement(text);
+function getTaskCounts(div) {
   let taskFinishedCount = 0;
   let taskUnfinishedCount = 0;
   _.each(div.querySelectorAll('li'), (listItem) => {
@@ -36,9 +35,8 @@ export function getTaskCounts(text) {
   return {taskFinishedCount, taskTotalCount};
 }
 
-export function getIssueDueAt(text) {
+function getIssueDueAt(div) {
   // TODO: Maybe parse using the local timezone
-  const div = getElement(text);
   const el = div.querySelector('date.due');
   if (el) {
     // either use the datetime attribute, or the text
@@ -88,8 +86,7 @@ export function forEachRelatedIssue(div, fn) {
 }
 
 // Find all links in the Issue body to other issues or Pull Requests
-export function getRelatedIssues(text, repoOwner1, repoName1) {
-  const div = getElement(text, repoOwner1, repoName1);
+function _getRelatedIssues(div) {
   const relatedIssues = [];
   forEachRelatedIssue(div, ({repoOwner, repoName, number}, link) => {
     // Check if the previous node ends with "fixes" or "closes"
@@ -107,4 +104,16 @@ export function getRelatedIssues(text, repoOwner1, repoName1) {
     relatedIssues.push({repoOwner, repoName, number, fixes, prevWord});
   });
   return relatedIssues;
+}
+export function getRelatedIssues(text, repoOwner, repoName) {
+  const div = getElement(text, repoOwner, repoName);
+  return _getRelatedIssues(div);
+}
+
+export function getDataFromHtml(text, repoOwner, repoName) {
+  const div = getElement(text, repoOwner, repoName);
+  const taskCounts = getTaskCounts(div);
+  // const relatedIssues = _getRelatedIssues(div);
+  const dueAt = getIssueDueAt(div);
+  return {/*relatedIssues,*/ taskCounts, dueAt};
 }

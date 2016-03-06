@@ -8,7 +8,7 @@ import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import {getTaskCounts, getIssueDueAt, PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
+import {PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 import Time from './time';
@@ -98,9 +98,8 @@ let Issue = React.createClass({
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);
     }
-    // TODO: Maybe the following 2 should be methods on the card
-    const {taskFinishedCount, taskTotalCount} = getTaskCounts(issue.body);
-    const issueDueAt = getIssueDueAt(issue.body);
+    const {taskFinishedCount, taskTotalCount} = card.getTaskCounts();
+    const issueDueAt = card.getDueAt();
 
     // Defined by the collector
     const { isDragging, connectDragSource } = this.props;
@@ -263,7 +262,7 @@ let Issue = React.createClass({
       <IssueOrPullRequestBlurb key='issue-blurb'
         card={card}
         primaryRepoName={primaryRepoName} />,
-      <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip>Click to Edit Collaboratively (real realtime)!</BS.Tooltip>}>
+      <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip id={etherpadHref}>Click to Edit Collaboratively (really realtime)!</BS.Tooltip>}>
         <Link to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>
       </BS.OverlayTrigger>,
       taskCounts

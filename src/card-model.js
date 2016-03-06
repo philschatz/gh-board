@@ -1,6 +1,6 @@
 import SettingsStore from './settings-store';
 import Client from './github-client';
-import {getTaskCounts} from './gfm-dom';
+import {getDataFromHtml} from './gfm-dom';
 
 const MAX_LISTENERS = 5;
 
@@ -77,12 +77,22 @@ export default class Card {
       return this.issue.updatedAt;
     }
   }
-  getTaskCounts() {
-    if (!this._taskCounts) {
-      this._taskCounts = getTaskCounts(this.issue.body);
+  _getDataFromHtml() {
+    if (this.__cachedHtmlBody !== this.issue.body) {
+      this.__cachedHtmlData = getDataFromHtml(this.issue.body, this.repoOwner, this.repoName);
+      this.__cachedHtmlBody = this.issue.body;
     }
-    return this._taskCounts;
+    return this.__cachedHtmlData;
   }
+  getTaskCounts() {
+    return this._getDataFromHtml().taskCounts;
+  }
+  getDueAt() {
+    return this._getDataFromHtml().dueAt;
+  }
+  // getRelatedIssues() {
+  //   return getRelatedIssues(this.issue.body);
+  // }
   getCommentCount() {
     let count = this.issue.comments;
     // include comments on code in the count

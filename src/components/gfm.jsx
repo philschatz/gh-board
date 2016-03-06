@@ -78,7 +78,7 @@ const buildStatusBadge = (card) => {
     newNode.textContent = 'Closed?';
   }
   return newNode;
-}
+};
 
 const InnerMarkdown = React.createClass({
   displayName: 'InnerMarkdown',

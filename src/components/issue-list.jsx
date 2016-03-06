@@ -3,7 +3,6 @@ import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 
 import SettingsStore from '../settings-store';
-import {isLight} from '../helpers';
 
 import ColoredIcon from './colored-icon';
 
