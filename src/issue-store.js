@@ -6,6 +6,7 @@ import {getRelatedIssues} from './gfm-dom';
 import {getFilters, filterCardsByFilter} from './route-utils';
 import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
+import Progress from './progress';
 
 const RELOAD_TIME_SHORT = 30 * 1000;
 const RELOAD_TIME_LONG = 5 * 60 * 1000;
@@ -149,27 +150,33 @@ class IssueStore extends EventEmitter {
     return cardFactory(repoOwner, repoName, issue.number, issue);
   }
   // Fetch all the issues and then filter based on the URL
-  fetchIssues() {
+  fetchIssues(progress) {
     const {repoInfos} = getFilters().getState();
-    return this._fetchAllIssues(repoInfos).then((cards) => {
+    if (!progress) {
+      // If no progress is passed in then just use a dummy progress
+      progress = new Progress();
+    }
+    return this._fetchAllIssues(repoInfos, progress).then((cards) => {
       return filterCardsByFilter(cards);
     });
   }
-  _fetchAllIssuesForRepo(repoOwner, repoName) {
+  _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
+    progress.start(`Fetching Issues for ${repoOwner}/${repoName}`);
     const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
     return fetchAll(FETCHALL_MAX, issues)
     .then((vals) => {
+      progress.stop(`Fetching Issues for ${repoOwner}/${repoName}`);
       return _.map(vals, (issue) => {
         return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
       });
     });
   }
-  _fetchAllIssues(repoInfos, isForced) {
+  _fetchAllIssues(repoInfos, progress, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
       this.polling = setTimeout(() => {
         this.polling = null;
-        this._fetchAllIssues(repoInfos, true /*isForced*/);
+        this._fetchAllIssues(repoInfos, progress, true /*isForced*/);
       }, getReloadTime());
     }
     if (!isForced && cacheCards && cacheCardsRepoInfos === JSON.stringify(repoInfos)) {
@@ -185,14 +192,16 @@ class IssueStore extends EventEmitter {
     const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
       if (repoName === '*') {
         // Fetch all the repos, and then concat them
+        progress.start(`Fetching list of all repositories for ${repoOwner}`)
         return fetchAll(FETCHALL_MAX, Client.getOcto().orgs(repoOwner).repos.fetch)
         .then((repos) => {
+          progress.stop(`Fetching list of all repositories for ${repoOwner}`, repos.length);
           return Promise.all(repos.map((repo) => {
             // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
             if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
               return null;
             }
-            return this._fetchAllIssuesForRepo(repoOwner, repo.name);
+            return this._fetchAllIssuesForRepo(repoOwner, repo.name, progress);
           }));
         })
         .then((issuesByRepo) => {
@@ -200,7 +209,7 @@ class IssueStore extends EventEmitter {
           return _.flatten(_.filter(issuesByRepo, (v) => { return v; }), true/*shallow*/);
         });
       } else {
-        return this._fetchAllIssuesForRepo(repoOwner, repoName);
+        return this._fetchAllIssuesForRepo(repoOwner, repoName, progress);
       }
     });
     return Promise.all(allPromises).then((issues) => {
