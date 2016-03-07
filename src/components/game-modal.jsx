@@ -36,7 +36,7 @@ const ALL_GAMES = [
   { name: 'Aunt Flora\'s Mansion', id: 'dca39858ca7ca7fcbe20' },
   { name: 'Cyber-Lasso', id: 'e3e444f7c63fb21b6ec0' }, // slow bc of `new Function() and no global`
   { name: 'Bubble Butler', id: '7347484' },
-  { name: 'Marble Shoot', id: '11359118' },
+  { name: 'Marble Shoot', id: 'd688de5e0e1e978f63fd' },
   { name: 'Spacekoban', note: 'short', id: '6a6c07f71d7039e4155e' },
   { name: 'Pushcat Jr', id: 'a8f4e5aed01de7c9ef50' },
   { name: 'Push', id: '9867759' },
@@ -178,7 +178,7 @@ const GameModal = React.createClass({
     // });
 
     const dropDown = (
-      <BS.DropdownButton title='Change Game' bsStyle='primary' style={{display: 'inline'}}>
+      <BS.DropdownButton id='change-game' title='Change Game' bsStyle='primary' style={{display: 'inline'}}>
         <BS.MenuItem header>Unlocked Games</BS.MenuItem>
         {unlockedGames}
         { /*
