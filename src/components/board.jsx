@@ -1,4 +1,5 @@
 import React from 'react';
+import * as BS from 'react-bootstrap';
 
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
@@ -8,7 +9,7 @@ import Progress from '../progress';
 
 const ProgressView = React.createClass({
   getInitialState() {
-    return {message: null};
+    return {message: null, ticks: 0, max: 0};
   },
   componentDidMount() {
     const {progress} = this.props;
@@ -22,13 +23,22 @@ const ProgressView = React.createClass({
     progress.off('tick', this.onTick);
     progress.off('stop', this.onStop);
   },
-  onStart(context) { this.setState({message: 'Start: ' + context}); },
-  onTick(context) { this.setState({message: context}); },
-  onStop(context) { this.setState({message: 'Finished: ' + context}); },
+  onStart(context) { this.setState({max: this.props.progress.max, message: 'Start: ' + context}); },
+  onTick(context, ticks, max) {
+    this.setState({ticks: ticks, max: max, message: context});
+    this.forceUpdate();
+  },
+  onStop(context, ticks) { this.setState({ticks: this.props.progress.ticks, max: this.props.progress.max, message: 'Finished: ' + context}); },
   render() {
+    const {progress} = this.props;
+    const {ticks, max} = this.state;
     const {message} = this.state;
+    const label = `${ticks}/${max}`;
     return (
-      <span><i className='octicon octicon-sync icon-spin'/> {message}</span>
+      <div>
+        <BS.ProgressBar now={ticks} max={max} label={label}/>
+        <i className='octicon octicon-sync icon-spin'/> {message}
+      </div>
     )
   }
 });
