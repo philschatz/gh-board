@@ -1,9 +1,9 @@
 import {EventEmitter} from 'events';
 
 class Progress extends EventEmitter {
-  constructor(max) {
+  constructor() {
     super();
-    this.max = max;
+    this.max = 0;
     this.ticks = 0;
     this.isComplete = false;
   }
@@ -17,17 +17,21 @@ class Progress extends EventEmitter {
   }
   tick(context) {
     if (this.isComplete) {
-      throw new Error('BUG! cannot tick when progress is already complete');
+      throw new Error(`BUG! cannot tick when progress is already complete. ticks=${this.ticks} max=${this.max}`);
     }
     if (this.max && this.ticks > this.max) {
       throw new Error('BUG! cannot tick when max ticks have occurred');
     }
     this.ticks += 1;
-    this.emit('tick', context, this.ticks);
+    this.emit('tick', context, this.ticks, this.max);
+  }
+  addTicks(num, context) {
+    this.max += num;
+    this.emit('add-ticks', context, this.ticks, this.max);
   }
   stop(context) {
     this.isComplete = true;
-    this.emit('stop', context);
+    this.emit('stop', context, this.ticks, this.max);
   }
 }
 

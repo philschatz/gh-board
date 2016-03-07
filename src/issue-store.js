@@ -161,11 +161,11 @@ class IssueStore extends EventEmitter {
     });
   }
   _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
-    progress.start(`Fetching Issues for ${repoOwner}/${repoName}`);
+    progress.addTicks(1, `Fetching Issues for ${repoOwner}/${repoName}`);
     const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
     return fetchAll(FETCHALL_MAX, issues)
     .then((vals) => {
-      progress.stop(`Fetching Issues for ${repoOwner}/${repoName}`);
+      progress.tick(`Fetched Issues for ${repoOwner}/${repoName}`);
       return _.map(vals, (issue) => {
         return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
       });
@@ -192,10 +192,10 @@ class IssueStore extends EventEmitter {
     const allPromises = _.map(repoInfos, ({repoOwner, repoName}) => {
       if (repoName === '*') {
         // Fetch all the repos, and then concat them
-        progress.start(`Fetching list of all repositories for ${repoOwner}`)
+        progress.addTicks(1, `Fetching list of all repositories for ${repoOwner}`);
         return fetchAll(FETCHALL_MAX, Client.getOcto().orgs(repoOwner).repos.fetch)
         .then((repos) => {
-          progress.stop(`Fetching list of all repositories for ${repoOwner}`, repos.length);
+          progress.tick(`Fetched list of all repositories for ${repoOwner}`);
           return Promise.all(repos.map((repo) => {
             // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
             if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
