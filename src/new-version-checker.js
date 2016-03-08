@@ -22,20 +22,22 @@ class NewVersionChecker extends EventEmitter {
       }, RELOAD_TIME);
     }
 
-    return Client.getOcto().repos('philschatz/gh-board').branches('gh-pages').fetch().then((branch) => {
-      const {sha} = branch.commit;
-      const {date} = branch.commit.commit.author;
-      const {message} = branch.commit.commit;
+    return Client.dbPromise().then(() => {
+      return Client.getOcto().repos('philschatz/gh-board').branches('gh-pages').fetch().then((branch) => {
+        const {sha} = branch.commit;
+        const {date} = branch.commit.commit.author;
+        const {message} = branch.commit.commit;
 
-      if (!this.loadedVersion) {
-        this.loadedVersion = {sha, date};
-      } else {
-        if (this.loadedVersion.sha !== sha) {
-          this.newestVersion = {sha, date, message};
-          this.emit('change', this.newestVersion);
+        if (!this.loadedVersion) {
+          this.loadedVersion = {sha, date};
+        } else {
+          if (this.loadedVersion.sha !== sha) {
+            this.newestVersion = {sha, date, message};
+            this.emit('change', this.newestVersion);
+          }
         }
-      }
-      return {sha, date, message};
+        return {sha, date, message};
+      });
     });
   }
 }

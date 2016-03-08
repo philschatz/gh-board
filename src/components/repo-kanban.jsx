@@ -4,13 +4,12 @@ import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
 
 import {getFilters} from '../route-utils';
-import {UNCATEGORIZED_NAME, fetchAll, FETCHALL_MAX} from '../helpers';
+import {UNCATEGORIZED_NAME} from '../helpers';
 import IssueStore from '../issue-store';
 import {filterCards} from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
-import Client from '../github-client';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -201,7 +200,7 @@ const RepoKanbanShell = React.createClass({
       <Board {...this.props}
         repoInfos={repoInfos}
         type={KanbanRepo}
-        columnDataPromise={fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoName).labels.fetch)}
+        columnDataPromise={IssueStore.fetchLabels(repoOwner, repoName)}
       />
     );
   },

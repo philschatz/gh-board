@@ -21,10 +21,12 @@ class Store extends EventEmitter {
       return Promise.resolve(currentUser);
     } else {
       if (Client.hasCredentials()) {
-        return Client.getOcto().user.fetch().then((info) => {
-          currentUser = info;
-          this.emit('change', info);
-          return info;
+        return Client.dbPromise().then(() => {
+          return Client.getOcto().user.fetch().then((info) => {
+            currentUser = info;
+            this.emit('change', info);
+            return info;
+          });
         });
       } else {
         return Promise.resolve(null);
@@ -35,8 +37,10 @@ class Store extends EventEmitter {
     if (emojisMap) {
       return Promise.resolve(emojisMap);
     } else {
-      return Client.getOcto().emojis.fetch()
-      .then((emojis) => emojisMap = emojis);
+      return Client.dbPromise().then(() => {
+        Client.getOcto().emojis.fetch()
+        .then((emojis) => emojisMap = emojis);
+      });
     }
   }
   getEmojis() {

@@ -156,9 +156,9 @@ class IssueStore extends EventEmitter {
       // If no progress is passed in then just use a dummy progress
       progress = new Progress();
     }
-    return this._fetchAllIssues(repoInfos, progress).then((cards) => {
+    return Client.dbPromise().then(() => this._fetchAllIssues(repoInfos, progress).then((cards) => {
       return filterCardsByFilter(cards);
-    });
+    }));
   }
   _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
     progress.addTicks(1, `Fetching Issues for ${repoOwner}/${repoName}`);
@@ -226,10 +226,10 @@ class IssueStore extends EventEmitter {
     });
   }
   fetchMilestones(repoOwner, repoName) {
-    return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
+    return Client.dbPromise().then(() => fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoName).milestones.fetch));
   }
   fetchLabels(repoOwner, repoName) {
-    return Client.getOcto().repos(repoOwner, repoName).labels.fetch();
+    return Client.dbPromise().then(() => fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoName).labels.fetch));
   }
   tryToMoveLabel(card, primaryRepoName, label) {
     this.emit('tryToMoveLabel', card, primaryRepoName, label);
