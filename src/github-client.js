@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import EventEmitter from 'events';
-import Dexie from 'dexie';
+// import Dexie from 'dexie';
 import Octo from 'octokat/dist/node/base';
 import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
 import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
@@ -14,12 +14,12 @@ const MAX_CACHED_URLS = 2000;
 
 let cachedClient = null;
 
-// Log all IndexedDB errors to the console
-Dexie.Promise.on('error', (err) => {
-  /* eslint-disable no-console */
-  console.log(`Dexie Uncaught error: ${err}`);
-  /* eslint-enable no-console */
-});
+// // Log all IndexedDB errors to the console
+// Dexie.Promise.on('error', (err) => {
+//   /* eslint-disable no-console */
+//   console.log(`Dexie Uncaught error: ${err}`);
+//   /* eslint-enable no-console */
+// });
 
 
 // Try to load/save to IndexedDB and fall back to localStorage for persisting the cache.
@@ -37,32 +37,32 @@ const cacheHandler = new class CacheHandler {
 
     // pull from IndexedDB
     // investigate https://mozilla.github.io/localForage/
-    const db = new Dexie('url-cache');
-    window.Dexie = Dexie;
-    db.version(1).stores({
-      urls: 'methodAndPath, eTag, data, status, linkRelations'
-    });
+    // const db = new Dexie('url-cache');
+    // window.Dexie = Dexie;
+    // db.version(1).stores({
+    //   urls: 'methodAndPath, eTag, data, status, linkRelations'
+    // });
 
     this.dbPromise = new Promise((resolve) => {
       // Try to use IndexedDB. If it fails to open (Safari/FF incognito mode)
       // then use localStorage (by virtue of not setting this._db)
-      db.open().then(() => {
-        return db.urls.where('methodAndPath').notEqual('_SOME_STRING_THAT_IS_NEVER_A_URL').each(({methodAndPath, eTag, data, status, linkRelations}) => {
-          if (data) {
-            data = JSON.parse(data);
-          }
-          if (linkRelations) {
-            linkRelations = JSON.parse(linkRelations);
-          }
-          this.cachedETags[methodAndPath] = {eTag, data, status, linkRelations};
-        });
-      }).then(() => {
-        // Use IndexedDB because it loaded up successfully
-        this._db = db;
+      // db.open().then(() => {
+      //   return db.urls.where('methodAndPath').notEqual('_SOME_STRING_THAT_IS_NEVER_A_URL').each(({methodAndPath, eTag, data, status, linkRelations}) => {
+      //     if (data) {
+      //       data = JSON.parse(data);
+      //     }
+      //     if (linkRelations) {
+      //       linkRelations = JSON.parse(linkRelations);
+      //     }
+      //     this.cachedETags[methodAndPath] = {eTag, data, status, linkRelations};
+      //   });
+      // }).then(() => {
+      //   // Use IndexedDB because it loaded up successfully
+      //   this._db = db;
+      //   resolve();
+      // }).catch(() => {
         resolve();
-      }).catch(() => {
-        resolve();
-      });
+      // });
 
     });
 
