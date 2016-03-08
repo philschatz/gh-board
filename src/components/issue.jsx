@@ -257,27 +257,25 @@ let Issue = React.createClass({
       );
     }
 
-    const etherpadHref = `/p-issue/${repoOwner}/${repoName}/${issue.number}`;
-    const header = [
-      <IssueOrPullRequestBlurb key='issue-blurb'
-        card={card}
-        primaryRepoName={primaryRepoName} />,
-      <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip id={etherpadHref}>Click to Edit Collaboratively (really realtime)!</BS.Tooltip>}>
-        <Link to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>
-      </BS.OverlayTrigger>,
-      taskCounts
-    ];
     const classes = {
       'issue': true,
       'is-dragging': isDragging,
       'is-updated': isUpdated,
       'is-pull-request': card.isPullRequest(),
+      'is-merged': card.isPullRequestMerged(),
       'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict()
     };
+    let mergeConflictBlurb;
+    if (card.isPullRequest() && card.hasMergeConflict()) {
+      mergeConflictBlurb = (
+        <i className='pull-right merge-conflict-warning octicon octicon-alert' title='This has a Merge Conflict'/>
+      );
+    }
     let statusBlurb;
     if (card.isPullRequest()) {
       const statusClasses = {
         'issue-status': true,
+        'pull-right': true,
         'is-merge-conflict': card.hasMergeConflict()
       };
       const status = card.getPullRequestStatus();
@@ -285,6 +283,9 @@ let Issue = React.createClass({
       let statusText;
       // pending, success, error, or failure
       switch (status.state) {
+        case 'success':
+          statusIcon = (<i className='status-icon octicon octicon-check'/>);
+          break;
         case 'pending':
           statusIcon = (<i className='status-icon octicon octicon-primitive-dot'/>);
           statusText = 'Testing...';
@@ -323,6 +324,19 @@ let Issue = React.createClass({
       );
     }
 
+    const etherpadHref = `/p-issue/${repoOwner}/${repoName}/${issue.number}`;
+    const header = [
+      <IssueOrPullRequestBlurb key='issue-blurb'
+        card={card}
+        primaryRepoName={primaryRepoName} />,
+      <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip id={etherpadHref}>Click to Edit Collaboratively (really realtime)!</BS.Tooltip>}>
+        <Link to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>
+      </BS.OverlayTrigger>,
+      statusBlurb,
+      taskCounts,
+      mergeConflictBlurb
+    ];
+
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
@@ -351,7 +365,6 @@ let Issue = React.createClass({
             {labels}
           </span>
           <span className='issue-footer'>
-            {statusBlurb}
             {dueAt}
             <span key='right-footer' className='issue-time-and-user'>
               <Time key='time' className='updated-at' dateTime={updatedAt}/>

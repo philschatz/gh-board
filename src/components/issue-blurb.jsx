@@ -11,7 +11,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     const {card, primaryRepoName, context} = this.props;
     const {issue, repoOwner, repoName} = card;
 
-    const isPullRequest = !!issue.pullRequest || !!issue.base; // use .base in case we are given the PR JSON (which does not contain labels)
+    const isPullRequest = card.isPullRequest() || !!issue.base; // use .base in case we are given the PR JSON (which does not contain labels)
     const multipleRepoName = primaryRepoName === repoName ? null : repoName;
     const popoverTitle = (
       <GithubFlavoredMarkdown
@@ -21,7 +21,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     );
 
     const bodyPopover = (
-      <BS.Popover id="popover-${issue.id}" className='issue-body' title={popoverTitle}>
+      <BS.Popover id={`popover-${issue.id}`} className='issue-body' title={popoverTitle}>
         <GithubFlavoredMarkdown
           disableLinks={false}
           repoOwner={repoOwner}
@@ -57,7 +57,8 @@ const IssueOrPullRequestBlurb = React.createClass({
 
     const classes = {
       'issue-blurb': true,
-      'is-pull-request': isPullRequest
+      'is-pull-request': isPullRequest,
+      'is-merged': card.isPullRequestMerged()
     };
 
     let kanbanColumnIcon;
