@@ -4,7 +4,6 @@ import {Link} from 'react-router';
 
 import Client from '../github-client';
 import {getFilters} from '../route-utils';
-import {fetchAll, FETCHALL_MAX} from '../helpers';
 import Loadable from './loadable';
 // import {getRelatedIssues} from '../gfm-dom';
 import IssueStore from '../issue-store';
@@ -43,7 +42,7 @@ const MergedSince = React.createClass({
     let prCommits = [];
     _.each(comparisons, (comparison, i) => {
       const {repoOwner, repoName} = repoInfos[i];
-      _.each(comparison[0].commits, (commit) => {
+      _.each(comparison.commits, (commit) => {
         const msg = commit.commit.message;
         const match = msg.match(MERGE_PULL_REQUEST_MESSAGE_REGEXP);
         if (match) {
@@ -63,7 +62,7 @@ const MergedSince = React.createClass({
         return (
           <Loadable
             key={repoOwner + repoName + number}
-            promise={Client.getOcto().repos(repoOwner, repoName).issues(number).fetch()}
+            promise={Client.dbPromise().then(() => Client.getOcto().repos(repoOwner, repoName).issues(number).fetch())}
             renderLoaded={(pr) => this.renderPullRequest(repoOwner, repoName, pr)}
             loadingText={`Loading ${repoOwner}/${repoName}#${number}...`}
           />
@@ -92,7 +91,7 @@ export const MergedSinceInner = React.createClass({
     const allPromise = Promise.all(_.map(repoInfos, ({repoOwner, repoName}, i) => {
       const startSha = startShas[i];
       const endSha = endShas[i];
-      return fetchAll(FETCHALL_MAX, Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch);
+      return Client.dbPromise().then(() => Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch());
     }));
 
     return (

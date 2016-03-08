@@ -156,14 +156,14 @@ class IssueStore extends EventEmitter {
       // If no progress is passed in then just use a dummy progress
       progress = new Progress();
     }
-    return this._fetchAllIssues(repoInfos, progress).then((cards) => {
+    return Client.dbPromise().then(() => this._fetchAllIssues(repoInfos, progress).then((cards) => {
       return filterCardsByFilter(cards);
-    });
+    }));
   }
   _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
     progress.addTicks(1, `Fetching Issues for ${repoOwner}/${repoName}`);
-    const issues = Client.getOcto().repos(repoOwner, repoName).issues.fetch;
-    return fetchAll(FETCHALL_MAX, issues)
+    const issuesState = Client.canCacheLots() ? 'all' : 'open';
+    return Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100})
     .then((vals) => {
       progress.tick(`Fetched Issues for ${repoOwner}/${repoName}`);
       return _.map(vals, (issue) => {
@@ -193,7 +193,7 @@ class IssueStore extends EventEmitter {
       if (repoName === '*') {
         // Fetch all the repos, and then concat them
         progress.addTicks(1, `Fetching list of all repositories for ${repoOwner}`);
-        return fetchAll(FETCHALL_MAX, Client.getOcto().orgs(repoOwner).repos.fetch)
+        return Client.getOcto().orgs(repoOwner).repos.fetchAll()
         .then((repos) => {
           progress.tick(`Fetched list of all repositories for ${repoOwner}`);
           return Promise.all(repos.map((repo) => {
@@ -226,10 +226,10 @@ class IssueStore extends EventEmitter {
     });
   }
   fetchMilestones(repoOwner, repoName) {
-    return Client.getOcto().repos(repoOwner, repoName).milestones.fetch();
+    return Client.dbPromise().then(() => Client.getOcto().repos(repoOwner, repoName).milestones.fetchAll());
   }
   fetchLabels(repoOwner, repoName) {
-    return Client.getOcto().repos(repoOwner, repoName).labels.fetch();
+    return Client.dbPromise().then(() => Client.getOcto().repos(repoOwner, repoName).labels.fetchAll());
   }
   tryToMoveLabel(card, primaryRepoName, label) {
     this.emit('tryToMoveLabel', card, primaryRepoName, label);

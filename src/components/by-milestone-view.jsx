@@ -8,7 +8,6 @@ import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import CurrentUserStore from '../user-store';
-import Client from '../github-client';
 import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
@@ -147,7 +146,7 @@ const RepoKanbanShell = React.createClass({
         repoInfos={repoInfos}
         columnRegExp={columnRegExp}
         type={ByMilestoneView}
-        columnDataPromise={Client.getOcto().repos(repoOwner, repoName).milestones.fetch()}
+        columnDataPromise={IssueStore.fetchMilestones(repoOwner, repoName)}
       />
     );
   },
