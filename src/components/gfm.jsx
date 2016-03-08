@@ -11,6 +11,8 @@ import linkify from 'gfm-linkify';
 import IssueStore from '../issue-store';
 import CurrentUserStore from '../user-store';
 import {forEachRelatedIssue} from '../gfm-dom';
+import {getFilters} from '../route-utils';
+import {isLight} from '../helpers';
 
 const insertAfter = (newNode, node) => {
   if (node.nextSibling) {
@@ -37,11 +39,35 @@ const camelize = (string) => {
 // Construct the little [Open], [Closed], [Merged] badge next to a PR/Issue number
 // Done in the DOM instead of React because it is injected into arbitrary HTML.
 const buildStatusBadge = (card) => {
+  const wrapNode = document.createElement('span');
+  wrapNode.classList.add('issue-status-badges');
   const newNode = document.createElement('span');
   newNode.classList.add('issue-status-badge');
   if (card.issue) {
     const isPullRequest = card.isPullRequest();
     const state = card.issue.state; // open, closed, reopened
+
+    const {columnRegExp} = getFilters().getState();
+    const kanbanLabel = card.issue.labels.filter((label) => {
+      return columnRegExp.test(label.name);
+    })[0];
+
+    if (kanbanLabel) {
+      const octicon = document.createElement('i');
+      octicon.classList.add('octicon');
+      octicon.classList.add('octicon-list-unordered');
+      const columnIcon = document.createElement('span');
+      columnIcon.classList.add('colored-icon');
+      if (isLight(kanbanLabel.color)) {
+        columnIcon.classList.add('is-light');
+      }
+      columnIcon.appendChild(octicon);
+      // TODO: add is-light class
+      columnIcon.style.backgroundColor = `#${kanbanLabel.color}`;
+      columnIcon.setAttribute('title', kanbanLabel.name.replace(columnRegExp, ''));
+      columnIcon.appendChild(octicon);
+      wrapNode.appendChild(columnIcon);
+    }
 
     const iconNode = document.createElement('i');
     iconNode.classList.add('octicon');
@@ -77,7 +103,8 @@ const buildStatusBadge = (card) => {
   } else {
     newNode.textContent = 'Closed?';
   }
-  return newNode;
+  wrapNode.appendChild(newNode);
+  return wrapNode;
 };
 
 const InnerMarkdown = React.createClass({
