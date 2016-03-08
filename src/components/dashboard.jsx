@@ -7,7 +7,6 @@ import classnames from 'classnames';
 import {buildRoute} from '../route-utils';
 import Client from '../github-client';
 import CurrentUserStore from '../user-store';
-import {fetchAll, FETCHALL_MAX} from '../helpers';
 import AsyncButton from './async-button';
 import Time from './time';
 
@@ -284,7 +283,7 @@ const CustomRepoModal = React.createClass({
             disabled={isDisabled}
             bsStyle='primary'
             waitingText='Checking...'
-            action={Client.getOcto().repos(customRepoName).fetch.bind(Client.getOcto())}
+            action={() => Client.dbPromise().then(() => Client.getOcto().repos(customRepoName).fetchAll.bind(Client.getOcto()))}
             onResolved={() => this.goToBoard(customRepoName)}
             renderError={() => <span>Invalid Repo. Please try again.</span>}
             >Show Board</AsyncButton>
@@ -351,7 +350,7 @@ const DashboardShell = React.createClass({
       CurrentUserStore.fetchUser()
       .then((currentUser) => {
         if (currentUser) {
-          return fetchAll(FETCHALL_MAX, Client.getOcto().user.repos.fetch);
+          return Client.dbPromise().then(() => Client.getOcto().user.repos.fetchAll());
         } else {
           return []; // Anonymous has no repos
         }

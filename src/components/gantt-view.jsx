@@ -221,7 +221,7 @@ const RepoKanbanShell = React.createClass({
     const [{repoOwner, repoName}] = repoInfos;
 
     // TODO: Actually do all the milestones
-    const allPromises = Promise.all([Client.getOcto().repos(repoOwner, repoName).milestones.fetch(), IssueStore.fetchIssues()]);
+    const allPromises = Promise.all([IssueStore.fetchMilestones(repoOwner, repoName), IssueStore.fetchIssues()]);
 
     return (
       <Loadable

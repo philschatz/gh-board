@@ -7,7 +7,8 @@ import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-on
 import AuthorizationPlugin from 'octokat/dist/node/plugins/authorization';
 import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case';
 import CacheHandlerPlugin from 'octokat/dist/node/plugins/cache-handler';
-
+import FetchAllPlugin from 'octokat/dist/node/plugins/fetch-all';
+import PaginationPlugin from 'octokat/dist/node/plugins/pagination';
 
 const MAX_CACHED_URLS = 2000;
 
@@ -37,6 +38,7 @@ const cacheHandler = new class CacheHandler {
     // pull from IndexedDB
     // investigate https://mozilla.github.io/localForage/
     const db = new Dexie('url-cache');
+    window.Dexie = Dexie;
     db.version(1).stores({
       urls: 'methodAndPath, eTag, data, status, linkRelations'
     });
@@ -152,7 +154,7 @@ class Client extends EventEmitter {
   }
   getCredentials() {
     return {
-      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, CacheHandlerPlugin],
+      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin],
       token: window.localStorage.getItem('gh-token'),
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
