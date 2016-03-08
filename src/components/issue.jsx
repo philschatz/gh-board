@@ -272,6 +272,7 @@ let Issue = React.createClass({
       'is-dragging': isDragging,
       'is-updated': isUpdated,
       'is-pull-request': card.isPullRequest(),
+      'is-merged': card.isPullRequestMerged(),
       'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict()
     };
     let statusBlurb;
