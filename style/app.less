@@ -344,6 +344,18 @@ body { background-color: #ddd; }
       }
 
 
+      // a.issue-status:hover { text-decoration: none; }
+      .issue-status {
+        font-size: 1rem;
+
+        &[data-status-state='success'] { color: #6cdf44; }
+        &[data-status-state='pending'] { color: #fb0; }
+        &[data-status-state='error'],
+        &[data-status-state='failure'] { color: #d00; font-weight: bold; }
+
+        .status-icon { }
+      }
+
       // .related-issues .issue-blurb {
       //   color: #999;
       //   font-weight: normal; /* Because it is in a H4 thanks to ListGroupItem */
@@ -445,18 +457,6 @@ body { background-color: #ddd; }
         // .x-clearfix();
         display: block;
         min-height: 2rem;
-
-        // a.issue-status:hover { text-decoration: none; }
-        .issue-status {
-          font-size: 1rem;
-
-          &[data-status-state='success'] { color: #6cdf44; }
-          &[data-status-state='pending'] { color: #fb0; }
-          &[data-status-state='error'],
-          &[data-status-state='failure'] { color: #d00; font-weight: bold; }
-
-          .status-icon { }
-        }
 
         .issue-due-at {
           &.is-overdue { color: #d00; font-weight: bold; }

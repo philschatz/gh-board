@@ -125,7 +125,7 @@ export default class Card {
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     return this.fetchPR().then(() => {
       if (!this._prStatusesPromise) {
-        this._prStatusesPromise = this._getOcto().commits(this._pr.head.sha).statuses.fetch().then((statuses) => {
+        this._prStatusesPromise = this._getOcto().commits(this._pr.head.sha).statuses.fetchAll().then((statuses) => {
           this._prStatuses = statuses;
           this._emitChange();
         });
