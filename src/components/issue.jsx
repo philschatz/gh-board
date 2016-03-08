@@ -265,6 +265,12 @@ let Issue = React.createClass({
       'is-merged': card.isPullRequestMerged(),
       'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict()
     };
+    let mergeConflictBlurb;
+    if (card.isPullRequest() && card.hasMergeConflict()) {
+      mergeConflictBlurb = (
+        <i className='pull-right merge-conflict-warning octicon octicon-alert' title='This has a Merge Conflict'/>
+      );
+    }
     let statusBlurb;
     if (card.isPullRequest()) {
       const statusClasses = {
@@ -327,7 +333,8 @@ let Issue = React.createClass({
         <Link to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>
       </BS.OverlayTrigger>,
       statusBlurb,
-      taskCounts
+      taskCounts,
+      mergeConflictBlurb
     ];
 
     return connectDragSource(
