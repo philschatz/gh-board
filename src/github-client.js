@@ -1,6 +1,20 @@
 import _ from 'underscore';
 import EventEmitter from 'events';
-// import Dexie from 'dexie';
+import Dexie from 'dexie';
+
+// 3 implementations: indexedDB, LocalStorage, In-mem
+import levelup from 'levelup';
+import memdown from 'memdown';
+import leveljs from 'level-js';
+// import levelidb from 'levelidb'; // alternate IndexedDB impl BROKEN
+import localstorage from 'localstorage-down';
+// + querying the data
+import levelQuery from 'level-queryengine';
+import jsonqueryEngine from 'jsonquery-engine';
+import pairs from 'pairs';
+
+
+
 import Octo from 'octokat/dist/node/base';
 import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
 import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
@@ -35,34 +49,78 @@ const cacheHandler = new class CacheHandler {
       this.cachedETags = {};
     }
 
+
+    // See https://github.com/Level/levelup/wiki/Modules for more
+    let driver;
+    // driver = memdown;
+    driver = leveljs;
+    // driver = localstorage;
+
+    let db2 = levelup('test-of-level', {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:1, indexes: [{ name: 'eTag', keyPath: 'eTag', unique: false, multiEntry: false }, { name: 'status', keyPath: 'status', unique: false, multiEntry: false }] , valueEncoding: 'none'});
+    // let db2 = leveljs('test-of-level');
+
+    window.leveljs = leveljs;
+    window.PHIL = db2;
+    db2 = levelQuery(db2);
+    window.PHIL2 = db2;
+    db2.query.use(jsonqueryEngine());
+    // db2.ensureIndex('*', 'pairs', pairs.index);
+    // db2.ensureIndex('eTag');
+
+    const opts = {asBuffer:false, raw:true, indexes: [{ name: 'eTag', keyPath: 'eTag', unique: false, multiEntry: false }]};
+    db2.open(() => {
+
+      db2.put('phil', {eTag: 'skdjh', status: 200, data: 'hello there', foos: [1,3,5]}/*if using localStorage or memdown you need to JSON.stringify*/, opts, (err1, val1) => {
+        db2.put('phil3', {eTag: 'skdjh3', status: 202, data: 'hello there boo', foos: [1,3,5,3]}/*if using localStorage or memdown you need to JSON.stringify*/, opts, (err2, val2) => {
+          console.log('poioiuoiu', err1, val1);
+          db2.get('phil', opts, (err, val) => {
+            console.log('askjdkasjhd', err, val);
+          });
+
+          // db2.query({ $and: [ { status: { $gt: 100 } }, { status: { $lt: 300 } } ] })
+          // just get all the results and load them into memory
+          db2.query({})
+          .on('data', (data) => {
+            console.log('zxczxczxcv');
+            console.log(data);
+          })
+          .on('stats', function (stats) {
+            // stats contains the query statistics in the format
+            //  { indexHits: 1, dataHits: 1, matchHits: 1 });
+            console.log('stats', stats);
+          });
+        });
+      });
+    })
+
     // pull from IndexedDB
     // investigate https://mozilla.github.io/localForage/
-    // const db = new Dexie('url-cache');
-    // window.Dexie = Dexie;
-    // db.version(1).stores({
-    //   urls: 'methodAndPath, eTag, data, status, linkRelations'
-    // });
+    const db = new Dexie('octokatCache');
+    window.Dexie = Dexie;
+    db.version(1).stores({
+      'octokatCache': 'methodAndPath, eTag, data, status, linkRelations'
+    });
 
     this.dbPromise = new Promise((resolve) => {
       // Try to use IndexedDB. If it fails to open (Safari/FF incognito mode)
       // then use localStorage (by virtue of not setting this._db)
-      // db.open().then(() => {
-      //   return db.urls.where('methodAndPath').notEqual('_SOME_STRING_THAT_IS_NEVER_A_URL').each(({methodAndPath, eTag, data, status, linkRelations}) => {
-      //     if (data) {
-      //       data = JSON.parse(data);
-      //     }
-      //     if (linkRelations) {
-      //       linkRelations = JSON.parse(linkRelations);
-      //     }
-      //     this.cachedETags[methodAndPath] = {eTag, data, status, linkRelations};
-      //   });
-      // }).then(() => {
-      //   // Use IndexedDB because it loaded up successfully
-      //   this._db = db;
-      //   resolve();
-      // }).catch(() => {
+      db.open().then(() => {
+        return db.octokatCache.where('methodAndPath').notEqual('_SOME_STRING_THAT_IS_NEVER_A_URL').each(({methodAndPath, eTag, data, status, linkRelations}) => {
+          if (data) {
+            data = JSON.parse(data);
+          }
+          if (linkRelations) {
+            linkRelations = JSON.parse(linkRelations);
+          }
+          this.cachedETags[methodAndPath] = {eTag, data, status, linkRelations};
+        });
+      }).then(() => {
+        // Use IndexedDB because it loaded up successfully
+        this._db = db;
         resolve();
-      // });
+      }).catch(() => {
+        resolve();
+      });
 
     });
 
@@ -74,7 +132,7 @@ const cacheHandler = new class CacheHandler {
     data = JSON.stringify(data);
     linkRelations = JSON.stringify(linkRelations);
     // This returns a promise but we ignore it. TODO: Batch the updates ina transaction maybe
-    this._db.urls.put({methodAndPath, eTag, data, status, linkRelations});
+    this._db.octokatCache.put({methodAndPath, eTag, data, status, linkRelations});
   }
   _dumpCache() {
     /* eslint-disable no-console */
