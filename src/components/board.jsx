@@ -1,11 +1,13 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 
+import {filterCardsByFilter} from '../route-utils';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import Loadable from './loadable';
 import Progress from '../progress';
+import Database from '../database';
 
 const ProgressView = React.createClass({
   getInitialState() {
@@ -85,7 +87,10 @@ const Board = React.createClass({
   render() {
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
-    const cardsPromise = IssueStore.fetchIssues(progress);
+    const cardsPromise = Database.fetchCards().then((cards) => {
+      IssueStore.fetchIssues();
+      return filterCardsByFilter(cards);
+    });
 
     return (
       <Loadable key='board'

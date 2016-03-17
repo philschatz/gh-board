@@ -4,9 +4,10 @@ import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
 import {getRelatedIssues} from './gfm-dom';
 import {getFilters, filterCardsByFilter} from './route-utils';
-import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
+import {contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 import Progress from './progress';
+import Database from './database';
 
 const RELOAD_TIME_SHORT = 30 * 1000;
 const RELOAD_TIME_LONG = 5 * 60 * 1000;
@@ -25,7 +26,7 @@ function getReloadTime() {
 
 let GRAPH_CACHE = new BipartiteGraph();
 let CARD_CACHE = {};
-const cardFactory = (repoOwner, repoName, number, issue) => {
+const cardFactory = (repoOwner, repoName, number, issue, pr=null, prStatuses=null) => {
   const key = toIssueKey(repoOwner, repoName, number);
   let card = CARD_CACHE[key];
   if (card && issue) {
@@ -34,7 +35,7 @@ const cardFactory = (repoOwner, repoName, number, issue) => {
   } else if (card) {
     return card;
   } else {
-    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue);
+    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue, pr, prStatuses);
     CARD_CACHE[key] = card;
     return card;
   }
@@ -137,11 +138,11 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
-  issueNumberToCard(repoOwner, repoName, number, issue=null) {
+  issueNumberToCard(repoOwner, repoName, number, issue=null, pr=null, prStatuses=null) {
     if (!(repoOwner && repoName && number)) {
       throw new Error('BUG! Forgot to pass arguments in');
     }
-    return cardFactory(repoOwner, repoName, number, issue);
+    return cardFactory(repoOwner, repoName, number, issue, pr, prStatuses);
   }
   issueToCard(repoOwner, repoName, issue) {
     if (!(repoOwner && repoName && issue)) {
@@ -166,8 +167,8 @@ class IssueStore extends EventEmitter {
     return Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100})
     .then((vals) => {
       progress.tick(`Fetched Issues for ${repoOwner}/${repoName}`);
-      return _.map(vals, (issue) => {
-        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
+      return vals.map((issue) => {
+        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue);
       });
     });
   }
@@ -219,10 +220,15 @@ class IssueStore extends EventEmitter {
 
       cacheCards = cards;
       cacheCardsRepoInfos = JSON.stringify(repoInfos);
-      if (isForced) {
-        this.emit('change');
-      }
-      return cards;
+
+      // Save the cards and then emit that they were changed
+      return Database.putCards(cards).then(() => {
+        if (isForced) {
+          this.emit('change');
+        }
+        return cards;
+      });
+
     });
   }
   fetchMilestones(repoOwner, repoName) {

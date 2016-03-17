@@ -1,17 +1,12 @@
 import _ from 'underscore';
 import EventEmitter from 'events';
-import Dexie from 'dexie';
 
 // 3 implementations: indexedDB, LocalStorage, In-mem
 import levelup from 'levelup';
-import memdown from 'memdown';
 import leveljs from 'level-js';
-// import levelidb from 'levelidb'; // alternate IndexedDB impl BROKEN
-import localstorage from 'localstorage-down';
 // + querying the data
 import levelQuery from 'level-queryengine';
 import jsonqueryEngine from 'jsonquery-engine';
-import pairs from 'pairs';
 
 
 
@@ -27,14 +22,6 @@ import PaginationPlugin from 'octokat/dist/node/plugins/pagination';
 const MAX_CACHED_URLS = 2000;
 
 let cachedClient = null;
-
-// // Log all IndexedDB errors to the console
-// Dexie.Promise.on('error', (err) => {
-//   /* eslint-disable no-console */
-//   console.log(`Dexie Uncaught error: ${err}`);
-//   /* eslint-enable no-console */
-// });
-
 
 // Try to load/save to IndexedDB and fall back to localStorage for persisting the cache.
 // localStorage support is needed because IndexedDB is disabled for Private browsing in Safari/Firefox
@@ -56,70 +43,27 @@ const cacheHandler = new class CacheHandler {
     driver = leveljs;
     // driver = localstorage;
 
-    let db2 = levelup('test-of-level', {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:1, indexes: [{ name: 'eTag', keyPath: 'eTag', unique: false, multiEntry: false }, { name: 'status', keyPath: 'status', unique: false, multiEntry: false }] , valueEncoding: 'none'});
-    // let db2 = leveljs('test-of-level');
+    const dbOpts = {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:3, /*indexes: indexes,*/ valueEncoding: 'none'};
+    let db = levelup('octokatCache', dbOpts);
+    db = levelQuery(db);
+    db.query.use(jsonqueryEngine());
 
-    window.leveljs = leveljs;
-    window.PHIL = db2;
-    db2 = levelQuery(db2);
-    window.PHIL2 = db2;
-    db2.query.use(jsonqueryEngine());
-    // db2.ensureIndex('*', 'pairs', pairs.index);
-    // db2.ensureIndex('eTag');
-
-    const opts = {asBuffer:false, raw:true, indexes: [{ name: 'eTag', keyPath: 'eTag', unique: false, multiEntry: false }]};
-    db2.open(() => {
-
-      db2.put('phil', {eTag: 'skdjh', status: 200, data: 'hello there', foos: [1,3,5]}/*if using localStorage or memdown you need to JSON.stringify*/, opts, (err1, val1) => {
-        db2.put('phil3', {eTag: 'skdjh3', status: 202, data: 'hello there boo', foos: [1,3,5,3]}/*if using localStorage or memdown you need to JSON.stringify*/, opts, (err2, val2) => {
-          console.log('poioiuoiu', err1, val1);
-          db2.get('phil', opts, (err, val) => {
-            console.log('askjdkasjhd', err, val);
-          });
-
-          // db2.query({ $and: [ { status: { $gt: 100 } }, { status: { $lt: 300 } } ] })
-          // just get all the results and load them into memory
-          db2.query({})
-          .on('data', (data) => {
-            console.log('zxczxczxcv');
-            console.log(data);
-          })
-          .on('stats', function (stats) {
-            // stats contains the query statistics in the format
-            //  { indexHits: 1, dataHits: 1, matchHits: 1 });
-            console.log('stats', stats);
-          });
-        });
-      });
-    })
-
-    // pull from IndexedDB
-    // investigate https://mozilla.github.io/localForage/
-    const db = new Dexie('octokatCache');
-    window.Dexie = Dexie;
-    db.version(1).stores({
-      'octokatCache': 'methodAndPath, eTag, data, status, linkRelations'
-    });
+    this._opts = {asBuffer:false, raw:true};
 
     this.dbPromise = new Promise((resolve) => {
-      // Try to use IndexedDB. If it fails to open (Safari/FF incognito mode)
-      // then use localStorage (by virtue of not setting this._db)
-      db.open().then(() => {
-        return db.octokatCache.where('methodAndPath').notEqual('_SOME_STRING_THAT_IS_NEVER_A_URL').each(({methodAndPath, eTag, data, status, linkRelations}) => {
-          if (data) {
-            data = JSON.parse(data);
-          }
-          if (linkRelations) {
-            linkRelations = JSON.parse(linkRelations);
-          }
-          this.cachedETags[methodAndPath] = {eTag, data, status, linkRelations};
+
+      db.open(() => {
+
+        db.query({})
+        .on('data', (entry) => {
+          let {methodAndPath, eTag, data, status} = entry;
+          this.cachedETags[methodAndPath] = {eTag, data, status};
+        })
+        .on('stats', (stats) => {
+          console.log('IndexedDB.octocatCache_stats', stats);
+          this._db = db;
+          resolve();
         });
-      }).then(() => {
-        // Use IndexedDB because it loaded up successfully
-        this._db = db;
-        resolve();
-      }).catch(() => {
-        resolve();
       });
 
     });
@@ -127,12 +71,10 @@ const cacheHandler = new class CacheHandler {
     // Async save once now new JSON has been fetched after X seconds
     this.pendingTimeout = null;
   }
-  _save(method, path, eTag, data, status, linkRelations) {
+  _save(method, path, eTag, data, status) {
     const methodAndPath = method + ' ' + path;
-    data = JSON.stringify(data);
-    linkRelations = JSON.stringify(linkRelations);
     // This returns a promise but we ignore it. TODO: Batch the updates ina transaction maybe
-    this._db.octokatCache.put({methodAndPath, eTag, data, status, linkRelations});
+    this._db.put(methodAndPath, {methodAndPath, eTag, data, status}, this._opts);
   }
   _dumpCache() {
     /* eslint-disable no-console */

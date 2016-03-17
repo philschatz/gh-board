@@ -1,11 +1,12 @@
 import SettingsStore from './settings-store';
 import Client from './github-client';
 import {getDataFromHtml} from './gfm-dom';
+import Database from './database';
 
 const MAX_LISTENERS = 5;
 
 export default class Card {
-  constructor(repoOwner, repoName, number, graph, issue) {
+  constructor(repoOwner, repoName, number, graph, issue, pr, prStatuses) {
     if (!repoOwner) { throw new Error('BUG! missing repoOwner'); }
     if (!repoName) { throw new Error('BUG! missing repoName'); }
     if (!number) { throw new Error('BUG! missing number'); }
@@ -15,8 +16,10 @@ export default class Card {
     this.number = number;
     this.issue = issue;
     this._graph = graph;
-    this._pr = null;
-    this._prPromise = null;
+    this._pr = pr;
+    this._prStatuses = prStatuses;
+    this._prPromise = pr ? Promise.resolve(pr) : null;
+    this._prStatusesPromise = prStatuses ? Promise.resolve(prStatuses) : null;
     this._changeListeners = [];
   }
   key() {
@@ -43,6 +46,7 @@ export default class Card {
   }
   hasMergeConflict() {
     if (this._pr) {
+      if (this._pr.merged) { return false; }
       return !this._pr.mergeable;
     } else {
       return false; // return false for now just to be safe
@@ -114,7 +118,11 @@ export default class Card {
     if (!this._prPromise) {
       return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
         if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
+        const isSame = this._pr && pr && JSON.stringify(this._pr) === JSON.stringify(pr);
         this._pr = pr;
+        if (!isSame) {
+          Database.putCard(this);
+        }
         this._emitChange();
       });
     }
@@ -126,7 +134,11 @@ export default class Card {
     return this.fetchPR().then(() => {
       if (!this._prStatusesPromise) {
         this._prStatusesPromise = this._getOcto().commits(this._pr.head.sha).statuses.fetchAll().then((statuses) => {
+          const isSame = this._prStatuses && statuses && JSON.stringify(this._prStatuses) === JSON.stringify(statuses);
           this._prStatuses = statuses;
+          if (!isSame) {
+            Database.putCard(this);
+          }
           this._emitChange();
         });
       }
@@ -135,6 +147,7 @@ export default class Card {
   fetchIssue() {
     return this._getOcto().issues(this.number).fetch().then((issue) => {
       this.issue = issue;
+      Database.putCard(this);
     });
   }
   resetPromisesAndState(issue) {
@@ -160,7 +173,7 @@ export default class Card {
   }
   isLoaded() {
     if (!this.issue) { return false; }
-    if (this.isPullRequest()) {
+    if (SettingsStore.getShowPullRequestData() && this.isPullRequest()) {
       // Check if the statuses are loaded
       return !!this._prStatuses;
     }
