@@ -145,7 +145,7 @@ class Client extends EventEmitter {
     this.LOW_RATE_LIMIT = 60;
   }
   // Used for checking if we should retreive ALL Issues or just open ones
-  canCacheLots() { return !!cacheHandler._db; }
+  canCacheLots() { return this.hasCredentials() && !!cacheHandler._db; }
   dbPromise() { return cacheHandler.dbPromise; }
   off() { // EventEmitter has `.on` but no matching `.off`
     const slice = [].slice;

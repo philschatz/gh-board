@@ -36,6 +36,50 @@ const DB_DATA = {
   }
 };
 
+
+// MonkeyPatch memdown's batch function because it stringifies everything
+memdown.prototype._batch = function (array, options, callback) {
+  let err
+    , i = -1
+    , key
+    , value
+    , iter
+    , len = array.length
+    , tree = this._store[this._location]
+
+  while (++i < len) {
+    if (!array[i])
+      continue;
+
+    key = this._isBuffer(array[i].key) ? array[i].key : String(array[i].key)
+    err = this._checkKey(key, 'key')
+    if (err)
+      return setImmediate(function errorCall() { callback(err) })
+
+    iter = tree.find(key)
+
+    if (array[i].type === 'put') {
+      // value = this._isBuffer(array[i].value) ? array[i].value : String(array[i].value)
+      value = array[i].value
+
+      err = this._checkKey(value, 'value')
+
+      if (err)
+        return setImmediate(function errorCall() { callback(err) })
+
+      tree = iter.valid ? iter.update(value) : tree.insert(key, value)
+    } else {
+      tree = iter.remove()
+    }
+  }
+
+  this._store[this._location] = tree;
+
+  setImmediate(callback)
+}
+
+
+
 // Try to load/save to IndexedDB and fall back to localStorage for persisting the cache.
 // localStorage support is needed because IndexedDB is disabled for Private browsing in Safari/Firefox
 const database = new class Database {
@@ -45,7 +89,7 @@ const database = new class Database {
       'labels': this._toDb('labels'),
       'repositories': this._toDb('repositories'),
     };
-    this._opts = {asBuffer:false, raw:true};
+    this._opts = {asBuffer:false, raw:true, valueEncoding: 'none', fillCache:false};
   }
   _toDb(dbName) {
     // See https://github.com/Level/levelup/wiki/Modules for more
@@ -55,7 +99,7 @@ const database = new class Database {
     // driver = localstorage;
 
     const {dbVersion, indexes} = DB_DATA[dbName];
-    const dbOpts = {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:dbVersion, indexes:indexes, valueEncoding: 'none', };
+    const dbOpts = {db: driver, fillCache:false, asBuffer:false, raw:true, storePrefix:'', dbVersion:dbVersion, indexes:indexes, valueEncoding: 'none', };
     let actualDb = levelup(dbName, dbOpts);
     let memDb = levelup(dbName, {db:memdown, valueEncoding: 'none'}); // using memdb affects updateCard
 
@@ -102,7 +146,7 @@ const database = new class Database {
       db = actualDb;
       method = actualDb.batch;
       // put it into memDb now, instead of waiting for success
-      memDb.batch(args[0], args[1]);
+      memDb.batch(args[0], args[1], args[2]);
     } else {
       throw new Error('Unknown levelDB operation. Expected get or put but got ' + methodName);
     }
@@ -201,9 +245,41 @@ const database = new class Database {
   getRepo(repoOwner, repoName) {
     return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`, this._opts);
   }
+  getRepoOrNull(repoOwner, repoName) {
+    return new Promise((resolve, reject) => {
+      this.getRepo(repoOwner, repoName)
+      .then((val) => {
+        if (!val.repoName) {
+          console.error('BUG: Looks like we retrieved something that is not a repo. Maybe it was a string?', val);
+          throw new Error('BUG: Looks like we retrieved something that is not a repo. Maybe it was a string?');
+        }
+        resolve(val);
+      })
+      .catch(() => { resolve(null); })
+    });
+  }
   putRepo(repoOwner, repoName, value) {
     return this._doOp('repositories', 'put', `${repoOwner}/${repoName}`, value, this._opts);
   }
+
+  putRepos(repos) {
+    const batchOps = repos.map((repo) => {
+      const {repoOwner, repoName} = repo;
+      return {
+        type: 'put',
+        key: `${repoOwner}/${repoName}`,
+        value: repo
+      };
+    });
+    return this._doOp('repositories', 'batch', batchOps, this._opts);
+  }
+
+  putCardsAndRepos(cards, repos) {
+    return this.putCards(cards).then(() => {
+      return this.putRepos(repos);
+    })
+  }
+
   patchRepo(repoOwner, repoName, changes) {
     return new Promise((resolve, reject) => {
       // this is atomic only because the get is instant because it's in-mem
