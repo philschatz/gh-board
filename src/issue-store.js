@@ -167,7 +167,7 @@ class IssueStore extends EventEmitter {
   _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
     progress.addTicks(1, `Fetching Issues for ${repoOwner}/${repoName}`);
     const issuesState = Client.canCacheLots() ? 'all' : 'open';
-    return Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100})
+    return Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100, sort: 'updated'})
     .then((vals) => {
       progress.tick(`Fetched Issues for ${repoOwner}/${repoName}`);
       return vals.map((issue) => {
@@ -175,43 +175,55 @@ class IssueStore extends EventEmitter {
       });
     });
   }
-  _fetchLastSeenUpdates(repoOwner, repoName, progress, lastSeenEventId) {
-    return Client.getOcto().repos(repoOwner, repoName).issues.events.fetch()
-    .then((result) => {
+  _fetchLastSeenUpdates(repoOwner, repoName, progress, lastSeenAt) {
+    const opts = {
+      per_page: 100,
+      sort: 'updated',
+      direction: 'desc'
+    };
+    if (lastSeenAt) {
+      opts.since = lastSeenAt;
+    }
+    let fetchPromise;
+    if (Client.canCacheLots()) {
+      opts.state = 'all'; // fetch opened and closed Issues
+      fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetchAll(opts);
+    } else {
+      fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetch(opts).then(({items}) => {
+        // fetch() yields `{ items: [...] }` while fetchAll() yields `[...]`
+        // so unwrap.
+        return items;
+      });
+    }
+    return fetchPromise
+    .then((items) => {
       progress.tick(`Fetched Updates for ${repoOwner}/${repoName}`);
-      let newLastSeenEventId;
-      // could have 0 events
-      if (result.items && result.items.length) {
-        newLastSeenEventId = result.items[0].id;
+      let newLastSeenAt;
+      if (items.length) {
+        newLastSeenAt = items[0].updatedAt;
       } else {
         // If a repository has 0 events it probably has not changed in a while
         // or never had any commits. Do not keep trying to fetch all the Issues though
-        // so set the lastSeenEventId to be something non-zero
+        // so set the lastSeenAt to be something non-zero
         // since falsy means gh-board has not fetched all the Issuese before.
-        newLastSeenEventId = -1;
+        newLastSeenAt = null;
       }
-      let hitLastSeenEventId = false;
-      let cards = result.items.map((event) => {
-        // Ignore what type of event it was
-        const {issue, id} = event;
-        if (id && id === lastSeenEventId) {
-          hitLastSeenEventId = true;
-        }
-        if (hitLastSeenEventId) {
+      let cards = items.map((issue) => {
+        if (lastSeenAt === issue.updatedAt) {
+          // If this Issue was updated at the same time then ignore it
+          // TODO: this is a bit imprecise. maybe it's safer to not exclude it this way
           return null;
         }
-        console.log('Saw a new event!', repoName, event.event, event.createdAt);
+        console.log('Saw an updated/new issue!', repoName, issue.number, 'updated:', issue.updatedAt, 'last saw this repo:', lastSeenAt);
         return this.issueNumberToCard(repoOwner, repoName, issue.number, issue);
       });
-      // .reverse because events are newest first but IndexedDB needs them to be newest-last
-      cards = cards.reverse();
       // remove the null cards (null because they are not new events)
       cards = _.filter(cards, (card) => { return !!card; });
       const ret = { cards };
-      // only include the repository key if the lastSeenEventId changed
+      // only include the repository key if the lastSeenAt changed
       // That way fewer things will need to be saved to the DB
-      if (lastSeenEventId !== newLastSeenEventId) {
-        ret.repository = {repoOwner, repoName, lastSeenEventId: newLastSeenEventId};
+      if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
+        ret.repository = {repoOwner, repoName, lastSeenAt: newLastSeenAt};
       }
       return ret;
     });
@@ -219,33 +231,11 @@ class IssueStore extends EventEmitter {
   _fetchUpdatesForRepo(repoOwner, repoName, progress) {
     progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
     return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
-      if (repo && repo.lastSeenEventId) {
-        const {lastSeenEventId} = repo;
-        // Just fetch the list of events since we already fetched all the closed Issues
-        return this._fetchLastSeenUpdates(repoOwner, repoName, progress, lastSeenEventId);
-      } else if (!Client.canCacheLots()) {
-        // Just keep fetching the 1st page of Open Issues
-        return this._fetchAllIssuesForRepo(repoOwner, repoName, progress).then((cards) => {
-          return {
-            // repository: {repoOwner, repoName},
-            cards
-          };
-        });
-      } else {
-        // Fetch all the Closed Issues and then fetch the 1st page of events.
-        // Combine them and most importantly, the result of the 2nd call will set the lastSeenEventId in the DB
-        return this._fetchAllIssuesForRepo(repoOwner, repoName, progress).then((allCards) => {
-          return this._fetchLastSeenUpdates(repoOwner, repoName, progress, null /*lastSeenEventId*/).then(({repository, cards}) => {
-            if (repository && !repository.lastSeenEventId) {
-              throw new Error('BUG! no new lastSeenEventId found');
-            }
-            return {
-              repository,
-              cards: allCards.concat(cards)
-            };
-          });
-        });
+      let lastSeenAt;
+      if (repo && repo.lastSeenAt) {
+        lastSeenAt = repo.lastSeenAt;
       }
+      return this._fetchLastSeenUpdates(repoOwner, repoName, progress, lastSeenAt);
     });
   }
   _fetchAllIssues(repoInfos, progress, isForced) {
@@ -291,7 +281,7 @@ class IssueStore extends EventEmitter {
     });
     return Promise.all(allPromises).then((repoAndCards) => {
       repoAndCards = _.flatten(repoAndCards, true /*shallow*/); // the asterisks in the URL become an array of repoAndCards so we need to flatten
-      const repos = _.filter(repoAndCards.map(({repository}) => { return repository; }), (v) => { return !!v; }); // if the lastSeenEventId did not change then repository field will be missing
+      const repos = _.filter(repoAndCards.map(({repository}) => { return repository; }), (v) => { return !!v; }); // if the lastSeenAt did not change then repository field will be missing
       const cards = _.flatten(repoAndCards.map(({cards}) => { return cards; }), true /*shallow*/);
 
       _buildBipartiteGraph(GRAPH_CACHE, cards);
@@ -301,7 +291,7 @@ class IssueStore extends EventEmitter {
 
       // Save the cards and then emit that they were changed
       return Database.putCardsAndRepos(cards, repos).then(() => {
-        if (isForced && cards.length) {
+        if (cards.length) {
           this.emit('change');
         }
         return cards;
