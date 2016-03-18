@@ -78,7 +78,7 @@ function _buildBipartiteGraph(graph, cards) {
 
   _.each(cards, (card) => {
     const cardPath = graph.cardToKey(card);
-    if (card.issue.pullRequest) {
+    if (card.isPullRequest()) {
       // card is a Pull Request
       allPullRequests[cardPath] = card;
     } else {
@@ -89,19 +89,21 @@ function _buildBipartiteGraph(graph, cards) {
 
   _.each(cards, (card) => {
     const cardPath = GRAPH_CACHE.cardToKey(card);
-    const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
-    // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
-    // TODO: Refactor to simplify this datastructure
-    //if (card.issue.pullRequest) {
-      // card is a Pull Request
-      _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
-        const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
-        const otherCard = allIssues[otherCardPath] || allPullRequests[otherCardPath];
-        if (otherCard) {
-          GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
-        }
-      });
-    //}
+    if (card.issue) { // If an issue refers to some random repo then card.issue might be null
+      const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
+      // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
+      // TODO: Refactor to simplify this datastructure
+      //if (card.issue.pullRequest) {
+        // card is a Pull Request
+        _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
+          const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
+          const otherCard = allIssues[otherCardPath] || allPullRequests[otherCardPath];
+          if (otherCard) {
+            GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
+          }
+        });
+      //}
+    }
   });
 }
 

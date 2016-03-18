@@ -39,7 +39,11 @@ export default class Card {
     this._changeListeners = this._changeListeners.filter(item => item !== listener);
   }
   isPullRequest() {
-    return !!this.issue.pullRequest;
+    if (this.issue) {
+      return !!this.issue.pullRequest;
+    } else {
+      return false;
+    }
   }
   isPullRequestMerged() {
     return !! this.isPullRequest() && this._pr && this._pr.mergedAt;
