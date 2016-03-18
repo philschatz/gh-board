@@ -163,9 +163,9 @@ const database = new class Database {
     return db.open().then(function() {
       const cards = [];
       return db.issues.each((value) => {
-        const {repoOwner, repoName, issue, pr, statuses} = value;
+        const {repoOwner, repoName, issue, pr, status} = value;
         const number = issue.number;
-        cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, statuses));
+        cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));
       }).then(() => {
         return cards;
       });
@@ -195,7 +195,7 @@ const database = new class Database {
     });
   }
   toCardValue(card) {
-    const {repoOwner, repoName, issue, _pr, _prStatuses} = card;
+    const {repoOwner, repoName, issue, _pr, _prStatus} = card;
     const {columnRegExp} = getFilters().getState();
     const labelNames = issue.labels.map((label) => label.name);
     const value = {
@@ -211,7 +211,7 @@ const database = new class Database {
       updatedAtMs: moment(issue.updatedAt).toDate().getTime(),
     };
     if (_pr) value.pr = _pr; // TODO: Filter out useless info like URLs. No need to clutter up the db
-    if (_prStatuses) value.statuses = _prStatuses;
+    if (_prStatus) value.status = _prStatus;
     return value;
   }
   putCard(card) {

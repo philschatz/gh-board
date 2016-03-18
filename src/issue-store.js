@@ -2,7 +2,6 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
-import {getRelatedIssues} from './gfm-dom';
 import {getFilters, filterCardsByFilter} from './route-utils';
 import {contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
@@ -90,14 +89,14 @@ function _buildBipartiteGraph(graph, cards) {
   _.each(cards, (card) => {
     const cardPath = GRAPH_CACHE.cardToKey(card);
     if (card.issue) { // If an issue refers to some random repo then card.issue might be null
-      const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
+      const relatedIssues = card.getRelatedIssuesFromBody();
       // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
       // TODO: Refactor to simplify this datastructure
       //if (card.issue.pullRequest) {
         // card is a Pull Request
         _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
           const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
-          const otherCard = allIssues[otherCardPath] || allPullRequests[otherCardPath];
+          const otherCard = issueStore.issueNumberToCard(repoOwner, repoName, number);
           if (otherCard) {
             GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
           }
@@ -111,7 +110,7 @@ let cacheCardsRepoInfos = null;
 let cacheCards = null;
 let isPollingEnabled = false;
 
-class IssueStore extends EventEmitter {
+const issueStore = new class IssueStore extends EventEmitter {
   constructor() {
     super();
     document.addEventListener('visibilitychange', () => {
@@ -360,4 +359,4 @@ class IssueStore extends EventEmitter {
   }
 }
 
-export default new IssueStore();
+export default issueStore;

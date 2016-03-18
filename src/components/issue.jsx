@@ -235,13 +235,19 @@ let Issue = React.createClass({
 
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
+      let title;
+      if (issueCard.issue) {
+        title = (
+          <span className='related-issue-title'>{issueCard.issue.title}</span>
+        );
+      }
       return (
         <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
             card={issueCard}
             primaryRepoName={card.repoName}
             context={context}/>
-          <span className='related-issue-title'>{issueCard.issue.title}</span>
+          {title}
         </div>
       );
     });

@@ -117,7 +117,7 @@ export function getRelatedIssues(text, repoOwner, repoName) {
 export function getDataFromHtml(text, repoOwner, repoName) {
   const div = getElement(text, repoOwner, repoName);
   const taskCounts = getTaskCounts(div);
-  // const relatedIssues = _getRelatedIssues(div);
+  const relatedIssues = _getRelatedIssues(div);
   const dueAt = getIssueDueAt(div);
-  return {/*relatedIssues,*/ taskCounts, dueAt};
+  return {relatedIssues, taskCounts, dueAt};
 }

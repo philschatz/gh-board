@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 import SettingsStore from './settings-store';
 import Client from './github-client';
 import {getDataFromHtml} from './gfm-dom';
@@ -6,7 +8,7 @@ import Database from './database';
 const MAX_LISTENERS = 5;
 
 export default class Card {
-  constructor(repoOwner, repoName, number, graph, issue, pr, prStatuses) {
+  constructor(repoOwner, repoName, number, graph, issue, pr, prStatus) {
     if (!repoOwner) { throw new Error('BUG! missing repoOwner'); }
     if (!repoName) { throw new Error('BUG! missing repoName'); }
     if (!number) { throw new Error('BUG! missing number'); }
@@ -17,9 +19,9 @@ export default class Card {
     this.issue = issue;
     this._graph = graph;
     this._pr = pr;
-    this._prStatuses = prStatuses;
+    this._prStatus = prStatus;
     this._prPromise = pr ? Promise.resolve(pr) : null;
-    this._prStatusesPromise = prStatuses ? Promise.resolve(prStatuses) : null;
+    this._prStatusPromise = prStatus ? Promise.resolve(prStatus) : null;
     this._changeListeners = [];
   }
   key() {
@@ -57,12 +59,19 @@ export default class Card {
     }
   }
   getPullRequestStatus() {
-    if (!this._prStatuses) {
+    if (!this._prStatus) {
       return {};
     }
-    // TODO: check when there are multiple statuses
-    if (this._prStatuses.length) {
-      return this._prStatuses[0];
+    if (this._prStatus) {
+      const {state, statuses} = this._prStatus;
+      // Pull out the 1st status which matches the overall status of the commit.
+      // That way we get the targetURL and message.
+      // When 'pending', there might not be entries in statuses
+      const theStatus = _.filter(statuses, (status) => { return status.state === state; })[0];
+      if (!theStatus) {
+        return {};
+      }
+      return theStatus;
     } else {
       return {};
     }
@@ -101,9 +110,9 @@ export default class Card {
   getDueAt() {
     return this._getDataFromHtml().dueAt;
   }
-  // getRelatedIssues() {
-  //   return getRelatedIssues(this.issue.body);
-  // }
+  getRelatedIssuesFromBody() {
+    return this._getDataFromHtml().relatedIssues;
+  }
   getCommentCount() {
     let count = this.issue.comments;
     // include comments on code in the count
@@ -132,14 +141,15 @@ export default class Card {
     }
     return this._prPromise;
   }
-  fetchPRStatuses() {
+  fetchPRStatus() {
     if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     return this.fetchPR().then(() => {
-      if (!this._prStatusesPromise) {
-        this._prStatusesPromise = this._getOcto().commits(this._pr.head.sha).statuses.fetchAll().then((statuses) => {
-          const isSame = this._prStatuses && statuses && JSON.stringify(this._prStatuses) === JSON.stringify(statuses);
-          this._prStatuses = statuses;
+      if (!this._prStatusPromise) {
+        this._prStatusPromise = this._getOcto().commits(this._pr.head.sha).status.fetch()
+        .then((status) => {
+          const isSame = this._prStatus && status && JSON.stringify(this._prStatus) === JSON.stringify(status);
+          this._prStatus = status;
           if (!isSame) {
             Database.putCard(this);
           }
@@ -159,11 +169,11 @@ export default class Card {
       throw new Error('BUG: resetPromisesAndState requires an issue arg');
     }
     this.issue = issue;
-    const {_pr, _prStatuses} = this; // squirrel so UI doesn't see blips
+    const {_pr, _prStatus} = this; // squirrel so UI doesn't see blips
     delete this._prPromise;
-    delete this._prStatusesPromise;
-    if (_prStatuses) {
-      this.fetchPRStatuses(); // Trigger fetching PR and status
+    delete this._prStatusPromise;
+    if (_prStatus) {
+      this.fetchPRStatus(); // Trigger fetching PR and status
     } else if (_pr) {
       this.fetchPR(); // Trigger fetching PR
     } else {
@@ -179,14 +189,14 @@ export default class Card {
     if (!this.issue) { return false; }
     if (SettingsStore.getShowPullRequestData() && this.isPullRequest()) {
       // Check if the statuses are loaded
-      return !!this._prStatuses;
+      return !!this._prStatus;
     }
     return true; // It is an issue and is loaded
   }
   load() {
     if (this.issue) {
       if (this.isPullRequest()) {
-        return Promise.all([this.fetchIssue(), this.fetchPRStatuses()]);
+        return Promise.all([this.fetchIssue(), this.fetchPRStatus()]);
       } else {
         return this.fetchIssue(); // fetch it again
       }
