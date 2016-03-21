@@ -641,8 +641,14 @@ body { background-color: #ddd; }
 // A blurb can be inside an issue or in the move modal
 .issue-blurb {
   .blurb-context,
-  .blurb-icon { margin-left: .5rem; }
-  .blurb-icon { cursor: pointer; }
+  .blurb-icon {
+    cursor: pointer;
+    margin-left: .5rem;
+
+    &[data-state='merged'] { color: #6e5494; }
+    &[data-state='closed'] { color: #bd2c00; }
+    &[data-state='open'] { color: #6cc644; }
+  }
   .blurb-context { margin-right: .5rem; }
   .blurb-number-link {
     // color: #66f;

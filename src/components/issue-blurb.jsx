@@ -40,8 +40,14 @@ const IssueOrPullRequestBlurb = React.createClass({
 
       let icon = null;
       if (isPullRequest) {
+        let state;
+        if (card.isPullRequestMerged()) {
+          state = 'merged';
+        } else {
+          state = issue.state;
+        }
         icon = (
-          <i title='Click for Pull Request Details' className='blurb-icon octicon octicon-git-pull-request' onClick={this.onClickIcon}/>
+          <i title='Click for Pull Request Details' className='blurb-icon octicon octicon-git-pull-request' onClick={this.onClickIcon} data-state={state}/>
         );
       } else {
         const classes = {
@@ -52,7 +58,7 @@ const IssueOrPullRequestBlurb = React.createClass({
           'octicon-issue-closed': issue.state === 'closed'
         };
         icon = (
-          <i title='Click for Issue Details' className={classnames(classes)} onClick={this.onClickIcon}/>
+          <i title='Click for Issue Details' className={classnames(classes)} onClick={this.onClickIcon} data-state={issue.state}/>
         );
       }
 
