@@ -174,7 +174,7 @@ const issueStore = new class IssueStore extends EventEmitter {
       });
     });
   }
-  _fetchLastSeenUpdates(repoOwner, repoName, progress, lastSeenAt) {
+  _fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate) {
     const opts = {
       per_page: 100,
       sort: 'updated',
@@ -222,19 +222,32 @@ const issueStore = new class IssueStore extends EventEmitter {
       // only include the repository key if the lastSeenAt changed
       // That way fewer things will need to be saved to the DB
       if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
-        ret.repository = {repoOwner, repoName, lastSeenAt: newLastSeenAt};
+        ret.repository = {repoOwner, repoName, lastSeenAt: newLastSeenAt, isPrivate};
       }
       return ret;
     });
   }
-  _fetchUpdatesForRepo(repoOwner, repoName, progress) {
+  // _fetchUpdatesForRepo(repoOwner, repoName, progress) {
+  //   progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
+  //   return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
+  //     let lastSeenAt;
+  //     if (repo && repo.lastSeenAt) {
+  //       lastSeenAt = repo.lastSeenAt;
+  //     }
+  //     return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt);
+  //   });
+  // }
+  _fetchUpdatesForRepo(repo, progress) {
+    const repoOwner = repo.owner.login;
+    const repoName = repo.name;
+    const isPrivate = repo.private;
     progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
     return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
       let lastSeenAt;
       if (repo && repo.lastSeenAt) {
         lastSeenAt = repo.lastSeenAt;
       }
-      return this._fetchLastSeenUpdates(repoOwner, repoName, progress, lastSeenAt);
+      return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate);
     });
   }
   _fetchAllIssues(repoInfos, progress, isForced) {
@@ -259,15 +272,64 @@ const issueStore = new class IssueStore extends EventEmitter {
       if (repoName === '*') {
         // Fetch all the repos, and then concat them
         progress.addTicks(1, `Fetching list of all repositories for ${repoOwner}`);
+
+        // // This method searches for all repos that have been pushed in the last year.
+        // // DISADVANTAGES: searches only **public** repos, not private ones
+        // const lastSeenAt = '2015-01-01T00:00:00Z'; // Only poll repos that were pushed in the last year
+        // const q = `user:${repoOwner} pushed:>=${lastSeenAt}`;
+        // return Client.getOcto().search.repositories.fetchAll({sort:'pushed', q:q})
+        // .then((repos) => {
+        //   progress.tick(`Fetched list of all repositories for ${repoOwner}`);
+        //   return Promise.all(repos.map((repo) => {
+        //     // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
+        //     if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
+        //       return null;
+        //     }
+        //     return this._fetchUpdatesForRepo(repo, progress);
+        //   }));
+        // })
+        // .then((issuesByRepo) => {
+        //   // exclude the null repos (ones that were explicitly listed in the URL)
+        //   return _.flatten(_.filter(issuesByRepo, (v) => { return !!v; }), true/*shallow*/);
+        // });
+
+
+        // // This method searches for all issues that have updated since a certain date.
+        // // This has the DISADVANTAGE of maybe missing some updates,
+        // // missing new repos that have been added
+        // // missing new issues in a repo that has not been fetched yet (since the lastUpdated date should be null)
+        // // and having to calculate 1 timestamp from all the repos
+        // const lastSeenAt = '2016-03-19T22:32:14Z';
+        // const q = `user:${repoOwner} updated:>=${lastSeenAt}`;
+        // return Client.getOcto().search.issues.fetchAll({sort:'updated', q:q})
+        // .then((issues) => {
+        //   return issues.map((issue) => {
+        //     // Parse repository_url becaue the repo info is not anywhere else
+        //     // repository_url = "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}"
+        //     const [repoOwner, repoName] = /repos\/(.*)/.exec(issue.repositoryUrl)[1].split('/');
+        //     return this.issueNumberToCard(repoOwner, repoName, issue.number, issue);
+        //   });
+        // });
+
+
         return Client.getOcto().orgs(repoOwner).repos.fetchAll()
         .then((repos) => {
           progress.tick(`Fetched list of all repositories for ${repoOwner}`);
+          // Filter repos to only include ones that have been pushed in the last year
+          // to avoid excessive polling
+          repos = _.filter(repos, (repo) => {
+            const ret = Date.now() - Date.parse(repo.updatedAt) < 1000 * 60 * 60 * 24 * 365
+            // if (!ret) {
+            //   console.log('Skipping over ', repo.name, 'because lastUpdated=', repo.updatedAt);
+            // }
+            return ret;
+          });
           return Promise.all(repos.map((repo) => {
             // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
             if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
               return null;
             }
-            return this._fetchUpdatesForRepo(repoOwner, repo.name, progress);
+            return this._fetchUpdatesForRepo(repo, progress);
           }));
         })
         .then((issuesByRepo) => {
@@ -275,7 +337,10 @@ const issueStore = new class IssueStore extends EventEmitter {
           return _.flatten(_.filter(issuesByRepo, (v) => { return !!v; }), true/*shallow*/);
         });
       } else {
-        return this._fetchUpdatesForRepo(repoOwner, repoName, progress);
+        return Client.getOcto().repos(repoOwner, repoName).fetch()
+        .then((repo) => {
+          return this._fetchUpdatesForRepo(repo, progress);
+        });
       }
     });
     return Promise.all(allPromises).then((repoAndCards) => {

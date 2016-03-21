@@ -2,14 +2,18 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 
-import GithubFlavoredMarkdown from './gfm';
-import ColoredIcon from './colored-icon';
 import {getFilters} from '../route-utils';
+import Database from '../database';
+
+import GithubFlavoredMarkdown from './gfm';
+import Loadable from './loadable';
+import ColoredIcon from './colored-icon';
 
 const IssueOrPullRequestBlurb = React.createClass({
   render() {
-    const {card, primaryRepoName, context} = this.props;
+    const {card, primaryRepoName, context, repo} = this.props;
     const {issue, repoOwner, repoName, number} = card;
+    const isPrivate = repo && repo.isPrivate;
 
     const multipleRepoName = primaryRepoName === repoName ? null : repoName;
     let blurbContext;
@@ -19,6 +23,12 @@ const IssueOrPullRequestBlurb = React.createClass({
       );
     }
 
+    let privateEl;
+    if (isPrivate) {
+      privateEl = (
+        <i className='octicon octicon-lock private' title='Private Repository'/>
+      );
+    }
     if (issue) {
       const isPullRequest = card.isPullRequest() || issue.base; // use .base in case we are given the PR JSON (which does not contain labels)
       const popoverTitle = (
@@ -97,6 +107,7 @@ const IssueOrPullRequestBlurb = React.createClass({
             overlay={bodyPopover}>
             <span className='-just-for-overlay-trigger'>
               {icon}
+              {privateEl}
               <span className='blurb-secondary-repo'>{multipleRepoName}</span>
               {blurbContext}
             </span>
@@ -108,6 +119,7 @@ const IssueOrPullRequestBlurb = React.createClass({
       return (
         <span className='issue-blurb'>
           <span className='blurb-number'>{card.number}</span>
+          {privateEl}
           <span className='blurb-secondary-repo'>{multipleRepoName}</span>
           {blurbContext}
         </span>
@@ -118,4 +130,20 @@ const IssueOrPullRequestBlurb = React.createClass({
   }
 });
 
-export default IssueOrPullRequestBlurb;
+
+const IssueOrPullRequestBlurbShell = React.createClass({
+  render() {
+    const {card, primaryRepoName, context} = this.props;
+    const {repoOwner, repoName} = card;
+    const promise = Database.getRepoOrNull(repoOwner, repoName);
+
+    return (
+      <Loadable
+        promise={promise}
+        renderLoaded={(repo) => (<IssueOrPullRequestBlurb repo={repo} card={card} primaryRepoName={primaryRepoName} context={context} />)}
+      />
+    )
+  }
+});
+
+export default IssueOrPullRequestBlurbShell;
