@@ -17,23 +17,27 @@ import leveljs from 'level-js';
 
 const DB_DATA = {
   'issues': {
-    dbVersion: 3,
-    indexes: [
-      { name: '[repoOwner+repoName]', keyPath: ['repoOwner', 'repoName'], unique: false, multiEntry: false },
-      { name: 'state', keyPath: 'state', unique: false, multiEntry: false },
-      // Do state as 2nd arg because it can be omitted.
-      // See https://stackoverflow.com/questions/12084177/in-indexeddb-is-there-a-way-to-make-a-sorted-compound-query
-      { name: '[kanbanColumn+state]', keyPath: ['kanbanColumn', 'state'], unique: false, multiEntry: false },
-    ]},
-  'labels': {
-    // dbVersion: 1,
+    dbVersion: 1,
+    // indexes: [
+    //   { name: '[repoOwner+repoName]', keyPath: ['repoOwner', 'repoName'], unique: false, multiEntry: false },
+    //   { name: 'state', keyPath: 'state', unique: false, multiEntry: false },
+    //   // Do state as 2nd arg because it can be omitted.
+    //   // See https://stackoverflow.com/questions/12084177/in-indexeddb-is-there-a-way-to-make-a-sorted-compound-query
+    //   { name: '[kanbanColumn+state]', keyPath: ['kanbanColumn', 'state'], unique: false, multiEntry: false },
+    // ]
   },
+  // 'labels': {
+  //   // dbVersion: 1,
+  // },
   'repositories': {
-    dbVersion: 2,
-    indexes: [
-      // { name: '[repoOwner+repoName]', keyPath: ['repoOwner', 'repoName'], unique: true, multiEntry: false }
-    ]
-  }
+    dbVersion: 1,
+    // indexes: [
+    //   { name: '[repoOwner+repoName]', keyPath: ['repoOwner', 'repoName'], unique: true, multiEntry: false }
+    // ]
+  },
+  // 'octokatCache': {
+  //   dbVersion: 3,
+  // }
 };
 
 
@@ -84,11 +88,12 @@ memdown.prototype._batch = function (array, options, callback) {
 // localStorage support is needed because IndexedDB is disabled for Private browsing in Safari/Firefox
 const database = new class Database {
   constructor() {
-    this._dbs = {
-      'issues': this._toDb('issues'),
-      'labels': this._toDb('labels'),
-      'repositories': this._toDb('repositories'),
-    };
+    this._dbs = {}
+    const dbNames = Object.keys(DB_DATA);
+    for (const i in dbNames) {
+      const key = dbNames[i];
+      this._dbs[key] = this._toDb(key);
+    }
     this._opts = {asBuffer:false, raw:true, valueEncoding: 'none', fillCache:false};
   }
   _toDb(dbName) {

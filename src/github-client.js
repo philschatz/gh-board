@@ -43,7 +43,7 @@ const cacheHandler = new class CacheHandler {
     driver = leveljs;
     // driver = localstorage;
 
-    const dbOpts = {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:3, /*indexes: indexes,*/ valueEncoding: 'none'};
+    const dbOpts = {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:1, /*indexes: indexes,*/ valueEncoding: 'none'};
     let db = levelup('octokatCache', dbOpts);
     db = levelQuery(db);
     db.query.use(jsonqueryEngine());
