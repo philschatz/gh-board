@@ -227,10 +227,22 @@ function isUser(issue, userName) {
 };
 
 
+function matchesRepoInfo(repoInfos, card) {
+  for (const i in repoInfos) {
+    const {repoOwner, repoName} = repoInfos[i];
+    if (repoOwner === card.repoOwner && repoName === card.repoName) {
+      return true;
+    } else if (repoOwner === card.repoOwner && repoName === '*') {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
-  const {milestoneTitles, userName, columnRegExp} = getFilters().getState();
+  const {repoInfos, milestoneTitles, userName, columnRegExp} = getFilters().getState();
   let {tagNames, columnLabels} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
   const includedTagNames = tagNames.filter((tagName) => { return tagName[0] !== '-'; });
   const excludedTagNames = tagNames.filter((tagName) => { return tagName[0] === '-'; }).map((tagName) => { return tagName.substring(1); });
@@ -240,6 +252,12 @@ export function filterCardsByFilter(cards) {
 
   return cards.filter((card) => {
     const {issue} = card;
+
+    // Skip the card if it is not one of the repos
+    if (!matchesRepoInfo(repoInfos, card)) {
+      return false;
+    }
+
     // Add all the labels for lookup later (like the color)
     issue.labels.forEach((label) => {
       LABEL_CACHE[label.name] = label;
