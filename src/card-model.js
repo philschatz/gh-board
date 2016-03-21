@@ -196,8 +196,9 @@ export default class Card {
   load() {
     if (this.issue) {
       if (this.isPullRequest()) {
-        return Promise.all([this.fetchIssue(), this.fetchPRStatus()]);
+        return this.fetchPRStatus();
       } else {
+        return Promise.resolve('There is already an issue. no need to fetch again');
         return this.fetchIssue(); // fetch it again
       }
     } else {
