@@ -132,8 +132,13 @@ export default class Card {
     if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     if (!this._prPromise || isForced) {
+      const oldHead = this._pr && this._pr.head.sha;
       return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
         if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
+        if (pr.head.sha !== oldHead) {
+          this._prStatus = null;
+          this._prStatusPromise = null;
+        }
         const isSame = this._pr && pr && JSON.stringify(this._pr) === JSON.stringify(pr);
         this._pr = pr;
         if (!isSame) {
@@ -147,18 +152,20 @@ export default class Card {
   fetchPRStatus(isForced) {
     if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
-    // TODO: Only fetch the status when the old status is "pending" or the PR head commit changed
     return this.fetchPR(isForced).then(() => {
       if (!this._prStatusPromise || isForced) {
-        this._prStatusPromise = this._getOcto().commits(this._pr.head.sha).status.fetch()
-        .then((status) => {
-          const isSame = this._prStatus && status && JSON.stringify(this._prStatus) === JSON.stringify(status);
-          this._prStatus = status;
-          if (!isSame) {
-            Database.putCard(this);
-            this._emitChange();
-          }
-        });
+        // TODO: Only fetch the status when the old status is "pending" or the PR head commit changed
+        if (!this._prStatus || this._prStatus.state === 'pending') {
+          this._prStatusPromise = this._getOcto().commits(this._pr.head.sha).status.fetch()
+          .then((status) => {
+            const isSame = this._prStatus && status && JSON.stringify(this._prStatus) === JSON.stringify(status);
+            this._prStatus = status;
+            if (!isSame) {
+              Database.putCard(this);
+              this._emitChange();
+            }
+          });
+        }
       }
     });
   }
