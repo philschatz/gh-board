@@ -47,6 +47,12 @@ const FilterCategory = React.createClass({
         <Link to={toggleHref}>{iconNode}</Link>
       );
     }
+    let excludeLink;
+    if (excludeHref) {
+      excludeLink = (
+        <Link to={excludeHref} className='item-toggle-exclude' title='Exclude this from the board'><i className='octicon octicon-x'/></Link>
+      );
+    }
     return (
       <BS.ListGroupItem key={text} className={classnames({'is-selected': isSelected, 'is-excluded': isExcluded})}>
         {checkmark}
@@ -57,7 +63,7 @@ const FilterCategory = React.createClass({
             inline={true}
             text={text}/>
         </Link>
-        <Link to={excludeHref} className='item-toggle-exclude' title='Exclude this from the board'><i className='octicon octicon-x'/></Link>
+        {excludeLink}
       </BS.ListGroupItem>
     );
   },
@@ -207,6 +213,16 @@ const FilterDropdown = React.createClass({
       <FilterCategory items={items}/>
     );
   },
+  renderStates() {
+    const filters = getFilters();
+    const {states} = filters.getState();
+
+    const items = ['open', 'closed'].map((state) => {
+      return {text: state, isSelected: states.indexOf(state) >= 0, toggleHref: filters.toggleState(state).url() }
+    });
+
+    return (<FilterCategory items={items}/>);
+  },
 
   render() {
     const {milestones, labels} = this.props;
@@ -252,6 +268,9 @@ const FilterDropdown = React.createClass({
           </BS.Panel>
           <BS.Panel className='filter-category' header='Columns' eventKey='3'>
             {this.renderColumnNames(labels)}
+          </BS.Panel>
+          <BS.Panel className='filter-category' header='States' eventKey='4'>
+            {this.renderStates()}
           </BS.Panel>
         </BS.Accordion>
       </BS.Panel>

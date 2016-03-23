@@ -44,7 +44,7 @@ function addParams(options, key, vals) {
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
-export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName}={}, ...otherFields) {
+export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName, states}={}, ...otherFields) {
   repoInfos = repoInfos || [];
   milestoneTitles = milestoneTitles || [];
   tagNames = tagNames || [];
@@ -62,6 +62,7 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLa
   addParams(options, 'l', tagNames);
   addParams(options, 'c', columnLabels);
   addParams(options, 'u', userName);
+  addParams(options, 's', states);
   if (columnRegExp) {
     const re = columnRegExp.toString();
     // Strip off the wrapping `/` marks
@@ -111,6 +112,7 @@ export function parseRoute({params, routes, location}) {
   let tagNames = [];
   let columnLabels = [];
   let userName;
+  let states;
   let columnRegExp;
 
   // TODO: remove these fallbacks once URL's are updated.
@@ -121,9 +123,10 @@ export function parseRoute({params, routes, location}) {
   if (query.l) { tagNames = parseArray(query.l); }
   if (query.c) { columnLabels = parseArray(query.c); }
   if (query.u) { userName = query.u; }
+  if (query.s) { states = parseArray(query.s); }
   if (query.x) { columnRegExp = new RegExp(query.x); }
 
-  return {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName};
+  return {repoInfos, milestoneTitles, tagNames, columnLabels, userName, states, columnRegExp, routeSegmentName};
 }
 
 class FilterState {
@@ -171,6 +174,9 @@ class FilterState {
   toggleColumnLabel(columnLabel) {
     return this._toggleKey('columnLabels', columnLabel);
   }
+  toggleState(state) {
+    return this._toggleKey('states', state);
+  }
   // setUser(user)
   // clearUser()
   toggleUserName(name) {
@@ -199,6 +205,7 @@ const DEFAULTS = {
   repoInfos: [],
   milestoneTitles: [],
   tagNames: [],
+  states: ['open'],
   columnLabels: [],
   columnRegExp: undefined
 };
@@ -242,7 +249,7 @@ function matchesRepoInfo(repoInfos, card) {
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
-  const {repoInfos, milestoneTitles, userName, columnRegExp} = getFilters().getState();
+  const {repoInfos, milestoneTitles, userName, states, columnRegExp} = getFilters().getState();
   let {tagNames, columnLabels} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
   const includedTagNames = tagNames.filter((tagName) => { return tagName[0] !== '-'; });
   const excludedTagNames = tagNames.filter((tagName) => { return tagName[0] === '-'; }).map((tagName) => { return tagName.substring(1); });
@@ -255,6 +262,10 @@ export function filterCardsByFilter(cards) {
 
     // Skip the card if it is not one of the repos
     if (!matchesRepoInfo(repoInfos, card)) {
+      return false;
+    }
+
+    if (states.indexOf(card.issue.state) < 0) {
       return false;
     }
 
