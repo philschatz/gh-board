@@ -76,6 +76,9 @@ export default class Card {
       return {};
     }
   }
+  getIssueType() {
+    return this.isPullRequest() ? 'pull-request' : 'issue';
+  }
   getRelated() {
     const key = this._graph.cardToKey(this);
     // return this._graph.getB(key).concat(this._graph.getA(key));

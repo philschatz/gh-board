@@ -68,11 +68,18 @@ const FilterCategory = React.createClass({
     );
   },
   render() {
+    const {noSearch} = this.props;
     const items = this.filterItems();
 
+    let searchInput;
+    if (!noSearch) {
+      searchInput = (
+        <BS.Input type='text' ref='filterInput' placeholder='Filter text' onChange={this.onFilterInputChange}/>
+      );
+    }
     return (
       <form>
-        <BS.Input type='text' ref='filterInput' placeholder='Filter text' onChange={this.onFilterInputChange}/>
+        {searchInput}
         <BS.ListGroup>
           {items.map(this.renderItem)}
         </BS.ListGroup>
@@ -221,7 +228,17 @@ const FilterDropdown = React.createClass({
       return {text: state, isSelected: states.indexOf(state) >= 0, toggleHref: filters.toggleState(state).url() }
     });
 
-    return (<FilterCategory items={items}/>);
+    return (<FilterCategory noSearch items={items}/>);
+  },
+  renderTypes() {
+    const filters = getFilters();
+    const {types} = filters.getState();
+
+    const items = ['issue', 'pull-request'].map((type) => {
+      return {text: type, isSelected: types.indexOf(type) >= 0, toggleHref: filters.toggleType(type).url() }
+    });
+
+    return (<FilterCategory noSearch items={items}/>);
   },
 
   render() {
@@ -271,6 +288,9 @@ const FilterDropdown = React.createClass({
           </BS.Panel>
           <BS.Panel className='filter-category' header='States' eventKey='4'>
             {this.renderStates()}
+          </BS.Panel>
+          <BS.Panel className='filter-category' header='Types' eventKey='5'>
+            {this.renderTypes()}
           </BS.Panel>
         </BS.Accordion>
       </BS.Panel>
