@@ -18,13 +18,13 @@ import leveljs from 'level-js';
 const DB_DATA = {
   'issues': {
     dbVersion: 1,
-    // indexes: [
+    indexes: [
     //   { name: '[repoOwner+repoName]', keyPath: ['repoOwner', 'repoName'], unique: false, multiEntry: false },
-    //   { name: 'state', keyPath: 'state', unique: false, multiEntry: false },
+      { name: 'state', keyPath: 'state', unique: false, multiEntry: false },
     //   // Do state as 2nd arg because it can be omitted.
     //   // See https://stackoverflow.com/questions/12084177/in-indexeddb-is-there-a-way-to-make-a-sorted-compound-query
     //   { name: '[kanbanColumn+state]', keyPath: ['kanbanColumn', 'state'], unique: false, multiEntry: false },
-    // ]
+    ]
   },
   // 'labels': {
   //   // dbVersion: 1,
@@ -163,11 +163,18 @@ const database = new class Database {
     return this._doOp('issues', 'get', `${repoOwner}/${repoName}#${number}`, this._opts);
   }
   fetchCards() {
+    const {states} = getFilters().getState();
     const db = new Dexie('issues');
-    db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'state, [repoOwner+repoName]'})
+    db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'})
     return db.open().then(function() {
       const cards = [];
-      return db.issues.each((value) => {
+      let query;
+      if (states.length === 1) {
+        query = db.issues.where('state').equals('open');
+      } else if (states.length === 2 /* [open, closed] */) {
+        query = db.issues;
+      }
+      return query.each((value) => {
         const {repoOwner, repoName, issue, pr, status} = value;
         const number = issue.number;
         cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));

@@ -306,7 +306,26 @@ const FilterDropdown = React.createClass({
         selectedMilestoneItem = renderMilestone({title: milestoneTitles[0]});
       }
     } else {
-      selectedMilestoneItem = 'All Issues and Pull Requests';
+      const {states, types} = getFilters().getState();
+      let state = '';
+      if (states.length === 1) {
+        if (states[0] === 'open') { state = 'Open'; }
+        else if (states[0] === 'closed') { state = 'Closed'; }
+        else { throw new Error('BUG: invalid state'); }
+      }
+      if (types.length === 2) {
+        selectedMilestoneItem = `All ${state} Issues and Pull Requests`;
+      } else if (types.length === 1) {
+        if (types[0] === 'issue') {
+          selectedMilestoneItem = `All ${state} Issues`;
+        } else if (types[0] === 'pull-request') {
+          selectedMilestoneItem = `All ${state} Pull Requests`;
+        } else {
+          throw new Error('BUG: invalid type')
+        }
+      } else {
+        throw new Error('BUG: invalid type')
+      }
     }
 
 
