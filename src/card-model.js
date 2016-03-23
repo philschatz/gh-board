@@ -124,36 +124,37 @@ export default class Card {
   _getOcto() {
     return Client.getOcto().repos(this.repoOwner, this.repoName);
   }
-  fetchPR() {
+  fetchPR(isForced) {
     if (!this.isPullRequest()) { throw new Error('BUG! Should not be fetching PR for an Issue'); }
     if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
-    if (!this._prPromise) {
+    if (!this._prPromise || isForced) {
       return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
         if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
         const isSame = this._pr && pr && JSON.stringify(this._pr) === JSON.stringify(pr);
         this._pr = pr;
         if (!isSame) {
           Database.putCard(this);
+          this._emitChange();
         }
-        this._emitChange();
       });
     }
     return this._prPromise;
   }
-  fetchPRStatus() {
+  fetchPRStatus(isForced) {
     if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
-    return this.fetchPR().then(() => {
-      if (!this._prStatusPromise) {
+    // TODO: Only fetch the status when the old status is "pending" or the PR head commit changed
+    return this.fetchPR(isForced).then(() => {
+      if (!this._prStatusPromise || isForced) {
         this._prStatusPromise = this._getOcto().commits(this._pr.head.sha).status.fetch()
         .then((status) => {
           const isSame = this._prStatus && status && JSON.stringify(this._prStatus) === JSON.stringify(status);
           this._prStatus = status;
           if (!isSame) {
             Database.putCard(this);
+            this._emitChange();
           }
-          this._emitChange();
         });
       }
     });
@@ -164,21 +165,29 @@ export default class Card {
       Database.putCard(this);
     });
   }
-  resetPromisesAndState(issue) {
+  resetPromisesAndState(issue, pr, prStatus) {
     if (!issue) {
       throw new Error('BUG: resetPromisesAndState requires an issue arg');
     }
-    this.issue = issue;
-    const {_pr, _prStatus} = this; // squirrel so UI doesn't see blips
     delete this._prPromise;
     delete this._prStatusPromise;
-    if (_prStatus) {
-      this.fetchPRStatus(); // Trigger fetching PR and status
-    } else if (_pr) {
-      this.fetchPR(); // Trigger fetching PR
-    } else {
-      this._emitChange();
+    this.issue = issue;
+    if (pr) {
+      this._pr = pr;
+      this._prPromise = Promise.resolve('PR resolved because it was loaded from DB');
     }
+    if (prStatus) {
+      this._prStatus = prStatus;
+      this._prStatusPromise = Promise.resolve('PRStatus resolved because it was loaded from DB');
+    }
+    // if (_prStatus) {
+    //   this.fetchPRStatus(); // Trigger fetching PR and status
+    // } else if (_pr) {
+    //   this.fetchPR(); // Trigger fetching PR
+    // } else {
+    //   this._emitChange();
+    // }
+    this._emitChange();
   }
   _emitChange() {
     this._changeListeners.forEach(function (listener) {

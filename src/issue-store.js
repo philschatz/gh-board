@@ -29,7 +29,7 @@ const cardFactory = (repoOwner, repoName, number, issue, pr=null, prStatuses=nul
   const key = toIssueKey(repoOwner, repoName, number);
   let card = CARD_CACHE[key];
   if (card && issue) {
-    card.resetPromisesAndState(issue);
+    card.resetPromisesAndState(issue, pr, prStatuses);
     return card;
   } else if (card) {
     return card;
