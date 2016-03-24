@@ -154,8 +154,8 @@ export default class Card {
     if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
     return this.fetchPR(isForced).then(() => {
       if (!this._prStatusPromise || isForced) {
-        // TODO: Only fetch the status when the old status is "pending" or the PR head commit changed
-        if (!this._prStatus || this._prStatus.state === 'pending') {
+        // Stop fetching the status once it is success. Some failed tests might get re-run.
+        if (!this._prStatus || this._prStatus.state !== 'success') {
           this._prStatusPromise = this._getOcto().commits(this._pr.head.sha).status.fetch()
           .then((status) => {
             const isSame = this._prStatus && status && JSON.stringify(this._prStatus) === JSON.stringify(status);
