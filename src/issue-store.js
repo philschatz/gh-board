@@ -166,7 +166,13 @@ const issueStore = new class IssueStore extends EventEmitter {
   _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
     progress.addTicks(1, `Fetching Issues for ${repoOwner}/${repoName}`);
     const issuesState = Client.canCacheLots() ? 'all' : 'open';
-    return Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100, sort: 'updated'})
+    let fetchAllIssues;
+    if (Client.canCacheLots()) {
+      fetchAllIssues = Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100, sort: 'updated'});
+    } else {
+      fetchAllIssues = Client.getOcto().repos(repoOwner, repoName).issues.fetchOne({state: issuesState, per_page: 100, sort: 'updated'});
+    }
+    return fetchAllIssues
     .then((vals) => {
       progress.tick(`Fetched Issues for ${repoOwner}/${repoName}`);
       return vals.map((issue) => {
@@ -178,6 +184,7 @@ const issueStore = new class IssueStore extends EventEmitter {
     const opts = {
       per_page: 100,
       sort: 'updated',
+      state: 'all', // fetch opened and closed Issues
       direction: 'desc'
     };
     if (lastSeenAt) {
@@ -185,14 +192,9 @@ const issueStore = new class IssueStore extends EventEmitter {
     }
     let fetchPromise;
     if (Client.canCacheLots()) {
-      opts.state = 'all'; // fetch opened and closed Issues
       fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetchAll(opts);
     } else {
-      fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetch(opts).then(({items}) => {
-        // fetch() yields `{ items: [...] }` while fetchAll() yields `[...]`
-        // so unwrap.
-        return items;
-      });
+      fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetchOne(opts);
     }
     return fetchPromise
     .then((items) => {
@@ -311,8 +313,14 @@ const issueStore = new class IssueStore extends EventEmitter {
         //   });
         // });
 
-
-        return Client.getOcto().orgs(repoOwner).repos.fetchAll()
+        let fetchAllRepos;
+        if (Client.canCacheLots()) {
+          fetchAllRepos = Client.getOcto().orgs(repoOwner).repos.fetchAll();
+        } else {
+          // only get the 1st page of results if not logged in
+          fetchAllRepos = Client.getOcto().orgs(repoOwner).repos.fetchOne();
+        }
+        return fetchAllRepos
         .then((repos) => {
           progress.tick(`Fetched list of all repositories for ${repoOwner}`);
           // Filter repos to only include ones that have been pushed in the last year
@@ -324,6 +332,12 @@ const issueStore = new class IssueStore extends EventEmitter {
             // }
             return ret;
           });
+          // If anonymous mode is on then only poll 5 repositories
+          if (!Client.canCacheLots()) {
+            if (repos.length > 5) {
+              repos = repos.slice(0, 5);
+            }
+          }
           return Promise.all(repos.map((repo) => {
             // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
             if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
@@ -354,7 +368,15 @@ const issueStore = new class IssueStore extends EventEmitter {
       cacheCardsRepoInfos = JSON.stringify(repoInfos);
 
       // Save the cards and then emit that they were changed
-      return Database.putCardsAndRepos(cards, repos).then(() => {
+      let putCardsAndRepos;
+      if (Client.canCacheLots()) {
+        putCardsAndRepos = Database.putCardsAndRepos(cards, repos);
+      } else {
+        // when not logged in then do not bother saving the last-updated time for each repo
+        // since we have only been asking for 1 page of results.
+        putCardsAndRepos = Database.putCards(cards);
+      }
+      return putCardsAndRepos.then(() => {
         if (cards.length) {
           this.emit('change');
         }

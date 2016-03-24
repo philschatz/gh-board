@@ -18,6 +18,7 @@ import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case';
 import CacheHandlerPlugin from 'octokat/dist/node/plugins/cache-handler';
 import FetchAllPlugin from 'octokat/dist/node/plugins/fetch-all';
 import PaginationPlugin from 'octokat/dist/node/plugins/pagination';
+import toQueryString from 'octokat/dist/node/helpers/querystring';
 
 const MAX_CACHED_URLS = 2000;
 
@@ -139,6 +140,23 @@ const cacheHandler = new class CacheHandler {
   }
 };
 
+
+
+const FetchOnePlugin = {
+  asyncVerbs: {
+    fetchOne: function(requester, path) {
+      return function(cb, query) {
+        return requester.request('GET', `${path}${toQueryString(query)}`, null, null, function(err, result) {
+          if (err) {
+            return cb(err);
+          }
+          return cb(null, result.items);
+        });
+      };
+    }
+  }
+}
+
 class Client extends EventEmitter {
   constructor() {
     super();
@@ -154,7 +172,7 @@ class Client extends EventEmitter {
   }
   getCredentials() {
     return {
-      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin],
+      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin, FetchOnePlugin],
       token: window.localStorage.getItem('gh-token'),
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
