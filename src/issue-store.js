@@ -315,10 +315,10 @@ const issueStore = new class IssueStore extends EventEmitter {
 
         let fetchAllRepos;
         if (Client.canCacheLots()) {
-          fetchAllRepos = Client.getOcto().orgs(repoOwner).repos.fetchAll();
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchAll();
         } else {
           // only get the 1st page of results if not logged in
-          fetchAllRepos = Client.getOcto().orgs(repoOwner).repos.fetchOne();
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
         }
         return fetchAllRepos
         .then((repos) => {
