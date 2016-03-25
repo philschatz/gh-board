@@ -2,11 +2,11 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
-import {getRelatedIssues} from './gfm-dom';
 import {getFilters, filterCardsByFilter} from './route-utils';
-import {fetchAll, FETCHALL_MAX, contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
+import {contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 import Progress from './progress';
+import Database from './database';
 
 const RELOAD_TIME_SHORT = 30 * 1000;
 const RELOAD_TIME_LONG = 5 * 60 * 1000;
@@ -25,16 +25,17 @@ function getReloadTime() {
 
 let GRAPH_CACHE = new BipartiteGraph();
 let CARD_CACHE = {};
-const cardFactory = (repoOwner, repoName, number, issue) => {
+const cardFactory = (repoOwner, repoName, number, issue, pr=null, prStatuses=null) => {
   const key = toIssueKey(repoOwner, repoName, number);
   let card = CARD_CACHE[key];
   if (card && issue) {
-    card.resetPromisesAndState(issue);
+    card.resetPromisesAndState(issue, pr, prStatuses);
     return card;
   } else if (card) {
     return card;
   } else {
-    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue);
+    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue, pr, prStatuses);
+    _buildBipartiteGraph(GRAPH_CACHE, [card]);
     CARD_CACHE[key] = card;
     return card;
   }
@@ -76,7 +77,7 @@ function _buildBipartiteGraph(graph, cards) {
 
   _.each(cards, (card) => {
     const cardPath = graph.cardToKey(card);
-    if (card.issue.pullRequest) {
+    if (card.isPullRequest()) {
       // card is a Pull Request
       allPullRequests[cardPath] = card;
     } else {
@@ -87,19 +88,21 @@ function _buildBipartiteGraph(graph, cards) {
 
   _.each(cards, (card) => {
     const cardPath = GRAPH_CACHE.cardToKey(card);
-    const relatedIssues = getRelatedIssues(card.issue.body, card.repoOwner, card.repoName);
-    // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
-    // TODO: Refactor to simplify this datastructure
-    //if (card.issue.pullRequest) {
-      // card is a Pull Request
-      _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
-        const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
-        const otherCard = allIssues[otherCardPath] || allPullRequests[otherCardPath];
-        if (otherCard) {
-          GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
-        }
-      });
-    //}
+    if (card.issue) { // If an issue refers to some random repo then card.issue might be null
+      const relatedIssues = card.getRelatedIssuesFromBody();
+      // NEW FEATURE: Show **all** related Issues/PR's (the graph is no longer bipartite)
+      // TODO: Refactor to simplify this datastructure
+      //if (card.issue.pullRequest) {
+        // card is a Pull Request
+        _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
+          const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
+          const otherCard = issueStore.issueNumberToCard(repoOwner, repoName, number);
+          if (otherCard) {
+            GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
+          }
+        });
+      //}
+    }
   });
 }
 
@@ -107,7 +110,7 @@ let cacheCardsRepoInfos = null;
 let cacheCards = null;
 let isPollingEnabled = false;
 
-class IssueStore extends EventEmitter {
+const issueStore = new class IssueStore extends EventEmitter {
   constructor() {
     super();
     document.addEventListener('visibilitychange', () => {
@@ -137,11 +140,11 @@ class IssueStore extends EventEmitter {
   startPolling() {
     isPollingEnabled = true;
   }
-  issueNumberToCard(repoOwner, repoName, number, issue=null) {
+  issueNumberToCard(repoOwner, repoName, number, issue=null, pr=null, prStatuses=null) {
     if (!(repoOwner && repoName && number)) {
       throw new Error('BUG! Forgot to pass arguments in');
     }
-    return cardFactory(repoOwner, repoName, number, issue);
+    return cardFactory(repoOwner, repoName, number, issue, pr, prStatuses);
   }
   issueToCard(repoOwner, repoName, issue) {
     if (!(repoOwner && repoName && issue)) {
@@ -163,12 +166,90 @@ class IssueStore extends EventEmitter {
   _fetchAllIssuesForRepo(repoOwner, repoName, progress) {
     progress.addTicks(1, `Fetching Issues for ${repoOwner}/${repoName}`);
     const issuesState = Client.canCacheLots() ? 'all' : 'open';
-    return Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100})
+    let fetchAllIssues;
+    if (Client.canCacheLots()) {
+      fetchAllIssues = Client.getOcto().repos(repoOwner, repoName).issues.fetchAll({state: issuesState, per_page: 100, sort: 'updated'});
+    } else {
+      fetchAllIssues = Client.getOcto().repos(repoOwner, repoName).issues.fetchOne({state: issuesState, per_page: 100, sort: 'updated'});
+    }
+    return fetchAllIssues
     .then((vals) => {
       progress.tick(`Fetched Issues for ${repoOwner}/${repoName}`);
-      return _.map(vals, (issue) => {
-        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue, GRAPH_CACHE);
+      return vals.map((issue) => {
+        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue);
       });
+    });
+  }
+  _fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate) {
+    const opts = {
+      per_page: 100,
+      sort: 'updated',
+      state: 'all', // fetch opened and closed Issues
+      direction: 'desc'
+    };
+    if (lastSeenAt) {
+      opts.since = lastSeenAt;
+    }
+    let fetchPromise;
+    if (Client.canCacheLots()) {
+      fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetchAll(opts);
+    } else {
+      fetchPromise = Client.getOcto().repos(repoOwner, repoName).issues.fetchOne(opts);
+    }
+    return fetchPromise
+    .then((items) => {
+      progress.tick(`Fetched Updates for ${repoOwner}/${repoName}`);
+      let newLastSeenAt;
+      if (items.length) {
+        newLastSeenAt = items[0].updatedAt;
+      } else {
+        // If a repository has 0 events it probably has not changed in a while
+        // or never had any commits. Do not keep trying to fetch all the Issues though
+        // so set the lastSeenAt to be something non-zero
+        // since falsy means gh-board has not fetched all the Issuese before.
+        newLastSeenAt = null;
+      }
+      let cards = items.map((issue) => {
+        if (lastSeenAt === issue.updatedAt) {
+          // If this Issue was updated at the same time then ignore it
+          // TODO: this is a bit imprecise. maybe it's safer to not exclude it this way
+          return null;
+        }
+        console.log('Saw an updated/new issue!', repoName, issue.number, 'updated:', issue.updatedAt, 'last saw this repo:', lastSeenAt);
+        return this.issueNumberToCard(repoOwner, repoName, issue.number, issue);
+      });
+      // remove the null cards (null because they are not new events)
+      cards = _.filter(cards, (card) => { return !!card; });
+      const ret = { cards };
+      // only include the repository key if the lastSeenAt changed
+      // That way fewer things will need to be saved to the DB
+      if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
+        ret.repository = {repoOwner, repoName, lastSeenAt: newLastSeenAt, isPrivate};
+      }
+      return ret;
+    });
+  }
+  // _fetchUpdatesForRepo(repoOwner, repoName, progress) {
+  //   progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
+  //   return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
+  //     let lastSeenAt;
+  //     if (repo && repo.lastSeenAt) {
+  //       lastSeenAt = repo.lastSeenAt;
+  //     }
+  //     return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt);
+  //   });
+  // }
+  _fetchUpdatesForRepo(repo, progress) {
+    const repoOwner = repo.owner.login;
+    const repoName = repo.name;
+    const isPrivate = repo.private;
+    progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
+    return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
+      let lastSeenAt;
+      if (repo && repo.lastSeenAt) {
+        lastSeenAt = repo.lastSeenAt;
+      }
+      return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate);
     });
   }
   _fetchAllIssues(repoInfos, progress, isForced) {
@@ -193,36 +274,115 @@ class IssueStore extends EventEmitter {
       if (repoName === '*') {
         // Fetch all the repos, and then concat them
         progress.addTicks(1, `Fetching list of all repositories for ${repoOwner}`);
-        return Client.getOcto().orgs(repoOwner).repos.fetchAll()
+
+        // // This method searches for all repos that have been pushed in the last year.
+        // // DISADVANTAGES: searches only **public** repos, not private ones
+        // const lastSeenAt = '2015-01-01T00:00:00Z'; // Only poll repos that were pushed in the last year
+        // const q = `user:${repoOwner} pushed:>=${lastSeenAt}`;
+        // return Client.getOcto().search.repositories.fetchAll({sort:'pushed', q:q})
+        // .then((repos) => {
+        //   progress.tick(`Fetched list of all repositories for ${repoOwner}`);
+        //   return Promise.all(repos.map((repo) => {
+        //     // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
+        //     if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
+        //       return null;
+        //     }
+        //     return this._fetchUpdatesForRepo(repo, progress);
+        //   }));
+        // })
+        // .then((issuesByRepo) => {
+        //   // exclude the null repos (ones that were explicitly listed in the URL)
+        //   return _.flatten(_.filter(issuesByRepo, (v) => { return !!v; }), true/*shallow*/);
+        // });
+
+
+        // // This method searches for all issues that have updated since a certain date.
+        // // This has the DISADVANTAGE of maybe missing some updates,
+        // // missing new repos that have been added
+        // // missing new issues in a repo that has not been fetched yet (since the lastUpdated date should be null)
+        // // and having to calculate 1 timestamp from all the repos
+        // const lastSeenAt = '2016-03-19T22:32:14Z';
+        // const q = `user:${repoOwner} updated:>=${lastSeenAt}`;
+        // return Client.getOcto().search.issues.fetchAll({sort:'updated', q:q})
+        // .then((issues) => {
+        //   return issues.map((issue) => {
+        //     // Parse repository_url becaue the repo info is not anywhere else
+        //     // repository_url = "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}"
+        //     const [repoOwner, repoName] = /repos\/(.*)/.exec(issue.repositoryUrl)[1].split('/');
+        //     return this.issueNumberToCard(repoOwner, repoName, issue.number, issue);
+        //   });
+        // });
+
+        let fetchAllRepos;
+        if (Client.canCacheLots()) {
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchAll();
+        } else {
+          // only get the 1st page of results if not logged in
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
+        }
+        return fetchAllRepos
         .then((repos) => {
           progress.tick(`Fetched list of all repositories for ${repoOwner}`);
+          // Filter repos to only include ones that have been pushed in the last year
+          // to avoid excessive polling
+          repos = _.filter(repos, (repo) => {
+            const ret = Date.now() - Date.parse(repo.updatedAt) < 1000 * 60 * 60 * 24 * 365
+            // if (!ret) {
+            //   console.log('Skipping over ', repo.name, 'because lastUpdated=', repo.updatedAt);
+            // }
+            return ret;
+          });
+          // If anonymous mode is on then only poll 5 repositories
+          if (!Client.canCacheLots()) {
+            if (repos.length > 5) {
+              repos = repos.slice(0, 5);
+            }
+          }
           return Promise.all(repos.map((repo) => {
             // Exclude repos that are explicitly listed (usually only the primary repo is listed so we know where to pull milestones/labesl from)
             if (explicitlyListedRepos[`${repoOwner}/${repo.name}`]) {
               return null;
             }
-            return this._fetchAllIssuesForRepo(repoOwner, repo.name, progress);
+            return this._fetchUpdatesForRepo(repo, progress);
           }));
         })
         .then((issuesByRepo) => {
           // exclude the null repos (ones that were explicitly listed in the URL)
-          return _.flatten(_.filter(issuesByRepo, (v) => { return v; }), true/*shallow*/);
+          return _.flatten(_.filter(issuesByRepo, (v) => { return !!v; }), true/*shallow*/);
         });
       } else {
-        return this._fetchAllIssuesForRepo(repoOwner, repoName, progress);
+        return Client.getOcto().repos(repoOwner, repoName).fetch()
+        .then((repo) => {
+          return this._fetchUpdatesForRepo(repo, progress);
+        });
       }
     });
-    return Promise.all(allPromises).then((issues) => {
-      const cards = _.flatten(issues, true /*shallow*/);
+    return Promise.all(allPromises).then((repoAndCards) => {
+      repoAndCards = _.flatten(repoAndCards, true /*shallow*/); // the asterisks in the URL become an array of repoAndCards so we need to flatten
+      const repos = _.filter(repoAndCards.map(({repository}) => { return repository; }), (v) => { return !!v; }); // if the lastSeenAt did not change then repository field will be missing
+      const cards = _.flatten(repoAndCards.map(({cards}) => { return cards; }), true /*shallow*/);
 
       _buildBipartiteGraph(GRAPH_CACHE, cards);
 
       cacheCards = cards;
       cacheCardsRepoInfos = JSON.stringify(repoInfos);
-      if (isForced) {
-        this.emit('change');
+
+      // Save the cards and then emit that they were changed
+      let putCardsAndRepos;
+      if (Client.canCacheLots()) {
+        putCardsAndRepos = Database.putCardsAndRepos(cards, repos);
+      } else {
+        // when not logged in then do not bother saving the last-updated time for each repo
+        // since we have only been asking for 1 page of results.
+        putCardsAndRepos = Database.putCards(cards);
       }
-      return cards;
+      return putCardsAndRepos.then(() => {
+        if (cards.length) {
+          this.emit('change');
+        }
+        return cards;
+      });
+
     });
   }
   fetchMilestones(repoOwner, repoName) {
@@ -286,4 +446,4 @@ class IssueStore extends EventEmitter {
   }
 }
 
-export default new IssueStore();
+export default issueStore;

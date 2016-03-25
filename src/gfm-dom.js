@@ -15,6 +15,10 @@ function getElement(text, repoOwner, repoName) {
       html = ultramarked(linkify(text));
     }
   }
+  // Disable loading images as soon as they are added to the DOM
+  // Since we are using this to find data like refs and task list counts
+  // the images don't actually have to be fetched.
+  html = html.replace(/<img\b[^>]*>/ig, '');
   DIV.innerHTML = html;
   return DIV;
 }
@@ -113,7 +117,7 @@ export function getRelatedIssues(text, repoOwner, repoName) {
 export function getDataFromHtml(text, repoOwner, repoName) {
   const div = getElement(text, repoOwner, repoName);
   const taskCounts = getTaskCounts(div);
-  // const relatedIssues = _getRelatedIssues(div);
+  const relatedIssues = _getRelatedIssues(div);
   const dueAt = getIssueDueAt(div);
-  return {/*relatedIssues,*/ taskCounts, dueAt};
+  return {relatedIssues, taskCounts, dueAt};
 }

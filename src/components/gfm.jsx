@@ -136,7 +136,7 @@ const InnerMarkdown = React.createClass({
 
       // Find links to Issues/PR's and add the title, open/closed state, and kanban column
       // First, remove all badges from the DOM
-      _.each(root.querySelectorAll('.issue-status-badge'), (node) => node.remove());
+      _.each(root.querySelectorAll('.issue-status-badges'), (node) => node.remove());
 
       forEachRelatedIssue(root, ({repoOwner, repoName, number}, link) => {
         const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);

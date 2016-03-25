@@ -31,13 +31,10 @@ const IssueList = React.createClass({
   displayName: 'IssueList',
   getInitialState() {
     // Initially, expand all issues only if tableLayout is true
-    return {showAllIssues: SettingsStore.getTableLayout()};
+    return {showAllIssues: SettingsStore.getTableLayout(), morePressedCount: 0};
   },
   showAllIssues() {
     this.setState({showAllIssues: true});
-  },
-  getInitialState() {
-    return {morePressedCount: 0};
   },
   onClickMore() {
     this.setState({morePressedCount: this.state.morePressedCount + 1});

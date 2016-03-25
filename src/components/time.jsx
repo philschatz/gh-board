@@ -2,21 +2,47 @@ import {EventEmitter} from 'events';
 import React from 'react';
 import Moment from 'moment';
 
-const UPDATE_INTERVAL = 20 * 1000;
+const RELOAD_TIME_SHORT = 30 * 1000;
+const RELOAD_TIME_LONG = 5 * 60 * 1000;
 
-const timer = new class Store extends EventEmitter {
+function getReloadTime() {
+  if (document.hidden) {
+    return RELOAD_TIME_LONG;
+  } else {
+    return RELOAD_TIME_SHORT;
+  }
+}
+
+export const Timer = new class Store extends EventEmitter {
   off() { // EventEmitter has `.on` but no matching `.off`
     const slice = [].slice;
     const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
     return this.removeListener.apply(this, args);
   }
+  onTick(listener)  { this.on('tick', listener); }
+  offTick(listener) { this.off('tick', listener); }
 };
 
 // since there can be hundreds of issues, increase the max limit
-timer.setMaxListeners(0);
+Timer.setMaxListeners(0);
 
 // `tick` every `UPDATE_INTERVAL`
-setInterval((() => timer.emit('tick')), UPDATE_INTERVAL);
+let timerTimeout = null;
+const timerFn = () => {
+  Timer.emit('tick');
+  // const d = new Date();
+  // console.log('tick', d.getMinutes(), d.getSeconds());
+  timerTimeout = setTimeout(timerFn, getReloadTime());
+}
+timerFn();
+
+const handleVisibilityChange = () => {
+  if (!document.hidden) {
+    clearTimeout(timerTimeout);
+    timerFn();
+  }
+}
+document.addEventListener('visibilitychange', handleVisibilityChange, false);
 
 export default React.createClass({
   getInitialState() {
@@ -25,10 +51,10 @@ export default React.createClass({
     return {forceUpdate: this.forceUpdate.bind(this)};
   },
   componentWillMount() {
-    timer.on('tick', this.state.forceUpdate);
+    Timer.onTick(this.state.forceUpdate);
   },
   componentWillUnmount() {
-    timer.off('tick', this.state.forceUpdate);
+    Timer.offTick(this.state.forceUpdate);
   },
   render() {
     const {dateTime, className} = this.props;
