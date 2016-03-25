@@ -30,8 +30,7 @@ function collect(connect, monitor) {
 const IssueList = React.createClass({
   displayName: 'IssueList',
   getInitialState() {
-    // Initially, expand all issues only if tableLayout is true
-    return {showAllIssues: SettingsStore.getTableLayout(), morePressedCount: 0};
+    return {morePressedCount: 0};
   },
   showAllIssues() {
     this.setState({showAllIssues: true});
@@ -44,7 +43,7 @@ const IssueList = React.createClass({
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
     const {showAllIssues, morePressedCount} = this.state;
-    const multiple = 50; // Add 50 results at a time
+    const multiple = 25; // Add 25 results at a time
 
     let className = 'column-title';
     if (icon) {
@@ -72,11 +71,11 @@ const IssueList = React.createClass({
 
     let partialChildren;
     let moreButton;
-    if (!showAllIssues && MIN_CHILDREN_TO_SHOW + 1 + morePressedCount * multiple < children.length) {
+    if (!showAllIssues && MIN_CHILDREN_TO_SHOW + (1 + morePressedCount) * multiple < children.length) {
       partialChildren = children.slice(0, MIN_CHILDREN_TO_SHOW + morePressedCount * multiple);
       moreButton = (
         <BS.Button onClick={this.onClickMore} className='list-group-item'>
-          {children.length - morePressedCount * multiple} more...
+          {children.length - (morePressedCount + 1) * multiple} more...
         </BS.Button>
       );
     } else {
