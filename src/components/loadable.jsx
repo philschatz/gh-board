@@ -13,7 +13,33 @@ export default React.createClass({
   },
   getDefaultProps() {
     return {
-      renderError: () => <div className='loadable is-error'>Error Loading. Is the repo URL correct? are you connected to the internet? Are you logged in?</div>
+      renderError: (err) => {
+        console.error(err);
+        // If it is a permissions error then it might be a rate limi
+        if (err.status === 403) {
+          return (
+            <div>
+              <h2>Insufficient Permissions (or rate limit exceeded)</h2>
+              <p>
+                It looks like either you do not have permission to see this repository or the rate limit for requests to GitHub has been exceeded. This usually happens when you are not logged in to gh-board. Try signing in to continue.
+              </p>
+              <code>{err.message}</code>
+            </div>
+          );
+        } else if (err.name === 'InvalidStateError') {
+          return (
+            <span>It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.</span>
+          );
+        } else {
+          return (
+            <span>
+              Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.
+              {err.message}
+              {JSON.stringify(err)}
+            </span>
+          );
+        }
+      }
     };
   },
   componentDidMount() {

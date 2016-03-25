@@ -49,7 +49,7 @@ const cacheHandler = new class CacheHandler {
     try {
       db = levelup('octokatCache', dbOpts);
     } catch (err) {
-      alert('Looks like webkit is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.');
+      alert('It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.');
       this.dbPromise = Promise.resolve('Running without indexedDB');
       return;
     }

@@ -93,6 +93,22 @@ const Board = React.createClass({
 
     };
   },
+  renderError(err) {
+    console.error(err);
+    if (err.name === 'InvalidStateError') {
+      return (
+        <span>It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.</span>
+      );
+    } else {
+      return (
+        <span>
+          Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.
+          {err.message}
+          {JSON.stringify(err)}
+        </span>
+      );
+    }
+  },
   render() {
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
@@ -106,7 +122,7 @@ const Board = React.createClass({
         promise={Promise.all([columnDataPromise, cardsPromise])}
         renderLoading={() => (<ProgressView progress={progress}/>)}
         renderLoaded={this.renderKanbanRepos(repoInfos)}
-        renderError={(err) => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API. {err.message} {JSON.stringify(err)}</span>)}
+        renderError={this.renderError}
       />
     );
   }
