@@ -80,7 +80,16 @@ const Board = React.createClass({
 
     return ([columnData, cards]) => {
 
-      return React.createElement(type, {columnData, cards, repoInfos});
+      if (cards.length) {
+        return React.createElement(type, {columnData, cards, repoInfos});
+      } else {
+        return (
+          <div className='-no-issues'>
+            <h2>No Issues to show</h2>
+            <p>There are no Issues to show. Maybe the repository does not have any or an applied filter removes all Issues.</p>
+          </div>
+        );
+      }
 
     };
   },
