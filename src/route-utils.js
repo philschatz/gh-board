@@ -30,10 +30,12 @@ function toQueryString(options) {
   }
 };
 
-function addParams(options, key, vals) {
+function addParams(options, key, vals, defaults) {
   const arr = options[key] || [];
   if (Array.isArray(vals)) {
-    options[key] = arr.concat(vals);
+    if (!defaults || JSON.stringify(defaults) !== JSON.stringify(vals)) {
+      options[key] = arr.concat(vals);
+    }
   } else if (vals) {
     arr.push(vals);
     options[key] = arr;
@@ -44,7 +46,7 @@ function addParams(options, key, vals) {
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
-export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName}={}, ...otherFields) {
+export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName, states, types}={}, ...otherFields) {
   repoInfos = repoInfos || [];
   milestoneTitles = milestoneTitles || [];
   tagNames = tagNames || [];
@@ -62,6 +64,8 @@ export function buildRoute(name, {repoInfos, milestoneTitles, tagNames, columnLa
   addParams(options, 'l', tagNames);
   addParams(options, 'c', columnLabels);
   addParams(options, 'u', userName);
+  addParams(options, 's', states, DEFAULTS.states); // include the defaults so the URL is cleaner
+  addParams(options, 't', types, DEFAULTS.types);
   if (columnRegExp) {
     const re = columnRegExp.toString();
     // Strip off the wrapping `/` marks
@@ -111,6 +115,8 @@ export function parseRoute({params, routes, location}) {
   let tagNames = [];
   let columnLabels = [];
   let userName;
+  let states;
+  let types;
   let columnRegExp;
 
   // TODO: remove these fallbacks once URL's are updated.
@@ -121,9 +127,11 @@ export function parseRoute({params, routes, location}) {
   if (query.l) { tagNames = parseArray(query.l); }
   if (query.c) { columnLabels = parseArray(query.c); }
   if (query.u) { userName = query.u; }
+  if (query.s) { states = parseArray(query.s); }
+  if (query.t) { types = parseArray(query.t); }
   if (query.x) { columnRegExp = new RegExp(query.x); }
 
-  return {repoInfos, milestoneTitles, tagNames, columnLabels, userName, columnRegExp, routeSegmentName};
+  return {repoInfos, milestoneTitles, tagNames, columnLabels, userName, states, types, columnRegExp, routeSegmentName};
 }
 
 class FilterState {
@@ -171,6 +179,12 @@ class FilterState {
   toggleColumnLabel(columnLabel) {
     return this._toggleKey('columnLabels', columnLabel);
   }
+  toggleState(state) {
+    return this._toggleKey('states', state);
+  }
+  toggleType(type) {
+    return this._toggleKey('types', type);
+  }
   // setUser(user)
   // clearUser()
   toggleUserName(name) {
@@ -199,6 +213,8 @@ const DEFAULTS = {
   repoInfos: [],
   milestoneTitles: [],
   tagNames: [],
+  states: ['open'],
+  types: ['issue', 'pull-request'],
   columnLabels: [],
   columnRegExp: undefined
 };
@@ -227,10 +243,22 @@ function isUser(issue, userName) {
 };
 
 
+function matchesRepoInfo(repoInfos, card) {
+  for (const i in repoInfos) {
+    const {repoOwner, repoName} = repoInfos[i];
+    if (repoOwner === card.repoOwner && repoName === card.repoName) {
+      return true;
+    } else if (repoOwner === card.repoOwner && repoName === '*') {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
 export function filterCardsByFilter(cards) {
-  const {milestoneTitles, userName, columnRegExp} = getFilters().getState();
+  const {repoInfos, milestoneTitles, userName, states, types, columnRegExp} = getFilters().getState();
   let {tagNames, columnLabels} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
   const includedTagNames = tagNames.filter((tagName) => { return tagName[0] !== '-'; });
   const excludedTagNames = tagNames.filter((tagName) => { return tagName[0] === '-'; }).map((tagName) => { return tagName.substring(1); });
@@ -240,6 +268,20 @@ export function filterCardsByFilter(cards) {
 
   return cards.filter((card) => {
     const {issue} = card;
+
+    // Skip the card if it is not one of the repos
+    if (!matchesRepoInfo(repoInfos, card)) {
+      return false;
+    }
+
+    if (states.indexOf(card.issue.state) < 0) {
+      return false;
+    }
+
+    if (types.indexOf(card.getIssueType()) < 0) {
+      return false;
+    }
+
     // Add all the labels for lookup later (like the color)
     issue.labels.forEach((label) => {
       LABEL_CACHE[label.name] = label;

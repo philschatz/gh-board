@@ -47,6 +47,12 @@ const FilterCategory = React.createClass({
         <Link to={toggleHref}>{iconNode}</Link>
       );
     }
+    let excludeLink;
+    if (excludeHref) {
+      excludeLink = (
+        <Link to={excludeHref} className='item-toggle-exclude' title='Exclude this from the board'><i className='octicon octicon-x'/></Link>
+      );
+    }
     return (
       <BS.ListGroupItem key={text} className={classnames({'is-selected': isSelected, 'is-excluded': isExcluded})}>
         {checkmark}
@@ -57,16 +63,23 @@ const FilterCategory = React.createClass({
             inline={true}
             text={text}/>
         </Link>
-        <Link to={excludeHref} className='item-toggle-exclude' title='Exclude this from the board'><i className='octicon octicon-x'/></Link>
+        {excludeLink}
       </BS.ListGroupItem>
     );
   },
   render() {
+    const {noSearch} = this.props;
     const items = this.filterItems();
 
+    let searchInput;
+    if (!noSearch) {
+      searchInput = (
+        <BS.Input type='text' ref='filterInput' placeholder='Filter text' onChange={this.onFilterInputChange}/>
+      );
+    }
     return (
       <form>
-        <BS.Input type='text' ref='filterInput' placeholder='Filter text' onChange={this.onFilterInputChange}/>
+        {searchInput}
         <BS.ListGroup>
           {items.map(this.renderItem)}
         </BS.ListGroup>
@@ -207,6 +220,26 @@ const FilterDropdown = React.createClass({
       <FilterCategory items={items}/>
     );
   },
+  renderStates() {
+    const filters = getFilters();
+    const {states} = filters.getState();
+
+    const items = ['open', 'closed'].map((state) => {
+      return {text: state, isSelected: states.indexOf(state) >= 0, toggleHref: filters.toggleState(state).url() }
+    });
+
+    return (<FilterCategory noSearch items={items}/>);
+  },
+  renderTypes() {
+    const filters = getFilters();
+    const {types} = filters.getState();
+
+    const items = ['issue', 'pull-request'].map((type) => {
+      return {text: type, isSelected: types.indexOf(type) >= 0, toggleHref: filters.toggleType(type).url() }
+    });
+
+    return (<FilterCategory noSearch items={items}/>);
+  },
 
   render() {
     const {milestones, labels} = this.props;
@@ -253,6 +286,12 @@ const FilterDropdown = React.createClass({
           <BS.Panel className='filter-category' header='Columns' eventKey='3'>
             {this.renderColumnNames(labels)}
           </BS.Panel>
+          <BS.Panel className='filter-category' header='States' eventKey='4'>
+            {this.renderStates()}
+          </BS.Panel>
+          <BS.Panel className='filter-category' header='Types' eventKey='5'>
+            {this.renderTypes()}
+          </BS.Panel>
         </BS.Accordion>
       </BS.Panel>
     );
@@ -267,7 +306,26 @@ const FilterDropdown = React.createClass({
         selectedMilestoneItem = renderMilestone({title: milestoneTitles[0]});
       }
     } else {
-      selectedMilestoneItem = 'All Issues and Pull Requests';
+      const {states, types} = getFilters().getState();
+      let state = '';
+      if (states.length === 1) {
+        if (states[0] === 'open') { state = 'Open'; }
+        else if (states[0] === 'closed') { state = 'Closed'; }
+        else { throw new Error('BUG: invalid state'); }
+      }
+      if (types.length === 2) {
+        selectedMilestoneItem = `All ${state} Issues and Pull Requests`;
+      } else if (types.length === 1) {
+        if (types[0] === 'issue') {
+          selectedMilestoneItem = `All ${state} Issues`;
+        } else if (types[0] === 'pull-request') {
+          selectedMilestoneItem = `All ${state} Pull Requests`;
+        } else {
+          throw new Error('BUG: invalid type')
+        }
+      } else {
+        throw new Error('BUG: invalid type')
+      }
     }
 
 

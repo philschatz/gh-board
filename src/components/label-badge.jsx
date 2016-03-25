@@ -26,7 +26,7 @@ const LabelBadge = React.createClass({
       icon = (<i className='octicon octicon-list-unordered'/>);
       name = label.name.replace(/^\d+\ -\ /, ' ');
     } else {
-      icon = null;
+      icon = (<i className='octicon octicon-tag'/>);
       name = label.name;
     }
     if (label.color && isLight(label.color)) {

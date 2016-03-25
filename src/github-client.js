@@ -1,6 +1,15 @@
 import _ from 'underscore';
 import EventEmitter from 'events';
-// import Dexie from 'dexie';
+
+// 3 implementations: indexedDB, LocalStorage, In-mem
+import levelup from 'levelup';
+import leveljs from 'level-js';
+// + querying the data
+import levelQuery from 'level-queryengine';
+import jsonqueryEngine from 'jsonquery-engine';
+
+
+
 import Octo from 'octokat/dist/node/base';
 import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
 import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
@@ -9,18 +18,11 @@ import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case';
 import CacheHandlerPlugin from 'octokat/dist/node/plugins/cache-handler';
 import FetchAllPlugin from 'octokat/dist/node/plugins/fetch-all';
 import PaginationPlugin from 'octokat/dist/node/plugins/pagination';
+import toQueryString from 'octokat/dist/node/helpers/querystring';
 
 const MAX_CACHED_URLS = 2000;
 
 let cachedClient = null;
-
-// // Log all IndexedDB errors to the console
-// Dexie.Promise.on('error', (err) => {
-//   /* eslint-disable no-console */
-//   console.log(`Dexie Uncaught error: ${err}`);
-//   /* eslint-enable no-console */
-// });
-
 
 // Try to load/save to IndexedDB and fall back to localStorage for persisting the cache.
 // localStorage support is needed because IndexedDB is disabled for Private browsing in Safari/Firefox
@@ -35,46 +37,51 @@ const cacheHandler = new class CacheHandler {
       this.cachedETags = {};
     }
 
-    // pull from IndexedDB
-    // investigate https://mozilla.github.io/localForage/
-    // const db = new Dexie('url-cache');
-    // window.Dexie = Dexie;
-    // db.version(1).stores({
-    //   urls: 'methodAndPath, eTag, data, status, linkRelations'
-    // });
+
+    // See https://github.com/Level/levelup/wiki/Modules for more
+    let driver;
+    // driver = memdown;
+    driver = leveljs;
+    // driver = localstorage;
+
+    const dbOpts = {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:1, /*indexes: indexes,*/ valueEncoding: 'none'};
+    let db;
+    try {
+      db = levelup('octokatCache', dbOpts);
+    } catch (err) {
+      alert('It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.');
+      this.dbPromise = Promise.resolve('Running without indexedDB');
+      return;
+    }
+    db = levelQuery(db);
+    db.query.use(jsonqueryEngine());
+
+    this._opts = {asBuffer:false, raw:true};
 
     this.dbPromise = new Promise((resolve) => {
-      // Try to use IndexedDB. If it fails to open (Safari/FF incognito mode)
-      // then use localStorage (by virtue of not setting this._db)
-      // db.open().then(() => {
-      //   return db.urls.where('methodAndPath').notEqual('_SOME_STRING_THAT_IS_NEVER_A_URL').each(({methodAndPath, eTag, data, status, linkRelations}) => {
-      //     if (data) {
-      //       data = JSON.parse(data);
-      //     }
-      //     if (linkRelations) {
-      //       linkRelations = JSON.parse(linkRelations);
-      //     }
-      //     this.cachedETags[methodAndPath] = {eTag, data, status, linkRelations};
-      //   });
-      // }).then(() => {
-      //   // Use IndexedDB because it loaded up successfully
-      //   this._db = db;
-      //   resolve();
-      // }).catch(() => {
-        resolve();
-      // });
-
+      db.open((err) => {
+        if (err) {
+          alert('Problem opening database. are you incognito? ' + err.message);
+        }
+        db.query({})
+        .on('data', (entry) => {
+          let {methodAndPath, eTag, data, status} = entry;
+          this.cachedETags[methodAndPath] = {eTag, data, status};
+        })
+        .on('stats', (stats) => {
+          this._db = db;
+          resolve();
+        });
+      });
     });
 
     // Async save once now new JSON has been fetched after X seconds
     this.pendingTimeout = null;
   }
-  _save(method, path, eTag, data, status, linkRelations) {
+  _save(method, path, eTag, data, status) {
     const methodAndPath = method + ' ' + path;
-    data = JSON.stringify(data);
-    linkRelations = JSON.stringify(linkRelations);
     // This returns a promise but we ignore it. TODO: Batch the updates ina transaction maybe
-    this._db.urls.put({methodAndPath, eTag, data, status, linkRelations});
+    this._db.put(methodAndPath, {methodAndPath, eTag, data, status}, this._opts);
   }
   _dumpCache() {
     /* eslint-disable no-console */
@@ -139,13 +146,30 @@ const cacheHandler = new class CacheHandler {
   }
 };
 
+
+
+const FetchOnePlugin = {
+  asyncVerbs: {
+    fetchOne: function(requester, path) {
+      return function(cb, query) {
+        return requester.request('GET', `${path}${toQueryString(query)}`, null, null, function(err, result) {
+          if (err) {
+            return cb(err);
+          }
+          return cb(null, result.items);
+        });
+      };
+    }
+  }
+}
+
 class Client extends EventEmitter {
   constructor() {
     super();
     this.LOW_RATE_LIMIT = 60;
   }
   // Used for checking if we should retreive ALL Issues or just open ones
-  canCacheLots() { return !!cacheHandler._db; }
+  canCacheLots() { return this.hasCredentials() && !!cacheHandler._db; }
   dbPromise() { return cacheHandler.dbPromise; }
   off() { // EventEmitter has `.on` but no matching `.off`
     const slice = [].slice;
@@ -154,7 +178,7 @@ class Client extends EventEmitter {
   }
   getCredentials() {
     return {
-      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin],
+      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin, FetchOnePlugin],
       token: window.localStorage.getItem('gh-token'),
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),

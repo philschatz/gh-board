@@ -12,6 +12,7 @@ import {PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 import Time from './time';
+import {Timer} from './time'; // used for polling PR status
 import LabelBadge from './label-badge';
 import IssueOrPullRequestBlurb from './issue-blurb';
 
@@ -72,13 +73,22 @@ let Issue = React.createClass({
     // TODO: Not sure why React no longer automatically binds all functions to `this`
     this._changeListener = this.forceUpdate.bind(this);
     card.onChange(this._changeListener);
+    Timer.onTick(this.pollPullRequestStatus);
   },
   componentWillUnmount() {
     const {card} = this.props;
     card.offChange(this._changeListener);
+    Timer.offTick(this.pollPullRequestStatus);
   },
   update(issue) {
     this.setState({issue});
+  },
+  pollPullRequestStatus() {
+    const {card} = this.props;
+    const {repoOwner, repoName, number} = card;
+    if (card.isPullRequest()) {
+      card.fetchPRStatus(true/*force*/);
+    }
   },
   onDragStart() {
     // Rotate the div just long enough for the browser to get a screenshot
@@ -235,13 +245,19 @@ let Issue = React.createClass({
 
     const relatedCards = _.map(card.getRelated(), ({vertex: issueCard, edgeValue}) => {
       const context = issueCard.isPullRequest() ? PULL_REQUEST_ISSUE_RELATION[edgeValue] : edgeValue;
+      let title;
+      if (issueCard.issue) {
+        title = (
+          <span className='related-issue-title'>{issueCard.issue.title}</span>
+        );
+      }
       return (
         <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
             card={issueCard}
             primaryRepoName={card.repoName}
             context={context}/>
-          <span className='related-issue-title'>{issueCard.issue.title}</span>
+          {title}
         </div>
       );
     });

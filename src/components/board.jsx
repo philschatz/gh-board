@@ -1,11 +1,13 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 
+import {filterCardsByFilter} from '../route-utils';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
 import Loadable from './loadable';
 import Progress from '../progress';
+import Database from '../database';
 
 const ProgressView = React.createClass({
   getInitialState() {
@@ -78,21 +80,49 @@ const Board = React.createClass({
 
     return ([columnData, cards]) => {
 
-      return React.createElement(type, {columnData, cards, repoInfos});
+      if (cards.length) {
+        return React.createElement(type, {columnData, cards, repoInfos});
+      } else {
+        return (
+          <div className='-no-issues'>
+            <h2>No Issues to show</h2>
+            <p>There are no Issues to show. Maybe the repository does not have any or an applied filter removes all Issues.</p>
+          </div>
+        );
+      }
 
     };
+  },
+  renderError(err) {
+    console.error(err);
+    if (err.name === 'InvalidStateError') {
+      return (
+        <span>It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.</span>
+      );
+    } else {
+      return (
+        <span>
+          Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API.
+          {err.message}
+          {JSON.stringify(err)}
+        </span>
+      );
+    }
   },
   render() {
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
-    const cardsPromise = IssueStore.fetchIssues(progress);
+    const cardsPromise = Database.fetchCards().then((cards) => {
+      IssueStore.fetchIssues();
+      return filterCardsByFilter(cards);
+    });
 
     return (
       <Loadable key='board'
         promise={Promise.all([columnDataPromise, cardsPromise])}
         renderLoading={() => (<ProgressView progress={progress}/>)}
         renderLoaded={this.renderKanbanRepos(repoInfos)}
-        renderError={(err) => (<span>Problem loading. Is it a valid repo? And have you exceeded your number of requests? Usually happens when not logged in because GitHub limits anonymous use of their API. {err.message} {JSON.stringify(err)}</span>)}
+        renderError={this.renderError}
       />
     );
   }
