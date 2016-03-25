@@ -13,6 +13,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [Moving Cards](#moving-cards)
   - [Task Lists](#task-lists)
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
+  - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
 - [Development](#development)
   - [How Does it Work?](#how-does-it-work)
@@ -91,6 +92,12 @@ By using the `- [ ]` notation in the body of an Issue or Pull Request, the progr
 ![image](https://cloud.githubusercontent.com/assets/253202/13621876/d1bcfeb0-e568-11e5-8a73-c5ef61645a88.png)
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13621905/dfee5920-e568-11e5-94df-98a887f63d24.png)
+
+# Easter Eggs
+
+Plus, it comes with totally useful easter eggs you can unlock!
+
+![easter-eggs](https://cloud.githubusercontent.com/assets/253202/14037438/185532ee-f21a-11e5-8b83-20f8cd21b753.gif)
 
 
 # Examples
