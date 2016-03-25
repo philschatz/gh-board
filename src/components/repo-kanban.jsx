@@ -64,7 +64,7 @@ const KanbanColumn = React.createClass({
 
     if (issueComponents.length || SettingsStore.getShowEmptyColumns()) {
       return (
-        <BS.Col key={label.name} md={3} className='kanban-board-column'>
+        <BS.Col key={label.name} xl={2} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
           <IssueList
             icon={icon}
             title={title}
@@ -171,7 +171,7 @@ const KanbanRepo = React.createClass({
     });
 
     return (
-      <BS.Grid className='kanban-board' data-column-count={kanbanColumnCount}>
+      <BS.Grid fluid className='kanban-board' data-column-count={kanbanColumnCount}>
         <BS.Row>
           {kanbanColumns}
           {/* addCardList */}
