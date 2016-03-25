@@ -45,28 +45,34 @@ const cacheHandler = new class CacheHandler {
     // driver = localstorage;
 
     const dbOpts = {db: driver, asBuffer:false, raw:true, storePrefix:'', dbVersion:1, /*indexes: indexes,*/ valueEncoding: 'none'};
-    let db = levelup('octokatCache', dbOpts);
+    let db;
+    try {
+      db = levelup('octokatCache', dbOpts);
+    } catch (err) {
+      alert('Looks like webkit is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.');
+      this.dbPromise = Promise.resolve('Running without indexedDB');
+      return;
+    }
     db = levelQuery(db);
     db.query.use(jsonqueryEngine());
 
     this._opts = {asBuffer:false, raw:true};
 
     this.dbPromise = new Promise((resolve) => {
-
-      db.open(() => {
-
+      db.open((err) => {
+        if (err) {
+          alert('Problem opening database. are you incognito? ' + err.message);
+        }
         db.query({})
         .on('data', (entry) => {
           let {methodAndPath, eTag, data, status} = entry;
           this.cachedETags[methodAndPath] = {eTag, data, status};
         })
         .on('stats', (stats) => {
-          console.log('IndexedDB.octocatCache_stats', stats);
           this._db = db;
           resolve();
         });
       });
-
     });
 
     // Async save once now new JSON has been fetched after X seconds
