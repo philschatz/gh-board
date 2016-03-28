@@ -40,6 +40,8 @@ const issueSource = {
       IssueStore.tryToMoveLabel(card, primaryRepoName, dropResult.label);
     } else if (dropResult.milestone){
       IssueStore.tryToMoveMilestone(card, primaryRepoName, dropResult.milestone);
+    } else if (dropResult.title === 'No Milestone') {
+      alert('BUG: gh-board is currently unable to remove a milestone. Help us out by submitting a Pull Request!');
     } else {
       throw new Error('BUG: Only know how to move to a kanban label or a milestone');
     }

@@ -37,7 +37,7 @@ const KanbanColumn = React.createClass({
     );
 
     return (
-      <BS.Col key={login} md={3} className='kanban-board-column'>
+      <BS.Col key={login} xl={2} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
         <IssueList title={heading}>
           {issueComponents}
         </IssueList>
@@ -82,7 +82,7 @@ const MilestonesView = React.createClass({
     });
 
     return (
-      <BS.Grid className='kanban-board' data-column-count={kanbanColumnCount}>
+      <BS.Grid fluid className='kanban-board' data-column-count={kanbanColumnCount}>
         <BS.Row>
           {kanbanColumns}
         </BS.Row>

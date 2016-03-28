@@ -423,20 +423,23 @@ const issueStore = new class IssueStore extends EventEmitter {
   moveMilestone(repoOwner, repoName, issue, newMilestone) {
     // TODO: Check if the milestone exists. If not, create it
 
-    Client.getOcto().repos(repoOwner, repoName).milestones.fetch()
+    Client.getOcto().repos(repoOwner, repoName).milestones.fetchAll()
     .then((milestones) => {
       // Find the milestone with a matching Title
       const matchingMilestone = _.filter(milestones, (milestone) => {
         return milestone.title === newMilestone.title;
       })[0];
 
-      return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({milestone: matchingMilestone.number})
-      .then(() => {
-
-        // invalidate the issues list
-        cacheCards = null;
-        this.emit('change');
-      });
+      if (matchingMilestone) {
+        return Client.getOcto().repos(repoOwner, repoName).issues(issue.number).update({milestone: matchingMilestone.number})
+        .then(() => {
+          // invalidate the issues list
+          cacheCards = null;
+          this.emit('change');
+        });
+      } else {
+        alert(`It seems the target repository (${repoOwner}/${repoName}) does not have a matching milestone ${newMilestone.title} to move the Issue(s) to. Please create the milestone manually for now`);
+      }
 
     });
 

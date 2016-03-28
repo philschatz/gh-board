@@ -54,7 +54,7 @@ const KanbanColumn = React.createClass({
 
     if (isShowingColumn) {
       return (
-        <BS.Col key={milestone && milestone.title || 'no-milestone'} md={3} className='kanban-board-column'>
+        <BS.Col key={milestone && milestone.title || 'no-milestone'} xl={2} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
           <IssueList
             title={heading}
             milestone={milestone}
@@ -82,6 +82,7 @@ const ByMilestoneView = React.createClass({
     let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
+    kanbanColumnCount++; // "No Milestone" counts as a column
 
     const uncategorizedColumn = (
       <KanbanColumn
@@ -117,7 +118,7 @@ const ByMilestoneView = React.createClass({
     });
 
     return (
-      <BS.Grid className='kanban-board' data-column-count={kanbanColumnCount}>
+      <BS.Grid fluid className='kanban-board' data-column-count={kanbanColumnCount}>
         <BS.Row>
           {uncategorizedColumn}
           {kanbanColumns}

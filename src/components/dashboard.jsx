@@ -367,7 +367,7 @@ const DashboardShell = React.createClass({
 
 
     return (
-      <BS.Grid className='dashboard' data-org-count={myRepos.length}>
+      <BS.Grid fluid className='dashboard' data-org-count={myRepos.length}>
         <BS.Row>
           <BS.Col md={6}>
             <ExamplesPanel/>
