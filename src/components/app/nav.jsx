@@ -258,6 +258,7 @@ const AppNav = React.createClass({
               <BS.MenuItem key='manager-pages' header>Manager-ish Pages</BS.MenuItem>
               {managerMenu}
               <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
+              <SettingsItem key='burndown' to={getFilters().setRouteName('burndown').url()}>Burndown Chart</SettingsItem>
               <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
 
             </BS.NavDropdown>

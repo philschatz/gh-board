@@ -162,6 +162,9 @@ const database = new class Database {
   getCard(repoOwner, repoName, number) {
     return this._doOp('issues', 'get', `${repoOwner}/${repoName}#${number}`, this._opts);
   }
+  // TODO: pass a filter as an arg so it can smartly (using Indexes) fetch the cards
+  // ie: If there is just 1 repo then use the repoName index.
+  // ie: If just getting open (or closed) Issues then use the `state` index.
   fetchCards() {
     const {states} = getFilters().getState();
     const db = new Dexie('issues');
