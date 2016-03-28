@@ -82,6 +82,7 @@ const ByMilestoneView = React.createClass({
     let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
+    kanbanColumnCount++; // "No Milestone" counts as a column
 
     const uncategorizedColumn = (
       <KanbanColumn
