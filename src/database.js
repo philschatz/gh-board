@@ -129,7 +129,9 @@ const database = new class Database {
   _toPromise(ctx, method, ...args) {
     return new Promise((resolve, reject) => {
       method.call(ctx, ...args, (err, val) => {
-        if (err) { return reject(err); }
+        if (err) {
+          return reject(err);
+        }
         return resolve(val);
       });
     });
@@ -158,6 +160,12 @@ const database = new class Database {
     return this._toPromise(db, method, ...args).then((val) => {
       return val;
     });
+  }
+  _resetDatabase(dbName) {
+    return Dexie.delete(dbName);
+  }
+  resetDatabases() {
+    return Promise.all(Object.keys(DB_DATA).map((dbName) => this._resetDatabase(dbName)));
   }
   getCard(repoOwner, repoName, number) {
     return this._doOp('issues', 'get', `${repoOwner}/${repoName}#${number}`, this._opts);
@@ -290,6 +298,10 @@ const database = new class Database {
     return this.putCards(cards).then(() => {
       return this.putRepos(repos);
     })
+    .catch((err) => {
+      console.error(err);
+      return err;
+    });
   }
 
   patchRepo(repoOwner, repoName, changes) {

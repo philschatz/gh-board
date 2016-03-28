@@ -7,6 +7,7 @@ import SettingsStore from '../../settings-store';
 import Client from '../../github-client';
 import CurrentUserStore from '../../user-store';
 import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
+import Database from '../../database';
 
 import LoginModal from '../login-modal';
 import LabelBadge from '../label-badge';
@@ -74,6 +75,13 @@ const AppNav = React.createClass({
       alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!');
       /*eslint-enable no-alert */
     });
+  },
+  promptAndResetDatabases() {
+    if (confirm('Are you sure you want to reset all the local data? It will take some time to repopulate all the data from GitHub and you may need to reload the page')) {
+      Database.resetDatabases().then(() => {
+        alert('Local cache has been cleared');
+      })
+    }
   },
   render() {
     let routeInfo = getFilters().getState();
@@ -259,7 +267,7 @@ const AppNav = React.createClass({
               {managerMenu}
               <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
               <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
-
+              <BS.MenuItem key='reset-databases' onClick={this.promptAndResetDatabases}>Reset Local Cache...</BS.MenuItem>
             </BS.NavDropdown>
             {loginButton}
           </BS.Nav>
