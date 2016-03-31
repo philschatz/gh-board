@@ -964,3 +964,16 @@ i.icon-spin {
 .octicon.private {
   color: #e9dba5;
 }
+
+// burndown chart needs a background color
+.burndown {
+  margin-left: 2rem;
+  .rd3-legend-chart {
+    .rd3-chart { background-color: white; }
+    .rd3-legend {
+      padding-left: 2rem !important; // override the style attribute
+      .rd3-legend-item { white-space: nowrap; }
+    }
+  }
+
+}
