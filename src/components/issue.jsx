@@ -286,7 +286,7 @@ let Issue = React.createClass({
     let mergeConflictBlurb;
     if (card.isPullRequest() && card.hasMergeConflict()) {
       mergeConflictBlurb = (
-        <i className='pull-right merge-conflict-warning octicon octicon-alert' title='This has a Merge Conflict'/>
+        <i key='merge-conflict' className='pull-right merge-conflict-warning octicon octicon-alert' title='This has a Merge Conflict'/>
       );
     }
     let statusBlurb;
@@ -318,9 +318,9 @@ let Issue = React.createClass({
       }
       if (statusIcon || statusText) {
         if (status.targetUrl) {
-          statusBlurb = (<a target='_blank' className={classnames(statusClasses)} data-status-state={status.state} href={status.targetUrl} title={status.description}>{statusIcon}{' '}{statusText}</a>);
+          statusBlurb = (<a key='status' target='_blank' className={classnames(statusClasses)} data-status-state={status.state} href={status.targetUrl} title={status.description}>{statusIcon}{' '}{statusText}</a>);
         } else {
-          statusBlurb = (<span className={classnames(statusClasses)} data-status-state={status.state} title={status.description}>{statusIcon}{' '}{statusText}</span>);
+          statusBlurb = (<span key='status' className={classnames(statusClasses)} data-status-state={status.state} title={status.description}>{statusIcon}{' '}{statusText}</span>);
         }
 
       }
@@ -382,7 +382,7 @@ let Issue = React.createClass({
             {milestone}
             {labels}
           </span>
-          <span className='issue-footer'>
+          <span key='footer' className='issue-footer'>
             {dueAt}
             <span key='right-footer' className='issue-time-and-user'>
               <Time key='time' className='updated-at' dateTime={updatedAt}/>

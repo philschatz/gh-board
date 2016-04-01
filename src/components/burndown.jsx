@@ -3,7 +3,7 @@ import _ from 'underscore';
 
 import {LineChart} from 'react-d3';
 import Database from '../database';
-import {filterCardsByFilter} from '../route-utils';
+import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import Loadable from './loadable';
 
@@ -35,14 +35,15 @@ const BurndownShell = React.createClass({
     const startDate = cards[0].issue.createdAt;
     // From this point, we only care about closed Issues
     cards = cards.filter((card) => card.issue.closedAt);
-    cards = _.sortBy(cards, (card) => getDay(card.issue.closedAt));
-    const endDate = cards[cards.length - 1].issue.closedAt;
 
     if (!cards.length) {
       return (
-        <span>Not showing a chart because there are 0 closed cards to show</span>
+        <span>Not showing a chart because there are 0 closed cards to show. Maybe you need to select "closed" from the filter options</span>
       );
     }
+
+    cards = _.sortBy(cards, (card) => getDay(card.issue.closedAt));
+    const endDate = cards[cards.length - 1].issue.closedAt;
 
     const startDays = getDay(startDate);
     const endDays = getDay(endDate);
@@ -110,9 +111,7 @@ const BurndownShell = React.createClass({
   },
   render() {
     // TODO: send the current filter as an arg to `Database.fetchCards()` so it can smartly (using Indexes) fetch the cards
-    const promise = Database.fetchCards().then((cards) => {
-      return filterCardsByFilter(cards);
-    });
+    const promise = Database.fetchCards(getFilters().getState());
 
     return (
       <div className='burndown'>
