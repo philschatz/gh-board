@@ -1,7 +1,7 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 
-import {filterCardsByFilter} from '../route-utils';
+import {getFilters, filterCardsByFilter} from '../route-utils';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
@@ -112,9 +112,8 @@ const Board = React.createClass({
   render() {
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
-    const cardsPromise = Database.fetchCards().then((cards) => {
-      IssueStore.fetchIssues();
-      return filterCardsByFilter(cards);
+    const cardsPromise = IssueStore.fetchIssues().then((cards) => {
+      return Database.fetchCards(getFilters().getState()) || cards;
     });
 
     return (
