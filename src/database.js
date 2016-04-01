@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import moment from 'moment';
 
-import {getFilters} from './route-utils';
+import {getFilters, filterCardsByFilter} from './route-utils';
 import IssueStore from './issue-store';
 
 // 3 implementations: indexedDB, LocalStorage, In-mem
@@ -170,8 +170,11 @@ const database = new class Database {
   getCard(repoOwner, repoName, number) {
     return this._doOp('issues', 'get', `${repoOwner}/${repoName}#${number}`, this._opts);
   }
-  fetchCards() {
-    const {states} = getFilters().getState();
+  // TODO: pass a filter as an arg so it can smartly (using Indexes) fetch the cards
+  // ie: If there is just 1 repo then use the repoName index.
+  // ie: If just getting open (or closed) Issues then use the `state` index.
+  fetchCards(filterState) {
+    const {states} = filterState || getFilters().getState();
     const db = new Dexie('issues');
     db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'})
     return db.open().then(function() {
@@ -187,7 +190,7 @@ const database = new class Database {
         const number = issue.number;
         cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));
       }).then(() => {
-        return cards;
+        return filterCardsByFilter(cards);
       });
     })
 

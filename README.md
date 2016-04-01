@@ -13,6 +13,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [Moving Cards](#moving-cards)
   - [Task Lists](#task-lists)
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
+  - [Burndown Chart](#burndown-chart)
   - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
 - [Development](#development)
@@ -92,6 +93,15 @@ By using the `- [ ]` notation in the body of an Issue or Pull Request, the progr
 ![image](https://cloud.githubusercontent.com/assets/253202/13621876/d1bcfeb0-e568-11e5-8a73-c5ef61645a88.png)
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13621905/dfee5920-e568-11e5-94df-98a887f63d24.png)
+
+
+### Burndown Chart
+
+Shows a burndown chart for a Milestone (ie "Sprint" or "Iteration").
+If you use select multiple repositories it will include all of them.
+
+![burndown-chart](https://cloud.githubusercontent.com/assets/253202/14071745/572d85ac-f486-11e5-80a6-024d7c83138f.png)
+
 
 # Easter Eggs
 

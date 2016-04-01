@@ -56,6 +56,15 @@ const routes = [
                 callback(null, require('./components/gantt-view').default);
               });
             }
+          },
+          { path: 'burndown',
+            // Keep the review page as a separate chunk because it contains d3
+            getComponent(location, callback) {
+              require.ensure([], (require) => {
+                // Remember to add the `.default`!
+                callback(null, require('./components/burndown').default);
+              });
+            }
           }
       ] },
       // Catch for people blindly replacing "https://github.com/..." with "gh-board/#..."
