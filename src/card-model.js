@@ -80,6 +80,9 @@ export default class Card {
     if (!this.isPullRequest()) {
       throw new Error('BUG! Did not check if this was a PullRequest first');
     }
+    if (!this._pr) {
+      return true;
+    }
     return this._pr.base.ref === this._pr.base.repo.defaultBranch;
   }
   getIssueType() {
