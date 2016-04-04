@@ -281,7 +281,8 @@ let Issue = React.createClass({
       'is-updated': isUpdated,
       'is-pull-request': card.isPullRequest(),
       'is-merged': card.isPullRequestMerged(),
-      'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict()
+      'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict(),
+      'is-pull-request-to-different-branch': card.isPullRequest() && !card.isPullRequestToDefaultBranch()
     };
     let mergeConflictBlurb;
     if (card.isPullRequest() && card.hasMergeConflict()) {

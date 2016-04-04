@@ -14,6 +14,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [Task Lists](#task-lists)
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
   - [Issue Images](#issue-images)
+  - [Pull Request to non-default branch](#pull-request-to-non-default-branch)
   - [Burndown Chart](#burndown-chart)
   - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
@@ -109,6 +110,13 @@ If you use select multiple repositories it will include all of them.
 If an Issue or Pull Request contains an image then it will be shown in the Issue
 
 ![image](https://cloud.githubusercontent.com/assets/253202/14223380/bbc026c2-f84c-11e5-9ccb-639f62aaf6d7.png)
+
+### Pull Request to non-default branch
+
+Sometimes Pull Requests go to a branch other than the main branch. This makes it clear when that happens.
+
+![image](https://cloud.githubusercontent.com/assets/253202/14266496/ac9581b4-fa96-11e5-9991-d15a146f1e3b.png)
+
 
 # Easter Eggs
 
