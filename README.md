@@ -13,6 +13,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [Moving Cards](#moving-cards)
   - [Task Lists](#task-lists)
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
+  - [Issue Images](#issue-images)
   - [Burndown Chart](#burndown-chart)
   - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
@@ -102,6 +103,12 @@ If you use select multiple repositories it will include all of them.
 
 ![burndown-chart](https://cloud.githubusercontent.com/assets/253202/14071745/572d85ac-f486-11e5-80a6-024d7c83138f.png)
 
+
+# Issue Image
+
+If an Issue or Pull Request contains an image then it will be shown in the Issue
+
+![image](https://cloud.githubusercontent.com/assets/253202/14223380/bbc026c2-f84c-11e5-9ccb-639f62aaf6d7.png)
 
 # Easter Eggs
 

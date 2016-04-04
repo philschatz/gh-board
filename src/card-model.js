@@ -113,6 +113,9 @@ export default class Card {
   getDueAt() {
     return this._getDataFromHtml().dueAt;
   }
+  getFeaturedImageSrc() {
+    return this._getDataFromHtml().featuredImageSrc;
+  }
   getRelatedIssuesFromBody() {
     return this._getDataFromHtml().relatedIssues;
   }

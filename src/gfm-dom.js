@@ -18,7 +18,8 @@ function getElement(text, repoOwner, repoName) {
   // Disable loading images as soon as they are added to the DOM
   // Since we are using this to find data like refs and task list counts
   // the images don't actually have to be fetched.
-  html = html.replace(/<img\b[^>]*>/ig, '');
+  // html = html.replace(/<img\b[^>]*>/ig, '');
+  html = html.replace(/<img/ig, '<board-image');
   DIV.innerHTML = html;
   return DIV;
 }
@@ -56,6 +57,14 @@ function getIssueDueAt(div) {
     } else {
       console.error(`Invalid due date format for "${el.outerHTML}"`);
     }
+  }
+  return null;
+}
+
+function getFeaturedImage(div) {
+  const el = div.querySelector('board-image[alt="main"]') || div.querySelector('board-image');
+  if (el) {
+    return el.getAttribute('src');
   }
   return null;
 }
@@ -119,5 +128,6 @@ export function getDataFromHtml(text, repoOwner, repoName) {
   const taskCounts = getTaskCounts(div);
   const relatedIssues = _getRelatedIssues(div);
   const dueAt = getIssueDueAt(div);
-  return {relatedIssues, taskCounts, dueAt};
+  const featuredImageSrc = getFeaturedImage(div);
+  return {relatedIssues, taskCounts, dueAt, featuredImageSrc};
 }
