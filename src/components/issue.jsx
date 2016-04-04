@@ -355,6 +355,12 @@ let Issue = React.createClass({
       mergeConflictBlurb
     ];
 
+    let featuredImage;
+    if (card.getFeaturedImageSrc()) {
+      featuredImage = (
+        <img className='featured-image' src={card.getFeaturedImageSrc()}/>
+      );
+    }
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
@@ -378,6 +384,7 @@ let Issue = React.createClass({
               text={issue.title}/>
           </a>
 
+          {featuredImage}
           <span key='labels' className='issue-labels'>
             {milestone}
             {labels}
