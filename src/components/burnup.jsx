@@ -114,7 +114,7 @@ const BurnupShell = React.createClass({
     const startDays = getDay(startDate);
     const endDays = getDay(endDate);
 
-    if (endDays - startDays < 15) {
+    if (endDays - startDays < 90) {
       chunkType = 'day';
     // } else if (endDays - startDays < 100) {
     //   chunkType = 'week';
