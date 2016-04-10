@@ -211,7 +211,20 @@ const BurnupShell = React.createClass({
             }
           }
         }
-      }
+      },
+      // tooltip: { // Doesn't work with the far-right item yet
+      //   position: function(dataToShow, tWidth, tHeight, element) {
+      //     // return {top: 10, left: element.x.baseVal.value};
+      //     const $$ = this;
+      //     const mouse = $$.d3.mouse(element);
+      //     const svgLeft = $$.getSvgLeft(true);
+      //     const tooltipLeft = svgLeft + $$.getCurrentPaddingLeft(true) + $$.x(dataToShow[0].x) + 20;
+      //     const tooltipRight = tooltipLeft + tWidth;
+      //     const chartRight = svgLeft + $$.currentWidth - $$.getCurrentPaddingRight();
+      //     const tooltipTop = mouse[1] + 15;
+      //     return {top: 10, left: tooltipLeft};
+      //   }
+      // }
     };
     return (
       <Chart className='burnup-chart' data={chartData} options={options} element='burnup'/>
@@ -223,7 +236,7 @@ const BurnupShell = React.createClass({
 
     return (
       <div className='burnup'>
-        <h2>Burnup Chart</h2>
+        <h2><i className='octicon octicon-graph'/>  Burnup Chart</h2>
         <p>Make sure you selected <strong>closed</strong> and <strong>Issues</strong> and optionally a Milestone from the filter dropdown at the top of this page</p>
         <p>Also, this chart only fills the area when something changed (useful for weekends/open-source projects that frequently have periods of no change)</p>
         <Loadable

@@ -266,8 +266,8 @@ const AppNav = React.createClass({
               <BS.MenuItem key='manager-pages' header>Manager-ish Pages</BS.MenuItem>
               {managerMenu}
               <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
-              <SettingsItem key='burnup' to={getFilters().setRouteName('burnup').url()}>Burnup Chart</SettingsItem>
-              <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}>Gantt Chart</SettingsItem>
+              <SettingsItem key='burnup' to={getFilters().setRouteName('burnup').url()}><i className='octicon octicon-graph'/> Burnup Chart</SettingsItem>
+              <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}><i className='octicon octicon-graph'/> Gantt Chart</SettingsItem>
               <BS.MenuItem key='reset-databases' onClick={this.promptAndResetDatabases}>Reset Local Cache...</BS.MenuItem>
             </BS.NavDropdown>
             {loginButton}
