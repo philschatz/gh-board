@@ -6,7 +6,7 @@ import Database from '../database';
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import Loadable from './loadable';
-
+import moment from 'moment';
 
 const BurnupShell = React.createClass({
   componentWillMount() {
@@ -33,6 +33,26 @@ const BurnupShell = React.createClass({
       } else if (chunkType === 'year') {
         const d = new Date(dateStr);
         return d.getFullYear();
+      } else {
+        throw new Error('BUG: Invalid date range chunk type');
+      }
+    }
+    function formatChunk(chunk) {
+      if (chunkType === 'day') {
+        const m = new moment(chunk * 1000 * 60 * 60 * 24);
+        return m.format('MMM DD');
+      // } else if (chunkType === 'week') {
+      //   return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24 / 7);
+      } else if (chunkType === 'month') {
+        const month = chunk % 100;
+        if (month === 0) {
+          const year = (chunk / 100) % 100; // only use the last 2 digits of the year
+          return `${moment.monthsShort(month)} '${year}`; // moment months are 0-indexed
+        } else {
+          return moment.monthsShort(month); // moment months are 0-indexed
+        }
+      } else if (chunkType === 'year') {
+        return chunk;
       } else {
         throw new Error('BUG: Invalid date range chunk type');
       }
@@ -143,8 +163,11 @@ const BurnupShell = React.createClass({
       }
       // Only add an entry if it changed
       rows.push([
-        closedToday ? closedCount : null,
-        openedToday ? openedCount : null,
+        currentChunk,
+        // closedToday ? closedCount : null,
+        // openedToday ? openedCount : null,
+        closedCount,
+        openedCount,
         openedToday || null
       ]);
     }
@@ -156,9 +179,10 @@ const BurnupShell = React.createClass({
     // Add the row titles and the "Ideal" line
     rows[0].push(0); // ideal start
     rows[rows.length - 1].push(openedCount); // ideal end
-    rows.unshift(['closed', 'total', 'new', 'ideal']);
+    rows.unshift(['chunk', 'closed', 'total', 'new', 'ideal']);
 
     const chartData = {
+        x: 'chunk',
         rows: rows,
         colors: {
             closed: '#ff0000',
@@ -173,8 +197,24 @@ const BurnupShell = React.createClass({
         },
         // groups: [['opened', 'closed']]
     };
+    function formatChunkIndex(index) {
+      return formatChunk(rows[index+1][0]);// +1 because 1st row is the headers
+    }
+    const options = {
+      axis: {
+        x: {
+          type: 'category',
+          tick: {
+            format: formatChunkIndex,
+            culling: {
+              max: 20
+            }
+          }
+        }
+      }
+    };
     return (
-      <Chart className='burnup-chart' data={chartData} element='burnup'/>
+      <Chart className='burnup-chart' data={chartData} options={options} element='burnup'/>
     );
   },
   render() {
