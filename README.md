@@ -15,7 +15,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
   - [Issue Images](#issue-images)
   - [Pull Request to non-default branch](#pull-request-to-non-default-branch)
-  - [Burndown Chart](#burndown-chart)
+  - [Burnup Chart](#burnup-chart)
   - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
 - [Development](#development)
@@ -97,12 +97,16 @@ By using the `- [ ]` notation in the body of an Issue or Pull Request, the progr
 ![image](https://cloud.githubusercontent.com/assets/253202/13621905/dfee5920-e568-11e5-94df-98a887f63d24.png)
 
 
-### Burndown Chart
+### Burnup Chart
 
-Shows a burndown chart for a Milestone (ie "Sprint" or "Iteration").
+[Why Burnup instead of Burndown?](http://brodzinski.com/2012/10/burn-up-better-burn-down.html)
+
+Shows a burnup chart for a Milestone (ie "Sprint" or "Iteration").
 If you use select multiple repositories it will include all of them.
 
-![burndown-chart](https://cloud.githubusercontent.com/assets/253202/14071745/572d85ac-f486-11e5-80a6-024d7c83138f.png)
+It also skips when nothing was opened or closed that day/month/year (useful to see weekends or holidays).
+
+![burnup-chart](https://cloud.githubusercontent.com/assets/253202/14406693/5e05c870-fe7d-11e5-9564-ecddb08ebe0d.png)
 
 
 # Issue Image

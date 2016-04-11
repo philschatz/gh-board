@@ -57,12 +57,12 @@ const routes = [
               });
             }
           },
-          { path: 'burndown',
+          { path: 'burnup',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {
               require.ensure([], (require) => {
                 // Remember to add the `.default`!
-                callback(null, require('./components/burndown').default);
+                callback(null, require('./components/burnup').default);
               });
             }
           }
