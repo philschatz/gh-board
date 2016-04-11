@@ -507,6 +507,7 @@ body { background-color: #ddd; }
       // &:not(.is-mergeable) .list-group-item-heading .issue-blurb .blurb-icon { .x-stripes(#ccc; .8); }
       &.is-merge-conflict:not(.is-updated) { .x-stripes(#fcfcfc; .9); }
       &.is-merge-conflict.is-updated       { .x-stripes(#fcfcd9; .9); }
+      &.is-merge-conflict.is-pull-request-to-different-branch { .x-stripes(#e9e9fc; .9); }
     }
 
     /* Color the blurb icon to be gray if there is an issue */
@@ -965,17 +966,13 @@ i.icon-spin {
   color: #e9dba5;
 }
 
-// burndown chart needs a background color
-.burndown {
+// burnup chart needs a background color
+.burnup {
   margin-left: 2rem;
-  .rd3-legend-chart {
-    .rd3-chart { background-color: white; }
-    .rd3-legend {
-      padding-left: 2rem !important; // override the style attribute
-      .rd3-legend-item { white-space: nowrap; }
-    }
+  margin-right: 2rem;
+  .burnup-chart {
+    background-color: white;
   }
-
 }
 
 

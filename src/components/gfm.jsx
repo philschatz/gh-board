@@ -233,34 +233,39 @@ const InnerMarkdown = React.createClass({
   render() {
     const {text, repoOwner, repoName, inline} = this.props;
     if (!text) { return null; }
+    const hasHtmlTags = /</.test(text);
     const context = repoOwner + '/' + repoName;
     const textStripped = text.replace(/<!--[\s\S]*?-->/g, '');
     const textEmojis = this.replaceEmojis(textStripped);
     const html = ultramarked(linkify(textEmojis, context));
-
-    if (html) {
-      if (inline) {
-        // Remove the wrapping `<p>` since this is supposed to be inline markdown
-        // (ie for a title)
-        const inlineHtml = html.replace(/^<p>/, '').replace(/<\/p>\n$/, '');
-        const props = {
-          className: 'markdown-body',
-          dangerouslySetInnerHTML: {__html: inlineHtml}
-        };
-        return (<span {...props}/>);
-      } else {
-        const props = {
-          className: 'markdown-body',
-          dangerouslySetInnerHTML: {__html: html}
-        };
-        return (<div {...props}/>);
-      }
+    if (hasHtmlTags && inline) {
+      // Issue titles and labels sometimes unintentionally have HTML tags in them.
+      // but non-inline stuff (like Issue body) should not try to be smart.
+      return (<span className='markdown-body is-text'>{text}</span>);
     } else {
-      return (
-        <div className='markdown-body is-empty'></div>
-      );
+      if (html) {
+        if (inline) {
+          // Remove the wrapping `<p>` since this is supposed to be inline markdown
+          // (ie for a title)
+          const inlineHtml = html.replace(/^<p>/, '').replace(/<\/p>\n$/, '');
+          const props = {
+            className: 'markdown-body',
+            dangerouslySetInnerHTML: {__html: inlineHtml}
+          };
+          return (<span {...props}/>);
+        } else {
+          const props = {
+            className: 'markdown-body',
+            dangerouslySetInnerHTML: {__html: html}
+          };
+          return (<div {...props}/>);
+        }
+      } else {
+        return (
+          <div className='markdown-body is-empty'></div>
+        );
+      }
     }
-
   }
 
 });
