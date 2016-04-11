@@ -146,7 +146,7 @@ let Issue = React.createClass({
           placement='top'
           delayShow={1000}
           overlay={tooltip}>
-          <LabelBadge isClickable label={label}/>
+          <LabelBadge isFilterLink label={label}/>
         </BS.OverlayTrigger>
       );
     });

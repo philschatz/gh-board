@@ -295,6 +295,29 @@ const issueStore = new class IssueStore extends EventEmitter {
 
     })
   }
+  fetchConcreteRepoInfos(repoInfos) {
+    const allPromises = repoInfos.map(({repoOwner, repoName}) => {
+      if (repoName === '*') {
+        let fetchAllRepos;
+        if (Client.canCacheLots()) {
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchAll();
+        } else {
+          // only get the 1st page of results if not logged in
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
+        }
+        return fetchAllRepos.then((repos) => {
+          return repos.map((repo) => {return {repoOwner, repoName: repo.name}; });
+        });
+      } else {
+        return {repoOwner, repoName};
+      }
+    });
+
+    return Promise.all(allPromises).then((repoInfosArrays) => {
+      return _.unique(_.flatten(repoInfosArrays));
+    });
+
+  }
   _fetchAllIssues(repoInfos, progress, isForced) {
     // Start/keep polling
     if (!this.polling && isPollingEnabled) {
@@ -492,9 +515,26 @@ const issueStore = new class IssueStore extends EventEmitter {
   }
 
   _getLabelsRemoved(newLabels, oldLabels) {
+    oldLabels = oldLabels ? oldLabels.labels : [];
+    oldLabels = oldLabels || [];
     const newLabelNames = newLabels.map(({name}) => name).sort();
     const oldLabelNames = oldLabels.map(({name}) => name).sort();
     return _.difference(oldLabelNames, newLabelNames);
+  }
+
+  // Try to pull labels from the DB, and if they are not there then ask GitHub
+  fetchRepoLabels(repoOwner, repoName) {
+    return Database.getRepoLabelsOrNull(repoOwner, repoName)
+    .then((val) => {
+      if (val) {
+        return val;
+      } else {
+        return Client.getOcto().repos(repoOwner, repoName).labels.fetchAll()
+        .then((labels) => {
+          return {repoOwner, repoName, labels};
+        })
+      }
+    })
   }
 }
 
