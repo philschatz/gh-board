@@ -231,6 +231,10 @@ export function getFilters() {
   return FILTER_STATE;
 }
 
+export function getFreshFilter() {
+  return new FilterState(DEFAULTS);
+}
+
 export const LABEL_CACHE = {}; // keys are label names and values are the label object (contains color)
 
 
@@ -257,9 +261,10 @@ function matchesRepoInfo(repoInfos, card) {
 
 // Filters the list of cards by the criteria set in the URL.
 // Used by IssueStore.fetchIssues()
-export function filterCardsByFilter(cards) {
-  const {repoInfos, milestoneTitles, userName, states, types, columnRegExp} = getFilters().getState();
-  let {tagNames, columnLabels} = getFilters().getState(); // We might remove UNCATEGORIZED_NAME from the list
+export function filterCardsByFilter(cards, filter) {
+  filter = filter || getFilters();
+  const {repoInfos, milestoneTitles, userName, states, types, columnRegExp} = filter.getState();
+  let {tagNames, columnLabels} = filter.getState(); // We might remove UNCATEGORIZED_NAME from the list
   const includedTagNames = tagNames.filter((tagName) => { return tagName[0] !== '-'; });
   const excludedTagNames = tagNames.filter((tagName) => { return tagName[0] === '-'; }).map((tagName) => { return tagName.substring(1); });
 

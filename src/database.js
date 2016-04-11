@@ -26,8 +26,8 @@ const DB_DATA = {
     //   { name: '[kanbanColumn+state]', keyPath: ['kanbanColumn', 'state'], unique: false, multiEntry: false },
     ]
   },
-  // 'labels': {
-  //   // dbVersion: 1,
+  // 'labels': { // contains repoOwner, repoName, labels
+  //   dbVersion: 1,
   // },
   'repositories': {
     dbVersion: 1,
@@ -173,8 +173,9 @@ const database = new class Database {
   // TODO: pass a filter as an arg so it can smartly (using Indexes) fetch the cards
   // ie: If there is just 1 repo then use the repoName index.
   // ie: If just getting open (or closed) Issues then use the `state` index.
-  fetchCards(filterState) {
-    const {states} = filterState || getFilters().getState();
+  fetchCards(filter) {
+    filter = filter || getFilters();
+    const {states} = filter.getState();
     const db = new Dexie('issues');
     db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'})
     return db.open().then(function() {
@@ -190,7 +191,7 @@ const database = new class Database {
         const number = issue.number;
         cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));
       }).then(() => {
-        return filterCardsByFilter(cards);
+        return filterCardsByFilter(cards, filter);
       });
     })
 
@@ -265,6 +266,25 @@ const database = new class Database {
     return this._doOp('labels', 'put', name, {color, repoOwner, repoName}, this._opts);
   }
 
+  putRepoLabels(repoOwner, repoName, labels) {
+    return this.patchRepo(repoOwner, repoName, {labels});
+  }
+  getRepoLabels(repoOwner, repoName) {
+    return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`)
+    .then(({labels}) => {
+      return labels || null;
+    });
+  }
+  getRepoLabelsOrNull(repoOwner, repoName) {
+    return new Promise((resolve, reject) => {
+      this.getRepoLabels(repoOwner, repoName)
+      .then((val) => {
+        resolve(val);
+      })
+      .catch(() => { resolve(null); })
+    });
+  }
+
   getRepo(repoOwner, repoName) {
     return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`, this._opts);
   }
@@ -281,6 +301,7 @@ const database = new class Database {
       .catch(() => { resolve(null); })
     });
   }
+
   putRepo(repoOwner, repoName, value) {
     return this._doOp('repositories', 'put', `${repoOwner}/${repoName}`, value, this._opts);
   }

@@ -181,10 +181,13 @@ export default class Card {
       }
     });
   }
-  fetchIssue() {
+  fetchIssue(skipSavingToDb) {
     return this._getOcto().issues(this.number).fetch().then((issue) => {
       this.issue = issue;
-      Database.putCard(this);
+      if (!skipSavingToDb) {
+        Database.putCard(this);
+      }
+      return issue;
     });
   }
   resetPromisesAndState(issue, pr, prStatus) {

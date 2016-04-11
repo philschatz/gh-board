@@ -2,7 +2,7 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
-import {getFilters, filterCardsByFilter} from './route-utils';
+import {getFilters, filterCardsByFilter, getFreshFilter} from './route-utils';
 import {contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 import Progress from './progress';
@@ -244,13 +244,56 @@ const issueStore = new class IssueStore extends EventEmitter {
     const repoName = repo.name;
     const isPrivate = repo.private;
     progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
-    return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
-      let lastSeenAt;
-      if (repo && repo.lastSeenAt) {
-        lastSeenAt = repo.lastSeenAt;
-      }
-      return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate);
-    });
+    // Check if the set of labels have changed for this repo.
+    // If so, then for every label that no longer exists we need to fetch the Issue and update it.
+    // The reason is that the label _could_ have been renamed.
+    return Promise.all([
+      this.fetchLabels(repoOwner, repoName),
+      Database.getRepoLabelsOrNull(repoOwner, repoName)
+    ]).then(([newLabels, oldLabels]) => {
+
+      // Check if the labels have changed.
+      const labelsRemoved = this._getLabelsRemoved(newLabels, oldLabels || []);
+      // TODO: when labelsRemoved (or when they changed at all, then we should refresh the board so the new columns show up)
+
+      // find all the Issues that have labels that have been removed so we can update them
+      return Promise.all(labelsRemoved.map((label) => {
+        let filter = getFreshFilter().toggleState('closed')/*.toggleState('open')*/;  // TODO: open is toggled on by default
+        filter.state.repoInfos = [{repoOwner, repoName}]; // HACK since there is no ggod way to do this directly on the filter
+        if (getFilters().getState().columnRegExp.test(label)) {
+          filter = filter.toggleColumnLabel(label);
+        } else {
+          filter = filter.toggleTagName(label);
+        }
+        return Database.fetchCards(filter);
+      }))
+      .then((cardsArrays) => {
+        const cards = _.unique(_.flatten(cardsArrays));
+        // Re-fetch each Issue
+        return Promise.all(cards.map((card) => card.fetchIssue(true/*skipSavingToDb*/)))
+        .then((newIssues) => {
+          return Database.putCards(cards)
+          .then(() => {
+            // Update the list of labels now that all the Issues have been updated
+            return Database.putRepoLabels(repoOwner, repoName, newLabels)
+            .then(() => {
+
+
+              // FINALLY, actually fetch the updates
+              return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
+                let lastSeenAt;
+                if (repo && repo.lastSeenAt) {
+                  lastSeenAt = repo.lastSeenAt;
+                }
+                return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate);
+              });
+
+            })
+          })
+        })
+      })
+
+    })
   }
   _fetchAllIssues(repoInfos, progress, isForced) {
     // Start/keep polling
@@ -446,6 +489,12 @@ const issueStore = new class IssueStore extends EventEmitter {
   }
   createLabel(repoOwner, repoName, opts) {
     return Client.getOcto().repos(repoOwner, repoName).labels.create(opts);
+  }
+
+  _getLabelsRemoved(newLabels, oldLabels) {
+    const newLabelNames = newLabels.map(({name}) => name).sort();
+    const oldLabelNames = oldLabels.map(({name}) => name).sort();
+    return _.difference(oldLabelNames, newLabelNames);
   }
 }
 
