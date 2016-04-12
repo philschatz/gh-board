@@ -91,7 +91,17 @@ export const MergedSinceInner = React.createClass({
     const allPromise = Promise.all(_.map(repoInfos, ({repoOwner, repoName}, i) => {
       const startSha = startShas[i];
       const endSha = endShas[i];
-      return Client.dbPromise().then(() => Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch());
+      return Client.dbPromise().then(() => {
+        return new Promise((resolve, reject) => {
+          Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch()
+          .then(resolve)
+          .catch((err) => {
+            // Some repositories are private so don't error, just silently fail
+            resolve({_UNABLE_TO_COMPARE:true, commits:[]});
+          });
+        });
+
+      });
     }));
 
     return (

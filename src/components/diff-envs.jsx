@@ -10,14 +10,12 @@ const DiffEnvs = React.createClass({
     return Client.getAnonymousOcto().fromUrl(`https://${hostName}/rev.txt`).read().then((textFile) => {
       const shaInfos = {};
       textFile.split('\n').forEach((line) => {
-        let [repoName, updatedStr, toStr, sha] = line.split(' ');
+        let [repoName, atSymbol, sha] = line.split(' ');
+        if (repoName[0] === '/') {
+          repoName = repoName.substring(1);
+        }
         if (repoName && sha) {
-          if (updatedStr !== 'updated') { throw new Error('BUG! looks like rev.txt is malformed'); }
-          if (toStr !== 'to')           { throw new Error('BUG! looks like rev.txt is malformed'); }
-          // HACK: to account for the fact that rev.txt uses the old name for tutor-server
-          if (repoName === 'tutor') {
-            repoName = 'tutor-server';
-          }
+          if (atSymbol !== '@')           { throw new Error('BUG! looks like rev.txt is malformed'); }
           shaInfos[repoName] = sha;
         }
       });
@@ -29,17 +27,36 @@ const DiffEnvs = React.createClass({
 
     const allPromise = Promise.all([this.requestRev(startHost), this.requestRev(endHost)])
     .then(([startShaInfos, endShaInfos]) => {
+      // Make sure repoInfos only contains repos that are in both the start and end
+      Object.keys(endShaInfos).forEach((key) => {
+        if (!startShaInfos[key]) {
+          delete endShaInfos[key];
+        }
+      })
+      Object.keys(startShaInfos).forEach((key) => {
+        if (!endShaInfos[key]) {
+          delete startShaInfos[key];
+        }
+      })
+
+
       // build up an array of shas
-      const repoInfos = Object.keys(endShaInfos).map((repoName) => {
+      let repoInfos = Object.keys(endShaInfos).map((repoPath) => {
         // HACK: assume the org is openstax
-        return {repoOwner: 'openstax', repoName};
+        const [repoOwner, repoName] = repoPath.split('/');
+        return {repoOwner, repoName};
       });
-      const startShas = repoInfos.map(({repoName}) => {
-        return startShaInfos[repoName];
+      const startShas = repoInfos.map(({repoOwner, repoName}) => {
+        return startShaInfos[`${repoOwner}/${repoName}`];
       });
-      const endShas = repoInfos.map(({repoName}) => {
-        return endShaInfos[repoName];
+      const endShas = repoInfos.map(({repoOwner, repoName}) => {
+        return endShaInfos[`${repoOwner}/${repoName}`];
       });
+
+      console.log('startShaInfos');
+      console.log(startShaInfos);
+      console.log('endShaInfos');
+      console.log(endShaInfos);
 
       return {repoInfos, startShas, endShas};
     });
