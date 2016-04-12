@@ -180,7 +180,7 @@ const issueStore = new class IssueStore extends EventEmitter {
       });
     });
   }
-  _fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate) {
+  _fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate, didLabelsChange) {
     const opts = {
       per_page: 100,
       sort: 'updated',
@@ -220,7 +220,7 @@ const issueStore = new class IssueStore extends EventEmitter {
       });
       // remove the null cards (null because they are not new events)
       cards = _.filter(cards, (card) => { return !!card; });
-      const ret = { cards };
+      const ret = { cards, didLabelsChange };
       // only include the repository key if the lastSeenAt changed
       // That way fewer things will need to be saved to the DB
       if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
@@ -285,7 +285,7 @@ const issueStore = new class IssueStore extends EventEmitter {
                 if (repo && repo.lastSeenAt) {
                   lastSeenAt = repo.lastSeenAt;
                 }
-                return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate);
+                return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate, this._getDidLabelsChange(newLabels, oldLabels));
               });
 
             })
@@ -448,6 +448,8 @@ const issueStore = new class IssueStore extends EventEmitter {
       repoAndCards = _.flatten(repoAndCards, true /*shallow*/); // the asterisks in the URL become an array of repoAndCards so we need to flatten
       const repos = _.filter(repoAndCards.map(({repository}) => { return repository; }), (v) => { return !!v; }); // if the lastSeenAt did not change then repository field will be missing
       const cards = _.flatten(repoAndCards.map(({cards}) => { return cards; }), true /*shallow*/);
+      // didLabelsChange is true if at least one of the repos labels changed
+      const didLabelsChange = _.flatten(repoAndCards.map(({didLabelsChange}) => { return didLabelsChange; }), true /*shallow*/).indexOf(true) >= 0;
 
       _buildBipartiteGraph(GRAPH_CACHE, cards);
 
@@ -464,7 +466,7 @@ const issueStore = new class IssueStore extends EventEmitter {
         putCardsAndRepos = Database.putCards(cards);
       }
       return putCardsAndRepos.then(() => {
-        if (cards.length) {
+        if (cards.length || didLabelsChange) {
           this.emit('change');
         }
         return cards;
@@ -541,6 +543,14 @@ const issueStore = new class IssueStore extends EventEmitter {
     const newLabelNames = newLabels.map(({name}) => name).sort();
     const oldLabelNames = oldLabels.map(({name}) => name).sort();
     return _.difference(oldLabelNames, newLabelNames);
+  }
+
+  _getDidLabelsChange(newLabels, oldLabels) {
+    oldLabels = oldLabels ? oldLabels.labels : [];
+    oldLabels = oldLabels || [];
+    const newLabelNames = newLabels.map(({name}) => name);
+    const oldLabelNames = oldLabels.map(({name}) => name);
+    return _.intersection(oldLabelNames, newLabelNames).length !== newLabels.length;
   }
 
   // Try to pull labels from the DB, and if they are not there then ask GitHub
