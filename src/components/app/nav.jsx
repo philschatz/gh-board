@@ -98,7 +98,7 @@ const AppNav = React.createClass({
       // TODO: HACK. Find a better way to update the color of labels
       const label = LABEL_CACHE[tagName] || {name: tagName, color: 'ffffff'};
       return (
-        <LabelBadge key={tagName} isClickable label={label}/>
+        <LabelBadge key={tagName} isFilterLink label={label}/>
       );
     });
 
@@ -268,6 +268,7 @@ const AppNav = React.createClass({
               <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
               <SettingsItem key='burnup' to={getFilters().setRouteName('burnup').url()}><i className='octicon octicon-graph'/> Burnup Chart</SettingsItem>
               <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}><i className='octicon octicon-graph'/> Gantt Chart</SettingsItem>
+              <SettingsItem key='label-editing' to={getFilters().setRouteName('labels').url()}><i className='octicon octicon-tag'/> Label Editing</SettingsItem>
               <BS.MenuItem key='reset-databases' onClick={this.promptAndResetDatabases}>Reset Local Cache...</BS.MenuItem>
             </BS.NavDropdown>
             {loginButton}

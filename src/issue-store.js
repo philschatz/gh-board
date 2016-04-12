@@ -2,7 +2,7 @@ import _ from 'underscore';
 import {EventEmitter} from 'events';
 import Client from './github-client';
 import BipartiteGraph from './bipartite-graph';
-import {getFilters, filterCardsByFilter} from './route-utils';
+import {getFilters, filterCardsByFilter, getFreshFilter} from './route-utils';
 import {contains, KANBAN_LABEL, UNCATEGORIZED_NAME} from './helpers';
 import Card from './card-model';
 import Progress from './progress';
@@ -180,7 +180,7 @@ const issueStore = new class IssueStore extends EventEmitter {
       });
     });
   }
-  _fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate) {
+  _fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate, didLabelsChange) {
     const opts = {
       per_page: 100,
       sort: 'updated',
@@ -220,7 +220,7 @@ const issueStore = new class IssueStore extends EventEmitter {
       });
       // remove the null cards (null because they are not new events)
       cards = _.filter(cards, (card) => { return !!card; });
-      const ret = { cards };
+      const ret = { cards, didLabelsChange };
       // only include the repository key if the lastSeenAt changed
       // That way fewer things will need to be saved to the DB
       if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
@@ -244,13 +244,89 @@ const issueStore = new class IssueStore extends EventEmitter {
     const repoName = repo.name;
     const isPrivate = repo.private;
     progress.addTicks(1, `Fetching Updates for ${repoOwner}/${repoName}`);
-    return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
-      let lastSeenAt;
-      if (repo && repo.lastSeenAt) {
-        lastSeenAt = repo.lastSeenAt;
+    // Check if the set of labels have changed for this repo.
+    // If so, then for every label that no longer exists we need to fetch the Issue and update it.
+    // The reason is that the label _could_ have been renamed.
+    return Promise.all([
+      this.fetchLabels(repoOwner, repoName),
+      Database.getRepoLabelsOrNull(repoOwner, repoName)
+    ]).then(([newLabels, oldLabels]) => {
+
+      // Check if the labels have changed.
+      const labelsRemoved = this._getLabelsRemoved(newLabels, oldLabels || []);
+      // TODO: when labelsRemoved (or when they changed at all, then we should refresh the board so the new columns show up)
+
+      // find all the Issues that have labels that have been removed so we can update them
+      return Promise.all(labelsRemoved.map((label) => {
+        let filter = getFreshFilter().toggleState('closed')/*.toggleState('open')*/;  // TODO: open is toggled on by default
+        filter.state.repoInfos = [{repoOwner, repoName}]; // HACK since there is no ggod way to do this directly on the filter
+        if (getFilters().getState().columnRegExp.test(label)) {
+          filter = filter.toggleColumnLabel(label);
+        } else {
+          filter = filter.toggleTagName(label);
+        }
+        return Database.fetchCards(filter);
+      }))
+      .then((cardsArrays) => {
+        const cards = _.unique(_.flatten(cardsArrays));
+        // Re-fetch each Issue
+        return Promise.all(cards.map((card) => card.fetchIssue(true/*skipSavingToDb*/)))
+        .then((newIssues) => {
+          return Database.putCards(cards)
+          .then(() => {
+            // Update the list of labels now that all the Issues have been updated
+            return Database.putRepoLabels(repoOwner, repoName, newLabels)
+            .then(() => {
+
+
+              // FINALLY, actually fetch the updates
+              return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
+                let lastSeenAt;
+                if (repo && repo.lastSeenAt) {
+                  lastSeenAt = repo.lastSeenAt;
+                }
+                return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate, this._getDidLabelsChange(newLabels, oldLabels));
+              });
+
+            })
+          })
+        })
+      })
+
+    })
+  }
+  fetchConcreteRepoInfos(repoInfos) {
+    const allPromises = repoInfos.map(({repoOwner, repoName}) => {
+      if (repoName === '*') {
+        let fetchAllRepos;
+        if (Client.canCacheLots()) {
+          // First, we have to determine if the repoOwner is an Organization or a User
+          // so we can call .orgs or .users to get the list of repositories
+          // .orgs returns Private+Public repos but .users only returns private repos
+          fetchAllRepos = Client.getOcto().users(repoOwner).fetch()
+          .then(({type}) => {
+            if ('Organization' === type) {
+              return Client.getOcto().orgs(repoOwner).repos.fetchAll();
+            } else {
+              return Client.getOcto().users(repoOwner).repos.fetchAll();
+            }
+          });
+        } else {
+          // only get the 1st page of results if not logged in
+          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
+        }
+        return fetchAllRepos.then((repos) => {
+          return repos.map((repo) => {return {repoOwner, repoName: repo.name, repo}; });
+        });
+      } else {
+        return {repoOwner, repoName};
       }
-      return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate);
     });
+
+    return Promise.all(allPromises).then((repoInfosArrays) => {
+      return _.unique(_.flatten(repoInfosArrays));
+    });
+
   }
   _fetchAllIssues(repoInfos, progress, isForced) {
     // Start/keep polling
@@ -315,9 +391,20 @@ const issueStore = new class IssueStore extends EventEmitter {
 
         let fetchAllRepos;
         if (Client.canCacheLots()) {
-          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchAll();
+          // First, we have to determine if the repoOwner is an Organization or a User
+          // so we can call .orgs or .users to get the list of repositories
+          // .orgs returns Private+Public repos but .users only returns private repos
+          fetchAllRepos = Client.getOcto().users(repoOwner).fetch()
+          .then(({type}) => {
+            if ('Organization' === type) {
+              return Client.getOcto().orgs(repoOwner).repos.fetchAll();
+            } else {
+              return Client.getOcto().users(repoOwner).repos.fetchAll();
+            }
+          });
         } else {
           // only get the 1st page of results if not logged in
+          // since it's anonymous we only need to get public repos (.users only yields public repos)
           fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
         }
         return fetchAllRepos
@@ -361,6 +448,8 @@ const issueStore = new class IssueStore extends EventEmitter {
       repoAndCards = _.flatten(repoAndCards, true /*shallow*/); // the asterisks in the URL become an array of repoAndCards so we need to flatten
       const repos = _.filter(repoAndCards.map(({repository}) => { return repository; }), (v) => { return !!v; }); // if the lastSeenAt did not change then repository field will be missing
       const cards = _.flatten(repoAndCards.map(({cards}) => { return cards; }), true /*shallow*/);
+      // didLabelsChange is true if at least one of the repos labels changed
+      const didLabelsChange = _.flatten(repoAndCards.map(({didLabelsChange}) => { return didLabelsChange; }), true /*shallow*/).indexOf(true) >= 0;
 
       _buildBipartiteGraph(GRAPH_CACHE, cards);
 
@@ -377,7 +466,7 @@ const issueStore = new class IssueStore extends EventEmitter {
         putCardsAndRepos = Database.putCards(cards);
       }
       return putCardsAndRepos.then(() => {
-        if (cards.length) {
+        if (cards.length || didLabelsChange) {
           this.emit('change');
         }
         return cards;
@@ -446,6 +535,37 @@ const issueStore = new class IssueStore extends EventEmitter {
   }
   createLabel(repoOwner, repoName, opts) {
     return Client.getOcto().repos(repoOwner, repoName).labels.create(opts);
+  }
+
+  _getLabelsRemoved(newLabels, oldLabels) {
+    oldLabels = oldLabels ? oldLabels.labels : [];
+    oldLabels = oldLabels || [];
+    const newLabelNames = newLabels.map(({name}) => name).sort();
+    const oldLabelNames = oldLabels.map(({name}) => name).sort();
+    return _.difference(oldLabelNames, newLabelNames);
+  }
+
+  _getDidLabelsChange(newLabels, oldLabels) {
+    oldLabels = oldLabels ? oldLabels.labels : [];
+    oldLabels = oldLabels || [];
+    const newLabelNames = newLabels.map(({name}) => name);
+    const oldLabelNames = oldLabels.map(({name}) => name);
+    return _.intersection(oldLabelNames, newLabelNames).length !== newLabels.length;
+  }
+
+  // Try to pull labels from the DB, and if they are not there then ask GitHub
+  fetchRepoLabels(repoOwner, repoName) {
+    return Database.getRepoLabelsOrNull(repoOwner, repoName)
+    .then((val) => {
+      if (val) {
+        return val;
+      } else {
+        return Client.getOcto().repos(repoOwner, repoName).labels.fetchAll()
+        .then((labels) => {
+          return {repoOwner, repoName, labels};
+        })
+      }
+    })
   }
 }
 

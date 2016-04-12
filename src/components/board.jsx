@@ -113,7 +113,7 @@ const Board = React.createClass({
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
     const cardsPromise = IssueStore.fetchIssues().then((cards) => {
-      return Database.fetchCards(getFilters().getState()) || cards;
+      return Database.fetchCards(getFilters()) || cards;
     });
 
     return (

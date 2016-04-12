@@ -26,9 +26,9 @@ const DB_DATA = {
     //   { name: '[kanbanColumn+state]', keyPath: ['kanbanColumn', 'state'], unique: false, multiEntry: false },
     ]
   },
-  // 'labels': {
-  //   // dbVersion: 1,
-  // },
+  'repoLabels': { // contains repoOwner, repoName, labels
+    dbVersion: 1,
+  },
   'repositories': {
     dbVersion: 1,
     // indexes: [
@@ -111,20 +111,22 @@ const database = new class Database {
     // memDb = levelQuery(memDb);
     // memDb.query.use(jsonqueryEngine());
 
-    // TODO: somehow tell other code to wait until memDb is loaded
-    actualDb.createReadStream()
-    .on('data', ({key, value}) => {
-      memDb.put(key, value);
-    })
-    .on('error', (err) => {
-      callback(err);
-    })
-    .on('end', () => {
-      console.log('Done loading DB into memDb for ', dbName);
+    const loadedPromise = new Promise((resolve, reject) => {
+      // TODO: somehow tell other code to wait until memDb is loaded
+      actualDb.createReadStream()
+      .on('data', ({key, value}) => {
+        memDb.put(key, value);
+      })
+      .on('error', (err) => {
+        reject(err);
+      })
+      .on('end', () => {
+        console.log('Done loading DB into memDb for ', dbName);
+        resolve(dbName);
+      });
+
     });
-
-
-    return {memDb, actualDb};
+    return {memDb, actualDb, loadedPromise};
   }
   _toPromise(ctx, method, ...args) {
     return new Promise((resolve, reject) => {
@@ -138,7 +140,7 @@ const database = new class Database {
   }
   // Ensures that the correct DB is open before performing an operation
   _doOp(dbName, methodName, ...args) {
-    const {memDb, actualDb} = this._dbs[dbName];
+    const {memDb, actualDb, loadedPromise} = this._dbs[dbName];
     let db;
     let method;
     if (methodName === 'get') {
@@ -157,8 +159,10 @@ const database = new class Database {
     } else {
       throw new Error('Unknown levelDB operation. Expected get or put but got ' + methodName);
     }
-    return this._toPromise(db, method, ...args).then((val) => {
-      return val;
+    return loadedPromise.then(() => {
+      return this._toPromise(db, method, ...args).then((val) => {
+        return val;
+      });
     });
   }
   _resetDatabase(dbName) {
@@ -173,8 +177,9 @@ const database = new class Database {
   // TODO: pass a filter as an arg so it can smartly (using Indexes) fetch the cards
   // ie: If there is just 1 repo then use the repoName index.
   // ie: If just getting open (or closed) Issues then use the `state` index.
-  fetchCards(filterState) {
-    const {states} = filterState || getFilters().getState();
+  fetchCards(filter) {
+    filter = filter || getFilters();
+    const {states} = filter.getState();
     const db = new Dexie('issues');
     db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'})
     return db.open().then(function() {
@@ -190,7 +195,7 @@ const database = new class Database {
         const number = issue.number;
         cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));
       }).then(() => {
-        return filterCardsByFilter(cards);
+        return filterCardsByFilter(cards, filter);
       });
     })
 
@@ -257,12 +262,28 @@ const database = new class Database {
     return this._doOp('issues', 'batch', batchOps, this._opts);
   }
 
-  getLabel(labelName) {
-    return this._doOp('labels', 'get', labelName, this._opts);
+  // getLabel(labelName) {
+  //   return this._doOp('labels', 'get', labelName, this._opts);
+  // }
+  // putLabel(repoOwner, repoName, label) {
+  //   const {name, color} = label;
+  //   return this._doOp('labels', 'put', name, {color, repoOwner, repoName}, this._opts);
+  // }
+
+  putRepoLabels(repoOwner, repoName, labels) {
+    return this._doOp('repoLabels', 'put', `${repoOwner}/${repoName}`, {repoOwner, repoName, labels});
   }
-  putLabel(repoOwner, repoName, label) {
-    const {name, color} = label;
-    return this._doOp('labels', 'put', name, {color, repoOwner, repoName}, this._opts);
+  getRepoLabels(repoOwner, repoName) {
+    return this._doOp('repoLabels', 'get', `${repoOwner}/${repoName}`);
+  }
+  getRepoLabelsOrNull(repoOwner, repoName) {
+    return new Promise((resolve, reject) => {
+      this.getRepoLabels(repoOwner, repoName)
+      .then((val) => {
+        resolve(val);
+      })
+      .catch(() => { resolve(null); })
+    });
   }
 
   getRepo(repoOwner, repoName) {
@@ -281,6 +302,7 @@ const database = new class Database {
       .catch(() => { resolve(null); })
     });
   }
+
   putRepo(repoOwner, repoName, value) {
     return this._doOp('repositories', 'put', `${repoOwner}/${repoName}`, value, this._opts);
   }
@@ -311,12 +333,12 @@ const database = new class Database {
     return new Promise((resolve, reject) => {
       // this is atomic only because the get is instant because it's in-mem
       this.getRepo(repoOwner, repoName).then((repoData) => {
-        this.putRepo(repoOwner, repoName, _.extend({}, repoData, changes))
+        this.putRepo(repoOwner, repoName, _.extend({}, repoData, {repoOwner, repoName}, changes))
         .then(() => resolve(null))
         .catch((err) => reject(err));
       }).catch(() => {
         // this error above means the entry wasn't in the DB (which is OK for a PATCH)
-        this.putRepo(repoOwner, repoName, changes)
+        this.putRepo(repoOwner, repoName, _.extend({}, {repoOwner, repoName}, changes))
         .then(() => resolve(null))
         .catch((err) => reject(err));
       });
