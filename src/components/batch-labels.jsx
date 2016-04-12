@@ -58,7 +58,10 @@ const LabelViewEdit = React.createClass({
       Promise.all(repoInfos.map((repoInfo) => {
         return Client.getOcto().repos(repoInfo).labels(label.name).update({name: name});
       }))
-      .then(() => { alert('Done renaming. To see the updates, go back to the kanban board and then back here (because the developer is lazy)')})
+      .then(() => {
+        alert('Done renaming. To see the updates, go back to the kanban board and then back here (because the developer is lazy)');
+        this.setState({isEditing: false});
+      })
       .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); })
     }
   },
@@ -74,14 +77,21 @@ const LabelViewEdit = React.createClass({
       Promise.all(repoInfos.map((repoInfo) => {
         return Client.getOcto().repos(repoInfo).labels(label.name).remove();
       }))
-      .then(() => { alert('Done removing. To see the updates, go back to the kanban board and then back here (because the developer is lazy)')})
+      .then(() => {
+        alert('Done removing. To see the updates, go back to the kanban board and then back here (because the developer is lazy)');
+        this.setState({isRemoved: true});
+      })
       .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); })
     }
   },
   render() {
     const {label, skipPrimaryRepo} = this.props;
     let {repoInfos} = this.props;
-    const {isEditing, name} = this.state;
+    const {isEditing, isRemoved, name} = this.state;
+
+    if (isRemoved) {
+      return (<tr/>);
+    }
 
     if (skipPrimaryRepo) {
       repoInfos = repoInfos.slice(1, repoInfos.length);
@@ -90,7 +100,7 @@ const LabelViewEdit = React.createClass({
       const isSaveEnabled = name && name !== label.name;
       return (
         <tr>
-          <td><BS.Input ref='labelName' type='text' onChange={this.onChangeName} defaultValue={label.name}/></td>
+          <td><BS.Input ref='labelName' type='text' onChange={this.onChangeName} defaultValue={name || label.name}/></td>
           <td></td>
           <td>
             <BS.Button bsStyle='default' onClick={this.onClickCancel}>Cancel</BS.Button>
@@ -109,10 +119,15 @@ const LabelViewEdit = React.createClass({
       } else {
         details = `${repoInfos[0].split('/')[1]} & ${repoInfos.length - 1} more`
       }
+
+      const constructedLabel = {
+        name: name || label.name,
+        color: label.color
+      };
       return (
         <tr>
           <td>
-            <LabelBadge label={label} onClick={this.onClickEdit}/>
+            <LabelBadge label={constructedLabel} onClick={this.onClickEdit}/>
           </td>
           <td><small>{details}</small></td>
           <td>
@@ -127,6 +142,18 @@ const LabelViewEdit = React.createClass({
 });
 
 const BatchLabelsShell = React.createClass({
+  componentDidMount() {
+    IssueStore.on('change', this.onChange);
+    IssueStore.startPolling();
+    IssueStore.fetchIssues(); // TODO: start up the polling in a better way
+  },
+  componentWillUnmount() {
+    IssueStore.off('change', this.onChange);
+  },
+  onChange() {
+    this.setState({});
+  },
+
   renderLabels(labels, skipPrimaryRepo) {
     return _.sortBy(labels, ({name}) => name).map(({label, repoInfos}) => {
       return (
