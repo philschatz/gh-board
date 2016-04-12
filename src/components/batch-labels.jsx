@@ -25,6 +25,7 @@ import * as BS from 'react-bootstrap';
 
 import IssueStore from '../issue-store';
 import Database from '../database';
+import Client from '../github-client';
 import {getFilters} from '../route-utils';
 
 import Loadable from './loadable';
@@ -32,7 +33,11 @@ import LabelBadge from './label-badge';
 
 const LabelViewEdit = React.createClass({
   getInitialState() {
-    return {isEditing: false};
+    return {isEditing: false, name: null};
+  },
+  onChangeName() {
+    const name = this.refs.labelName.getValue();
+    this.setState({name});
   },
   onClickEdit() {
     this.setState({isEditing: true});
@@ -40,22 +45,56 @@ const LabelViewEdit = React.createClass({
   onClickCancel() {
     this.setState({isEditing: false});
   },
+  onClickSave() {
+    const {repoInfos, label} = this.props;
+    const name = this.refs.labelName.getValue();
+    let message;
+    if (repoInfos.length > 2) {
+      message = `Are you sure you want to change this label in ${repoInfos.length} repositories?`;
+    } else {
+      message = `Are you sure you want to change this label in ${repoInfos[0]}?`;
+    }
+    if (confirm(message)) {
+      Promise.all(repoInfos.map((repoInfo) => {
+        return Client.getOcto().repos(repoInfo).labels(label.name).update({name: name});
+      }))
+      .then(() => { alert('Done renaming. To see the updates, go back to the kanban board and then back here (because the developer is lazy)')})
+      .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); })
+    }
+  },
+  onClickRemove() {
+    const {repoInfos, label} = this.props;
+    let message;
+    if (repoInfos.length > 2) {
+      message = `Are you sure you want to remove this label in ${repoInfos.length} repositories?`;
+    } else {
+      message = `Are you sure you want to remove this label in ${repoInfos[0]}?`;
+    }
+    if (confirm(message)) {
+      Promise.all(repoInfos.map((repoInfo) => {
+        return Client.getOcto().repos(repoInfo).labels(label.name).remove();
+      }))
+      .then(() => { alert('Done removing. To see the updates, go back to the kanban board and then back here (because the developer is lazy)')})
+      .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); })
+    }
+  },
   render() {
     const {label, skipPrimaryRepo} = this.props;
     let {repoInfos} = this.props;
-    const {isEditing} = this.state;
+    const {isEditing, name} = this.state;
 
     if (skipPrimaryRepo) {
       repoInfos = repoInfos.slice(1, repoInfos.length);
     }
     if (isEditing) {
+      const isSaveEnabled = name && name !== label.name;
       return (
         <tr>
-          <td><BS.Input ref='labelName' type='text' defaultValue={label.name}/></td>
+          <td><BS.Input ref='labelName' type='text' onChange={this.onChangeName} defaultValue={label.name}/></td>
           <td></td>
           <td>
             <BS.Button bsStyle='default' onClick={this.onClickCancel}>Cancel</BS.Button>
-            <BS.Button bsStyle='primary' disabled>Save</BS.Button>
+            <BS.Button bsStyle='primary' onClick={this.onClickSave} disabled={!isSaveEnabled}>Save</BS.Button>
           </td>
         </tr>
       )
@@ -79,7 +118,7 @@ const LabelViewEdit = React.createClass({
           <td>
             <BS.Button bsStyle='link' onClick={this.onClickEdit}><i className='octicon octicon-pencil'/> Edit</BS.Button>
             {' '}
-            <BS.Button bsStyle='link' disabled><i className='octicon octicon-trashcan'/></BS.Button>
+            <BS.Button bsStyle='link' onClick={this.onClickRemove}><i className='octicon octicon-trashcan'/></BS.Button>
           </td>
         </tr>
       );
