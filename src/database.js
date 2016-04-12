@@ -26,9 +26,9 @@ const DB_DATA = {
     //   { name: '[kanbanColumn+state]', keyPath: ['kanbanColumn', 'state'], unique: false, multiEntry: false },
     ]
   },
-  // 'labels': { // contains repoOwner, repoName, labels
-  //   dbVersion: 1,
-  // },
+  'repoLabels': { // contains repoOwner, repoName, labels
+    dbVersion: 1,
+  },
   'repositories': {
     dbVersion: 1,
     // indexes: [
@@ -262,22 +262,19 @@ const database = new class Database {
     return this._doOp('issues', 'batch', batchOps, this._opts);
   }
 
-  getLabel(labelName) {
-    return this._doOp('labels', 'get', labelName, this._opts);
-  }
-  putLabel(repoOwner, repoName, label) {
-    const {name, color} = label;
-    return this._doOp('labels', 'put', name, {color, repoOwner, repoName}, this._opts);
-  }
+  // getLabel(labelName) {
+  //   return this._doOp('labels', 'get', labelName, this._opts);
+  // }
+  // putLabel(repoOwner, repoName, label) {
+  //   const {name, color} = label;
+  //   return this._doOp('labels', 'put', name, {color, repoOwner, repoName}, this._opts);
+  // }
 
   putRepoLabels(repoOwner, repoName, labels) {
-    return this.patchRepo(repoOwner, repoName, {labels});
+    return this._doOp('repoLabels', 'put', `${repoOwner}/${repoName}`, {repoOwner, repoName, labels});
   }
   getRepoLabels(repoOwner, repoName) {
-    return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`)
-    .then(({labels}) => {
-      return {repoOwner, repoName, labels} || null;
-    });
+    return this._doOp('repoLabels', 'get', `${repoOwner}/${repoName}`);
   }
   getRepoLabelsOrNull(repoOwner, repoName) {
     return new Promise((resolve, reject) => {

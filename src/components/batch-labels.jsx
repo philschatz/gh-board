@@ -41,13 +41,18 @@ const LabelViewEdit = React.createClass({
     this.setState({isEditing: false});
   },
   render() {
-    const {label, repoInfos} = this.props;
+    const {label, skipPrimaryRepo} = this.props;
+    let {repoInfos} = this.props;
     const {isEditing} = this.state;
+
+    if (skipPrimaryRepo) {
+      repoInfos = repoInfos.slice(1, repoInfos.length);
+    }
     if (isEditing) {
       return (
         <tr>
           <td><BS.Input ref='labelName' type='text' defaultValue={label.name}/></td>
-          <td>color?</td>
+          <td></td>
           <td>
             <BS.Button bsStyle='default' onClick={this.onClickCancel}>Cancel</BS.Button>
             <BS.Button bsStyle='primary' disabled>Save</BS.Button>
@@ -55,13 +60,27 @@ const LabelViewEdit = React.createClass({
         </tr>
       )
     } else {
+      let details;
+      if (repoInfos.length === 0) {
+        // only occurs when we skip the primary repo
+      } else if (repoInfos.length === 1) {
+        details = repoInfos[0].split('/')[1]; // use .split so we only show the repo name
+      } else if (repoInfos.length === 2) {
+        details = `${repoInfos[0].split('/')[1]} & ${repoInfos[1].split('/')[1]}`;
+      } else {
+        details = `${repoInfos[0].split('/')[1]} & ${repoInfos.length - 1} more`
+      }
       return (
         <tr>
           <td>
             <LabelBadge label={label} onClick={this.onClickEdit}/>
           </td>
-          <td>{repoInfos.length === 1 ? repoInfos[0] : repoInfos.length}</td>
-          <td><BS.Button bsStyle='link' onClick={this.onClickEdit}><i className='octicon octicon-pencil'/> Edit</BS.Button></td>
+          <td><small>{details}</small></td>
+          <td>
+            <BS.Button bsStyle='link' onClick={this.onClickEdit}><i className='octicon octicon-pencil'/> Edit</BS.Button>
+            {' '}
+            <BS.Button bsStyle='link' disabled><i className='octicon octicon-trashcan'/></BS.Button>
+          </td>
         </tr>
       );
     }
@@ -69,10 +88,10 @@ const LabelViewEdit = React.createClass({
 });
 
 const BatchLabelsShell = React.createClass({
-  renderLabels(labels) {
+  renderLabels(labels, skipPrimaryRepo) {
     return _.sortBy(labels, ({name}) => name).map(({label, repoInfos}) => {
       return (
-        <LabelViewEdit key={label.name} label={label} repoInfos={repoInfos}/>
+        <LabelViewEdit key={label.name} label={label} repoInfos={repoInfos} skipPrimaryRepo={skipPrimaryRepo}/>
       )
     });
   },
@@ -85,7 +104,10 @@ const BatchLabelsShell = React.createClass({
       (labels || []).forEach((label) => {
         const {name} = label;
         const labelCount = labelCounts[name] || {repoInfos: [], label};
-        labelCount.repoInfos.push(`${repoOwner}/${repoName}`);
+        // if repos are listed explicitly _and_ a `*` is provided there may be duplicates
+        if (labelCount.repoInfos.indexOf(`${repoOwner}/${repoName}`) < 0) {
+          labelCount.repoInfos.push(`${repoOwner}/${repoName}`);
+        }
         labelCounts[name] = labelCount;
       });
     });
@@ -103,22 +125,20 @@ const BatchLabelsShell = React.createClass({
       return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) < 0) && repoInfos.length === 1;
     });
 
-
-
     return (
       <BS.Grid>
         <BS.Row>
-          <BS.Col md={6}>
-            <BS.Panel header='Primary Repository'>
+          <BS.Col lg={6}>
+            <BS.Panel header={`Primary Repository (${primaryRepoOwner}/${primaryRepoName})`}>
               These are labels on the primary repository that may affect other repositories
               <BS.Table responsive hover>
                 <tbody>
-                  {this.renderLabels(primaryLabels)}
+                  {this.renderLabels(primaryLabels, true/*skipPrimaryRepo*/)}
                 </tbody>
               </BS.Table>
             </BS.Panel>
           </BS.Col>
-          <BS.Col md={6}>
+          <BS.Col lg={6}>
             <BS.Panel header='Labels in more than 1 repository'>
               These are labels in multiple repositories (but not the primary repository)
               <BS.Table responsive hover>
@@ -128,7 +148,7 @@ const BatchLabelsShell = React.createClass({
               </BS.Table>
             </BS.Panel>
           </BS.Col>
-          <BS.Col md={6}>
+          <BS.Col lg={6}>
             <BS.Panel header='Labels unique to 1 repository'>
               These are labels that are unique to 1 repository (but not in the primary repository)
               <BS.Table responsive hover>
