@@ -232,7 +232,7 @@ const BurnupShell = React.createClass({
   },
   render() {
     // TODO: send the current filter as an arg to `Database.fetchCards()` so it can smartly (using Indexes) fetch the cards
-    const promise = Database.fetchCards(getFilters().getState());
+    const promise = Database.fetchCards(getFilters());
 
     return (
       <div className='burnup'>

@@ -12,6 +12,7 @@ import MergedSince from './components/merged-since';
 import {MergedSinceFormShell} from './components/merged-since';
 import DiffEnvs from './components/diff-envs';
 import EtherpadShell from './components/etherpad';
+import BatchLabelsShell from './components/batch-labels';
 
 import {parseRoute, buildRoute} from './route-utils';
 
@@ -46,6 +47,7 @@ const routes = [
           { path: 'compare/:startShas(/:endShas)', component: MergedSince},
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
+          { path: 'labels', component: BatchLabelsShell },
           // Redirect to the gantt URL
           { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
           { path: 'gantt',

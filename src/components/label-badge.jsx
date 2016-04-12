@@ -13,7 +13,7 @@ const LabelBadge = React.createClass({
     extra: React.PropTypes.string
   },
   render() {
-    const {label, isClickable} = this.props;
+    const {label, isFilterLink, onClick} = this.props;
     let {className, extra} = this.props;
 
     let name;
@@ -37,7 +37,7 @@ const LabelBadge = React.createClass({
       extra = ` (${extra})`;
     }
 
-    if (isClickable) {
+    if (isFilterLink) {
       return (
         <Link to={getFilters().toggleTagName(label.name).url()}
           key={name}
@@ -58,6 +58,7 @@ const LabelBadge = React.createClass({
           key={name}
           {...this.props}
           className={className}
+          onClick={onClick}
           style={{backgroundColor: '#' + label.color}}>
           {icon}
           <GithubFlavoredMarkdown
