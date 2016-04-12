@@ -300,13 +300,23 @@ const issueStore = new class IssueStore extends EventEmitter {
       if (repoName === '*') {
         let fetchAllRepos;
         if (Client.canCacheLots()) {
-          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchAll();
+          // First, we have to determine if the repoOwner is an Organization or a User
+          // so we can call .orgs or .users to get the list of repositories
+          // .orgs returns Private+Public repos but .users only returns private repos
+          fetchAllRepos = Client.getOcto().users(repoOwner).fetch()
+          .then(({type}) => {
+            if ('Organization' === type) {
+              return Client.getOcto().orgs(repoOwner).repos.fetchAll();
+            } else {
+              return Client.getOcto().users(repoOwner).repos.fetchAll();
+            }
+          });
         } else {
           // only get the 1st page of results if not logged in
           fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
         }
         return fetchAllRepos.then((repos) => {
-          return repos.map((repo) => {return {repoOwner, repoName: repo.name}; });
+          return repos.map((repo) => {return {repoOwner, repoName: repo.name, repo}; });
         });
       } else {
         return {repoOwner, repoName};
@@ -381,9 +391,20 @@ const issueStore = new class IssueStore extends EventEmitter {
 
         let fetchAllRepos;
         if (Client.canCacheLots()) {
-          fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchAll();
+          // First, we have to determine if the repoOwner is an Organization or a User
+          // so we can call .orgs or .users to get the list of repositories
+          // .orgs returns Private+Public repos but .users only returns private repos
+          fetchAllRepos = Client.getOcto().users(repoOwner).fetch()
+          .then(({type}) => {
+            if ('Organization' === type) {
+              return Client.getOcto().orgs(repoOwner).repos.fetchAll();
+            } else {
+              return Client.getOcto().users(repoOwner).repos.fetchAll();
+            }
+          });
         } else {
           // only get the 1st page of results if not logged in
+          // since it's anonymous we only need to get public repos (.users only yields public repos)
           fetchAllRepos = Client.getOcto().users(repoOwner).repos.fetchOne();
         }
         return fetchAllRepos
