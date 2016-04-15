@@ -15,6 +15,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
   - [Issue Images](#issue-images)
   - [Pull Request to non-default branch](#pull-request-to-non-default-branch)
+  - [Batch-Edit Labels in Multiple Repositories](#batch-edit-labels-in-multiple-repositories)
   - [Burnup Chart](#burnup-chart)
   - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
@@ -120,6 +121,12 @@ If an Issue or Pull Request contains an image then it will be shown in the Issue
 Sometimes Pull Requests go to a branch other than the main branch. This makes it clear when that happens.
 
 ![image](https://cloud.githubusercontent.com/assets/253202/14266496/ac9581b4-fa96-11e5-9991-d15a146f1e3b.png)
+
+### Batch-Edit Labels in Multiple Repositories
+
+If you need to rename a column or remove a duplicate label you can get to this page from the Settings dropdown next to the filter link.
+
+![image](https://cloud.githubusercontent.com/assets/253202/14569597/b3388eba-030d-11e6-9b6e-ea03df2f2327.png)
 
 
 # Easter Eggs
