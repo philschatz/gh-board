@@ -56,6 +56,9 @@ const MergedSince = React.createClass({
     // Sort commits by when they were made
     prCommits = _.sortBy(prCommits, ({at}) => at.getTime());
 
+    // Store this in a global var so we can make ad-hoc CSV reports
+    window.__PR_COMMITS = prCommits;
+
     const children = _.map(prCommits, ({repoOwner, repoName, number}) => {
       if (number) {
         // Try and fetch the issue the PR fixed

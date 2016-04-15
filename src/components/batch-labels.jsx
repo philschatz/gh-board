@@ -113,11 +113,46 @@ const LabelViewEdit = React.createClass({
       if (repoInfos.length === 0) {
         // only occurs when we skip the primary repo
       } else if (repoInfos.length === 1) {
-        details = repoInfos[0].split('/')[1]; // use .split so we only show the repo name
+        const [repoOwner, repoName] = repoInfos[0].split('/');
+        details = (
+          <a target='_window' href={`https://github.com/${repoOwner}/${repoName}/labels`}>{repoName}</a>
+        );
       } else if (repoInfos.length === 2) {
-        details = `${repoInfos[0].split('/')[1]} & ${repoInfos[1].split('/')[1]}`;
+        const [repoOwner, repoName] = repoInfos[0].split('/');
+        const [repoOwner2, repoName2] = repoInfos[1].split('/');
+        details = (
+          <span>
+            <a target='_window' href={`https://github.com/${repoOwner}/${repoName}/labels`}>{repoName}</a>
+            <span> & </span>
+            <a target='_window' href={`https://github.com/${repoOwner2}/${repoName2}/labels`}>{repoName2}</a>
+          </span>
+        );
       } else {
-        details = `${repoInfos[0].split('/')[1]} & ${repoInfos.length - 1} more`
+        const [repoOwner, repoName] = repoInfos[0].split('/');
+        const popover = (
+          <BS.Popover id={`repos-with-${label.name}`} title='Repositories that have this label'>
+            {repoInfos.slice(1).sort().map((repoInfo) => {
+              const [repoOwner1, repoName1] = repoInfo.split('/');
+              return (
+                <p key={repoInfo}>
+                  <a target='_window' href={`https://github.com/${repoOwner1}/${repoName1}/labels`}>{repoOwner1}/{repoName1}</a>
+                </p>
+              )
+            })}
+          </BS.Popover>
+        );
+        details = (
+          <span className='-repo-and-more'>
+            <a target='_window' href={`https://github.com/${repoOwner}/${repoName}/labels`}>{repoName}</a>
+            <span> & </span>
+
+            <BS.OverlayTrigger trigger='click' placement='bottom' rootClose overlay={popover}>
+              <BS.Button bsStyle='link' bsSize='sm'>
+                {repoInfos.length - 1} more...
+              </BS.Button>
+            </BS.OverlayTrigger>
+          </span>
+        );
       }
 
       const constructedLabel = {
@@ -191,39 +226,60 @@ const BatchLabelsShell = React.createClass({
       return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) < 0) && repoInfos.length === 1;
     });
 
+
+    let primaryPanel;
+    if (primaryLabels.length) {
+      primaryPanel = (
+        <BS.Col lg={6}>
+          <BS.Panel header={`Primary Repository (${primaryRepoOwner}/${primaryRepoName})`}>
+            These are labels on the primary repository that may affect other repositories
+            <BS.Table responsive hover>
+              <tbody>
+                {this.renderLabels(primaryLabels, true/*skipPrimaryRepo*/)}
+              </tbody>
+            </BS.Table>
+          </BS.Panel>
+        </BS.Col>
+      );
+    }
+
+    let nonPrimaryAndNonUniquePanel;
+    if (nonPrimaryAndNonUniqueLabels.length) {
+      nonPrimaryAndNonUniquePanel = (
+        <BS.Col lg={6}>
+          <BS.Panel header='Labels in more than 1 repository'>
+            These are labels in multiple repositories (but not the primary repository)
+            <BS.Table responsive hover>
+              <tbody>
+                {this.renderLabels(nonPrimaryAndNonUniqueLabels)}
+              </tbody>
+            </BS.Table>
+          </BS.Panel>
+        </BS.Col>
+      );
+    }
+
+    let uniquePanel;
+    if (uniqueLabels.length) {
+      uniquePanel = (
+        <BS.Col lg={6}>
+          <BS.Panel header='Labels unique to 1 repository'>
+            These are labels that are unique to 1 repository (but not in the primary repository)
+            <BS.Table responsive hover>
+              <tbody>
+                {this.renderLabels(uniqueLabels)}
+              </tbody>
+            </BS.Table>
+          </BS.Panel>
+        </BS.Col>
+      );
+    }
     return (
       <BS.Grid>
         <BS.Row>
-          <BS.Col lg={6}>
-            <BS.Panel header={`Primary Repository (${primaryRepoOwner}/${primaryRepoName})`}>
-              These are labels on the primary repository that may affect other repositories
-              <BS.Table responsive hover>
-                <tbody>
-                  {this.renderLabels(primaryLabels, true/*skipPrimaryRepo*/)}
-                </tbody>
-              </BS.Table>
-            </BS.Panel>
-          </BS.Col>
-          <BS.Col lg={6}>
-            <BS.Panel header='Labels in more than 1 repository'>
-              These are labels in multiple repositories (but not the primary repository)
-              <BS.Table responsive hover>
-                <tbody>
-                  {this.renderLabels(nonPrimaryAndNonUniqueLabels)}
-                </tbody>
-              </BS.Table>
-            </BS.Panel>
-          </BS.Col>
-          <BS.Col lg={6}>
-            <BS.Panel header='Labels unique to 1 repository'>
-              These are labels that are unique to 1 repository (but not in the primary repository)
-              <BS.Table responsive hover>
-                <tbody>
-                  {this.renderLabels(uniqueLabels)}
-                </tbody>
-              </BS.Table>
-            </BS.Panel>
-          </BS.Col>
+          {primaryPanel}
+          {nonPrimaryAndNonUniquePanel}
+          {uniquePanel}
         </BS.Row>
       </BS.Grid>
     );
