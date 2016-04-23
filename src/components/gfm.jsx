@@ -52,6 +52,12 @@ const buildStatusBadge = (card) => {
       return columnRegExp.test(label.name);
     })[0];
 
+    // Add  the issue title
+    const titleNode = document.createElement('span');
+    titleNode.classList.add('issue-title');
+    titleNode.appendChild(document.createTextNode(card.issue.title));
+    wrapNode.appendChild(titleNode);
+
     if (kanbanLabel) {
       const octicon = document.createElement('i');
       octicon.classList.add('octicon');

@@ -990,3 +990,22 @@ i.icon-spin {
 
   .action-delete { color: #bd2c00; }
 }
+
+// These are the badges for Issues that are in GFM.
+.issue-status-badges .issue-title {
+
+  color: #666;
+  background-color: #eee;
+  display: inline-block;
+  cursor: default;
+
+  &:not(:hover) {
+    max-width: 30rem;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &::before { content: '('; }
+  &::after { content: ')'; }
+}
