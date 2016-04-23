@@ -474,6 +474,11 @@ const issueStore = new class IssueStore extends EventEmitter {
 
     });
   }
+  loadCardsFromDatabase(filter) {
+    return Database.fetchCards(filter).then((cards) => {
+      _buildBipartiteGraph(GRAPH_CACHE, cards);
+    });
+  }
   fetchMilestones(repoOwner, repoName) {
     return Client.dbPromise().then(() => Client.getOcto().repos(repoOwner, repoName).milestones.fetchAll());
   }

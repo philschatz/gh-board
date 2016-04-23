@@ -50,6 +50,7 @@ const routes = [
           { path: 'labels', component: BatchLabelsShell },
           // Redirect to the gantt URL
           { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
+          { path: 'p-issue/:repoOwner/:repoName/:number', component: EtherpadShell},
           { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {

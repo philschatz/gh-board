@@ -188,3 +188,4 @@ Just specify a GitHub repository in the URL and off you go!
 - [ ] add a way to add labels/milestones to an Issue (autocreate the label/milestone in the repo)
 - [ ] 1-click to move to the next column
 - [ ] cache issues-updated-since requests and CI status requests in Session Storage instead of IndexedDB so they can be cleared easier
+- [ ] collaboratively edit Milestones and any GitHub file

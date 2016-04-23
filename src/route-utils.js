@@ -163,6 +163,10 @@ class FilterState {
     obj[key] = current;
     return this._chain(obj);
   }
+  clearFilters() {
+    const {repoInfos} = this.state;
+    return new FilterState({repoInfos});
+  }
   // addMilestone(ms)
   // removeMilestone(ms)
   toggleMilestoneTitle(title) {

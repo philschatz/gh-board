@@ -1,12 +1,17 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
-import history from '../history';
+import EtherpadClient from 'etherpad-lite-client';
+import {Link} from 'react-router';
 
-import GithubFlavoredMarkdown from './gfm';
+import history from '../history';
 import Client from '../github-client';
 import IssueStore from '../issue-store';
 import UserStore from '../user-store';
-import EtherpadClient from 'etherpad-lite-client';
+import Database from '../database';
+import {getFilters} from '../route-utils';
+
+import Loadable from './loadable';
+import GithubFlavoredMarkdown from './gfm';
 
 const Etherpad = React.createClass({
   getInitialState() {
@@ -104,6 +109,11 @@ const Etherpad = React.createClass({
         <BS.Button onClick={() => history.goBack()}>Go Back</BS.Button>
       );
     }
+    if (getFilters().getState().repoInfos.length > 0) {
+      goBack = (
+        <Link to={getFilters().setRouteName('').url()} className='btn btn-default'>Go Back</Link>
+      )
+    }
     let isLoadEnabled = false;
     let isSaveEnabled = false;
     if (text.trim() !== this.getIssueBody().trim()) {
@@ -132,14 +142,21 @@ const Etherpad = React.createClass({
 });
 
 const EtherpadShell = React.createClass({
-  render() {
+  renderLoaded() {
     const {repoOwner, repoName, number} = this.props.params;
     const hostName = 'https://openstax-pad.herokuapp.com';
     const secret = 'openstax';
-
+    return (
+      <Etherpad hostName={hostName} secret={secret} repoOwner={repoOwner} repoName={repoName} number={number}/>
+    );
+  },
+  render() {
+    const promise = IssueStore.loadCardsFromDatabase();
     return (
       <div>
-        <Etherpad hostName={hostName} secret={secret} repoOwner={repoOwner} repoName={repoName} number={number}/>
+        <Loadable promise={promise}
+          renderLoaded={this.renderLoaded}
+        />
       </div>
     );
   }
