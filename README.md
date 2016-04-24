@@ -182,8 +182,8 @@ Just specify a GitHub repository in the URL and off you go!
 - [x] select between Issue-centric and PullRequest-centric view
 - [x] support milestone (sprint) planning by making each milestone a column
 - [x] show labels unique to each repository
+- [x] linked Issues & PR's should include the title
 - [ ] add GitHub search
-- [ ] linked Issues & PR's should include the title
 - [ ] add a list view in addition to a board (uses Due Dates)
 - [ ] add a way to add labels/milestones to an Issue (autocreate the label/milestone in the repo)
 - [ ] 1-click to move to the next column

@@ -60,7 +60,7 @@ export default React.createClass({
     const {dateTime, className} = this.props;
     const humanized = Moment(dateTime).fromNow();
     return (
-      <time {...this.props} dateTime={dateTime} className={className}>{humanized}</time>
+      <time {...this.props} dateTime={dateTime} className={className} title={dateTime}>{humanized}</time>
     );
   }
 });
