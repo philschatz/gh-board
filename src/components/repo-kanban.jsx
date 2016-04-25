@@ -199,7 +199,6 @@ const RepoKanbanShell = React.createClass({
     // Alert the user once when they are viewing a repository that does not have any columns.
     // That way they know why everything is "Uncategorized"
     const promise = IssueStore.fetchLabels(repoOwner, repoName).then((labels) => {
-      console.log(labels);
       if (filterKanbanLabels(labels, getFilters().getState().columnRegExp).length === 0) {
         alert('You are viewing a repository that does not have any properly formatted labels denoting columns so everything will show up as "Uncategorized". To create columns, rename your labels so they are "# - title" where # denotes the order of the column');
       }

@@ -11,7 +11,6 @@ import AsyncButton from './async-button';
 import Time from './time';
 
 const SAMPLE_REPOS = [
-  {repoOwner: 'react-bootstrap', repoName: 'react-bootstrap'},
   {repoOwner: 'huboard', repoName: 'huboard'},
   {repoOwner: 'openstax', repoNames: ['tutor-js', 'tutor-server'], comment: ' (multiple repositories)'},
   {repoOwner: 'jquery', repoName: 'jquery'}

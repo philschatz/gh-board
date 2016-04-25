@@ -4,6 +4,7 @@ import Router from 'react-router';
 
 import history from './history';
 import App from './components/app';
+import NotFoundShell from './components/not-found';
 import Dashboard from './components/dashboard';
 import RepoKanban from './components/repo-kanban';
 import ByMilestoneView from './components/by-milestone-view';
@@ -71,7 +72,10 @@ const routes = [
           }
       ] },
       // Catch for people blindly replacing "https://github.com/..." with "gh-board/#..."
-      { path: '/:repoOwner/:repoName', onEnter: ({params}, replace) => replace(null, `/r/${params.repoOwner}:${params.repoName}`) }
+      { path: '/:repoOwner/:repoName', onEnter: ({params}, replace) => replace(null, `/r/${params.repoOwner}:${params.repoName}`) },
+      // Catch for people blindly replacing "https://github.com/..." with "gh-board/#/r/..."
+      { path: '/r/:repoOwner/:repoName', onEnter: ({params}, replace) => replace(null, `/r/${params.repoOwner}:${params.repoName}`) },
+      { path: '/**', component: NotFoundShell },
     ],
   }
 ];

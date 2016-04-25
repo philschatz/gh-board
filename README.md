@@ -142,7 +142,7 @@ Just specify a GitHub repository in the URL and off you go!
 
 - [openstax/tutor-js](http://philschatz.com/gh-board/#/r/openstax:tutor-js)
 - [openstax/tutor-js + tutor-server](http://philschatz.com/gh-board/#/r/openstax:tutor-js|tutor-server) (multiple repositories)
-- [react-bootstrap/react-bootstrap](http://philschatz.com/gh-board/#/r/react-bootstrap:react-bootstrap)
+- [huboard/huboard](http://philschatz.com/gh-board/#/r/huboard:huboard)
 - [jquery/jquery](http://philschatz.com/gh-board/#/r/jquery:jquery)
 - Or wildcards! (must be logged in) using `http://philschatz.com/gh-board/#/r/openstax:tutor-js|*`
 
