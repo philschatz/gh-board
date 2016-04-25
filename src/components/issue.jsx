@@ -343,7 +343,7 @@ let Issue = React.createClass({
       );
     }
 
-    const etherpadHref = `/p-issue/${repoOwner}/${repoName}/${issue.number}`;
+    const etherpadHref = getFilters().setRouteName(`p-issue/${repoOwner}/${repoName}/${issue.number}`).url();
     const header = [
       <IssueOrPullRequestBlurb key='issue-blurb'
         card={card}

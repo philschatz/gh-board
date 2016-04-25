@@ -160,15 +160,15 @@ const LabelViewEdit = React.createClass({
         color: label.color
       };
       return (
-        <tr>
-          <td>
+        <tr className='batch-label'>
+          <td className='-label-badge'>
             <LabelBadge label={constructedLabel} onClick={this.onClickEdit}/>
           </td>
-          <td><small>{details}</small></td>
-          <td>
+          <td className='-label-repos'><small>{details}</small></td>
+          <td className='label-actions'>
             <BS.Button bsStyle='link' onClick={this.onClickEdit}><i className='octicon octicon-pencil'/> Edit</BS.Button>
             {' '}
-            <BS.Button bsStyle='link' onClick={this.onClickRemove}><i className='octicon octicon-trashcan'/></BS.Button>
+            <BS.Button className='action-delete' bsStyle='link' onClick={this.onClickRemove}><i className='octicon octicon-trashcan'/></BS.Button>
           </td>
         </tr>
       );
@@ -222,10 +222,34 @@ const BatchLabelsShell = React.createClass({
       return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) < 0) && repoInfos.length > 1;
     });
 
-    const uniqueLabels = _.filter(labelCountsValues, ({repoInfos}) => {
-      return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) < 0) && repoInfos.length === 1;
-    });
+    // const uniqueLabels = _.filter(labelCountsValues, ({repoInfos}) => {
+    //   return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) < 0) && repoInfos.length === 1;
+    // });
 
+    // generate a set of unique labels for each repo
+    let repoInfosWithUniqueLabels = repoInfosWithLabels.map(({repoOwner, repoName, labels}) => {
+      let uniqueLabels = labels.filter((label) => {
+        if (!labelCounts[label.name]) {
+          throw new Error('BUG! Should have found at least 1 repository in labelCounts');
+        } else {
+          return (labelCounts[label.name].repoInfos.length === 1);
+        }
+      });
+      // renderLabels requires the following structure:
+      // {name, label, repoInfos}
+      uniqueLabels = uniqueLabels.map((label) => {
+        return {name: label.name, label, repoInfos: []};
+      });
+      return {repoOwner, repoName, uniqueLabels};
+    });
+    // Remove the primary repo and then
+    // Remove repos with no unique labels
+    repoInfosWithUniqueLabels = repoInfosWithUniqueLabels.filter(({repoOwner, repoName, uniqueLabels}) => {
+      if (repoOwner === primaryRepoOwner && repoName === primaryRepoName) {
+        return false;
+      }
+      return uniqueLabels.length > 0;
+    });
 
     let primaryPanel;
     if (primaryLabels.length) {
@@ -259,13 +283,14 @@ const BatchLabelsShell = React.createClass({
       );
     }
 
-    let uniquePanel;
-    if (uniqueLabels.length) {
-      uniquePanel = (
-        <BS.Col lg={6}>
-          <BS.Panel header='Labels unique to 1 repository'>
-            These are labels that are unique to 1 repository (but not in the primary repository)
-            <BS.Table responsive hover>
+    const uniquePanels = repoInfosWithUniqueLabels.map(({repoOwner, repoName, uniqueLabels}) => {
+      const header = (
+        <span>Labels unique to <a target='_window' href={`https://github.com/${repoOwner}/${repoName}/labels`}>{repoOwner}/{repoName}</a></span>
+      )
+      return (
+        <BS.Col lg={6} key={`${repoOwner}/${repoName}`}>
+          <BS.Panel header={header}>
+            <BS.Table responsive hover fill>
               <tbody>
                 {this.renderLabels(uniqueLabels)}
               </tbody>
@@ -273,13 +298,14 @@ const BatchLabelsShell = React.createClass({
           </BS.Panel>
         </BS.Col>
       );
-    }
+    });
+
     return (
       <BS.Grid>
         <BS.Row>
           {primaryPanel}
           {nonPrimaryAndNonUniquePanel}
-          {uniquePanel}
+          {uniquePanels}
         </BS.Row>
       </BS.Grid>
     );

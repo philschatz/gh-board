@@ -196,11 +196,19 @@ const RepoKanbanShell = React.createClass({
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
 
+    // Alert the user once when they are viewing a repository that does not have any columns.
+    // That way they know why everything is "Uncategorized"
+    const promise = IssueStore.fetchLabels(repoOwner, repoName).then((labels) => {
+      if (filterKanbanLabels(labels, getFilters().getState().columnRegExp).length === 0) {
+        alert('You are viewing a repository that does not have any properly formatted labels denoting columns so everything will show up as "Uncategorized". To create columns, rename your labels so they are "# - title" where # denotes the order of the column');
+      }
+      return labels;
+    });
     return (
       <Board {...this.props}
         repoInfos={repoInfos}
         type={KanbanRepo}
-        columnDataPromise={IssueStore.fetchLabels(repoOwner, repoName)}
+        columnDataPromise={promise}
       />
     );
   },
