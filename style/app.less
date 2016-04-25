@@ -573,6 +573,13 @@ body { background-color: #ddd; }
 .popover {
   max-width: 500px;
 
+  &.popover-issue-body {
+    min-width: 400px; // some popovers are inside an <a> which is inside an Issue body
+
+    .arrow { display: none; }
+  }
+
+
   .popover-content {
     max-height: 300px;
     overflow-y: auto;
