@@ -362,6 +362,32 @@ let Issue = React.createClass({
         <img className='featured-image' src={card.getFeaturedImageSrc()}/>
       );
     }
+
+
+    const bodyPopover = (
+      <BS.Popover className='popover-issue-body' id={`popover-${card.key()}-body`} title={issue.title}>
+        <GithubFlavoredMarkdown
+          repoOwner={repoOwner}
+          repoName={repoName}
+          text={issue.body}/>
+      </BS.Popover>
+    );
+    const TitleLink = React.createClass({
+      render() {
+        const {children} = this.props;
+        return (
+          <BS.OverlayTrigger
+            delayShow={2000}
+            container={this}
+            trigger={['hover', 'focus']}
+            placement='bottom'
+            overlay={bodyPopover}>
+            {children}
+          </BS.OverlayTrigger>
+        )
+      }
+    });
+
     return connectDragSource(
       <div className='-drag-source'>
         <BS.ListGroupItem
@@ -372,20 +398,23 @@ let Issue = React.createClass({
           className={classnames(classes)}
           data-state={issue.state}>
 
-          <a
-            key='link'
-            className='issue-title'
-            target='_blank'
-            href={issue.htmlUrl}>
-            <GithubFlavoredMarkdown
-              inline
-              disableLinks={true}
-              repoOwner={repoOwner}
-              repoName={repoName}
-              text={issue.title}/>
-          </a>
+          <TitleLink>
+            <span className='-extra-span-for-inline-popover'>
+              <a
+                key='link'
+                className='issue-title'
+                target='_blank'
+                href={issue.htmlUrl}>
+                  <GithubFlavoredMarkdown
+                    inline
+                    repoOwner={repoOwner}
+                    repoName={repoName}
+                    text={issue.title}/>
+              </a>
+              {featuredImage}
+            </span>
+          </TitleLink>
 
-          {featuredImage}
           <span key='labels' className='issue-labels'>
             {milestone}
             {labels}
