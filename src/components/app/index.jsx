@@ -15,7 +15,6 @@ const App = React.createClass({
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
     this._historyListener = history.listen(this.storeHistory);
-    this.storeHistory({path: this.props.route.path});
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
@@ -30,7 +29,9 @@ const App = React.createClass({
   },
   storeHistory(locationChangeEvent) {
     if (window.ga) {
-      window.ga('set', 'page', '/gh-board' + locationChangeEvent.pathname);
+      const {pathname, hash} = window.location;
+      window.ga('set', 'page', pathname + hash);
+      // window.ga('set', 'page', '/gh-board/#' + locationChangeEvent.pathname + locationChangeEvent.search);
       window.ga('send', 'pageview');
     }
   },
