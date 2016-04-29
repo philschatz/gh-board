@@ -13,7 +13,13 @@ import {getFilters} from '../route-utils';
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 
-const Etherpad = React.createClass({
+const EtherpadInner = React.createClass({
+  getDefaultProps() {
+    return {
+      hostName: 'https://openstax-pad.herokuapp.com',
+      secret: 'openstax'
+    };
+  },
   getInitialState() {
     return {isSaving: false, text: 'Please wait, it may take 30sec for the free Heroku site to spin up. See [Heroku Free Dynos](https://blog.heroku.com/archives/2015/5/7/heroku-free-dynos)'};
   },
@@ -43,21 +49,14 @@ const Etherpad = React.createClass({
     return `github.com_${repoOwner}_${repoName}_${number}`;
   },
   getUrl() {
-    const {hostName} = this.props;
-    const padName = this.getPadName();
+    const {hostName, padName} = this.props;
     // from https://github.com/ether/etherpad-lite-jquery-plugin/blob/master/js/etherpad.js
     return `${hostName}/p/${padName}`;
   },
   loadIssueBody() {
-    const {repoOwner, repoName, number} = this.props;
+    const {loadBody} = this.props;
 
-    const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-
-
-
-    // refetch the Issue body (esp if it hasn't been loaded yet)
-    return card.fetchIssue().then(() => {
-
+    return loadBody().then((text) => {
       // const url = `${hostName}/api/1/setText?apiKey=${secret}&padID=${this.getPad()}&text=`;
       const etherpad = EtherpadClient.connect({
         apikey: 'openstaxkey',
@@ -66,33 +65,27 @@ const Etherpad = React.createClass({
         protocol: 'https:', //because browserify's `https` module is really `http`
         ssl: true
       });
-      etherpad.setText({padID: this.getPadName(), text: card.issue.body}, (err) => {
+      etherpad.setText({padID: this.props.padName, text: text}, (err) => {
         /* eslint-disable no-console */
         console.log('Because of CORS this returns an error but actually succeeeds');
         console.log(err);
         /* eslint-enable no-console */
       });
-      return card.issue.body; // just in case someone uses this promise
+      return text; // just in case someone uses this promise
 
     });
   },
   saveIssueBody() {
     const {text} = this.state;
-    const {repoOwner, repoName, number} = this.props;
+    const {saveBody} = this.props;
     this.setState({isSaving: true});
-    Client.getOcto().repos(repoOwner, repoName).issues(number).update({body: text}).then(() => {
+    saveBody(text).then(() => {
       // TODO: un-disable the state
       this.setState({isSaving: false});
+    })
+    .catch((err) => {
+      alert('There was an error saving.\n' + JSON.stringify(err));
     });
-  },
-  getIssueBody() {
-    const {repoOwner, repoName, number} = this.props;
-    const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-    if (card.issue) {
-      return card.issue.body;
-    } else {
-      return ''; // return '' so it can be trimmed when comparing
-    }
   },
   promptLoadIssueBody() {
     if (confirm('Are you sure you want to discard the current collaborative edits and replace it with what is currently in GitHub?')) {
@@ -100,7 +93,7 @@ const Etherpad = React.createClass({
     }
   },
   render() {
-    const {repoOwner, repoName} = this.props;
+    const {title, repoOwner, repoName, getBody} = this.props;
     const {text, isSaving} = this.state;
     const src = this.getUrl();
     let goBack;
@@ -116,7 +109,7 @@ const Etherpad = React.createClass({
     }
     let isLoadEnabled = false;
     let isSaveEnabled = false;
-    if (text.trim() !== this.getIssueBody().trim()) {
+    if (text.trim() !== getBody().trim()) {
       isLoadEnabled = true;
       // Only if the text changed and the user is authenticated should we allow saving
       if (UserStore.getUser()) {
@@ -129,6 +122,7 @@ const Etherpad = React.createClass({
           {goBack}
           <BS.Button disabled={!isLoadEnabled} onClick={this.promptLoadIssueBody} title='Discards Edits and replaces the editor with what is currently on GitHub'>Reset Editor</BS.Button>
           <BS.Button disabled={!isSaveEnabled} onClick={this.saveIssueBody} title='Save changed made here back to GitHub (you must be logged in to gh-board)'>Save to GitHub</BS.Button>
+          {title}
         </div>
         <div className='etherpad-wrapper col-xs-12'>
           <iframe className='etherpad-frame col-xs-6' src={src} />
@@ -141,17 +135,18 @@ const Etherpad = React.createClass({
   }
 });
 
-const EtherpadShell = React.createClass({
+const Etherpad = React.createClass({
   renderLoaded() {
-    const {repoOwner, repoName, number} = this.props.params;
-    const hostName = 'https://openstax-pad.herokuapp.com';
-    const secret = 'openstax';
+    const {title, padName, getBody, saveBody, loadBody, repoOwner, repoName} = this.props;
     return (
-      <Etherpad hostName={hostName} secret={secret} repoOwner={repoOwner} repoName={repoName} number={number}/>
+      <EtherpadInner title={title} padName={padName} getBody={getBody} saveBody={saveBody} loadBody={loadBody} repoOwner={repoOwner} repoName={repoName}/>
     );
   },
   render() {
-    const promise = IssueStore.loadCardsFromDatabase();
+    let promise = IssueStore.loadCardsFromDatabase();
+    if (this.props.promise) {
+      promise = promise.then(() => { return this.props.promise; });
+    }
     return (
       <div>
         <Loadable promise={promise}
@@ -162,4 +157,4 @@ const EtherpadShell = React.createClass({
   }
 });
 
-export default EtherpadShell;
+export default Etherpad;
