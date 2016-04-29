@@ -13,6 +13,7 @@ import MergedSince from './components/merged-since';
 import {MergedSinceFormShell} from './components/merged-since';
 import DiffEnvs from './components/diff-envs';
 import EtherpadIssueShell from './components/etherpad-issue';
+import EtherpadFileShell from './components/etherpad-file';
 import BatchLabelsShell from './components/batch-labels';
 
 import {parseRoute, buildRoute} from './route-utils';
@@ -34,6 +35,7 @@ const routes = [
     childRoutes: [
       { path: '/diff-envs/:startHost/:endHost', component: DiffEnvs},
       { path: '/p-issue/:repoOwner/:repoName/:number', component: EtherpadIssueShell},
+      { path: '/p-file/:repoOwner/:repoName/:branch/**', component: EtherpadFileShell},
       { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:userName)(/x/:columnRegExpStr)',
         indexRoute: {component: RepoKanban},
         // If you change these children (or the parents) make sure you edit RELEVANT_PATH_SEGMENT in another file.
@@ -52,6 +54,7 @@ const routes = [
           // Redirect to the gantt URL
           { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
           { path: 'p-issue/:repoOwner/:repoName/:number', component: EtherpadIssueShell},
+          { path: 'p-file/:repoOwner/:repoName/:branch/**', component: EtherpadFileShell},
           { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {
