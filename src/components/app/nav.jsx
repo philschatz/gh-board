@@ -202,6 +202,13 @@ const AppNav = React.createClass({
             <BS.NavDropdown key='settings' id='display-settings' title={settingsTitle}>
               <BS.MenuItem key='display' header>Display Settings</BS.MenuItem>
               <SettingsItem
+                key='ShowSimpleList'
+                onSelect={SettingsStore.toggleShowSimpleList.bind(SettingsStore)}
+                isChecked={SettingsStore.getShowSimpleList()}
+                >
+                Show Simple List
+              </SettingsItem>
+              <SettingsItem
                 key='HideUncategorized'
                 onSelect={SettingsStore.toggleHideUncategorized.bind(SettingsStore)}
                 isChecked={SettingsStore.getHideUncategorized()}

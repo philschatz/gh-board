@@ -9,6 +9,8 @@ import {Link} from 'react-router';
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import {PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
+import SettingsStore from '../settings-store';
+
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 import Time from './time';
@@ -61,60 +63,79 @@ function collect(connect, monitor) {
 }
 
 
-// `GET .../issues` returns an object with `labels` and
-// `GET .../pulls` returns an object with `mergeable` so for Pull Requests
-// we have to have both to fully render an Issue.
-let Issue = React.createClass({
-  displayName: 'Issue',
-  getInitialState() {
-    return {taskFinishedCount: 0, taskTotalCount: 0};
-  },
-  componentWillMount() {
+let IssueSimple = React.createClass({
+  render() {
     const {card} = this.props;
-    if (!card.isLoaded()) { card.load(); }
-    // TODO: Not sure why React no longer automatically binds all functions to `this`
-    this._changeListener = this.forceUpdate.bind(this);
-    card.onChange(this._changeListener);
-    Timer.onTick(this.pollPullRequestStatus);
-  },
-  componentWillUnmount() {
-    const {card} = this.props;
-    card.offChange(this._changeListener);
-    Timer.offTick(this.pollPullRequestStatus);
-  },
-  update(issue) {
-    this.setState({issue});
-  },
-  pollPullRequestStatus() {
-    const {card} = this.props;
-    const {repoOwner, repoName, number} = card;
-    if (card.isPullRequest()) {
-      card.fetchPRStatus(true/*force*/);
-    }
-  },
-  onDragStart() {
-    // Rotate the div just long enough for the browser to get a screenshot
-    // so the element looks like it is being moved
-    const {style} = ReactDOM.findDOMNode(this);
-    style.transform = 'rotate(5deg)';
-    style.webkitTransform = 'rotate(5deg)';
-    setTimeout(() => {
-      style.transform = '';
-      style.webkitTransform = '';
-    }, 100);
+    const {issue, repoOwner, repoName} = card;
 
-  },
+    const issueDueAt = card.getDueAt();
+
+    // Defined by the collector
+    const { isDragging } = this.props;
+
+    // PR updatedAt is updated when commits are pushed
+    const updatedAt = card.getUpdatedAt();
+
+    const user = issue.assignee ? issue.assignee : issue.user;
+    const assignedAvatar = (
+      <Link to={getFilters().toggleUserName(user.login).url()} className='avatar-filter'>
+        <img
+          key='avatar'
+          className='avatar-image'
+          title={'Click to filter on ' + user.login}
+          src={user.avatarUrl}/>
+      </Link>
+    );
+
+    // stop highlighting after 5min
+    const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000;
+
+    const classes = {
+      'issue': true,
+      'is-simple-list': true,
+      'is-dragging': isDragging,
+      'is-updated': isUpdated,
+      'is-pull-request': card.isPullRequest(),
+      'is-merged': card.isPullRequestMerged(),
+      'is-merge-conflict': card.isPullRequest() && card.hasMergeConflict(),
+      'is-pull-request-to-different-branch': card.isPullRequest() && !card.isPullRequestToDefaultBranch()
+    };
+    return (
+      <BS.ListGroupItem
+        data-status-state={card.isPullRequest() ? card.getPullRequestStatus() : null}
+        onDragStart={this.onDragStart}
+        className={classnames(classes)}
+        data-state={issue.state}>
+
+        {assignedAvatar}
+        <GithubFlavoredMarkdown
+          className='issue-title'
+          inline
+          repoOwner={repoOwner}
+          repoName={repoName}
+          text={issue.title}/>
+        <a
+          className='issue-number'
+          target='_blank'
+          href={issue.htmlUrl}>
+          #{issue.number}
+        </a>
+      </BS.ListGroupItem>
+    );
+  }
+});
+
+
+let IssueCard = React.createClass({
   render() {
     const {card, primaryRepoName, columnRegExp} = this.props;
     const {issue, repoOwner, repoName} = card;
-    if (!issue) {
-      return (<span>Maybe moving Issue...</span>);
-    }
+
     const {taskFinishedCount, taskTotalCount} = card.getTaskCounts();
     const issueDueAt = card.getDueAt();
 
     // Defined by the collector
-    const { isDragging, connectDragSource } = this.props;
+    const { isDragging } = this.props;
 
     // PR updatedAt is updated when commits are pushed
     const updatedAt = card.getUpdatedAt();
@@ -388,8 +409,8 @@ let Issue = React.createClass({
       }
     });
 
-    return connectDragSource(
-      <div className='-drag-source'>
+    return (
+      <div className='-card-and-related'>
         <BS.ListGroupItem
           key={card.key()}
           data-status-state={card.isPullRequest() ? card.getPullRequestStatus() : null}
@@ -431,6 +452,71 @@ let Issue = React.createClass({
         <div key='related' className='related-issues'>
           {relatedCards}
         </div>
+      </div>
+    );
+  }
+});
+
+
+// `GET .../issues` returns an object with `labels` and
+// `GET .../pulls` returns an object with `mergeable` so for Pull Requests
+// we have to have both to fully render an Issue.
+let Issue = React.createClass({
+  displayName: 'Issue',
+  componentWillMount() {
+    const {card} = this.props;
+    if (!card.isLoaded()) { card.load(); }
+    // TODO: Not sure why React no longer automatically binds all functions to `this`
+    this._changeListener = this.forceUpdate.bind(this);
+    card.onChange(this._changeListener);
+    Timer.onTick(this.pollPullRequestStatus);
+  },
+  componentWillUnmount() {
+    const {card} = this.props;
+    card.offChange(this._changeListener);
+    Timer.offTick(this.pollPullRequestStatus);
+  },
+  update(issue) {
+    this.setState({issue});
+  },
+  pollPullRequestStatus() {
+    const {card} = this.props;
+    const {repoOwner, repoName, number} = card;
+    if (card.isPullRequest()) {
+      card.fetchPRStatus(true/*force*/);
+    }
+  },
+  onDragStart() {
+    // Rotate the div just long enough for the browser to get a screenshot
+    // so the element looks like it is being moved
+    const {style} = ReactDOM.findDOMNode(this);
+    style.transform = 'rotate(5deg)';
+    style.webkitTransform = 'rotate(5deg)';
+    setTimeout(() => {
+      style.transform = '';
+      style.webkitTransform = '';
+    }, 100);
+
+  },
+  render() {
+    const {card, primaryRepoName, columnRegExp} = this.props;
+    const { isDragging, connectDragSource } = this.props;
+    const {issue, repoOwner, repoName} = card;
+    let node;
+    if (!issue) {
+      return (<span>Maybe moving Issue...</span>);
+    } else if (SettingsStore.getShowSimpleList()){
+      node = (
+        <IssueSimple card={card} isDragging={isDragging}/>
+      );
+    } else {
+      node = (
+        <IssueCard card={card} primaryRepoName={primaryRepoName} columnRegExp={columnRegExp} isDragging={isDragging}/>
+      );
+    }
+    return connectDragSource(
+      <div className='-drag-source'>
+        {node}
       </div>
     );
   }

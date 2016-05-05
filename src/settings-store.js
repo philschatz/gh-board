@@ -20,6 +20,7 @@ function localSet(key, val) {
   }
 }
 
+let isShowSimpleList = localGet('isShowSimpleList') || false;
 let isHideUncategorized = localGet('isHideUncategorized') || false;
 let isShowEmptyColumns = localGet('isShowEmptyColumns') || false;
 let isTableLayout = localGet('isTableLayout') || false;
@@ -39,6 +40,14 @@ class SettingsStore extends EventEmitter {
     this.emit('change');
   }
 
+  toggleShowSimpleList() {
+    isShowSimpleList = !isShowSimpleList;
+    localSet('isShowSimpleList', isShowSimpleList);
+    this.emit('change');
+  }
+  getShowSimpleList() {
+    return isShowSimpleList;
+  }
   toggleHideUncategorized() {
     isHideUncategorized = !isHideUncategorized;
     localSet('isHideUncategorized', isHideUncategorized);
