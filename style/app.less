@@ -305,6 +305,34 @@ body { background-color: #ddd; }
     margin-right: 1rem;
     border-radius: 3px !important;
 
+    // Inspired by http://the-echoplex.net/flexyboxes/
+    &.is-simple-list {
+      border-radius: 0 !important;
+      margin: 1px;
+      // border: 1px solid black;
+      padding: .5rem;
+      display: flex;
+
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+      align-content: stretch;
+
+      .avatar-filter { flex: 0 0 auto; }
+      .issue-title {
+        flex: 1 1 auto;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        padding-left: 1rem;
+      }
+      .issue-number {
+        flex: 0 0 auto;
+        color: #ccc;
+      }
+    }
+
     /* Just make the issue gray so it is clear we are dragging this element from */
     &.is-dragging { opacity: .25; }
 

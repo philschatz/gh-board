@@ -183,9 +183,10 @@ Just specify a GitHub repository in the URL and off you go!
 - [x] support milestone (sprint) planning by making each milestone a column
 - [x] show labels unique to each repository
 - [x] linked Issues & PR's should include the title
-- [ ] add GitHub search
-- [ ] add a list view in addition to a board (uses Due Dates)
+- [x] collaboratively edit Milestones and any GitHub file by going to `/p-file/:repoOwner/:repoName/:branch/path-to-file`
+- [x] add a list view in addition to a board
+  - [ ] Sort by Due At, Updated At, and ascending/descending
 - [ ] add a way to add labels/milestones to an Issue (autocreate the label/milestone in the repo)
-- [ ] 1-click to move to the next column
 - [ ] cache issues-updated-since requests and CI status requests in Session Storage instead of IndexedDB so they can be cleared easier
-- [ ] collaboratively edit Milestones and any GitHub file
+- [ ] add effort labels XS, S, M, L, XL
+- [ ] add GitHub search

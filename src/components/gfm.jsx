@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
+import classnames from 'classnames';
+
 // import mermaid, {mermaidAPI} from 'mermaid';
 // import mermaidAPI from 'mermaid/dist/mermaidAPI';
 
@@ -237,7 +239,7 @@ const InnerMarkdown = React.createClass({
     });
   },
   render() {
-    const {text, repoOwner, repoName, inline} = this.props;
+    const {text, repoOwner, repoName, inline, className} = this.props;
     if (!text) { return null; }
     const hasHtmlTags = /</.test(text);
     const context = repoOwner + '/' + repoName;
@@ -255,13 +257,13 @@ const InnerMarkdown = React.createClass({
           // (ie for a title)
           const inlineHtml = html.replace(/^<p>/, '').replace(/<\/p>\n$/, '');
           const props = {
-            className: 'markdown-body',
+            className: classnames(['markdown-body', className]),
             dangerouslySetInnerHTML: {__html: inlineHtml}
           };
           return (<span {...props}/>);
         } else {
           const props = {
-            className: 'markdown-body',
+            className: classnames(['markdown-body', className]),
             dangerouslySetInnerHTML: {__html: html}
           };
           return (<div {...props}/>);
