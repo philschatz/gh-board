@@ -47,12 +47,18 @@ function getIssueDueAt(div) {
     // either use the datetime attribute, or the text
     const str = el.getAttribute('datetime') || el.textContent;
     if (str) {
-      let date = moment(str, 'MM/DD');
-      if (date.isValid()) {
+      // Try the iso string, then various text formats
+      try {
+        let date = moment(str);
         return date.toDate().getTime();
-      } else {
-        // fall back to parsing using the Date object
-        return Date.parse(attr);
+      } catch (e) {
+        let date = moment(str, 'MM/DD');
+        if (date.isValid()) {
+          return date.toDate().getTime();
+        } else {
+          // fall back to parsing using the Date object
+          return Date.parse(str);
+        }
       }
     } else {
       console.error(`Invalid due date format for "${el.outerHTML}"`);
