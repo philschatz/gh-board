@@ -404,6 +404,19 @@ body { background-color: #ddd; }
 
     &:not(:hover) .list-group-item-heading .etherpad-issue-edit { display: none; }
 
+    // Depending on the issue listing type (simple or card) this element could be in the footer, or not
+    .issue-due-at {
+      &.is-overdue { color: #d00; font-weight: bold; }
+      &.is-near { color: #fb0; }
+      &:not(.is-near):not(.is-overdue) { color: #ccc; }
+
+      font-size: 1rem;
+      padding-left: .5rem;
+      padding-right: .5rem;
+      white-space: nowrap; // because of flexbox
+
+    }
+
     .list-group-item-text {
       // background-color: white;
       padding-left: 1rem;
@@ -489,14 +502,6 @@ body { background-color: #ddd; }
         // .x-clearfix();
         display: block;
         min-height: 2rem;
-
-        .issue-due-at {
-          &.is-overdue { color: #d00; font-weight: bold; }
-          &.is-near { color: #fb0; }
-          &:not(.is-near):not(.is-overdue) { color: #ccc; }
-
-          font-size: 1rem;
-        }
 
         .issue-time-and-user {
           display: block;

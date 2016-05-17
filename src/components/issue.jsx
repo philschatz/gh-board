@@ -90,6 +90,24 @@ let IssueSimple = React.createClass({
     // stop highlighting after 5min
     const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000;
 
+    let dueAt;
+    if (issueDueAt) {
+      const dueAtClasses = {
+        'issue-due-at': true,
+        'is-overdue': issueDueAt < Date.now(),
+        'is-near': issueDueAt > Date.now() && issueDueAt - Date.now() < 7 * 24 * 60 * 60 * 1000 // set it to be 1 week
+      };
+      dueAt = (
+        <span className={classnames(dueAtClasses)}>
+          <i className='octicon octicon-calendar'/>
+          {' due '}
+          <Time dateTime={issueDueAt}/>
+        </span>
+      );
+    } else {
+      // Click to add due date
+    }
+
     const classes = {
       'issue': true,
       'is-simple-list': true,
@@ -114,6 +132,7 @@ let IssueSimple = React.createClass({
           repoOwner={repoOwner}
           repoName={repoName}
           text={issue.title}/>
+        {dueAt}
         <a
           className='issue-number'
           target='_blank'
@@ -362,6 +381,8 @@ let IssueCard = React.createClass({
           <Time dateTime={issueDueAt}/>
         </span>
       );
+    } else {
+      // Click to add due date
     }
 
     const etherpadHref = getFilters().setRouteName(`p-issue/${repoOwner}/${repoName}/${issue.number}`).url();
