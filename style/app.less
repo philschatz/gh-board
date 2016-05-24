@@ -414,7 +414,16 @@ body { background-color: #ddd; }
       padding-left: .5rem;
       padding-right: .5rem;
       white-space: nowrap; // because of flexbox
+    }
+    .issue-title {
+      display: block;
+      // it's a link
+      color: black;
+      font-weight: normal;
+      text-decoration: none;
 
+      .x-font-and-emoji(1.5rem);
+      &:hover { text-decoration: none; }
     }
 
     .list-group-item-text {
@@ -424,17 +433,6 @@ body { background-color: #ddd; }
       padding-bottom: 1rem;
 
       font-size: 2rem;
-
-      .issue-title {
-        display: block;
-        // it's a link
-        color: black;
-        font-weight: normal;
-        text-decoration: none;
-
-        .x-font-and-emoji(1.5rem);
-        &:hover { text-decoration: none; }
-      }
 
       // Sometimes the non-primary repo name is long
       // if so, add ellipses that expand when hovered
