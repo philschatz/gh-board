@@ -76,16 +76,19 @@ let IssueSimple = React.createClass({
     // PR updatedAt is updated when commits are pushed
     const updatedAt = card.getUpdatedAt();
 
-    const user = issue.assignee ? issue.assignee : issue.user;
-    const assignedAvatar = (
-      <Link to={getFilters().toggleUserName(user.login).url()} className='avatar-filter'>
-        <img
-          key='avatar'
-          className='avatar-image'
-          title={'Click to filter on ' + user.login}
-          src={user.avatarUrl}/>
-      </Link>
-    );
+    const user = issue.assignee;
+    let assignedAvatar;
+    if (user) {
+      assignedAvatar = (
+        <Link to={getFilters().toggleUserName(user.login).url()} className='avatar-filter'>
+          <img
+            key='avatar'
+            className='avatar-image'
+            title={'Click to filter on ' + user.login}
+            src={user.avatarUrl}/>
+        </Link>
+      );
+    }
 
     // stop highlighting after 5min
     const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000;
@@ -126,12 +129,17 @@ let IssueSimple = React.createClass({
         data-state={issue.state}>
 
         {assignedAvatar}
-        <GithubFlavoredMarkdown
+        <a
           className='issue-title'
-          inline
-          repoOwner={repoOwner}
-          repoName={repoName}
-          text={issue.title}/>
+          target='_blank'
+          href={issue.htmlUrl}>
+          <GithubFlavoredMarkdown
+            className='-issue-title-text'
+            inline
+            repoOwner={repoOwner}
+            repoName={repoName}
+            text={issue.title}/>
+        </a>
         {dueAt}
         <a
           className='issue-number'
