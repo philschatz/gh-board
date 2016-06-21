@@ -9,7 +9,7 @@ import Progress from './progress';
 import Database from './database';
 
 const RELOAD_TIME_SHORT = 30 * 1000;
-const RELOAD_TIME_LONG = 5 * 60 * 1000;
+const RELOAD_TIME_LONG = 10 * 60 * 1000;
 
 const toIssueKey = (repoOwner, repoName, number) => {
   return `${repoOwner}/${repoName}#${number}`;
