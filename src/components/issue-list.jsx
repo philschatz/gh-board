@@ -3,6 +3,7 @@ import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 
 import SettingsStore from '../settings-store';
+import IssueStore from '../issue-store';
 
 import ColoredIcon from './colored-icon';
 
@@ -27,10 +28,24 @@ function collect(connect, monitor) {
 }
 
 
+// Converts a table to a CSV string for downloading
+function toCSVString(table) {
+  return table.map((row) => {
+    return row.map((column) => {
+      if (typeof column === 'number') {
+        return column;
+      } else {
+        return '"' + column + '"';
+      }
+    }).join(', ');
+  }).join('\n');
+}
+
+
 const IssueList = React.createClass({
   displayName: 'IssueList',
   getInitialState() {
-    return {morePressedCount: 0};
+    return {morePressedCount: 0, showCSVModal: false};
   },
   showAllIssues() {
     this.setState({showAllIssues: true});
@@ -38,11 +53,15 @@ const IssueList = React.createClass({
   onClickMore() {
     this.setState({morePressedCount: this.state.morePressedCount + 1});
   },
+  toggleCSVModal() {
+    const {showCSVModal} = this.state;
+    this.setState({showCSVModal: !showCSVModal});
+  },
   render() {
-    const {icon, title, backgroundColor, children} = this.props;
+    const {icon, title, backgroundColor, children, cards} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
-    const {showAllIssues, morePressedCount} = this.state;
+    const {showAllIssues, morePressedCount, showCSVModal} = this.state;
     const multiple = 25; // Add 25 results at a time
 
     let className = 'column-title';
@@ -56,11 +75,57 @@ const IssueList = React.createClass({
         <ColoredIcon className='column-icon' color={backgroundColor}>{icon}</ColoredIcon>
       );
     }
+
+    let countOrDownloadLink;
+    if (cards) {
+      function generateCSV() {
+        // merged-since does not have the actual card object yet, so we look it up
+        const data = cards.map(({repoOwner, repoName, number}) => {
+          const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
+          if (card.issue) {
+            const ret = [repoOwner, repoName, number, card.issue.updatedAt, card.issue.user.login, card.issue.title];
+            // Some PR's have an image; if so, include it in the CSV
+            if (card.getFeaturedImageSrc()) {
+              ret.push(card.getFeaturedImageSrc());
+            }
+            return ret;
+          } else {
+            return [repoOwner, repoName, number];
+          }
+
+        });
+        // Add the CSV column headers
+        data.unshift(['repoOwner', 'repoName', 'number', 'updatedAt', 'createdBy', 'title', 'imageHref']);
+        return toCSVString(data);
+      }
+
+      countOrDownloadLink = (
+        <BS.Button bsStyle='link' onClick={this.toggleCSVModal} title='Generate CSV'
+          >
+          {children.length}
+          {' '}
+          <i className='octicon octicon-desktop-download'/>
+          <BS.Modal show={showCSVModal} onHide={this.toggleCSVModal}>
+            <BS.Modal.Header closeButton>
+              <BS.Modal.Title>CSV Data</BS.Modal.Title>
+            </BS.Modal.Header>
+            <BS.Modal.Body>
+              <textarea>{generateCSV()}</textarea>
+            </BS.Modal.Body>
+          </BS.Modal>
+        </BS.Button>
+      );
+    } else {
+      countOrDownloadLink = children.length;
+    }
+
     const header = (
       <h2 className={className}>
         {iconEl}
         {title}
-        {' (' + children.length + ')'}
+        {' ('}
+        {countOrDownloadLink}
+        {')'}
       </h2>
     );
 
