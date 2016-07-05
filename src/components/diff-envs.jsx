@@ -15,8 +15,11 @@ const DiffEnvs = React.createClass({
           repoName = repoName.substring(1);
         }
         if (repoName && sha) {
-          if (atSymbol !== '@')           { throw new Error('BUG! looks like rev.txt is malformed'); }
-          shaInfos[repoName] = sha;
+          if (atSymbol !== '@') {
+            alert('BUG! looks like rev.txt is malformed. Skipping: ' + line);
+          } else {
+            shaInfos[repoName] = sha;
+          }
         }
       });
       return shaInfos;
