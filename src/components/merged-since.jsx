@@ -73,8 +73,12 @@ const MergedSince = React.createClass({
       }
     });
 
+    let title = `Issues related to the Changes between ${startShas} and ${endShas}`;
+    if (title.length > 80) {
+      title = title.substring(0, 80) + '...';
+    }
     return (
-      <IssueList title={`Issues related to the Changes between ${startShas} and ${endShas}`}>
+      <IssueList title={title} cards={prCommits}>
         {children}
       </IssueList>
     );

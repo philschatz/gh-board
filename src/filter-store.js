@@ -149,12 +149,18 @@ class Store extends EventEmitter {
     //
     // filteredCards = filterCards(filteredCards, this.getLabels());
 
-    // Sort the cards by `updatedAt`
-    let sortedCards = _.sortBy(filteredCards, (card) => {
-      return card.issue.updatedAt;
+    // Sort the cards by `dueAt` and then by `updatedAt` (if `dueAt` does not exist)
+    let sortedCards = filteredCards.sort((a, b) => {
+      if (a.getDueAt() && b.getDueAt()) {
+        return a.getDueAt() - b.getDueAt();
+      } else if (a.getDueAt()) {
+        return -1;
+      } else if (b.getDueAt()) {
+        return 1;
+      } else {
+        return b.getUpdatedAt() - a.getUpdatedAt();
+      }
     });
-    // Reverse so newest ones are on top
-    sortedCards.reverse();
 
     // Filter out any Issues that are associated with at least one Pull request in the list of cards
     if (!SettingsStore.getRelatedShowAll()) {

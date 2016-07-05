@@ -49,7 +49,7 @@ const LabelViewEdit = React.createClass({
     const {repoInfos, label} = this.props;
     const name = this.refs.labelName.getValue();
     let message;
-    if (repoInfos.length > 2) {
+    if (repoInfos.length > 1) {
       message = `Are you sure you want to change this label in ${repoInfos.length} repositories?`;
     } else {
       message = `Are you sure you want to change this label in ${repoInfos[0]}?`;
@@ -238,7 +238,7 @@ const BatchLabelsShell = React.createClass({
       // renderLabels requires the following structure:
       // {name, label, repoInfos}
       uniqueLabels = uniqueLabels.map((label) => {
-        return {name: label.name, label, repoInfos: []};
+        return {name: label.name, label, repoInfos: [`${repoOwner}/${repoName}`]};
       });
       return {repoOwner, repoName, uniqueLabels};
     });
