@@ -330,7 +330,7 @@ const FilterDropdown = React.createClass({
 
 
     return (
-      <BS.NavDropdown id='filter-dropdown' className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem}<i className='octicon octicon-search'/></span>}>
+      <BS.NavDropdown id='filter-dropdown' className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem} {' '}<i className='octicon octicon-search'/></span>}>
         {panel}
       </BS.NavDropdown>
     );
