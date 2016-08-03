@@ -103,7 +103,7 @@ const RepoItem = React.createClass({
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         <i className={'repo-icon octicon ' + iconClass}/>
         <Link to={repoLink}>{repoName}</Link>
-        {repo.private && (<BS.Label className='repo-private-label' bsStyle='warning'>PRIVATE</BS.Label>) || null}
+        {repo.private && (<BS.Label className='repo-private-label' bsStyle='warning'>PRIVATE</BS.Label>) || null} {' '}
         {updatedAt}
         {comment}
         {multiSelectButton}
