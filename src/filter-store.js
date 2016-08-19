@@ -158,7 +158,8 @@ class Store extends EventEmitter {
       } else if (b.getDueAt()) {
         return 1;
       } else {
-        return b.getUpdatedAt() - a.getUpdatedAt();
+        // newest on top
+        return Date.parse(b.getUpdatedAt()) - Date.parse(a.getUpdatedAt());
       }
     });
 
