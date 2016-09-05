@@ -65,6 +65,11 @@ export default React.createClass({
               <li>Copy the new token and paste it in here!</li>
               <li><strong>Note:</strong> You may need to refresh the page when you click "Save"</li>
             </ol>
+            <h4>"Enterprise API"</h4>
+            <p>
+              You need to set a different <code>rootURL</code>. Set the following in your browser console:<br/>
+              <pre>window.localStorage.setItem('gh-rootURL', 'https://github.enterprise.com/api/v3')</pre>
+            </p>
           </div>
         </BS.Modal.Body>
         <BS.Modal.Footer className='modal-footer'>
