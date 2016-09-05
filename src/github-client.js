@@ -183,6 +183,7 @@ class Client extends EventEmitter {
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
       cacheHandler,
+      rootURL: window.localStorage.getItem('gh-rootURL'),
       emitter: this.emit.bind(this)
     };
   }
