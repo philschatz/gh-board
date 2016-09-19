@@ -183,7 +183,15 @@ class Client extends EventEmitter {
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
       cacheHandler,
-      rootURL: window.localStorage.getItem('gh-rootURL'),
+      rootURL: window.localStorage.getItem('gh-rootURL') || ( () => {
+
+        let hostname = document.location.hostname;
+        let tld = hostname.split('.');
+        tld.shift();
+        if (tld.join('.') == 'github.io') return null;
+        return 'https://' + hostname + '/api/v3';
+
+        })(),
       emitter: this.emit.bind(this)
     };
   }
