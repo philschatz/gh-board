@@ -123,7 +123,7 @@ export function parseRoute({params, routes, location}) {
   // TODO: remove these fallbacks once URL's are updated.
   if (repoStr) { repoInfos = getReposFromStr(repoStr); }
 
-  const query = qs.parse(location.search);
+  const query = qs.parse(location.search.replace(/^\?/, ''));
   if (query.m) { milestoneTitles = parseArray(query.m); }
   if (query.l) { tagNames = parseArray(query.l); }
   if (query.c) { columnLabels = parseArray(query.c); }
