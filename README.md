@@ -1,4 +1,7 @@
-# Serverless Kanban Board for GitHub Issues [![gh-board](https://img.shields.io/github/issues/philschatz/gh-board.svg?label=Issues%20%28gh-board%29)](http://philschatz.com/gh-board/)
+# Serverless Kanban Board for GitHub Issues
+[![issues][gh-board-image]][gh-board-url]
+[![dependency status][dependency-image]][dependency-url]
+[![dev dependency status][dev-dependency-image]][dev-dependency-url]
 
 Why waste time and money paying for a Ticket Tracker when you already work in GitHub? Now, you don't have to.
 
@@ -190,3 +193,13 @@ Just specify a GitHub repository in the URL and off you go!
 - [ ] cache issues-updated-since requests and CI status requests in Session Storage instead of IndexedDB so they can be cleared easier
 - [ ] add effort labels XS, S, M, L, XL
 - [ ] add GitHub search
+
+
+[gh-board-image]: https://img.shields.io/github/issues/philschatz/gh-board.svg?label=Issues%20%28gh-board%29
+[gh-board-url]: http://philschatz.com/gh-board/
+[travis-image]: https://img.shields.io/travis/philschatz/gh-board.svg
+[travis-url]: https://travis-ci.org/philschatz/gh-board
+[dependency-image]: https://img.shields.io/david/philschatz/gh-board.svg
+[dependency-url]: https://david-dm.org/philschatz/gh-board
+[dev-dependency-image]: https://img.shields.io/david/dev/philschatz/gh-board.svg
+[dev-dependency-url]: https://david-dm.org/philschatz/gh-board?type=dev
