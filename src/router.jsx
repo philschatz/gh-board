@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Router from 'react-router';
+import {Router} from 'react-router';
 
 import history from './history';
 import App from './components/app';
@@ -83,7 +83,11 @@ const routes = [
   }
 ];
 
-const router = React.createElement(Router, {history, routes});
+// Use hashHistory because there is a <MenuItem> in <App> that explicitly tacks on a "#"
+// Also, gh-pages does not support arbitrary URLs so the repos need to be in the hash
+const router = (
+  <Router history={history} routes={routes} />
+);
 
 export default function() {
   const div = document.createElement('div');

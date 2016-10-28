@@ -113,7 +113,6 @@ const RepoItem = React.createClass({
 });
 
 const RepoGroup = React.createClass({
-  mixins: [History],
   getInitialState() {
     return {selectedRepos: {}};
   },
@@ -242,7 +241,6 @@ const Dashboard = React.createClass({
 });
 
 const CustomRepoModal = React.createClass({
-  mixins: [History],
   getInitialState() {
     return {customRepoName: null};
   },
@@ -270,7 +268,7 @@ const CustomRepoModal = React.createClass({
         </BS.Modal.Header>
         <BS.Modal.Body className='modal-body'>
           <p>Enter the repository owner and name:</p>
-          <BS.Input
+          <BS.FormControl
             ref='customRepo'
             type='text'
             placeholder='Example: philschatz/gh-board'

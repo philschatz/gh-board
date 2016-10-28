@@ -74,7 +74,7 @@ const FilterCategory = React.createClass({
     let searchInput;
     if (!noSearch) {
       searchInput = (
-        <BS.Input type='text' ref='filterInput' placeholder='Filter text' onChange={this.onFilterInputChange}/>
+        <BS.FormControl type='text' ref='filterInput' placeholder='Filter text' onChange={this.onFilterInputChange}/>
       );
     }
     return (

@@ -11,7 +11,6 @@ import AppNav from './nav';
 import Footer from './footer';
 
 const App = React.createClass({
-  mixins: [History],
   componentDidMount() {
     SettingsStore.on('change:tableLayout', this.onChange);
     this._historyListener = history.listen(this.storeHistory);
