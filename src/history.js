@@ -1,4 +1,5 @@
-import createHashHistory from 'history/lib/createHashHistory';
+import {hashHistory} from 'react-router';
 
 // Use hashHistory because there is a <MenuItem> in <App> that explicitly tacks on a "#"
-export default createHashHistory({queryKey: false});
+// Also, gh-pages does not allow arbitrary URLs
+export default hashHistory;
