@@ -1,7 +1,6 @@
-@import '../node_modules/octicons/octicons/octicons';
-@octicons-font-path: '../node_modules/octicons/octicons';
+@import (less) '~octicons/build/font/octicons.css';
 
-@bs-path: '../node_modules/bootstrap/less';
+@bs-path: '~bootstrap/less';
 @import '@{bs-path}/variables';
 @import '@{bs-path}/mixins';
 @import '@{bs-path}/utilities';
@@ -28,5 +27,5 @@
 @import '@{bs-path}/tooltip';
 @import '@{bs-path}/type';
 
-@import (inline) '../node_modules/mermaid/dist/mermaid.css';
-@import (inline) '../node_modules/c3/c3.css';
+@import (inline) '~mermaid/dist/mermaid.css';
+@import (inline) '~c3/c3.css';
