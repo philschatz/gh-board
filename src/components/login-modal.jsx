@@ -42,7 +42,7 @@ export default React.createClass({
           <BS.Modal.Title>GitHub Credentials</BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body className='modal-body'>
-          <BS.Input
+          <BS.FormControl
             type='text'
             defaultValue={token}
             disabled={!!token}

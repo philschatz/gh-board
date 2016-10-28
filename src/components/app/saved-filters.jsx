@@ -20,7 +20,7 @@ const AddFilterModal = React.createClass({
           <BS.Modal.Title><i className='mega-octicon octicon-tag'/> Save Filter</BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body>
-          <BS.Input type='text' ref='title'/>
+          <BS.FormControl type='text' ref='title'/>
         </BS.Modal.Body>
         <BS.Modal.Footer>
           <BS.Button bsStyle='primary' onClick={this.onSave}>Save</BS.Button>

@@ -100,7 +100,7 @@ const LabelViewEdit = React.createClass({
       const isSaveEnabled = name && name !== label.name;
       return (
         <tr>
-          <td><BS.Input ref='labelName' type='text' onChange={this.onChangeName} defaultValue={name || label.name}/></td>
+          <td><BS.FormControl ref='labelName' type='text' onChange={this.onChangeName} defaultValue={name || label.name}/></td>
           <td></td>
           <td>
             <BS.Button bsStyle='default' onClick={this.onClickCancel}>Cancel</BS.Button>

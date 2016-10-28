@@ -102,7 +102,7 @@ const MoveModal = React.createClass({
           );
           return (
             <li className='related-issue'>
-              <BS.Input
+              <BS.FormControl
                 type='checkbox'
                 defaultChecked={!unCheckedCards[vertex.key()]}
                 wrapperClassName='select-related-issue'
