@@ -37,7 +37,7 @@ const KanbanColumn = React.createClass({
     );
 
     return (
-      <BS.Col key={login} xl={2} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
+      <BS.Col key={login} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
         <IssueList title={heading}>
           {issueComponents}
         </IssueList>
@@ -73,6 +73,7 @@ const MilestonesView = React.createClass({
       /*HACK: Column should handle milestones */
       return (
         <KanbanColumn
+          key={kanbanColumnCount}
           login={login}
           cards={columnCards}
           primaryRepoName={repoName}

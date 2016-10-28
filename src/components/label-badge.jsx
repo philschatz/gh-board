@@ -41,7 +41,7 @@ const LabelBadge = React.createClass({
       return (
         <Link to={getFilters().toggleTagName(label.name).url()}
           key={name}
-          {...this.props}
+          onClick={onClick}
           className={className}
           style={{backgroundColor: '#' + label.color}}>
           {icon}

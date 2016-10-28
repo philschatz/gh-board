@@ -31,7 +31,6 @@ const AddFilterModal = React.createClass({
 });
 
 const SavedFiltersButton = React.createClass({
-  mixins: [History],
   getInitialState() {
     return {showModal: false};
   },

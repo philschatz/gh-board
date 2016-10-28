@@ -113,7 +113,6 @@ const RepoItem = React.createClass({
 });
 
 const RepoGroup = React.createClass({
-  mixins: [History],
   getInitialState() {
     return {selectedRepos: {}};
   },
@@ -242,7 +241,6 @@ const Dashboard = React.createClass({
 });
 
 const CustomRepoModal = React.createClass({
-  mixins: [History],
   getInitialState() {
     return {customRepoName: null};
   },
