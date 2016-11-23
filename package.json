@@ -57,7 +57,7 @@
     "react-bootstrap": "^0.30.5",
     "react-dnd": "^2.1.2",
     "react-dnd-html5-backend": "^2.1.2",
-    "react-dom": "^15.3.2",
+    "react-dom": "^15.4.1",
     "react-router": "^3.0.0",
     "recordo": "^0.0.6",
     "ultramarked": "^1.7.0",
