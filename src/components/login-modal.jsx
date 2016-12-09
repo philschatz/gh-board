@@ -5,7 +5,12 @@ import * as BS from 'react-bootstrap';
 export default React.createClass({
   displayName: 'Login',
   onSave() {
-    const {token} = this.refs;
+    const {token, rootURL} = this.refs;
+    let rootURLVal = rootURL.getValue();
+    if (rootURLVal) {
+      rootURLVal = rootURLVal.trim();
+    }
+    Client.setRootUrl(rootURLVal);
     let tokenVal = token.getValue();
     if (tokenVal) {
       // needs trimming because just copying the token
@@ -18,6 +23,7 @@ export default React.createClass({
     this.onCancel();
   },
   onClear() {
+    Client.setRootUrl(null);
     Client.setToken(null);
     // Re-render the modal
     this.setState({});
@@ -26,7 +32,18 @@ export default React.createClass({
     this.props.onHide();
   },
   render() {
-    const {token} = Client.getCredentials();
+    const {token, rootURL} = Client.getCredentials();
+
+    let defaultRootURL = rootURL || (() => {
+
+      let hostname = document.location.hostname;
+      let tld = hostname.split('.');
+      tld.shift();
+      if (tld.join('.') == 'github.io') return null;
+      return 'https://' + hostname + '/api/v3';
+
+    })()
+
 
     const footer = (
       <span>
@@ -67,8 +84,13 @@ export default React.createClass({
             </ol>
             <h4>"GitHub Enterprise Endpoint"</h4>
             <p>
-              You need to set a custom <code>rootURL</code>. Set the following in your browser console:<br/>
-              <pre>window.localStorage.setItem('gh-rootURL', 'https://github.example.com/api/v3')</pre>
+              If you need to set a custom API endpoint:<br/>
+              <BS.Input
+                type='text'
+                defaultValue={defaultRootURL}
+                placeholder='Enter GitHub API URL, e.g. https://github.example.com/api/v3'
+                ref='rootURL'
+              />
             </p>
           </div>
         </BS.Modal.Body>

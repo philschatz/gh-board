@@ -183,15 +183,7 @@ class Client extends EventEmitter {
       username: window.localStorage.getItem('gh-username'),
       password: window.localStorage.getItem('gh-password'),
       cacheHandler,
-      rootURL: window.localStorage.getItem('gh-rootURL') || ( () => {
-
-        let hostname = document.location.hostname;
-        let tld = hostname.split('.');
-        tld.shift();
-        if (tld.join('.') == 'github.io') return null;
-        return 'https://' + hostname + '/api/v3';
-
-        })(),
+      rootURL: window.localStorage.getItem('gh-rootURL'),
       emitter: this.emit.bind(this)
     };
   }
@@ -219,6 +211,15 @@ class Client extends EventEmitter {
   }
   getRateLimitRemaining() {
     return this.rateLimitRemaining;
+  }
+
+  setRootUrl(rootURL) {
+    cachedClient = null;
+    if (rootURL) {
+      window.localStorage.setItem('gh-rootURL', rootURL);
+    } else {
+      window.localStorage.removeItem('gh-rootURL');
+    }
   }
 
   setToken(token) {
