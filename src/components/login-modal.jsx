@@ -37,9 +37,9 @@ export default React.createClass({
     let defaultRootURL = rootURL || (() => {
 
       let hostname = document.location.hostname;
-      let tld = hostname.split('.');
-      tld.shift();
-      if (tld.join('.') == 'github.io') return null;
+      let tld = hostname.split('.').slice(-2).join('.');
+      if (tld == 'github.io') return null;
+      if (tld == 'localhost') return null;
       return 'https://' + hostname + '/api/v3';
 
     })()
