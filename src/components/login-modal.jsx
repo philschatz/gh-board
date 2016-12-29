@@ -6,7 +6,12 @@ import {LinkExternalIcon} from 'react-octicons';
 export default React.createClass({
   displayName: 'Login',
   onSave() {
-    const {token} = this.refs;
+    const {token, rootURL} = this.refs;
+    let rootURLVal = rootURL.getValue();
+    if (rootURLVal) {
+      rootURLVal = rootURLVal.trim();
+    }
+    Client.setRootUrl(rootURLVal);
     let tokenVal = token.getValue();
     if (tokenVal) {
       // needs trimming because just copying the token
@@ -19,6 +24,7 @@ export default React.createClass({
     this.onCancel();
   },
   onClear() {
+    Client.setRootUrl(null);
     Client.setToken(null);
     // Re-render the modal
     this.setState({});
@@ -27,7 +33,18 @@ export default React.createClass({
     this.props.onHide();
   },
   render() {
-    const {token} = Client.getCredentials();
+    const {token, rootURL} = Client.getCredentials();
+
+    let defaultRootURL = rootURL || (() => {
+
+      let hostname = document.location.hostname;
+      let tld = hostname.split('.').slice(-2).join('.');
+      if (tld == 'github.io') return null;
+      if (tld == 'localhost') return null;
+      return 'https://' + hostname + '/api/v3';
+
+    })()
+
 
     const footer = (
       <span>
@@ -66,6 +83,16 @@ export default React.createClass({
               <li>Copy the new token and paste it in here!</li>
               <li><strong>Note:</strong> You may need to refresh the page when you click "Save"</li>
             </ol>
+            <h4>"GitHub Enterprise Endpoint"</h4>
+            <p>
+              If you need to set a custom API endpoint:<br/>
+              <BS.Input
+                type='text'
+                defaultValue={defaultRootURL}
+                placeholder='Enter GitHub API URL, e.g. https://github.example.com/api/v3'
+                ref='rootURL'
+              />
+            </p>
           </div>
         </BS.Modal.Body>
         <BS.Modal.Footer className='modal-footer'>
