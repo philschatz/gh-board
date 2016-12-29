@@ -57,15 +57,15 @@ test('shows a repo', async t => {
 })
 
 
-test('shows the label-editing screen', async t => {
-  await browser.click('.list-group > .repo-item > a')
-  await waitUntilDoneLoading(browser)
-  // Close the "Anonymous Browsing" modal
-  if (!GITHUB_TOKEN) {
-    await browser.waitForExist('.modal-dialog button.close')
-    await browser.click('.modal-dialog button.close')
-  }
-  await browser.click('#display-settings')
-  await browser.click('.octicon-tag') // HACK: Should use a class name or something
-  // await browser.waitForExist('.batch-label')
-})
+// test('shows the label-editing screen', async t => {
+//   await browser.click('.list-group > .repo-item > a')
+//   await waitUntilDoneLoading(browser)
+//   // Close the "Anonymous Browsing" modal
+//   if (!GITHUB_TOKEN) {
+//     await browser.waitForExist('.modal-dialog button.close')
+//     await browser.click('.modal-dialog button.close')
+//   }
+//   await browser.click('#display-settings')
+//   await browser.click('.octicon-tag') // HACK: Should use a class name or something
+//   // await browser.waitForExist('.batch-label')
+// })
