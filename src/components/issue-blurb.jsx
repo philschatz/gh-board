@@ -1,6 +1,7 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
+import {LockIcon, ListUnorderedIcon, GitPullRequestIcon, IssueOpenedIcon, IssueReopenedIcon, IssueClosedIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import Database from '../database';
@@ -26,7 +27,7 @@ const IssueOrPullRequestBlurb = React.createClass({
     let privateEl;
     if (isPrivate) {
       privateEl = (
-        <i className='octicon octicon-lock private' title='Private Repository'/>
+        <LockIcon className='private' title='Private Repository'/>
       );
     }
     if (issue) {
@@ -57,18 +58,21 @@ const IssueOrPullRequestBlurb = React.createClass({
           state = issue.state;
         }
         icon = (
-          <i title='Click for Pull Request Details' className='blurb-icon octicon octicon-git-pull-request' onClick={this.onClickIcon} data-state={state}/>
+          <GitPullRequestIcon title='Click for Pull Request Details' className='blurb-icon' onClick={this.onClickIcon} data-state={state}/>
         );
       } else {
-        const classes = {
-          'blurb-icon': true,
-          'octicon': true,
-          'octicon-issue-opened': issue.state === 'open' && !issue.closedBy,
-          'octicon-issue-reopened': issue.state === 'open' && issue.closedBy,
-          'octicon-issue-closed': issue.state === 'closed'
-        };
+        let iconType;
+        if (issue.state === 'open' && !issue.closedBy) {
+          iconType = IssueOpenedIcon;
+        } else if (issue.state === 'open' && issue.closedBy) {
+          iconType = IssueReopenedIcon;
+        } else if (issue.state === 'closed') {
+          iconType = IssueClosedIcon;
+        } else {
+          iconType = QuestionIcon;
+        }
         icon = (
-          <i title='Click for Issue Details' className={classnames(classes)} onClick={this.onClickIcon} data-state={issue.state}/>
+          <iconType title='Click for Issue Details' className='blurb-icon' onClick={this.onClickIcon} data-state={issue.state}/>
         );
       }
 
@@ -86,7 +90,7 @@ const IssueOrPullRequestBlurb = React.createClass({
         const {color, name} = kanbanColumn;
         kanbanColumnIcon = (
           <ColoredIcon color={color} name={name}>
-            <i className='octicon octicon-list-unordered'/>
+            <ListUnorderedIcon/>
           </ColoredIcon>
         );
       }

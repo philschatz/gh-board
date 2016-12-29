@@ -22,6 +22,7 @@
 import _ from 'underscore';
 import React from 'react';
 import * as BS from 'react-bootstrap';
+import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
 import IssueStore from '../issue-store';
 import Database from '../database';
@@ -166,9 +167,9 @@ const LabelViewEdit = React.createClass({
           </td>
           <td className='-label-repos'><small>{details}</small></td>
           <td className='label-actions'>
-            <BS.Button bsStyle='link' onClick={this.onClickEdit}><i className='octicon octicon-pencil'/> Edit</BS.Button>
+            <BS.Button bsStyle='link' onClick={this.onClickEdit}><PencilIcon/> Edit</BS.Button>
             {' '}
-            <BS.Button className='action-delete' bsStyle='link' onClick={this.onClickRemove}><i className='octicon octicon-trashcan'/></BS.Button>
+            <BS.Button className='action-delete' bsStyle='link' onClick={this.onClickRemove}><TrashcanIcon/></BS.Button>
           </td>
         </tr>
       );

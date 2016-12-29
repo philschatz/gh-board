@@ -1,6 +1,7 @@
 import React from 'react';
 import Client from '../github-client';
 import * as BS from 'react-bootstrap';
+import {LinkExternalIcon} from 'react-octicons';
 
 export default React.createClass({
   displayName: 'Login',
@@ -51,10 +52,10 @@ export default React.createClass({
           />
           <div className='github-token-instructions'>
             <h4>"Why do I need a token?"</h4>
-            <p>Unlinke other issue trackers, this one runs <em>in your browser</em> via any <a href='https://pages.github.com' target='_blank'>static webserver{' '}<i className='octicon octicon-link-external'/></a> so secret application keys are not possible.</p>
+            <p>Unlinke other issue trackers, this one runs <em>in your browser</em> via any <a href='https://pages.github.com' target='_blank'>static webserver{' '}<LinkExternalIcon/></a> so secret application keys are not possible.</p>
             <h4>"OK, That's fair. How do I create a token?"</h4>
             <ol>
-              <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new{' '}<i className='octicon octicon-link-external'/></a></li>
+              <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new{' '}<LinkExternalIcon/></a></li>
               <li>Provide a descriptive title (like "gh-board") in the "Token Description"</li>
               <li>Unselect all the checkboxes to just look at public repositories</li>
                 <ul>

@@ -1,5 +1,6 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
+import {SyncIcon} from 'react-octicons';
 
 const ASYNC_UNSTARTED = 'ASYNC_UNSTARTED';
 const ASYNC_RESOLVED = 'ASYNC_RESOLVED';
@@ -63,7 +64,7 @@ export default React.createClass({
       classes['is-waiting'] = true;
       disabled = true;
       kids = [
-        <i className='octicon octicon-sync icon-spin'/>,
+        <SyncIcon className='icon-spin'/>,
         waitingText
       ];
     } else if (asyncStatus === ASYNC_RESOLVED) {
