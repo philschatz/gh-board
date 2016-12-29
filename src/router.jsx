@@ -42,7 +42,8 @@ const routes = [
         childRoutes: [
           // Redirect from `/r/.../kanban` to `/r/...` . keep 'kanban' in the code so it is clear where the link is going
           { path: 'kanban',
-            onEnter: (state, replace) => replace(null, buildRoute('', parseRoute(state)))
+            component: RepoKanban
+            // onEnter: (state, replace) => replace(null, buildRoute('', parseRoute(state)))
           },
           { path: 'since', component: MergedSinceFormShell},
           { path: 'compare', component: MergedSinceFormShell},

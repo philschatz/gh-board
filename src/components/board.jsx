@@ -37,8 +37,10 @@ const ProgressView = React.createClass({
     const {ticks, max} = this.state;
     const {message} = this.state;
     const label = `${ticks}/${max}`;
+
+    // TODO: Use Loadable component
     return (
-      <div>
+      <div className="is-loading">
         <BS.ProgressBar now={ticks} max={max} label={label}/>
         <SyncIcon className='icon-spin'/> {message}
       </div>
