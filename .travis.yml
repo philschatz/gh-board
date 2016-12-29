@@ -1,0 +1,3 @@
+# `sudo:false` for faster builds.
+sudo: false
+language: node_js

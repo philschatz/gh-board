@@ -354,8 +354,9 @@ const DashboardShell = React.createClass({
       })
       .then((allRepos) => this.setState({repos: allRepos}))
       .catch(() => this.setState({repos: []}));
+      // TODO: Use Loadable component
       myRepos = (
-        <span className='custom-loading'>
+        <span className='custom-loading is-loading'>
           <i className='octicon octicon-sync icon-spin'/>
           {' Loading List of Repositories...'}
         </span>
