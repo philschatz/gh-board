@@ -14,7 +14,7 @@ const waitUntilDoneLoading = async () => {
 }
 
 
-GITHUB_TOKEN = process.env['GH_TOKEN']
+const GITHUB_TOKEN = process.env['GH_TOKEN']
 
 test.before(async t => {
   await browser.init()
