@@ -14,15 +14,17 @@ const waitUntilDoneLoading = async () => {
 }
 
 
+GITHUB_TOKEN = process.env['GH_TOKEN']
+
 test.before(async t => {
   await browser.init()
     .url('http://localhost:8080')
 
   // Set a GitHub token if one is defined
-  if(process.env['GH_TOKEN']) {
+  if(GITHUB_TOKEN) {
     await browser.execute(function(token) {
       window.localStorage['gh-token'] = token
-    }, process.env['GH_TOKEN'])
+    }, GITHUB_TOKEN)
     // Refresh so the JS loads the token
     await browser.refresh()
   }
@@ -44,8 +46,9 @@ test('shows a repo', async t => {
   await browser.click('.list-group > .repo-item > a')
   await waitUntilDoneLoading(browser)
   // Close the "Anonymous Browsing" modal
-  if (await browser.isExisting('.anonymous-instructions')) {
-    await browser.click('.anonymous-instructions button')
+  if (!GITHUB_TOKEN) {
+    await browser.waitForExist('.modal-dialog button.close')
+    await browser.click('.modal-dialog button.close')
   }
   // Verify that an Issue exists
   // FIXME: When loading is done then the issues should be listed (now it has to wait for 10 seconds)
@@ -58,8 +61,9 @@ test('shows the label-editing screen', async t => {
   await browser.click('.list-group > .repo-item > a')
   await waitUntilDoneLoading(browser)
   // Close the "Anonymous Browsing" modal
-  if (await browser.isExisting('.anonymous-instructions')) {
-    await browser.click('.anonymous-instructions button')
+  if (!GITHUB_TOKEN) {
+    await browser.waitForExist('.modal-dialog button.close')
+    await browser.click('.modal-dialog button.close')
   }
   await browser.click('#display-settings')
   await browser.click('.octicon-tag') // HACK: Should use a class name or something
