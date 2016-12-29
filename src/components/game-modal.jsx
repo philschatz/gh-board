@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import Client from '../github-client';
 import * as BS from 'react-bootstrap';
+import {CheckIcon, GiftIcon} from 'react-octicons';
 
 const GameModalInner = React.createClass({
   render() {
@@ -10,7 +11,7 @@ const GameModalInner = React.createClass({
     return (
       <BS.Modal className='game-modal' {...this.props}>
         <BS.Modal.Header closeButton>
-          <BS.Modal.Title><i className='mega-octicon octicon-gift'/> You found it! {dropDown} <small style={{display: 'inline-block', marginLeft: '3rem'}}>Keys: <kbd>Z</kbd> to undo, <kbd>R</kbd> to reset, <kbd>X</kbd> for action</small></BS.Modal.Title>
+          <BS.Modal.Title><GiftIcon size='mega'/> You found it! {dropDown} <small style={{display: 'inline-block', marginLeft: '3rem'}}>Keys: <kbd>Z</kbd> to undo, <kbd>R</kbd> to reset, <kbd>X</kbd> for action</small></BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body>
           <div className='game-wrapper'>
@@ -157,7 +158,7 @@ const GameModal = React.createClass({
       let winIcon;
       if (gamesWon[game.id]) {
         winIcon = (
-          <i className='octicon octicon-check'/>
+          <CheckIcon/>
         );
       }
       return (

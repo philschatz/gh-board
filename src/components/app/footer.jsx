@@ -1,5 +1,6 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
+import {GiftIcon, CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
 
 import Client from '../../github-client';
 import NewVersionChecker from '../../new-version-checker';
@@ -89,7 +90,7 @@ const KarmaWarning = React.createClass({
         <BS.Nav>
           <li>
             <span className={'karma-stats' + (isKarmaLow && ' is-karma-low' || '')}>
-              <i className='octicon octicon-cloud-download' title='GitHub API'/>
+              <CloudDownloadIcon title='GitHub API'/>
               {' API Requests Left: '}
               {karmaText}
               {resetText}
@@ -98,8 +99,8 @@ const KarmaWarning = React.createClass({
           {newestText}
         </BS.Nav>
         <BS.Nav pullRight>
-          <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><i className='octicon octicon-gift' title='Oooh, a present!'/></BS.NavItem>
-          <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><i className='octicon octicon-mark-github'/> Source Code</BS.NavItem>
+          <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><GiftIcon title='Oooh, a present!'/></BS.NavItem>
+          <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><MarkGithubIcon/> Source Code</BS.NavItem>
           <SavedFiltersButton/>
         </BS.Nav>
         <GameModal show={isGameOpen} onHide={this.onHideGameModal}/>

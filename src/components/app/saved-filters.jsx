@@ -1,6 +1,7 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 import {History} from 'react-router';
+import {TagIcon} from 'react-octicons';
 
 const LOCALSTORAGE_KEY = 'saved-filters';
 
@@ -17,7 +18,7 @@ const AddFilterModal = React.createClass({
     return (
       <BS.Modal className='-add-filter-modal' {...this.props}>
         <BS.Modal.Header closeButton>
-          <BS.Modal.Title><i className='mega-octicon octicon-tag'/> Save Filter</BS.Modal.Title>
+          <BS.Modal.Title><TagIcon size='mega'/> Save Filter</BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body>
           <BS.FormControl type='text' ref='title'/>
@@ -50,7 +51,7 @@ const SavedFiltersButton = React.createClass({
       );
     });
     const addFilter = (
-      <i className='octicon octicon-tag' title='Save Filter' onClick={this.showAddFilter}/>
+      <TagIcon title='Save Filter' onClick={this.showAddFilter}/>
     );
     return (
       <li className='-saved-filters'>

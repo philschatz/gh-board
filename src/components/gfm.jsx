@@ -61,6 +61,7 @@ const buildStatusBadge = (card) => {
     wrapNode.appendChild(titleNode);
 
     if (kanbanLabel) {
+      // TODO: Figure out something for these since we cannot easily inject SVG
       const octicon = document.createElement('i');
       octicon.classList.add('octicon');
       octicon.classList.add('octicon-list-unordered');

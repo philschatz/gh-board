@@ -1,4 +1,5 @@
 import React from 'react';
+import {SyncIcon} from 'react-octicons';
 
 const STATUS = {
   INITIAL: 'initial',
@@ -66,7 +67,7 @@ export default React.createClass({
     const {loadingText} = this.props;
     return (
       <span className='loadable is-loading'>
-        <i className='octicon octicon-sync icon-spin'/>
+        <SyncIcon className='icon-spin'/>
         {' ' + (loadingText || 'Loading...')}
       </span>
     );

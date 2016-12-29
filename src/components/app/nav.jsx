@@ -2,6 +2,7 @@ import _ from 'underscore';
 import React from 'react';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
+import {HomeIcon, StarIcon, GearIcon, QuestionIcon, GraphIcon, TagIcon} from 'react-octicons';
 
 import SettingsStore from '../../settings-store';
 import Client from '../../github-client';
@@ -92,7 +93,7 @@ const AppNav = React.createClass({
     const close = () => this.setState({ showModal: false});
 
     const brand = (
-      <Link to={buildRoute('dashboard')}><i className='octicon octicon-home'/></Link>
+      <Link to={buildRoute('dashboard')}><HomeIcon/></Link>
     );
     const filtering = _.map(getFilters().getState().tagNames, (tagName) => {
       // TODO: HACK. Find a better way to update the color of labels
@@ -125,7 +126,7 @@ const AppNav = React.createClass({
       loginButton = (
         <BS.NavDropdown key='signin-dropdown' id='signin-dropdown' title={avatarImage}>
           <BS.MenuItem key='1' header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
-          <BS.MenuItem key='2' onSelect={this.starThisProject}>Click to <i className='octicon octicon-star icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
+          <BS.MenuItem key='2' onSelect={this.starThisProject}>Click to <StarIcon className='icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
           <BS.MenuItem key='3' divider/>
           <BS.MenuItem key='4' eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
         </BS.NavDropdown>
@@ -137,7 +138,7 @@ const AppNav = React.createClass({
     }
 
     const settingsTitle = (
-      <i className='octicon octicon-gear'/>
+      <GearIcon/>
     );
 
     let repoDetails = null;
@@ -235,7 +236,7 @@ const AppNav = React.createClass({
                   className='btn btn-xs btn-default'
                   onClick={settingsMenuHelp}
                   >
-                  <i className='octicon octicon-question'/>
+                  <QuestionIcon/>
                 </button>
               </BS.MenuItem>
               <SettingsItem
@@ -273,9 +274,9 @@ const AppNav = React.createClass({
               <BS.MenuItem key='manager-pages' header>Manager-ish Pages</BS.MenuItem>
               {managerMenu}
               <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
-              <SettingsItem key='burnup' to={getFilters().setRouteName('burnup').url()}><i className='octicon octicon-graph'/> Burnup Chart</SettingsItem>
-              <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}><i className='octicon octicon-graph'/> Gantt Chart</SettingsItem>
-              <SettingsItem key='label-editing' to={getFilters().setRouteName('labels').url()}><i className='octicon octicon-tag'/> Label Editing</SettingsItem>
+              <SettingsItem key='burnup' to={getFilters().setRouteName('burnup').url()}><GraphIcon/> Burnup Chart</SettingsItem>
+              <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}><GraphIcon/> Gantt Chart</SettingsItem>
+              <SettingsItem key='label-editing' to={getFilters().setRouteName('labels').url()}><TagIcon/> Label Editing</SettingsItem>
               <BS.MenuItem key='reset-databases' onClick={this.promptAndResetDatabases}>Reset Local Cache...</BS.MenuItem>
             </BS.NavDropdown>
             {loginButton}

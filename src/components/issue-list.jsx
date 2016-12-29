@@ -1,6 +1,7 @@
 import React from 'react';
 import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
+import {DesktopDownloadIcon} from 'react-octicons';
 
 import SettingsStore from '../settings-store';
 import IssueStore from '../issue-store';
@@ -104,7 +105,7 @@ const IssueList = React.createClass({
           >
           {children.length}
           {' '}
-          <i className='octicon octicon-desktop-download'/>
+          <DesktopDownloadIcon/>
           <BS.Modal show={showCSVModal} onHide={this.toggleCSVModal}>
             <BS.Modal.Header closeButton>
               <BS.Modal.Title>CSV Data</BS.Modal.Title>

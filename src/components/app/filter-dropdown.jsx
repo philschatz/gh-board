@@ -3,6 +3,7 @@ import React from 'react';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
+import {XIcon, SearchIcon, CheckIcon, MilestoneIcon} from 'react-octicons';
 
 import IssueStore from '../../issue-store';
 import {getFilters} from '../../route-utils';
@@ -38,7 +39,7 @@ const FilterCategory = React.createClass({
     let checkmark;
     if (isSelected) {
       checkmark = (
-        <i className='item-checkmark octicon octicon-check'/>
+        <CheckIcon className='item-checkmark'/>
       );
     }
     let iconLink;
@@ -50,7 +51,7 @@ const FilterCategory = React.createClass({
     let excludeLink;
     if (excludeHref) {
       excludeLink = (
-        <Link to={excludeHref} className='item-toggle-exclude' title='Exclude this from the board'><i className='octicon octicon-x'/></Link>
+        <Link to={excludeHref} className='item-toggle-exclude' title='Exclude this from the board'><XIcon/></Link>
       );
     }
     return (
@@ -193,7 +194,7 @@ const FilterDropdown = React.createClass({
       const isSelected = state.milestoneTitles.indexOf(name) >= 0;
       const isExcluded = state.milestoneTitles.indexOf(`-${name}`) >= 0;
       // const iconNode = (
-      //   <i className='octicon octicon-milestone'/>
+      //   <MilestoneIcon/>
       // );
       let toggleHref;
       let excludeHref;
@@ -255,7 +256,7 @@ const FilterDropdown = React.createClass({
         );
       }
       return [
-        <i key='icon' className='milestone-icon octicon octicon-milestone'/>,
+        <MilestoneIcon key='icon' className='milestone-icon'/>,
         <span key='milestone-title' className='milestone-title'>
           <GithubFlavoredMarkdown
             inline
@@ -330,7 +331,7 @@ const FilterDropdown = React.createClass({
 
 
     return (
-      <BS.NavDropdown id='filter-dropdown' className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem} {' '}<i className='octicon octicon-search'/></span>}>
+      <BS.NavDropdown id='filter-dropdown' className='filter-menu' title={<span className='-filter-title'>{selectedMilestoneItem} {' '}<SearchIcon/></span>}>
         {panel}
       </BS.NavDropdown>
     );

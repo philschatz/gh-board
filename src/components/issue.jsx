@@ -5,6 +5,7 @@ import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 import classnames from 'classnames';
 import {Link} from 'react-router';
+import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, PencilIcon, CheckIcon, PrimitiveDotIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
@@ -102,7 +103,7 @@ let IssueSimple = React.createClass({
       };
       dueAt = (
         <span className={classnames(dueAtClasses)}>
-          <i className='octicon octicon-calendar'/>
+          <CalendarIcon/>
           {' due '}
           <Time dateTime={issueDueAt}/>
         </span>
@@ -227,7 +228,7 @@ let IssueCard = React.createClass({
           placement='bottom'
           overlay={taskListPopover}>
           <span className={classnames(taskCountsClasses)}>
-            <i className='octicon octicon-checklist'/>
+            <ChecklistIcon/>
             {`${taskFinishedCount}/${taskTotalCount}`}
           </span>
         </BS.OverlayTrigger>
@@ -275,7 +276,7 @@ let IssueCard = React.createClass({
             trigger={['click', 'focus']}
             placement='bottom'
             overlay={milestonePopover}>
-            <i className='milestone-icon octicon octicon-milestone'/>
+            <MilestoneIcon className='milestone-icon'/>
           </BS.OverlayTrigger>
           <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(issue.milestone.title).url()}>
             <GithubFlavoredMarkdown
@@ -316,7 +317,7 @@ let IssueCard = React.createClass({
     if (commentsCount) {
       comments = (
         <span className='comments-count' title='Comments'>
-          <i className='octicon octicon-comment'/>
+          <CommentIcon/>
           {' '}
           <span className='comments-count-number'>{commentsCount}</span>
         </span>
@@ -335,7 +336,7 @@ let IssueCard = React.createClass({
     let mergeConflictBlurb;
     if (card.isPullRequest() && card.hasMergeConflict()) {
       mergeConflictBlurb = (
-        <i key='merge-conflict' className='pull-right merge-conflict-warning octicon octicon-alert' title='This has a Merge Conflict'/>
+        <AlertIcon key='merge-conflict' className='pull-right merge-conflict-warning' title='This has a Merge Conflict'/>
       );
     }
     let statusBlurb;
@@ -351,15 +352,15 @@ let IssueCard = React.createClass({
       // pending, success, error, or failure
       switch (status.state) {
         case 'success':
-          statusIcon = (<i className='status-icon octicon octicon-check'/>);
+          statusIcon = (<CheckIcon className='status-icon'/>);
           break;
         case 'pending':
-          statusIcon = (<i className='status-icon octicon octicon-primitive-dot'/>);
+          statusIcon = (<PrimitiveDotIcon className='status-icon'/>);
           statusText = 'Testing...';
           break;
         case 'error':
         case 'failure':
-          statusIcon = (<i className='status-icon octicon octicon-x'/>);
+          statusIcon = (<XIcon className='status-icon'/>);
           statusText = 'Tests Failed';
           break;
         default:
@@ -384,7 +385,7 @@ let IssueCard = React.createClass({
       };
       dueAt = (
         <span className={classnames(dueAtClasses)}>
-          <i className='octicon octicon-calendar'/>
+          <CalendarIcon/>
           {' due '}
           <Time dateTime={issueDueAt}/>
         </span>
@@ -399,7 +400,7 @@ let IssueCard = React.createClass({
         card={card}
         primaryRepoName={primaryRepoName} />,
       <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip id={etherpadHref}>Click to Edit Collaboratively (really realtime)!</BS.Tooltip>}>
-        <Link to={etherpadHref} className='etherpad-issue-edit'><i className='octicon octicon-pencil'/></Link>
+        <Link to={etherpadHref} className='etherpad-issue-edit'><PencilIcon/></Link>
       </BS.OverlayTrigger>,
       statusBlurb,
       taskCounts,

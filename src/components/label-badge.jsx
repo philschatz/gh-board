@@ -2,6 +2,8 @@ import * as BS from 'react-bootstrap';
 import React from 'react';
 
 import {Link} from 'react-router';
+import {ListUnorderedIcon, TagIcon} from 'react-octicons';
+
 import {getFilters} from '../route-utils';
 import {KANBAN_LABEL, isLight} from '../helpers';
 import GithubFlavoredMarkdown from './gfm';
@@ -23,10 +25,10 @@ const LabelBadge = React.createClass({
     className += ' badge';
 
     if (KANBAN_LABEL.test(label.name)) {
-      icon = (<i className='octicon octicon-list-unordered'/>);
+      icon = (<ListUnorderedIcon/>);
       name = label.name.replace(/^\d+\ -\ /, ' ');
     } else {
-      icon = (<i className='octicon octicon-tag'/>);
+      icon = (<TagIcon/>);
       name = label.name;
     }
     if (label.color && isLight(label.color)) {

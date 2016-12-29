@@ -3,6 +3,7 @@ import _ from 'underscore';
 import {Link, History} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
+import {BeakerIcon, SyncIcon, LockIcon, RepoForkedIcon, RepoIcon, PersonIcon, OrganizationIcon} from 'react-octicons';
 
 import {buildRoute} from '../route-utils';
 import Client from '../github-client';
@@ -67,10 +68,10 @@ const RepoItem = React.createClass({
     });
 
 
-    let iconClass;
-    if (repo.private) { iconClass = 'octicon-lock'; }
-    else if (repo.fork) { iconClass = 'octicon-repo-forked'; }
-    else { iconClass = 'octicon-repo'; }
+    let repoIcon;
+    if (repo.private) { repoIcon = (<LockIcon className='repo-icon'/>); }
+    else if (repo.fork) { repoIcon = (<RepoForkedIcon className='repo-icon'/>); }
+    else { repoIcon = (<RepoIcon className='repo-icon'/>); }
 
     const classes = {
       'repo-item': true,
@@ -101,7 +102,7 @@ const RepoItem = React.createClass({
     const repoLink = buildRoute('kanban', {repoInfos});
     return (
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
-        <i className={'repo-icon octicon ' + iconClass}/>
+        {repoIcon}
         <Link to={repoLink}>{repoName}</Link>
         {repo.private && (<BS.Label className='repo-private-label' bsStyle='warning'>PRIVATE</BS.Label>) || null} {' '}
         {updatedAt}
@@ -168,13 +169,13 @@ const RepoGroup = React.createClass({
 
     let orgIcon;
     if (CurrentUserStore.getUser() && CurrentUserStore.getUser().login === repoOwner) {
-      orgIcon = 'octicon-person';
+      orgIcon = (<PersonIcon className='org-icon'/>);
     } else {
-      orgIcon = 'octicon-organization';
+      orgIcon = (<OrganizationIcon className='org-icon'/>);
     }
     const header = (
       <span className='org-header'>
-        <i className={'org-icon octicon ' + orgIcon}/>
+        {orgIcon}
         {' '}
         {repoOwner}
         {viewBoard}
@@ -263,7 +264,7 @@ const CustomRepoModal = React.createClass({
       <BS.Modal {...this.props}>
         <BS.Modal.Header closeButton>
           <BS.Modal.Title>
-            <i className='repo-icon mega-octicon octicon-repo'/>
+            <RepoIcon size='mega' className='repo-icon'/>
             {' Choose your GitHub Repo'}</BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body className='modal-body'>
@@ -303,7 +304,7 @@ const ExamplesPanel = React.createClass({
 
     const examplesHeader = (
       <span className='examples-header'>
-        <i className='org-icon octicon octicon-beaker'/>
+        <BeakerIcon className='org-icon'/>
         {' Example Boards of GitHub Repositories'}
       </span>
     );
@@ -313,7 +314,7 @@ const ExamplesPanel = React.createClass({
         <BS.ListGroup>
           {_.map(SAMPLE_REPOS, (props) => <RepoItem key={JSON.stringify(props)} {...props}/>)}
           <BS.ListGroupItem className='repo-item' onClick={this.onClickMore}>
-            <i className='repo-icon octicon octicon-repo'/>
+            <RepoIcon className='repo-icon'/>
             Choose your own...
           </BS.ListGroupItem>
           <CustomRepoModal show={showModal} container={this} onHide={close}/>
@@ -357,7 +358,7 @@ const DashboardShell = React.createClass({
       // TODO: Use Loadable component
       myRepos = (
         <span className='custom-loading is-loading'>
-          <i className='octicon octicon-sync icon-spin'/>
+          <SyncIcon className='icon-spin'/>
           {' Loading List of Repositories...'}
         </span>
       );
