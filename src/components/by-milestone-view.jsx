@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
+import {MilestoneIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
@@ -34,7 +35,7 @@ const KanbanColumn = React.createClass({
     if (milestone) {
       heading = (
         <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(milestone.title).url()}>
-          <i className='octicon octicon-milestone'/>
+          <MilestoneIcon/>
           <GithubFlavoredMarkdown
             inline
             disableLinks={true}

@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
 import * as BS from 'react-bootstrap';
+import {UserIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
@@ -31,7 +32,7 @@ const KanbanColumn = React.createClass({
     let heading;
     heading = (
       <span className='user-title'>
-        <i className='octicon octicon-user'/>
+        <UserIcon/>
         {login}
       </span>
     );

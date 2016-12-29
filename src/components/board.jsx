@@ -1,5 +1,6 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
+import {SyncIcon} from 'react-octicons';
 
 import {getFilters, filterCardsByFilter} from '../route-utils';
 import IssueStore from '../issue-store';
@@ -39,7 +40,7 @@ const ProgressView = React.createClass({
     return (
       <div>
         <BS.ProgressBar now={ticks} max={max} label={label}/>
-        <i className='octicon octicon-sync icon-spin'/> {message}
+        <SyncIcon className='icon-spin'/> {message}
       </div>
     )
   }
