@@ -43,6 +43,10 @@ test.beforeEach(async t => {
 test('shows a repo', async t => {
   await browser.click('.list-group > .repo-item > a')
   await waitUntilDoneLoading(browser)
+  // Close the "Anonymous Browsing" modal
+  if (await browser.isExisting('.anonymous-instructions')) {
+    await browser.click('.anonymous-instructions button')
+  }
   // Verify that an Issue exists
   // FIXME: When loading is done then the issues should be listed (now it has to wait for 10 seconds)
   // await browser.waitForExist('a.issue-title', 10 * 1000)
@@ -53,6 +57,10 @@ test('shows a repo', async t => {
 test('shows the label-editing screen', async t => {
   await browser.click('.list-group > .repo-item > a')
   await waitUntilDoneLoading(browser)
+  // Close the "Anonymous Browsing" modal
+  if (await browser.isExisting('.anonymous-instructions')) {
+    await browser.click('.anonymous-instructions button')
+  }
   await browser.click('#display-settings')
   await browser.click('.octicon-tag') // HACK: Should use a class name or something
   // await browser.waitForExist('.batch-label')

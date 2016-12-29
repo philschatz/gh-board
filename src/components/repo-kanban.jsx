@@ -99,9 +99,9 @@ const AnonymousModal = React.createClass({
     }
 
     return (
-      <BS.Modal show={showModal} container={this} onHide={onHide}>
+      <BS.Modal show={showModal} container={this} onHide={onHide} className='anonymous-instructions'>
         <BS.Modal.Header closeButton>Viewing a Board Anonymously</BS.Modal.Header>
-        <BS.Modal.Body className='anonymous-instructions'>
+        <BS.Modal.Body>
           <p>You are currently <strong>not signed in</strong>. GitHub's API only allows <em>60</em> requests per hour for non-authenticated users.</p>
           <p>Showing additional information for Pull Requests requires making a separate API call for each and can end up depleting the 60 requests quickly.</p>
 
