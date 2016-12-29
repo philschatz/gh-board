@@ -237,7 +237,7 @@ const BurnupShell = React.createClass({
 
     return (
       <div className='burnup'>
-        <h2><GraphIcon/>  Burnup Chart</h2>
+        <h2><GraphIcon size='mega'/>  Burnup Chart</h2>
         <p>Make sure you selected <strong>closed</strong> and <strong>Issues</strong> and optionally a Milestone from the filter dropdown at the top of this page</p>
         <p>Also, this chart only fills the area when something changed (useful for weekends/open-source projects that frequently have periods of no change)</p>
         <Loadable
