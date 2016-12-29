@@ -54,6 +54,9 @@ test('shows a repo', async t => {
   // FIXME: When loading is done then the issues should be listed (now it has to wait for 10 seconds)
   // await browser.waitForExist('a.issue-title', 10 * 1000)
   await browser.getText('a.issue-title')
+  // Check that issues have an updatedAt (check that MomentJS is working)
+  const agoRegExp = / ago/
+  t.true(agoRegExp.test(await browser.getText('time.updated-at')))
 })
 
 
