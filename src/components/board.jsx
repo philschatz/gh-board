@@ -44,7 +44,7 @@ const ProgressView = React.createClass({
         <BS.ProgressBar now={ticks} max={max} label={label}/>
         <SyncIcon className='icon-spin'/> {message}
       </div>
-    )
+    );
   }
 });
 

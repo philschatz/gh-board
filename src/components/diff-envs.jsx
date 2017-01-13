@@ -35,12 +35,12 @@ const DiffEnvs = React.createClass({
         if (!startShaInfos[key]) {
           delete endShaInfos[key];
         }
-      })
+      });
       Object.keys(startShaInfos).forEach((key) => {
         if (!endShaInfos[key]) {
           delete startShaInfos[key];
         }
-      })
+      });
 
 
       // build up an array of shas

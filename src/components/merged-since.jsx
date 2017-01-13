@@ -30,8 +30,8 @@ const MergedSince = React.createClass({
     //     </div>
     //   );
     // } else {
-      const card = IssueStore.issueToCard(repoOwner, repoName, pr);
-      return (
+    const card = IssueStore.issueToCard(repoOwner, repoName, pr);
+    return (
         <Issue card={card}/>
       );
     // }

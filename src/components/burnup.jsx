@@ -183,20 +183,20 @@ const BurnupShell = React.createClass({
     rows.unshift(['chunk', 'closed', 'total', 'new', 'ideal']);
 
     const chartData = {
-        x: 'chunk',
-        rows: rows,
-        colors: {
-            closed: '#ff0000',
-            total: '#00ff00',
-            'new': '#0000ff',
-            ideal: '#999999'
-        },
-        types: {
-            closed: 'area-spline',
-            total: 'area-spline',
-            'new': 'bar'
-        },
-        // groups: [['opened', 'closed']]
+      x: 'chunk',
+      rows: rows,
+      colors: {
+        closed: '#ff0000',
+        total: '#00ff00',
+        'new': '#0000ff',
+        ideal: '#999999'
+      },
+      types: {
+        closed: 'area-spline',
+        total: 'area-spline',
+        'new': 'bar'
+      },
+      // groups: [['opened', 'closed']]
     };
     function formatChunkIndex(index) {
       return formatChunk(rows[index+1][0]);// +1 because 1st row is the headers

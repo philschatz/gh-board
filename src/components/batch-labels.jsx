@@ -63,7 +63,7 @@ const LabelViewEdit = React.createClass({
         alert('Done renaming. To see the updates, go back to the kanban board and then back here (because the developer is lazy)');
         this.setState({isEditing: false});
       })
-      .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); })
+      .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
   },
   onClickRemove() {
@@ -82,7 +82,7 @@ const LabelViewEdit = React.createClass({
         alert('Done removing. To see the updates, go back to the kanban board and then back here (because the developer is lazy)');
         this.setState({isRemoved: true});
       })
-      .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); })
+      .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
   },
   render() {
@@ -108,7 +108,7 @@ const LabelViewEdit = React.createClass({
             <BS.Button bsStyle='primary' onClick={this.onClickSave} disabled={!isSaveEnabled}>Save</BS.Button>
           </td>
         </tr>
-      )
+      );
     } else {
       let details;
       if (repoInfos.length === 0) {
@@ -138,7 +138,7 @@ const LabelViewEdit = React.createClass({
                 <p key={repoInfo}>
                   <a target='_window' href={`https://github.com/${repoOwner1}/${repoName1}/labels`}>{repoOwner1}/{repoName1}</a>
                 </p>
-              )
+              );
             })}
           </BS.Popover>
         );
@@ -194,7 +194,7 @@ const BatchLabelsShell = React.createClass({
     return _.sortBy(labels, ({name}) => name).map(({label, repoInfos}) => {
       return (
         <LabelViewEdit key={label.name} label={label} repoInfos={repoInfos} skipPrimaryRepo={skipPrimaryRepo}/>
-      )
+      );
     });
   },
   renderLoaded(repoInfosWithLabels) {
@@ -216,7 +216,7 @@ const BatchLabelsShell = React.createClass({
 
     const labelCountsValues = _.sortBy(_.values(labelCounts), ({label}) => label.name);
     const primaryLabels = _.filter(labelCountsValues, ({repoInfos}) => {
-      return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) >= 0)
+      return (repoInfos.indexOf(`${primaryRepoOwner}/${primaryRepoName}`) >= 0);
     });
 
     const nonPrimaryAndNonUniqueLabels = _.filter(labelCountsValues, ({repoInfos}) => {
@@ -287,7 +287,7 @@ const BatchLabelsShell = React.createClass({
     const uniquePanels = repoInfosWithUniqueLabels.map(({repoOwner, repoName, uniqueLabels}) => {
       const header = (
         <span>Labels unique to <a target='_window' href={`https://github.com/${repoOwner}/${repoName}/labels`}>{repoOwner}/{repoName}</a></span>
-      )
+      );
       return (
         <BS.Col lg={6} key={`${repoOwner}/${repoName}`}>
           <BS.Panel header={header}>
@@ -324,7 +324,7 @@ const BatchLabelsShell = React.createClass({
         promise={promise}
         renderLoaded={this.renderLoaded}
       />
-    )
+    );
   }
 });
 
