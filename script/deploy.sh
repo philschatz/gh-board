@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+set -o pipefail
 
 # check if the current branch is `gh-pages`
 currentBranch=$(git rev-parse --abbrev-ref HEAD)
