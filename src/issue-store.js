@@ -94,13 +94,13 @@ function _buildBipartiteGraph(graph, cards) {
       // TODO: Refactor to simplify this datastructure
       //if (card.issue.pullRequest) {
         // card is a Pull Request
-        _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
-          const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
-          const otherCard = issueStore.issueNumberToCard(repoOwner, repoName, number);
-          if (otherCard) {
-            GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
-          }
-        });
+      _.each(relatedIssues, ({repoOwner, repoName, number, fixes}) => {
+        const otherCardPath = GRAPH_CACHE.cardToKey({repoOwner, repoName, issue: {number}});
+        const otherCard = issueStore.issueNumberToCard(repoOwner, repoName, number);
+        if (otherCard) {
+          GRAPH_CACHE.addEdge(otherCardPath, cardPath, otherCard, card, fixes);
+        }
+      });
       //}
     }
   });

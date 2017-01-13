@@ -10,10 +10,10 @@ export default function(milestoneCount) {
   const FIXED_TIME_DOMAIN_MODE = 'fixed';
 
   let margin = {
-  	top : 20,
-  	right : 40,
-  	bottom : 20,
-  	left : 250
+    top : 20,
+    right : 40,
+    bottom : 20,
+    left : 250
   };
   let selector = 'body';
   let timeDomainStart = d3.time.day.offset(new Date(),-3);
@@ -28,21 +28,21 @@ export default function(milestoneCount) {
   let tickFormat = '%H:%M';
 
   function keyFunction(d) {
-	  return d.startDate + d.taskName + d.endDate;
+    return d.startDate + d.taskName + d.endDate;
   };
 
   function rectTransform(d) {
-	  return 'translate(' + x(d.startDate) + ',' + y(d.taskName) + ')';
+    return 'translate(' + x(d.startDate) + ',' + y(d.taskName) + ')';
   };
   function rectTransformCompleted(d) {
-	  return 'translate(' + x(d.startDate) + ',' + y(d.taskName) + ')';
+    return 'translate(' + x(d.startDate) + ',' + y(d.taskName) + ')';
   };
   function rectTransformRemaining(d) {
-	  return 'translate(' + (x(d.startDate) + d.percent * (x(d.endDate)-x(d.startDate))) + ',' + y(d.taskName) + ')';
+    return 'translate(' + (x(d.startDate) + d.percent * (x(d.endDate)-x(d.startDate))) + ',' + y(d.taskName) + ')';
   };
   function rectTransformSegment({task, segment, total, prev}) {
     const percent = prev / total;
-	  return 'translate(' + (x(task.startDate) + percent * (x(task.endDate)-x(task.startDate))) + ',' + y(task.taskName) + ')';
+    return 'translate(' + (x(task.startDate) + percent * (x(task.endDate)-x(task.startDate))) + ',' + y(task.taskName) + ')';
   };
 
   let x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
@@ -55,37 +55,37 @@ export default function(milestoneCount) {
   let yAxis = d3.svg.axis().scale(y).orient('right').tickSize(0);
 
   function initTimeDomain(tasks) {
-	  if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
-	    if (tasks === undefined || tasks.length < 1) {
-		    timeDomainStart = d3.time.day.offset(new Date(), -3);
-		    timeDomainEnd = d3.time.hour.offset(new Date(), +3);
-		    return;
-	    }
-	    tasks = tasks.sort(function(a, b) {
-		    return a.endDate - b.endDate;
-	    });
-	    timeDomainEnd = tasks[tasks.length - 1].endDate;
-	    tasks = tasks.sort(function(a, b) {
-		    return a.startDate - b.startDate;
-	    });
-	    timeDomainStart = tasks[0].startDate;
-	  }
+    if (timeDomainMode === FIT_TIME_DOMAIN_MODE) {
+      if (tasks === undefined || tasks.length < 1) {
+        timeDomainStart = d3.time.day.offset(new Date(), -3);
+        timeDomainEnd = d3.time.hour.offset(new Date(), +3);
+        return;
+      }
+      tasks = tasks.sort(function(a, b) {
+        return a.endDate - b.endDate;
+      });
+      timeDomainEnd = tasks[tasks.length - 1].endDate;
+      tasks = tasks.sort(function(a, b) {
+        return a.startDate - b.startDate;
+      });
+      timeDomainStart = tasks[0].startDate;
+    }
   };
 
   function initAxis() {
-	  x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
-	  y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
-	  xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
+    x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
+    y = d3.scale.ordinal().domain(taskTypes).rangeRoundBands([ 0, height - margin.top - margin.bottom ], .1);
+    xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(d3.time.format(tickFormat)).tickSubdivide(true)
 		  .tickSize(8).tickPadding(8);
 
-	  yAxis = d3.svg.axis().scale(y).orient('right').tickSize(0);
+    yAxis = d3.svg.axis().scale(y).orient('right').tickSize(0);
   };
 
   function gantt(tasks) {
     initTimeDomain(tasks);
-	  initAxis();
+    initAxis();
 
-	  const svg = d3.select(selector)
+    const svg = d3.select(selector)
 	    .append('svg')
 	    .attr('class', 'chart')
 	    .attr('width', width + margin.left + margin.right)
@@ -126,8 +126,8 @@ export default function(milestoneCount) {
       .attr('height', (d) => y.rangeBand())
       .attr('width', ({task, total, segment}) => {
         const percent = segment.count / total;
-    	  return percent * (x(task.endDate) - x(task.startDate));
-    	});
+        return percent * (x(task.endDate) - x(task.startDate));
+      });
 
 
    // PHIL: Copy-pasta to show the 2nd half of the milestone (unfinished)
@@ -147,21 +147,21 @@ export default function(milestoneCount) {
  // 	     });
 
 
-	  svg.append('g')
+    svg.append('g')
   	  .attr('class', 'x axis')
   	  .attr('transform', 'translate(0, ' + (height - margin.top - margin.bottom) + ')')
   	  .transition()
   	  .call(xAxis);
 
-	  svg.append('g').attr('class', 'y axis').attr('transform', 'translate(-' + margin.left + ',0)').transition().call(yAxis);
+    svg.append('g').attr('class', 'y axis').attr('transform', 'translate(-' + margin.left + ',0)').transition().call(yAxis);
 
-	  return gantt;
+    return gantt;
   };
 
   gantt.redraw = function(tasks) {
 
-	  initTimeDomain(tasks);
-	  initAxis();
+    initTimeDomain(tasks);
+    initAxis();
 
     const svg = d3.select('.chart');
 
@@ -196,7 +196,7 @@ export default function(milestoneCount) {
       .attr('height', (d) => y.rangeBand())
       .attr('width', ({task, total, segment}) => {
         const percent = segment.count / total;
-   	    return percent * (x(task.endDate) - x(task.startDate));
+        return percent * (x(task.endDate) - x(task.startDate));
       });
 
 
@@ -250,24 +250,24 @@ export default function(milestoneCount) {
 // rect.exit().remove();
 
 
-  	svg.select('.x').transition().call(xAxis);
-  	svg.select('.y').transition().call(yAxis);
+    svg.select('.x').transition().call(xAxis);
+    svg.select('.y').transition().call(yAxis);
 
-	   return gantt;
+    return gantt;
   };
 
   gantt.margin = function(value) {
-	  if (!arguments.length)
-	    return margin;
-	  margin = value;
-	  return gantt;
+    if (!arguments.length)
+      return margin;
+    margin = value;
+    return gantt;
   };
 
   gantt.timeDomain = function(value) {
-	  if (!arguments.length)
-	    return [ timeDomainStart, timeDomainEnd ];
-	  timeDomainStart = +value[0], timeDomainEnd = +value[1];
-	  return gantt;
+    if (!arguments.length)
+      return [ timeDomainStart, timeDomainEnd ];
+    timeDomainStart = +value[0], timeDomainEnd = +value[1];
+    return gantt;
   };
 
   /**
@@ -276,52 +276,52 @@ export default function(milestoneCount) {
    *                "fixed" - fixed domain.
    */
   gantt.timeDomainMode = function(value) {
-	  if (!arguments.length)
-	    return timeDomainMode;
+    if (!arguments.length)
+      return timeDomainMode;
     timeDomainMode = value;
     return gantt;
   };
 
   gantt.taskTypes = function(value) {
-	  if (!arguments.length)
-	    return taskTypes;
-	  taskTypes = value;
-	  return gantt;
+    if (!arguments.length)
+      return taskTypes;
+    taskTypes = value;
+    return gantt;
   };
 
   gantt.taskStatus = function(value) {
-	  if (!arguments.length)
-	    return taskStatus;
-	  taskStatus = value;
-	  return gantt;
+    if (!arguments.length)
+      return taskStatus;
+    taskStatus = value;
+    return gantt;
   };
 
   gantt.width = function(value) {
-	  if (!arguments.length)
-	    return width;
-	  width = +value;
-	  return gantt;
+    if (!arguments.length)
+      return width;
+    width = +value;
+    return gantt;
   };
 
   gantt.height = function(value) {
-	  if (!arguments.length)
-	    return height;
-	  height = +value;
-	  return gantt;
+    if (!arguments.length)
+      return height;
+    height = +value;
+    return gantt;
   };
 
   gantt.tickFormat = function(value) {
-	  if (!arguments.length)
-	    return tickFormat;
-	  tickFormat = value;
-	  return gantt;
+    if (!arguments.length)
+      return tickFormat;
+    tickFormat = value;
+    return gantt;
   };
 
   gantt.selector = function(value) {
-	  if (!arguments.length)
-	    return selector;
-	  selector = value;
-	  return gantt;
+    if (!arguments.length)
+      return selector;
+    selector = value;
+    return gantt;
   };
 
   return gantt;
