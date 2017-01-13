@@ -288,12 +288,12 @@ const issueStore = new class IssueStore extends EventEmitter {
                 return this._fetchLastSeenUpdatesForRepo(repoOwner, repoName, progress, lastSeenAt, isPrivate, this._getDidLabelsChange(newLabels, oldLabels));
               });
 
-            })
-          })
-        })
-      })
+            });
+          });
+        });
+      });
 
-    })
+    });
   }
   fetchConcreteRepoInfos(repoInfos) {
     const allPromises = repoInfos.map(({repoOwner, repoName}) => {
@@ -413,7 +413,7 @@ const issueStore = new class IssueStore extends EventEmitter {
           // Filter repos to only include ones that have been pushed in the last year
           // to avoid excessive polling
           repos = _.filter(repos, (repo) => {
-            const ret = Date.now() - Date.parse(repo.updatedAt) < 1000 * 60 * 60 * 24 * 365
+            const ret = Date.now() - Date.parse(repo.updatedAt) < 1000 * 60 * 60 * 24 * 365;
             // if (!ret) {
             //   console.log('Skipping over ', repo.name, 'because lastUpdated=', repo.updatedAt);
             // }
@@ -568,10 +568,10 @@ const issueStore = new class IssueStore extends EventEmitter {
         return Client.getOcto().repos(repoOwner, repoName).labels.fetchAll()
         .then((labels) => {
           return {repoOwner, repoName, labels};
-        })
+        });
       }
-    })
+    });
   }
-}
+};
 
 export default issueStore;

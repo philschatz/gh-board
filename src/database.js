@@ -49,38 +49,38 @@ memdown.prototype._batch = function (array, options, callback) {
     , value
     , iter
     , len = array.length
-    , tree = this._store[this._location]
+    , tree = this._store[this._location];
 
   while (++i < len) {
     if (!array[i])
       continue;
 
-    key = this._isBuffer(array[i].key) ? array[i].key : String(array[i].key)
-    err = this._checkKey(key, 'key')
+    key = this._isBuffer(array[i].key) ? array[i].key : String(array[i].key);
+    err = this._checkKey(key, 'key');
     if (err)
-      return setImmediate(function errorCall() { callback(err) })
+      return setImmediate(function errorCall() { callback(err); });
 
-    iter = tree.find(key)
+    iter = tree.find(key);
 
     if (array[i].type === 'put') {
       // value = this._isBuffer(array[i].value) ? array[i].value : String(array[i].value)
-      value = array[i].value
+      value = array[i].value;
 
-      err = this._checkKey(value, 'value')
+      err = this._checkKey(value, 'value');
 
       if (err)
-        return setImmediate(function errorCall() { callback(err) })
+        return setImmediate(function errorCall() { callback(err); });
 
-      tree = iter.valid ? iter.update(value) : tree.insert(key, value)
+      tree = iter.valid ? iter.update(value) : tree.insert(key, value);
     } else {
-      tree = iter.remove()
+      tree = iter.remove();
     }
   }
 
   this._store[this._location] = tree;
 
-  setImmediate(callback)
-}
+  setImmediate(callback);
+};
 
 
 
@@ -88,7 +88,7 @@ memdown.prototype._batch = function (array, options, callback) {
 // localStorage support is needed because IndexedDB is disabled for Private browsing in Safari/Firefox
 const database = new class Database {
   constructor() {
-    this._dbs = {}
+    this._dbs = {};
     const dbNames = Object.keys(DB_DATA);
     for (const i in dbNames) {
       const key = dbNames[i];
@@ -181,7 +181,7 @@ const database = new class Database {
     filter = filter || getFilters();
     const {states} = filter.getState();
     const db = new Dexie('issues');
-    db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'})
+    db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'});
     return db.open().then(function() {
       const cards = [];
       let query;
@@ -197,7 +197,7 @@ const database = new class Database {
       }).then(() => {
         return filterCardsByFilter(cards, filter);
       });
-    })
+    });
 
     // // Alternative Method using leveDB (slow)
     // const cards = [];
@@ -282,7 +282,7 @@ const database = new class Database {
       .then((val) => {
         resolve(val);
       })
-      .catch(() => { resolve(null); })
+      .catch(() => { resolve(null); });
     });
   }
 
@@ -299,7 +299,7 @@ const database = new class Database {
         }
         resolve(val);
       })
-      .catch(() => { resolve(null); })
+      .catch(() => { resolve(null); });
     });
   }
 
