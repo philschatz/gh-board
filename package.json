@@ -9,7 +9,8 @@
     "dev-build": "eslint src; webpack --progress --colors",
     "start-webdriver": "webdriver-manager update && webdriver-manager start",
     "run-ava": "ava --verbose --serial",
-    "test": "./script/run-test.sh"
+    "test": "./script/run-test.sh",
+    "deploy": "./script/deploy.sh"
   },
   "author": "Philip Schatz",
   "license": "AGPL3.0",
