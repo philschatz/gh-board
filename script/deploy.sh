@@ -2,7 +2,7 @@
 
 # check if the current branch is `gh-pages`
 currentBranch=$(git rev-parse --abbrev-ref HEAD)
-if [[ ${currentBranch} -eq gh-pages ]]
+if [[ ${currentBranch} == "gh-pages" ]]
 then
   git push origin gh-pages
 else
