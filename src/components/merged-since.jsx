@@ -32,8 +32,8 @@ const MergedSince = React.createClass({
     // } else {
     const card = IssueStore.issueToCard(repoOwner, repoName, pr);
     return (
-        <Issue card={card}/>
-      );
+      <Issue card={card}/>
+    );
     // }
   },
   render() {
