@@ -86,7 +86,7 @@ export default React.createClass({
             <h4>"GitHub Enterprise Endpoint"</h4>
             <p>
               If you need to set a custom API endpoint:<br/>
-              <BS.Input
+              <BS.FormControl
                 type='text'
                 defaultValue={defaultRootURL}
                 placeholder='Enter GitHub API URL, e.g. https://github.example.com/api/v3'
