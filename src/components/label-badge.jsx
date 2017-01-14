@@ -6,7 +6,6 @@ import {ListUnorderedIcon, TagIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import {KANBAN_LABEL, isLight} from '../helpers';
-import GithubFlavoredMarkdown from './gfm';
 
 const LabelBadge = React.createClass({
   propTypes: {
@@ -47,10 +46,7 @@ const LabelBadge = React.createClass({
           className={className}
           style={{backgroundColor: '#' + label.color}}>
           {icon}
-          <GithubFlavoredMarkdown
-            inline
-            text={name}
-          />
+          {name}
           {extra}
         </Link>
       );
@@ -63,10 +59,7 @@ const LabelBadge = React.createClass({
           onClick={onClick}
           style={{backgroundColor: '#' + label.color}}>
           {icon}
-          <GithubFlavoredMarkdown
-            inline
-            text={name}
-          />
+          {name}
           {extra}
         </BS.Badge>
       );
