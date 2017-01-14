@@ -118,6 +118,19 @@ const GameModal = React.createClass({
       that._startEngine(GameEngine, gistId, gameData);
     });
   },
+  onHide() {
+    // Load the game engine from a separate bundle
+    const that = this;
+    /*eslint-disable no-undef */
+    require.ensure([], (require) => {
+      const GameEngine = require('puzzle-script');
+      /*eslint-enable no-undef */
+      that._stopEngine(GameEngine);
+    });
+  },
+  // GameEngine is passed in as an additional argument because it loaded
+  // from a separate bundle to reduce the size of the javascript file
+  // (if you are not using the code, do not bother loading it)
   _startEngine(GameEngine, gistId, gameData) {
     /*eslint-enable no-undef */
     const canvasNode = this.refs.gameCanvas;
@@ -138,19 +151,13 @@ const GameModal = React.createClass({
     this.setLastPlayed(gistId);
     this.setState({isPlaying: true});
   },
-  onHide() {
-    // Load the game engine from a separate bundle
-    /*eslint-disable no-undef */
-    require.ensure([], (require) => {
-      const GameEngine = require('puzzle-script');
-      /*eslint-enable no-undef */
-      const {isPlaying} = this.state;
-      if (isPlaying) {
-        GameEngine.stop();
-      }
-      this.setState({isPlaying: false});
-      this.props.onHide();
-    });
+  _stopEngine(GameEngine) {
+    const {isPlaying} = this.state;
+    if (isPlaying) {
+      GameEngine.stop();
+    }
+    this.setState({isPlaying: false});
+    this.props.onHide();
   },
   render() {
     const {isPlaying} = this.state;
