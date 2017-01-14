@@ -23,8 +23,12 @@ else
   # build
   npm run build
 
+  # copy index.html to root
+  cp ./dist/index.html ./index.html
+
   # commmit the new dist folder
   git add dist
+  get add index.html
   git commit -m ':rocket: deploy new version'
 
   # force push to gh-pages
@@ -33,8 +37,9 @@ else
   # go back to previous branch
   git checkout ${currentBranch}
 
-  # reset .gitignore
-  git checkout -- .gitignore
+  # reset .gitignore and index.html
+  git checkout -- .gitignore || true
+  git checkout -- index.html || true
 fi
 
 echo "Successfully deployed"
