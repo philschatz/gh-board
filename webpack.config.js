@@ -1,65 +1,142 @@
-var path = require("path");
-var webpack = require('webpack');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const OfflinePlugin = require('offline-plugin');
+const Dashboard = require('webpack-dashboard/plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-var isBuild = process.env['NODE_ENV'] === 'production';
+const ENV = process.env.NODE_ENV || 'development';
 
-var config = {
-    // devtool: '#eval-source-map',
-    devtool: 'source-map',
-    context: path.resolve(__dirname),
-    entry: [
-      // The following is added when `isBuild = falsy`
-      // 'webpack-dev-server/client?http://0.0.0.0:8080', // WebpackDevServer host and port
-      //'webpack/hot/only-dev-server',
+const config = {
+  entry: {
+    app: [
       './style/index.js',
-      './src/index.js'
+      './src/index.js',
     ],
-    output: {
-        path: __dirname + '/dist',
-        publicPath: './dist/', // gh-pages needs this to have a '.' for bundles
-        filename: 'bundle.js'
-    },
-    plugins: [
-      new webpack.NoErrorsPlugin(),
-      new ExtractTextPlugin('app.css')
-    ],
-    module: {
-        preLoaders: [
-          { test: /\.jsx?$/, loader: 'eslint-loader', exclude: [/node_modules|gantt-chart.*/, /octokat\.js/] },
-        ],
-        loaders: [
-            { test: /\.jsx?$/, loader: 'babel', exclude: [/node_modules/, /puzzle-script/, /octokat\.js/], query: { presets: ['react', 'es2015']} },
-            { test: /\.json$/, loader: 'json-loader'},
-            { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
-            { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
-            { test: /\.(woff|woff2|eot|ttf)/, loader: "url-loader?limit=30000&name=[name]-[hash].[ext]" }
-        ]
-    },
-    resolve: {
-      extensions: ['', '.js', '.jsx', '.json'],
-      alias: {
-        xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
-        fs: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-        proxyquire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-        rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-        'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
+		vendor: ['react', 'react-router', 'react-bootstrap']
+  },
+  output: {
+    path: path.resolve(__dirname, './dist'),
+		filename: '[name].[hash:8].js',
+		chunkFilename: '[id].[hash:8].chunk.js'
+  },
+
+  module: {
+    rules: [
+      {
+        enforce: 'pre',
+        test: /\.jsx?$/,
+        loader: 'eslint-loader',
+        exclude: [/node_modules|gantt-chart.*/, /octokat\.js/]
       },
+      {
+        test: /\.jsx?$/,
+        loader: 'babel-loader',
+        exclude: [/node_modules/, /puzzle-script/, /octokat\.js/],
+        query: { presets: ['react', 'es2015']}
+      },
+      {
+        test: /\.json$/,
+        loader: 'json-loader'
+      },
+      {
+        test: /\.less$/,
+        loader: ExtractTextPlugin.extract('css-loader!less-loader')
+      },
+      {
+        test: /\.(png|jpg|svg)/,
+        loader: 'file-loader?name=[name].[ext]'
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf)/,
+        loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'
+      }
+    ]
+  },
+
+  resolve: {
+    extensions: ['.js', '.jsx', '.json'],
+    alias: {
+      xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
+      fs: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
+      proxyquire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
+      rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
+      'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
     },
-    devServer: {
-      // hot: true // Added when `isBuild = falsy`
-    }
+  },
+
+  plugins: ([
+    new webpack.optimize.CommonsChunkPlugin({ name: 'vendor' }),
+    new webpack.LoaderOptionsPlugin({
+			options: {
+				context: __dirname
+			}
+		}),
+    new ExtractTextPlugin('app.css'),
+    new webpack.DefinePlugin({
+			'process.env.NODE_ENV': JSON.stringify(ENV)
+		}),
+		new HtmlWebpackPlugin({
+			template: './src/index.html',
+			title: 'GH-Board',
+		 	removeRedundantAttributes: true,
+			inject: false,
+			manifest: `${ENV === 'production' ? './dist/manifest.json' : '/assets/manifest.json' }`,
+			minify: {
+				collapseWhitespace: true,
+				removeComments: true
+			},
+			themeColor: '#f8f8f8',
+      analytics: ENV === 'production'
+		}),
+    new ManifestPlugin({
+			fileName: 'asset-manifest.json'
+		})
+  ])
+  // Only for development
+	.concat(ENV === 'development' ? [
+		new webpack.HotModuleReplacementPlugin(),
+		new Dashboard()
+	] : [])
+	// Only for production
+	.concat(ENV === 'production' ? [
+		new webpack.NoErrorsPlugin(),
+		new CopyWebpackPlugin([
+			{ from: './src/assets/manifest.json', to: './' },
+			{ from: './src/assets/img', to: './img' }
+		]),
+		new OfflinePlugin({
+			relativePaths: false,
+			publicPath: '/',
+			updateStrategy: 'all',
+			preferOnline: true,
+			safeToUseOptionalCaches: true,
+			caches: 'all',
+			version: 'GHBoard[hash]',
+			ServiceWorker: {
+				navigateFallbackURL: '/',
+				events: true
+			},
+			AppCache: false
+		})
+  ] : []),
+
+  stats: { colors: true },
+
+  devtool: ENV === 'production' ? 'source-map' : 'inline-source-map',
+  devServer: {
+		port: process.env.PORT || 8080,
+		host: '0.0.0.0',
+		compress: true,
+		contentBase: './src',
+		historyApiFallback: true
+	}
 };
 
-if (isBuild) {
-  // Remove React warnings and whatnot
-  config.plugins.unshift(new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }));
-} else {
-  config.debug = true;
-  config.output.publicPath = '/dist/'; // Dev server needs this to not have a dot.
-  // config.entry.unshift('webpack/hot/only-dev-server');
-  config.entry.unshift('webpack-dev-server/client?http://0.0.0.0:8080');
-  config.devServer.hotComponents = true;
+if (ENV === 'production') {
+  config.output.publicPath = './dist/'; // gh-pages needs this to have a '.' for bundles
 }
 
 module.exports = config;
