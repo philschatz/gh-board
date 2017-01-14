@@ -15,12 +15,12 @@ const config = {
       './style/index.js',
       './src/index.js',
     ],
-		vendor: ['react', 'react-router', 'react-bootstrap']
+    vendor: ['react', 'react-router', 'react-bootstrap']
   },
   output: {
     path: path.resolve(__dirname, './dist'),
-		filename: '[name].[hash:8].js',
-		chunkFilename: '[id].[hash:8].chunk.js'
+    filename: '[name].[hash:8].js',
+    chunkFilename: '[id].[hash:8].chunk.js'
   },
 
   module: {
@@ -29,7 +29,7 @@ const config = {
         enforce: 'pre',
         test: /\.jsx?$/,
         loader: 'eslint-loader',
-        exclude: [/node_modules|gantt-chart.*/, /octokat\.js/]
+        exclude: [/octokat\.js/]
       },
       {
         test: /\.jsx?$/,
@@ -70,69 +70,69 @@ const config = {
   plugins: ([
     new webpack.optimize.CommonsChunkPlugin({ name: 'vendor' }),
     new webpack.LoaderOptionsPlugin({
-			options: {
-				context: __dirname
-			}
-		}),
+      options: {
+        context: __dirname
+      }
+    }),
     new ExtractTextPlugin('app.css'),
     new webpack.DefinePlugin({
-			'process.env.NODE_ENV': JSON.stringify(ENV)
-		}),
-		new HtmlWebpackPlugin({
-			template: './src/index.html',
-			title: 'GH-Board',
-		 	removeRedundantAttributes: true,
-			inject: false,
-			manifest: `${ENV === 'production' ? './dist/manifest.json' : '/assets/manifest.json' }`,
-			minify: {
-				collapseWhitespace: true,
-				removeComments: true
-			},
-			themeColor: '#f8f8f8',
+      'process.env.NODE_ENV': JSON.stringify(ENV)
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/index.html',
+      title: 'GH-Board',
+       removeRedundantAttributes: true,
+      inject: false,
+      manifest: `${ENV === 'production' ? './dist/manifest.json' : '/assets/manifest.json' }`,
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true
+      },
+      themeColor: '#f8f8f8',
       analytics: ENV === 'production'
-		}),
+    }),
     new ManifestPlugin({
-			fileName: 'asset-manifest.json'
-		})
+      fileName: 'asset-manifest.json'
+    })
   ])
   // Only for development
-	.concat(ENV === 'development' ? [
-		new webpack.HotModuleReplacementPlugin(),
-		new Dashboard()
-	] : [])
-	// Only for production
-	.concat(ENV === 'production' ? [
-		new webpack.NoErrorsPlugin(),
-		new CopyWebpackPlugin([
-			{ from: './src/assets/manifest.json', to: './' },
-			{ from: './src/assets/img', to: './img' }
-		]),
-		new OfflinePlugin({
-			relativePaths: false,
-			publicPath: '/',
-			updateStrategy: 'all',
-			preferOnline: true,
-			safeToUseOptionalCaches: true,
-			caches: 'all',
-			version: 'GHBoard[hash]',
-			ServiceWorker: {
-				navigateFallbackURL: '/',
-				events: true
-			},
-			AppCache: false
-		})
+  .concat(ENV === 'development' ? [
+    new webpack.HotModuleReplacementPlugin(),
+    new Dashboard()
+  ] : [])
+  // Only for production
+  .concat(ENV === 'production' ? [
+    new webpack.NoErrorsPlugin(),
+    new CopyWebpackPlugin([
+      { from: './src/assets/manifest.json', to: './' },
+      { from: './src/assets/img', to: './img' }
+    ]),
+    new OfflinePlugin({
+      relativePaths: false,
+      publicPath: '/',
+      updateStrategy: 'all',
+      preferOnline: true,
+      safeToUseOptionalCaches: true,
+      caches: 'all',
+      version: 'GHBoard[hash]',
+      ServiceWorker: {
+        navigateFallbackURL: '/',
+        events: true
+      },
+      AppCache: false
+    })
   ] : []),
 
   stats: { colors: true },
 
   devtool: ENV === 'production' ? 'source-map' : 'inline-source-map',
   devServer: {
-		port: process.env.PORT || 8080,
-		host: '0.0.0.0',
-		compress: true,
-		contentBase: './src',
-		historyApiFallback: true
-	}
+    port: process.env.PORT || 8080,
+    host: '0.0.0.0',
+    compress: true,
+    contentBase: './src',
+    historyApiFallback: true
+  }
 };
 
 if (ENV === 'production') {
