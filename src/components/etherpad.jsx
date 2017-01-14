@@ -105,7 +105,7 @@ const EtherpadInner = React.createClass({
     if (getFilters().getState().repoInfos.length > 0) {
       goBack = (
         <Link to={getFilters().setRouteName('').url()} className='btn btn-default'>Go Back</Link>
-      )
+      );
     }
     let isLoadEnabled = false;
     let isSaveEnabled = false;

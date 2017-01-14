@@ -351,19 +351,19 @@ let IssueCard = React.createClass({
       let statusText;
       // pending, success, error, or failure
       switch (status.state) {
-        case 'success':
-          statusIcon = (<CheckIcon className='status-icon'/>);
-          break;
-        case 'pending':
-          statusIcon = (<PrimitiveDotIcon className='status-icon'/>);
-          statusText = 'Testing...';
-          break;
-        case 'error':
-        case 'failure':
-          statusIcon = (<XIcon className='status-icon'/>);
-          statusText = 'Tests Failed';
-          break;
-        default:
+      case 'success':
+        statusIcon = (<CheckIcon className='status-icon'/>);
+        break;
+      case 'pending':
+        statusIcon = (<PrimitiveDotIcon className='status-icon'/>);
+        statusText = 'Testing...';
+        break;
+      case 'error':
+      case 'failure':
+        statusIcon = (<XIcon className='status-icon'/>);
+        statusText = 'Tests Failed';
+        break;
+      default:
 
       }
       if (statusIcon || statusText) {
@@ -435,7 +435,7 @@ let IssueCard = React.createClass({
             overlay={bodyPopover}>
             {children}
           </BS.OverlayTrigger>
-        )
+        );
       }
     });
 

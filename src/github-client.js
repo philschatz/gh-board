@@ -161,7 +161,7 @@ const FetchOnePlugin = {
       };
     }
   }
-}
+};
 
 class Client extends EventEmitter {
   constructor() {

@@ -226,7 +226,7 @@ const FilterDropdown = React.createClass({
     const {states} = filters.getState();
 
     const items = ['open', 'closed'].map((state) => {
-      return {text: state, isSelected: states.indexOf(state) >= 0, toggleHref: filters.toggleState(state).url() }
+      return {text: state, isSelected: states.indexOf(state) >= 0, toggleHref: filters.toggleState(state).url() };
     });
 
     return (<FilterCategory noSearch items={items}/>);
@@ -236,7 +236,7 @@ const FilterDropdown = React.createClass({
     const {types} = filters.getState();
 
     const items = ['issue', 'pull-request'].map((type) => {
-      return {text: type, isSelected: types.indexOf(type) >= 0, toggleHref: filters.toggleType(type).url() }
+      return {text: type, isSelected: types.indexOf(type) >= 0, toggleHref: filters.toggleType(type).url() };
     });
 
     return (<FilterCategory noSearch items={items}/>);
@@ -322,10 +322,10 @@ const FilterDropdown = React.createClass({
         } else if (types[0] === 'pull-request') {
           selectedMilestoneItem = `All ${state} Pull Requests`;
         } else {
-          throw new Error('BUG: invalid type')
+          throw new Error('BUG: invalid type');
         }
       } else {
-        throw new Error('BUG: invalid type')
+        throw new Error('BUG: invalid type');
       }
     }
 

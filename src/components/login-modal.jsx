@@ -43,7 +43,7 @@ export default React.createClass({
       if (tld == 'localhost') return null;
       return 'https://' + hostname + '/api/v3';
 
-    })()
+    })();
 
 
     const footer = (

@@ -146,7 +146,7 @@ const IssueOrPullRequestBlurbShell = React.createClass({
         promise={promise}
         renderLoaded={(repo) => (<IssueOrPullRequestBlurb repo={repo} card={card} primaryRepoName={primaryRepoName} context={context} />)}
       />
-    )
+    );
   }
 });
 

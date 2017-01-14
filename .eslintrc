@@ -21,6 +21,7 @@
     "new-cap": 0,
     "quotes": [1, "single", "avoid-escape"],
     "no-console": 1,
-    "semi": 1
+    "semi": 1,
+    "indent": [2, 2]
   }
 }

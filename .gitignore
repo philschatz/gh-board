@@ -1,3 +1,4 @@
 /node_modules/
 /dist/
 /selenium-screenshot.png
+npm-debug.log

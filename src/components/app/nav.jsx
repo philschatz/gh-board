@@ -81,7 +81,7 @@ const AppNav = React.createClass({
     if (confirm('Are you sure you want to reset all the local data? It will take some time to repopulate all the data from GitHub and you may need to reload the page')) {
       Database.resetDatabases().then(() => {
         alert('Local cache has been cleared');
-      })
+      });
     }
   },
   render() {
