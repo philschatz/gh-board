@@ -92,18 +92,18 @@ const GanttChart = React.createClass({
 
     const taskStatus = {
       'milestone-status-overdue': 'milestone-status-overdue',
-        'milestone-status-open' : 'milestone-status-open',
-        'milestone-status-closed' : 'milestone-status-closed'
+      'milestone-status-open' : 'milestone-status-open',
+      'milestone-status-closed' : 'milestone-status-closed'
     };
 
     const taskNames = tasks.map(({taskName}) => taskName).sort();
 
     tasks.sort(function(a, b) {
-        return a.endDate - b.endDate;
+      return a.endDate - b.endDate;
     });
     const maxDate = tasks[tasks.length - 1].endDate;
     tasks.sort(function(a, b) {
-        return a.startDate - b.startDate;
+      return a.startDate - b.startDate;
     });
     // const minDate = tasks[0].startDate;
 
@@ -114,37 +114,37 @@ const GanttChart = React.createClass({
 
 
     function changeTimeDomain(timeDomainString) {
-        let format;
-        switch (timeDomainString) {
-          case '1hr':
-          	format = '%H:%M:%S';
-          	chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
-          	break;
-          case '3hr':
-          	format = '%H:%M';
-          	chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
-          	break;
+      let format;
+      switch (timeDomainString) {
+      case '1hr':
+        	format = '%H:%M:%S';
+        	chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
+        	break;
+      case '3hr':
+        	format = '%H:%M';
+        	chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
+        	break;
 
-          case '6hr':
-          	format = '%H:%M';
-          	chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
-          	break;
+      case '6hr':
+        	format = '%H:%M';
+        	chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
+        	break;
 
-          case '1day':
-          	format = '%H:%M';
-          	chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
-          	break;
+      case '1day':
+        	format = '%H:%M';
+        	chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
+        	break;
 
-          case '1week':
-          	format = '%m/%d';
-          	chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
-          	break;
-          default:
-          	format = '%H:%M';
+      case '1week':
+        	format = '%m/%d';
+        	chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
+        	break;
+      default:
+        	format = '%H:%M';
 
-        }
-        chart.tickFormat(format);
-        chart.redraw(tasks);
+      }
+      chart.tickFormat(format);
+      chart.redraw(tasks);
     }
 
     changeTimeDomain('1week');

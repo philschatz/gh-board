@@ -35,4 +35,4 @@ class Progress extends EventEmitter {
   }
 }
 
-export default Progress
+export default Progress;

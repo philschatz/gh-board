@@ -42,7 +42,7 @@ const timerFn = () => {
   // const d = new Date();
   // console.log('tick', d.getMinutes(), d.getSeconds());
   timerTimeout = setTimeout(timerFn, getReloadTime());
-}
+};
 timerFn();
 
 const handleVisibilityChange = () => {
@@ -59,7 +59,7 @@ const handleVisibilityChange = () => {
     });
   }
 
-}
+};
 document.addEventListener('visibilitychange', handleVisibilityChange, false);
 
 export default React.createClass({

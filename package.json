@@ -4,12 +4,14 @@
   "description": "kanban board using just GitHub",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint src --ext .js --ext .jsx",
     "start": "webpack-dashboard -- webpack-dev-server",
-    "build": "eslint src; NODE_ENV=production webpack --optimize-minimize --progress --colors",
-    "dev-build": "eslint src; webpack --progress --colors",
+    "build": "npm run lint; NODE_ENV=production webpack --optimize-minimize --progress --colors",
+    "dev-build": "npm run lint; webpack --progress --colors",
     "start-webdriver": "webdriver-manager update && webdriver-manager start",
     "run-ava": "ava --verbose --serial",
-    "test": "./script/run-test.sh"
+    "test": "./script/run-test.sh",
+    "deploy": "./script/deploy.sh"
   },
   "author": "Philip Schatz",
   "license": "AGPL3.0",
