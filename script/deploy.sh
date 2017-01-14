@@ -14,7 +14,7 @@ then
   git push origin gh-pages
 else
   # delete gh-pages branch and start a clean one
-  git branch -d gh-pages
+  git branch -D gh-pages
   git checkout -b gh-pages
 
   # remove .gitignore
