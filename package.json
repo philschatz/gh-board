@@ -9,7 +9,7 @@
     "build": "npm run lint; NODE_ENV=production webpack --optimize-minimize --progress --colors",
     "dev-build": "npm run lint; webpack --progress --colors",
     "start-webdriver": "webdriver-manager update && webdriver-manager start",
-    "run-ava": "ava --verbose --serial",
+    "test:only": "ava --verbose --serial",
     "test": "./script/run-test.sh",
     "deploy": "./script/deploy.sh"
   },

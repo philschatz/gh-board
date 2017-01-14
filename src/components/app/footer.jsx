@@ -99,7 +99,7 @@ const KarmaWarning = React.createClass({
           {newestText}
         </BS.Nav>
         <BS.Nav pullRight>
-          <BS.NavItem className='nav-squirrel' onClick={this.showGameModal}><GiftIcon title='Oooh, a present!'/></BS.NavItem>
+          <BS.NavItem className='nav-secret-game' onClick={this.showGameModal}><GiftIcon title='Oooh, a present!'/></BS.NavItem>
           <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><MarkGithubIcon/> Source Code</BS.NavItem>
           <SavedFiltersButton/>
         </BS.Nav>
