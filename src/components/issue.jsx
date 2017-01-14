@@ -5,7 +5,7 @@ import _ from 'underscore';
 import { DragSource } from 'react-dnd';
 import classnames from 'classnames';
 import {Link} from 'react-router';
-import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, PencilIcon, CheckIcon, PrimitiveDotIcon} from 'react-octicons';
+import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, PencilIcon, CheckIcon, PrimitiveDotIcon, XIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
