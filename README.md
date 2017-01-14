@@ -170,10 +170,17 @@ Just specify a GitHub repository in the URL and off you go!
 2. switch to the `gh-pages` branch
 3. make a commit and push it to `gh-pages` (to trigger GitHub to start hosting the files)
 4. go to `https://${USERNAME}.github.io/gh-board/`
-5. To make edits and push them up on GitHub
-  - make edits in the src directory in `gh-pages`
-  - run `npm run build`
-  - commit and push
+
+###### To make edits and push them up on GitHub
+
+1. make edits in the src directory in `master`
+2. commit your changes
+3. run `npm run deploy`
+
+###### To update your fork with the upstream (this repo)
+
+1. `git pull https://github.com/philschatz/gh-board.git master`
+2. run `npm run deploy`
 
 
 # TODO List
