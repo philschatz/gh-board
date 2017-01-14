@@ -1,7 +1,7 @@
 import React from 'react';
 import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
-import {DesktopDownloadIcon} from 'react-octicons';
+import {DesktopDownloadIcon, PlusIcon} from 'react-octicons';
 
 import SettingsStore from '../settings-store';
 import IssueStore from '../issue-store';
@@ -59,7 +59,7 @@ const IssueList = React.createClass({
     this.setState({showCSVModal: !showCSVModal});
   },
   render() {
-    const {icon, title, backgroundColor, children, cards} = this.props;
+    const {icon, title, backgroundColor, children, cards, primaryRepo, label} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
     const {showAllIssues, morePressedCount, showCSVModal} = this.state;
@@ -122,11 +122,17 @@ const IssueList = React.createClass({
 
     const header = (
       <h2 className={className}>
-        {iconEl}
-        {title}
-        {' ('}
-        {countOrDownloadLink}
-        {')'}
+        {iconEl}{title} ({countOrDownloadLink})
+        {primaryRepo && <a className="add-issue"
+          href={
+            'https://github.com/' + primaryRepo.repoOwner + '/' + primaryRepo.repoName +
+            '/issues/new' +
+            (label ? ('?labels=' + encodeURIComponent(label.name)) : '')
+          }
+          title="Create an issue"
+          target="_blank">
+          <PlusIcon />
+        </a>}
       </h2>
     );
 
