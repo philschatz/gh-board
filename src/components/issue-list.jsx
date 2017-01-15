@@ -3,6 +3,7 @@ import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
 import {DesktopDownloadIcon, PlusIcon} from 'react-octicons';
 
+import Client from '../github-client';
 import SettingsStore from '../settings-store';
 import IssueStore from '../issue-store';
 
@@ -120,12 +121,15 @@ const IssueList = React.createClass({
       countOrDownloadLink = children.length;
     }
 
+    let {rootURL = 'https://github.com/'} = Client.getCredentials();
+    rootURL = rootURL.replace('api/v3', '');
+
     const header = (
       <h2 className={className}>
         {iconEl}{title} ({countOrDownloadLink})
         {primaryRepo && <a className="add-issue"
           href={
-            'https://github.com/' + primaryRepo.repoOwner + '/' + primaryRepo.repoName +
+            rootURL + primaryRepo.repoOwner + '/' + primaryRepo.repoName +
             '/issues/new' +
             (label ? ('?labels=' + encodeURIComponent(label.name)) : '')
           }
