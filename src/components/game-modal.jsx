@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import Client from '../github-client';
 import * as BS from 'react-bootstrap';
@@ -133,7 +134,7 @@ const GameModal = React.createClass({
   // (if you are not using the code, do not bother loading it)
   _startEngine(GameEngine, gistId, gameData) {
     /*eslint-enable no-undef */
-    const canvasNode = this.refs.gameCanvas;
+    const canvasNode = ReactDOM.findDOMNode(this._gameCanvas);
     const {isPlaying} = this.state;
     if (isPlaying) {
       GameEngine.stop(canvasNode);
@@ -205,7 +206,7 @@ const GameModal = React.createClass({
     const className = {'secret-game-is-playing' : isPlaying};
     return (
       <GameModalInner {...this.props} onHide={this.onHide} dropDown={dropDown} className={className}>
-        <canvas ref='gameCanvas'/>
+        <canvas ref={r => this._gameCanvas = r}/>
       </GameModalInner>
     );
   }

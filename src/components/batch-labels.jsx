@@ -21,6 +21,7 @@
 
 import _ from 'underscore';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
@@ -37,18 +38,18 @@ const LabelViewEdit = React.createClass({
     return {isEditing: false, name: null};
   },
   onChangeName() {
-    const name = this.refs.labelName.getValue();
+    const name = ReactDOM.findDOMNode(this._labelName).value;
     this.setState({name});
   },
   onClickEdit() {
     this.setState({isEditing: true});
   },
   onClickCancel() {
-    this.setState({isEditing: false});
+    this.setState({isEditing: false, name: null});
   },
   onClickSave() {
     const {repoInfos, label} = this.props;
-    const name = this.refs.labelName.getValue();
+    const name = ReactDOM.findDOMNode(this._labelName).value;
     let message;
     if (repoInfos.length > 1) {
       message = `Are you sure you want to change this label in ${repoInfos.length} repositories?`;
@@ -101,7 +102,7 @@ const LabelViewEdit = React.createClass({
       const isSaveEnabled = name && name !== label.name;
       return (
         <tr>
-          <td><BS.FormControl ref='labelName' type='text' onChange={this.onChangeName} defaultValue={name || label.name}/></td>
+          <td><BS.FormControl ref={r => this._labelName = r} type='text' onChange={this.onChangeName} defaultValue={name || label.name}/></td>
           <td></td>
           <td>
             <BS.Button bsStyle='default' onClick={this.onClickCancel}>Cancel</BS.Button>
