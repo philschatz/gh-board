@@ -50,10 +50,9 @@ const GanttChart = React.createClass({
   },
   renderChart() {
     const {milestones, data, columns} = this.props;
-    const {ganttWrapper} = this.refs;
     const now = new Date();
 
-    ReactDOM.findDOMNode(ganttWrapper).innerHTML = '';
+    ReactDOM.findDOMNode(this._ganttWrapper).innerHTML = '';
 
     const tasks = milestones.map((milestone) => {
       const {createdAt, dueOn, title, state, closedIssues, openIssues} = milestone;
@@ -164,7 +163,7 @@ const GanttChart = React.createClass({
     });
     return (
       <div className='-gantt-chart-and-legend'>
-        <div ref='ganttWrapper' id='the-gantt-chart'/>
+        <div ref={r => this._ganttWrapper = r} id='the-gantt-chart'/>
         <h3>Legend</h3>
         <p>Blue vertical line is Today</p>
         <LabelBadge key='completed' label={{name:'0 - Closed', color: '666666'}} extra={closedCount}/>
