@@ -1,10 +1,12 @@
 import React from 'react';
 import { DropTarget } from 'react-dnd';
 import * as BS from 'react-bootstrap';
-import {DesktopDownloadIcon} from 'react-octicons';
+import {DesktopDownloadIcon, PlusIcon} from 'react-octicons';
 
+import Client from '../github-client';
 import SettingsStore from '../settings-store';
 import IssueStore from '../issue-store';
+import {UNCATEGORIZED_NAME} from '../helpers';
 
 import ColoredIcon from './colored-icon';
 
@@ -59,7 +61,7 @@ const IssueList = React.createClass({
     this.setState({showCSVModal: !showCSVModal});
   },
   render() {
-    const {icon, title, backgroundColor, children, cards} = this.props;
+    const {icon, title, backgroundColor, children, cards, primaryRepo, label} = this.props;
     const {connectDropTarget} = this.props;
     const {isOver} = this.props; // from the collector
     const {showAllIssues, morePressedCount, showCSVModal} = this.state;
@@ -120,13 +122,24 @@ const IssueList = React.createClass({
       countOrDownloadLink = children.length;
     }
 
+    let {rootURL} = Client.getCredentials();
+    rootURL = rootURL || 'https://github.com/';
+    rootURL = rootURL.replace('api/v3', '');
+
+    let newIssueURL = `${rootURL}${primaryRepo.repoOwner}/${primaryRepo.repoName}/issues/new`;
+    if (label && label.name !== UNCATEGORIZED_NAME) {
+      newIssueURL = `${newIssueURL}?labels=${encodeURIComponent(label.name)}`;
+    }
+
     const header = (
       <h2 className={className}>
-        {iconEl}
-        {title}
-        {' ('}
-        {countOrDownloadLink}
-        {')'}
+        {iconEl}{title} ({countOrDownloadLink})
+        {primaryRepo && <a className="add-issue"
+          href={newIssueURL}
+          title="Create an issue"
+          target="_blank">
+          <PlusIcon />
+        </a>}
       </h2>
     );
 

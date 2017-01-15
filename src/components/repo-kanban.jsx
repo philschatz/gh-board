@@ -34,14 +34,14 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, primaryRepoName} = this.props;
+    const {label, cards, primaryRepo} = this.props;
     const {columnRegExp} = getFilters().getState();
 
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.issue.id}
-          primaryRepoName={primaryRepoName}
+          primaryRepoName={primaryRepo.repoName}
           card={card}
           columnRegExp={columnRegExp}
           />
@@ -71,6 +71,7 @@ const KanbanColumn = React.createClass({
             title={title}
             backgroundColor={label.color}
             label={label}
+            primaryRepo={primaryRepo}
           >
             {issueComponents}
           </IssueList>
@@ -128,7 +129,7 @@ const KanbanRepo = React.createClass({
     const {columnRegExp} = getFilters().getState();
 
     // Get the primary repoOwner and repoName
-    const [{repoName}] = repoInfos;
+    const [primaryRepo] = repoInfos;
 
     let allLabels;
     if (!SettingsStore.getHideUncategorized()) {
@@ -163,7 +164,7 @@ const KanbanRepo = React.createClass({
             key={label.name}
             label={label}
             cards={columnCards}
-            primaryRepoName={repoName}
+            primaryRepo={primaryRepo}
           />
         );
       } else {
