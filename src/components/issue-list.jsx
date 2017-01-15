@@ -121,7 +121,8 @@ const IssueList = React.createClass({
       countOrDownloadLink = children.length;
     }
 
-    let {rootURL = 'https://github.com/'} = Client.getCredentials();
+    let {rootURL} = Client.getCredentials();
+    rootURL = rootURL || 'https://github.com/';
     rootURL = rootURL.replace('api/v3', '');
 
     const header = (
