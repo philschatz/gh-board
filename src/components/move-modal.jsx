@@ -26,10 +26,27 @@ const MoveModal = React.createClass({
     IssueStore.off('tryToMoveMilestone', this.onTryToMoveMilestone);
   },
   onTryToMoveLabel(card, primaryRepoName, label) {
-    this.setState({showModal: true, card, primaryRepoName, label, milestone: null, unCheckedCards: {}});
+    this.performMoveOrShowModal(card, primaryRepoName, label, null);
   },
   onTryToMoveMilestone(card, primaryRepoName, milestone) {
-    this.setState({showModal: true, card, primaryRepoName, label: null, milestone, unCheckedCards: {}});
+    this.performMoveOrShowModal(card, primaryRepoName, null, milestone);
+  },
+  performMoveOrShowModal(card, primaryRepoName, label, milestone) {
+    // If this card has related cards then show the modal.
+    // Otherwise, just perform the move
+    if (card.getRelated().length === 0) {
+      // FIXME : The code to move the label/milestone should be pulled out and just done here instead of setting the state
+      this.setState({showModal: false, card, primaryRepoName, label, milestone, unCheckedCards: {}});
+      if (label) {
+        this.onClickMoveLabel();
+      }
+      if (milestone) {
+        this.onClickMoveMilestone();
+      }
+    } else {
+      this.setState({showModal: true, card, primaryRepoName, label, milestone, unCheckedCards: {}});
+    }
+
   },
   onToggleCheckbox(card) {
     return () => {
@@ -102,12 +119,11 @@ const MoveModal = React.createClass({
           );
           return (
             <li className='related-issue'>
-              <BS.FormControl
-                type='checkbox'
-                defaultChecked={!unCheckedCards[vertex.key()]}
-                wrapperClassName='select-related-issue'
+              <BS.Checkbox
+                className='select-related-issue'
                 onClick={this.onToggleCheckbox(vertex)}
-                label={checkLabel}/>
+                checked={!unCheckedCards[vertex.key()]}
+                >{checkLabel}</BS.Checkbox>
             </li>
           );
         };
