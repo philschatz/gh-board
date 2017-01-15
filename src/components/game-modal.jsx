@@ -111,44 +111,56 @@ const GameModal = React.createClass({
   },
   asyncStartEngine(gistId, gameData) {
     // Load the game engine from a separate bundle
+    const that = this;
     /*eslint-disable no-undef */
     require.ensure([], (require) => {
       const GameEngine = require('puzzle-script');
-      /*eslint-enable no-undef */
-      const canvasNode = this.refs.gameCanvas.getDOMNode();
-      const {isPlaying} = this.state;
-      if (isPlaying) {
-        GameEngine.stop(canvasNode);
-      }
-      GameEngine.setOnWinGame(() => {
-        // When the user wins a game remember that in localStorage.
-        // That way, the next game becomes available
-        this.addGamesWon(gistId);
-        /*eslint-disable no-alert */
-        alert('Congrats! You unlocked another game!\n\nThe next one is not ready yet but check back in a day or 2... it will be');
-        /*eslint-enable no-alert */
-      });
-      GameEngine.useDefaultSaveAndLoad('game-' + gistId);
-      GameEngine.start(canvasNode, gameData);
-      this.setLastPlayed(gistId);
-      this.setState({isPlaying: true});
+      that._startEngine(GameEngine, gistId, gameData);
     });
   },
   onHide() {
     // Load the game engine from a separate bundle
+    const that = this;
     /*eslint-disable no-undef */
     require.ensure([], (require) => {
       const GameEngine = require('puzzle-script');
       /*eslint-enable no-undef */
-      const {isPlaying} = this.state;
-      if (isPlaying) {
-        GameEngine.stop();
-      }
-      this.setState({isPlaying: false});
-      this.props.onHide();
+      that._stopEngine(GameEngine);
     });
   },
+  // GameEngine is passed in as an additional argument because it loaded
+  // from a separate bundle to reduce the size of the javascript file
+  // (if you are not using the code, do not bother loading it)
+  _startEngine(GameEngine, gistId, gameData) {
+    /*eslint-enable no-undef */
+    const canvasNode = this.refs.gameCanvas;
+    const {isPlaying} = this.state;
+    if (isPlaying) {
+      GameEngine.stop(canvasNode);
+    }
+    GameEngine.setOnWinGame(() => {
+      // When the user wins a game remember that in localStorage.
+      // That way, the next game becomes available
+      this.addGamesWon(gistId);
+      /*eslint-disable no-alert */
+      alert('Congrats! You unlocked another game!\n\nThe next one is not ready yet but check back in a day or 2... it will be');
+      /*eslint-enable no-alert */
+    });
+    GameEngine.useDefaultSaveAndLoad('game-' + gistId);
+    GameEngine.start(canvasNode, gameData);
+    this.setLastPlayed(gistId);
+    this.setState({isPlaying: true});
+  },
+  _stopEngine(GameEngine) {
+    const {isPlaying} = this.state;
+    if (isPlaying) {
+      GameEngine.stop();
+    }
+    this.setState({isPlaying: false});
+    this.props.onHide();
+  },
   render() {
+    const {isPlaying} = this.state;
     const gamesWon = this.getGamesWon();
     // const winCount = Object.keys(gamesWon).length;
     // const availableGames = ALL_GAMES.slice(0, winCount < 6 ? winCount + 3 : ALL_GAMES.length);
@@ -190,8 +202,9 @@ const GameModal = React.createClass({
         */}
       </BS.DropdownButton>
     );
+    const className = {'secret-game-is-playing' : isPlaying};
     return (
-      <GameModalInner {...this.props} onHide={this.onHide} dropDown={dropDown}>
+      <GameModalInner {...this.props} onHide={this.onHide} dropDown={dropDown} className={className}>
         <canvas ref='gameCanvas'/>
       </GameModalInner>
     );
