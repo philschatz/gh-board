@@ -46,7 +46,7 @@ export default React.createClass({
     }
   },
   render() {
-    const {children, waitingText, renderError, doneText, className} = this.props;
+    const {children, waitingText, renderError, doneText, className, ...rest} = this.props;
     let {disabled} = this.props;
     const {val, asyncStatus} = this.state;
 
@@ -64,8 +64,8 @@ export default React.createClass({
       classes['is-waiting'] = true;
       disabled = true;
       kids = [
-        <SyncIcon className='icon-spin'/>,
-        waitingText
+        <SyncIcon className='icon-spin' key="icon"/>,
+        <span key="text">{waitingText}</span>
       ];
     } else if (asyncStatus === ASYNC_RESOLVED) {
       classes['is-resolved'] = true;
@@ -80,7 +80,7 @@ export default React.createClass({
       throw new Error('BUG: Invalid async state');
     }
     return (
-      <BS.Button {...this.props}
+      <BS.Button {...rest}
         className={classes}
         disabled={disabled}
         onClick={this.onClick}

@@ -17,7 +17,7 @@ const App = React.createClass({
   },
   componentWillMount() {
     SettingsStore.off('change:tableLayout', this.onChange);
-    setRouterHistory(this.history);
+    setRouterHistory(history);
     setFilters(this.props);
   },
   componentWillUpdate(newProps) {

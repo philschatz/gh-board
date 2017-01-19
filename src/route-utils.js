@@ -204,7 +204,7 @@ class FilterState {
     return this._chain({routeSegmentName});
   }
   go() {
-    ROUTER_HISTORY.pushState(null, this.url());
+    ROUTER_HISTORY.push(this.url());
   }
   url() {
     return buildRoute(null, this.state);

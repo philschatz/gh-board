@@ -10,7 +10,7 @@ import jsonqueryEngine from 'jsonquery-engine';
 
 
 
-import Octo from 'octokat/dist/node/base';
+import Octo from 'octokat';
 import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
 import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
 import AuthorizationPlugin from 'octokat/dist/node/plugins/authorization';
