@@ -1,8 +1,7 @@
 import React from 'react';
 import _ from 'underscore';
-import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
-import {GearIcon, ListUnorderedIcon} from 'react-octicons';
+import {ListUnorderedIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import {UNCATEGORIZED_NAME} from '../helpers';
@@ -15,6 +14,7 @@ import Loadable from './loadable';
 import IssueList from './issue-list';
 import Issue from './issue';
 import Board from './board';
+import AnonymousModal from './anonymous-modal';
 
 
 const filterKanbanLabels = (labels, columnRegExp) => {
@@ -65,7 +65,7 @@ const KanbanColumn = React.createClass({
 
     if (issueComponents.length || SettingsStore.getShowEmptyColumns()) {
       return (
-        <BS.Col key={label.name} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
+        <div key={label.name} className='kanban-board-column'>
           <IssueList
             icon={icon}
             title={title}
@@ -75,51 +75,11 @@ const KanbanColumn = React.createClass({
           >
             {issueComponents}
           </IssueList>
-        </BS.Col>
+        </div>
       );
     } else {
       return null; // TODO: Maybe the panel should say "No Issues" (but only if it's the only column)
     }
-
-  }
-});
-
-
-let isAlreadyShowedAnonymousModal = false;
-
-const AnonymousModal = React.createClass({
-  render() {
-    const onHide = () => {
-      isAlreadyShowedAnonymousModal = true;
-      this.setState({ showModal: false});
-    };
-    let showModal;
-    if (CurrentUserStore.getUser()) {
-      showModal = false;
-    } else {
-      showModal = !isAlreadyShowedAnonymousModal;
-    }
-
-    return (
-      <BS.Modal show={showModal} container={this} onHide={onHide}>
-        <BS.Modal.Header closeButton>Viewing a Board Anonymously</BS.Modal.Header>
-        <BS.Modal.Body className='anonymous-instructions-body'>
-          <p>You are currently <strong>not signed in</strong>. GitHub's API only allows <em>60</em> requests per hour for non-authenticated users.</p>
-          <p>Showing additional information for Pull Requests requires making a separate API call for each and can end up depleting the 60 requests quickly.</p>
-
-          <p>The following information is <strong>disabled initially</strong>:</p>
-          <ul>
-            <li>Status information from services like Travis-CI and Jenkins</li>
-            <li>Merge conflict information</li>
-            <li>More than 100 issues on the board</li>
-          </ul>
-          <p>You can enable it by clicking the <BS.Button disabled bsSize='xs'><GearIcon/>{' '}<span className='caret'/></BS.Button> on the top-right corner next to <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button> and selecting "Show More Pull Request Info" or by clicking the <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button>.</p>
-        </BS.Modal.Body>
-        <BS.Modal.Footer className='anonymous-instructions-footer'>
-          <BS.Button bsStyle='primary' onClick={onHide}>Ok, I'll find it if I need it</BS.Button>
-        </BS.Modal.Footer>
-      </BS.Modal>
-    );
   }
 });
 
@@ -143,8 +103,6 @@ const KanbanRepo = React.createClass({
 
     let sortedCards = FilterStore.filterAndSort(cards);
 
-    let kanbanColumnCount = 0; // Count the number of actual columns displayed
-
     const isFilteringByColumn = false;
 
     const kanbanColumns = _.map(kanbanLabels, (label) => {
@@ -158,7 +116,6 @@ const KanbanRepo = React.createClass({
       // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
 
       if ((!isFilteringByColumn && (SettingsStore.getShowEmptyColumns() || columnCards.length)) || (isFilteringByColumn && isFilteringByColumn.name === label.name)) {
-        kanbanColumnCount++; // Count the number of actual columns displayed
         return (
           <KanbanColumn
             key={label.name}
@@ -173,13 +130,11 @@ const KanbanRepo = React.createClass({
     });
 
     return (
-      <BS.Grid fluid className='kanban-board' data-column-count={kanbanColumnCount}>
-        <BS.Row>
+      <div className='kanban-board'>
           {kanbanColumns}
           {/* addCardList */}
-        </BS.Row>
         <AnonymousModal/>
-      </BS.Grid>
+      </div>
     );
   }
 });

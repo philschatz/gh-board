@@ -1,0 +1,21 @@
+@import './issue-list';
+
+.kanban-board {
+  display: flex;
+  height: 100%;
+
+  .kanban-board-column {
+    flex: 1 100%;
+    height: 100%;
+    overflow-y: scroll;
+    min-width: 247px;
+
+    vertical-align: top;
+    padding-left: 1rem;
+    padding-right: 0;
+
+    &:last-child {
+      padding-right: 1rem;
+    }
+  }
+}
