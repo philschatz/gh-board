@@ -147,13 +147,14 @@ const AppNav = React.createClass({
       const [{repoOwner, repoName}] = repoInfos;
       let repoNameItems;
       if (repoInfos.length === 1) {
+        const repoLink = buildRoute('kanban', {repoInfos});
         repoNameItems = (
-          <span className='repo-name'>{repoName}</span>
+          <Link to={repoLink} className='repo-name'>{repoName}</Link>
         );
       } else {
         repoNameItems = _.map(repoInfos, ({repoOwner, repoName}, index) => {
-          const repoInfos = [{repoOwner, repoName}];
-          const repoLink = buildRoute('kanban', {repoInfos});
+          const currentRepoInfos = [{repoOwner, repoName}];
+          const repoLink = buildRoute('kanban', {currentRepoInfos});
           return (
             <span key={repoLink} className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
