@@ -55,14 +55,14 @@ const KanbanColumn = React.createClass({
 
     if (isShowingColumn) {
       return (
-        <BS.Col key={milestone && milestone.title || 'no-milestone'} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
+        <div key={milestone && milestone.title || 'no-milestone'} className='kanban-board-column'>
           <IssueList
             title={heading}
             milestone={milestone}
           >
             {issueComponents}
           </IssueList>
-        </BS.Col>
+        </div>
       );
     } else {
       return null; // TODO: Maybe the panel should say "No Issues" (but only if it's the only column)
@@ -119,12 +119,10 @@ const ByMilestoneView = React.createClass({
     });
 
     return (
-      <BS.Grid fluid className='kanban-board' data-column-count={kanbanColumnCount}>
-        <BS.Row>
-          {uncategorizedColumn}
-          {kanbanColumns}
-        </BS.Row>
-      </BS.Grid>
+      <div className='kanban-board'>
+        {uncategorizedColumn}
+        {kanbanColumns}
+      </div>
     );
   }
 });
