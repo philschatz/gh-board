@@ -277,7 +277,7 @@ const database = new class Database {
     return this._doOp('repoLabels', 'get', `${repoOwner}/${repoName}`);
   }
   getRepoLabelsOrNull(repoOwner, repoName) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.getRepoLabels(repoOwner, repoName)
       .then((val) => {
         resolve(val);
@@ -290,7 +290,7 @@ const database = new class Database {
     return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`, this._opts);
   }
   getRepoOrNull(repoOwner, repoName) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.getRepo(repoOwner, repoName)
       .then((val) => {
         if (!val.repoName) {
