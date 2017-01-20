@@ -157,7 +157,7 @@ const database = new class Database {
       // put it into memDb now, instead of waiting for success
       memDb.batch(args[0], args[1], args[2]);
     } else {
-      throw new Error('Unknown levelDB operation. Expected get or put but got ' + methodName);
+      throw new Error('Unknown levelDB operation. Expected get, put or batch but got ' + methodName);
     }
     return loadedPromise.then(() => {
       return this._toPromise(db, method, ...args).then((val) => {
@@ -277,7 +277,7 @@ const database = new class Database {
     return this._doOp('repoLabels', 'get', `${repoOwner}/${repoName}`);
   }
   getRepoLabelsOrNull(repoOwner, repoName) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.getRepoLabels(repoOwner, repoName)
       .then((val) => {
         resolve(val);
@@ -290,7 +290,7 @@ const database = new class Database {
     return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`, this._opts);
   }
   getRepoOrNull(repoOwner, repoName) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.getRepo(repoOwner, repoName)
       .then((val) => {
         if (!val.repoName) {
@@ -330,24 +330,17 @@ const database = new class Database {
   }
 
   patchRepo(repoOwner, repoName, changes) {
-    return new Promise((resolve, reject) => {
-      // this is atomic only because the get is instant because it's in-mem
-      this.getRepo(repoOwner, repoName).then((repoData) => {
-        this.putRepo(repoOwner, repoName, _.extend({}, repoData, {repoOwner, repoName}, changes))
-        .then(() => resolve(null))
-        .catch((err) => reject(err));
-      }).catch(() => {
-        // this error above means the entry wasn't in the DB (which is OK for a PATCH)
-        this.putRepo(repoOwner, repoName, _.extend({}, {repoOwner, repoName}, changes))
-        .then(() => resolve(null))
-        .catch((err) => reject(err));
-      });
-    });
+    const putRepo = (repoData) => {
+      return this.putRepo(repoOwner, repoName, _.extend({}, repoData || {}, {repoOwner, repoName}, changes));
+    };
+    return this.getRepo(repoOwner, repoName) // this is atomic only because the get is instant because it's in-mem
+      .then(putRepo)
+      .catch(() => putRepo()) // this error means the entry wasn't in the DB (which is OK for a PATCH)
+      .then(() => null);
   }
 };
 
 window._database = database;
-
 
 // Singleton
 export default database;

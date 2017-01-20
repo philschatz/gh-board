@@ -1,65 +1,64 @@
-var path = require("path");
-var webpack = require('webpack');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-var isBuild = process.env['NODE_ENV'] === 'production';
+const isBuild = process.env['NODE_ENV'] === 'production';
 
-var config = {
-    // devtool: '#eval-source-map',
-    devtool: 'source-map',
-    context: path.resolve(__dirname),
-    entry: [
-      // The following is added when `isBuild = falsy`
-      // 'webpack-dev-server/client?http://0.0.0.0:8080', // WebpackDevServer host and port
-      //'webpack/hot/only-dev-server',
-      './style/index.js',
-      './src/index.js'
+const config = {
+  // devtool: '#eval-source-map',
+  debug: !isBuild,
+  devtool: 'source-map',
+  context: path.resolve(__dirname),
+  entry: [
+    './style/index.js',
+    './src/index.js'
+  ].concat(isBuild ? [] : [
+    'webpack-dev-server/client?http://0.0.0.0:8080'
+  ]),
+  output: {
+    path: __dirname + '/dist',
+    publicPath: isBuild ? './dist/' : '/dist/', // gh-pages needs this to have a '.' for bundles
+    filename: 'bundle.js'
+  },
+  plugins: [
+    new webpack.NoErrorsPlugin(),
+    new ExtractTextPlugin('app.css')
+  ].concat(isBuild ? [
+    new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } })
+  ] : []),
+  module: {
+    preLoaders: [
+      { test: /\.jsx?$/, loader: 'eslint-loader', exclude: [/node_modules|gantt-chart.*/, /octokat\.js/] },
     ],
-    output: {
-        path: __dirname + '/dist',
-        publicPath: './dist/', // gh-pages needs this to have a '.' for bundles
-        filename: 'bundle.js'
-    },
-    plugins: [
-      new webpack.NoErrorsPlugin(),
-      new ExtractTextPlugin('app.css')
-    ],
-    module: {
-        preLoaders: [
-          { test: /\.jsx?$/, loader: 'eslint-loader', exclude: [/node_modules|gantt-chart.*/, /octokat\.js/] },
-        ],
-        loaders: [
-            { test: /\.jsx?$/, loader: 'babel', exclude: [/node_modules/, /puzzle-script/, /octokat\.js/], query: { presets: ['react', 'es2015']} },
-            { test: /\.json$/, loader: 'json-loader'},
-            { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
-            { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
-            { test: /\.(woff|woff2|eot|ttf)/, loader: "url-loader?limit=30000&name=[name]-[hash].[ext]" }
-        ]
-    },
-    resolve: {
-      extensions: ['', '.js', '.jsx', '.json'],
-      alias: {
-        xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
-        fs: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-        proxyquire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-        rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-        'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
+    loaders: [
+      {
+        test: /\.jsx?$/,
+        loader: 'babel',
+        exclude: [/node_modules/, /puzzle-script/, /octokat\.js/],
+        query: {
+          presets: ['react', 'es2015'],
+          plugins: ['transform-object-rest-spread']
+        }
       },
+      { test: /\.json$/, loader: 'json-loader'},
+      { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
+      { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
+      { test: /\.(woff|woff2|eot|ttf)/, loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
+    ]
+  },
+  resolve: {
+    extensions: ['', '.js', '.jsx', '.json'],
+    alias: {
+      xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
+      fs: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
+      proxyquire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
+      rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
+      'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
     },
-    devServer: {
-      // hot: true // Added when `isBuild = falsy`
-    }
+  },
+  devServer: {
+    hotComponents: !isBuild
+  }
 };
-
-if (isBuild) {
-  // Remove React warnings and whatnot
-  config.plugins.unshift(new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }));
-} else {
-  config.debug = true;
-  config.output.publicPath = '/dist/'; // Dev server needs this to not have a dot.
-  // config.entry.unshift('webpack/hot/only-dev-server');
-  config.entry.unshift('webpack-dev-server/client?http://0.0.0.0:8080');
-  config.devServer.hotComponents = true;
-}
 
 module.exports = config;

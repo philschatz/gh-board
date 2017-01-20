@@ -126,8 +126,9 @@ const IssueList = React.createClass({
     rootURL = rootURL || 'https://github.com/';
     rootURL = rootURL.replace('api/v3', '');
 
-    let newIssueURL = `${rootURL}${primaryRepo.repoOwner}/${primaryRepo.repoName}/issues/new`;
-    if (label && label.name !== UNCATEGORIZED_NAME) {
+    let newIssueURL = primaryRepo &&
+      `${rootURL}${primaryRepo.repoOwner}/${primaryRepo.repoName}/issues/new`;
+    if (primaryRepo && label && label.name !== UNCATEGORIZED_NAME) {
       newIssueURL = `${newIssueURL}?labels=${encodeURIComponent(label.name)}`;
     }
 

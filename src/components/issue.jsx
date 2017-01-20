@@ -497,13 +497,11 @@ let Issue = React.createClass({
     const {card} = this.props;
     if (!card.isLoaded()) { card.load(); }
     // TODO: Not sure why React no longer automatically binds all functions to `this`
-    this._changeListener = this.forceUpdate.bind(this);
-    card.onChange(this._changeListener);
+    this._unsubscribe = card.onChange(this.forceUpdate.bind(this));
     Timer.onTick(this.pollPullRequestStatus);
   },
   componentWillUnmount() {
-    const {card} = this.props;
-    card.offChange(this._changeListener);
+    this._unsubscribe && this._unsubscribe();
     Timer.offTick(this.pollPullRequestStatus);
   },
   update(issue) {

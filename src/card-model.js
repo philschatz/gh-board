@@ -29,23 +29,34 @@ export default class Card {
     return `${repoOwner}/${repoName}#${number}`;
   }
   onChange(listener) {
+    if (typeof listener !== 'function') {
+      throw new Error('Expected listener to be a function.');
+    }
+
+    let isSubscribed = true;
+
     const len = this._changeListeners.length;
     if (len > MAX_LISTENERS) {
       /*eslint-disable no-console */
       console.warn('MAX_LISTENERS reached. Maybe a bug?', len);
       /*eslint-enable no-console */
     }
+
     this._changeListeners.push(listener);
-  }
-  offChange(listener) {
-    this._changeListeners = this._changeListeners.filter(item => item !== listener);
+
+    return () => {
+      if (!isSubscribed) {
+        return;
+      }
+
+      isSubscribed = false;
+
+      const index = this._changeListeners.indexOf(listener);
+      this._changeListeners.splice(index, 1);
+    };
   }
   isPullRequest() {
-    if (this.issue) {
-      return !!this.issue.pullRequest;
-    } else {
-      return false;
-    }
+    return this.issue && !!this.issue.pullRequest;
   }
   isPullRequestMerged() {
     return !! this.isPullRequest() && this._pr && this._pr.mergedAt;
@@ -62,19 +73,16 @@ export default class Card {
     if (!this._prStatus) {
       return {};
     }
-    if (this._prStatus) {
-      const {state, statuses} = this._prStatus;
-      // Pull out the 1st status which matches the overall status of the commit.
-      // That way we get the targetURL and message.
-      // When 'pending', there might not be entries in statuses
-      const theStatus = _.filter(statuses, (status) => { return status.state === state; })[0];
-      if (!theStatus) {
-        return {};
-      }
-      return theStatus;
-    } else {
+
+    const {state, statuses} = this._prStatus;
+    // Pull out the 1st status which matches the overall status of the commit.
+    // That way we get the targetURL and message.
+    // When 'pending', there might not be entries in statuses
+    const theStatus = _.filter(statuses, (status) => { return status.state === state; })[0];
+    if (!theStatus) {
       return {};
     }
+    return theStatus;
   }
   isPullRequestToDefaultBranch() {
     if (!this.isPullRequest()) {

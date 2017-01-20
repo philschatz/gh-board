@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
-import {History} from 'react-router';
 import {TagIcon} from 'react-octicons';
 
 const LOCALSTORAGE_KEY = 'saved-filters';

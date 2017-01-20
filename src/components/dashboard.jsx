@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import {Link, History} from 'react-router';
+import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 import {BeakerIcon, SyncIcon, LockIcon, RepoForkedIcon, RepoIcon, PersonIcon, OrganizationIcon} from 'react-octicons';
+import history from '../history';
 
 import {buildRoute} from '../route-utils';
 import Client from '../github-client';
@@ -136,7 +137,7 @@ const RepoGroup = React.createClass({
     const repoInfos = Object.keys(selectedRepos).map((repoName) => {
       return {repoOwner, repoName};
     });
-    this.history.pushState(null, buildRoute('kanban', {repoInfos}));
+    history.push(buildRoute('kanban', {repoInfos}));
   },
   render() {
     let {repoOwner, repos, index} = this.props;
@@ -253,8 +254,8 @@ const CustomRepoModal = React.createClass({
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
     const repoInfos = [{repoOwner, repoName}];
-    // TODO: Just make this a simple Link and no fancy history.pushState
-    this.history.pushState(null, buildRoute('kanban', {repoInfos}));
+    // TODO: Just make this a simple Link and no fancy history.push
+    history.push(buildRoute('kanban', {repoInfos}));
   },
   render() {
     const {customRepoName} = this.state;
