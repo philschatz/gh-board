@@ -131,8 +131,8 @@ const KanbanRepo = React.createClass({
 
     return (
       <div className='kanban-board'>
-          {kanbanColumns}
-          {/* addCardList */}
+        {kanbanColumns}
+        {/* addCardList */}
         <AnonymousModal/>
       </div>
     );
