@@ -1,0 +1,107 @@
+.topbar-nav {
+  // Add a check next to settings menu items
+  .settings-item-checkbox[data-checked='true']::before {
+    content: '\2713';
+
+    position: absolute;
+    left: 5px;
+  }
+
+  .milestone-dropdown {
+    .milestone-title {
+      .x-font-and-emoji(14px); // from the item styling
+    }
+
+    .milestone-item {
+      > a {
+        display: table;
+        width: 100%;
+        padding: 3px 20px; // from bootstrap .dropdown-menu > li > a
+
+        .milestone-title,
+        .due-at,
+        .milestone-icon {
+          display: table-cell;
+          white-space: nowrap;
+        }
+        .milestone-title,
+        .due-at {
+          padding-left: 1rem;
+        }
+        .milestone-title {
+          width: 100%; // so the columns all line up
+          text-align: left;
+        }
+        .due-at {
+          color: #888;
+          text-align: right;
+        }
+      }
+
+    }
+  }
+
+
+  .repo-links {
+    padding-top: 15px;
+    padding-bottom: 15px;
+    display: inline-block;
+
+    // handle many repos (just hide the rest)
+    max-width: 550px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    .repo-owner {
+      padding-right: .5rem;
+    }
+    .repo-name {
+      padding-left: .5rem;
+      padding-right: .5rem;
+    }
+  }
+
+  .active-filter {
+
+    // &:not(:empty)::before { content: 'Active Filter: '; }
+
+    .badge {
+      margin-right: .3rem; // space between labels
+
+      &::after {
+        content: 'x';
+        padding-left: 0.5rem;
+      }
+    }
+  }
+
+  // Override bootstrap breakpoints for the nav bar on smaller screens
+  .container {
+
+    .navbar-header {
+      float: left;
+      margin-right: 0;
+      margin-left: 0;
+    }
+    .navbar-nav {
+      float: left;
+      margin: 0;
+
+      > li {
+        float: left;
+        > a {
+          padding-top: 15px;
+          padding-bottom: 15px;
+          display: inline-block;
+        }
+      }
+    }
+    .navbar-right {
+      // .pull-right();
+      float: right !important;
+      margin-right: -15px;
+    }
+
+  }
+}

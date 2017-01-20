@@ -64,14 +64,6 @@ class SettingsStore extends EventEmitter {
   getShowEmptyColumns() {
     return isShowEmptyColumns;
   }
-  toggleTableLayout() {
-    isTableLayout = !isTableLayout;
-    localSet('isTableLayout', isTableLayout);
-    this.emit('change:tableLayout');
-  }
-  getTableLayout() {
-    return isTableLayout;
-  }
   setRelatedShowAll() {
     isRelated = 3;
     localSet('isRelated', isRelated);

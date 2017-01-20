@@ -1,0 +1,85 @@
+@import './issue';
+
+/* Move the padding to the title so the color fills up the entire header */
+.issue-list {
+  // box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.15);
+  background-color: #f3f3f3;
+  border-radius: 0; // override bootstrap
+
+  .panel-heading {
+    padding: 0;
+
+    .column-title {
+      font-weight: normal;
+
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      // display: inline-block;
+
+      // give the icon some padding so we can make a colored square
+      &:not(.has-icon) { padding: 10px 40px 10px 15px; }
+      &.has-icon {
+        padding-left: 0;
+        padding-right: 40px;
+        padding-top: 0;
+        padding-bottom: 0;
+
+        .label-title,
+        .milestone-title {
+          padding-top: 10px;
+          padding-bottom: 10px;
+          padding-left: 1rem; // so text is not squished next to the icon
+        }
+      }
+
+      .x-font-and-emoji(16px); // This is what is set on the <h2>
+
+      .column-icon {
+        display: inline-block;
+        padding: 10px 15px;
+        margin: 0; // override colored-icon has a margin
+        border-radius: 0; //override colored-icon
+        &:not(.is-light) { color: white; }
+      }
+
+      /* Support filtering on a single kanban column */
+      .label-title,
+      .milestone-title {
+        color: inherit; // It's an <a> but don't make it blue
+        cursor: pointer;
+
+        .octicon { padding-right: 1rem; }
+
+        &:hover { text-decoration: none; }
+      }
+    }
+
+    .add-issue {
+      display: block;
+      height: 38px;
+      float: right;
+      width: 40px;
+      margin-right: -40px;
+      text-align: center;
+      line-height: 38px;
+    }
+  }
+
+  // DnD styling
+
+  &:not(.is-over) .dnd-placeholder { display: none; }
+  .dnd-placeholder {
+    background-color: #fefefe;
+    height: 5rem;
+    margin: 2rem;
+    border-radius: 3px;
+    border: 1px dashed #aaa;
+    text-align: center;
+    line-height: 2.5rem;
+    color: #888;
+
+    &::before { content: 'Release to drop me in this list'; }
+  }
+}

@@ -29,8 +29,7 @@ const KanbanColumn = React.createClass({
       );
     });
 
-    let heading;
-    heading = (
+    const heading = (
       <span className='user-title'>
         <UserIcon/>
         {login}
@@ -38,23 +37,23 @@ const KanbanColumn = React.createClass({
     );
 
     return (
-      <BS.Col key={login} lg={3} md={4} sm={6} xs={12} className='kanban-board-column'>
+      <div key={login} className='kanban-board-column'>
         <IssueList title={heading}>
           {issueComponents}
         </IssueList>
-      </BS.Col>
+      </div>
     );
 
   }
 });
 
 
-const MilestonesView = React.createClass({
+const UsersView = React.createClass({
   render() {
     const {repoInfos, columnData, cards, columnRegExp} = this.props;
     const [{repoName}] = repoInfos; // primaryRepoName
 
-    let sortedCards = FilterStore.filterAndSort(cards, true/*isShowingMilestones*/);
+    let sortedCards = FilterStore.filterAndSort(cards, true);
 
     let kanbanColumnCount = 0; // Count the number of actual columns displayed
 
@@ -84,11 +83,9 @@ const MilestonesView = React.createClass({
     });
 
     return (
-      <BS.Grid fluid className='kanban-board' data-column-count={kanbanColumnCount}>
-        <BS.Row>
-          {kanbanColumns}
-        </BS.Row>
-      </BS.Grid>
+      <div className='kanban-board'>
+        {kanbanColumns}
+      </div>
     );
   }
 });
@@ -125,7 +122,7 @@ const RepoKanbanShell = React.createClass({
       <Board {...this.props}
         repoInfos={repoInfos}
         columnRegExp={columnRegExp}
-        type={MilestonesView}
+        type={UsersView}
         columnDataPromise={columnDataPromise}
       />
     );

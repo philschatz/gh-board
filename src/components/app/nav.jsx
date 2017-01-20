@@ -224,13 +224,6 @@ const AppNav = React.createClass({
                 >
                 Show Empty Columns
               </SettingsItem>
-              <SettingsItem
-                key='TableLayout'
-                onSelect={SettingsStore.toggleTableLayout.bind(SettingsStore)}
-                isChecked={SettingsStore.getTableLayout()}
-                >
-                Use Table Layout
-              </SettingsItem>
               <BS.MenuItem key='divider' divider/>
               <BS.MenuItem key='viewing-mode' header>Viewing Mode
                 <button

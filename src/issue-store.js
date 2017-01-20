@@ -259,7 +259,7 @@ const issueStore = new class IssueStore extends EventEmitter {
       // find all the Issues that have labels that have been removed so we can update them
       return Promise.all(labelsRemoved.map((label) => {
         let filter = getFreshFilter().toggleState('closed')/*.toggleState('open')*/;  // TODO: open is toggled on by default
-        filter.state.repoInfos = [{repoOwner, repoName}]; // HACK since there is no ggod way to do this directly on the filter
+        filter.state.repoInfos = [{repoOwner, repoName}]; // HACK since there is no good way to do this directly on the filter
         if (getFilters().getState().columnRegExp.test(label)) {
           filter = filter.toggleColumnLabel(label);
         } else {

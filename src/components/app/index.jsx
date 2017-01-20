@@ -39,9 +39,6 @@ const App = React.createClass({
   render() {
     const {params} = this.props;
     const classes = ['app'];
-    if (SettingsStore.getTableLayout()) {
-      classes.push('is-table-layout');
-    }
 
     return (
       <div className={classes.join(' ')}>
