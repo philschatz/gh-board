@@ -62,7 +62,7 @@
     "mermaid": "^6.0.0",
     "moment": "2.17.1",
     "octicons": "^5.0.1",
-    "octokat": "^0.6.1",
+    "octokat": "^0.6.2",
     "puzzle-script": "0.0.2",
     "qs": "^6.3.0",
     "react": "^15.3.2",
