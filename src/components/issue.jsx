@@ -270,7 +270,7 @@ let IssueCard = React.createClass({
         </BS.Popover>
       );
       milestone = (
-        <span className='issue-milestone badge'>
+        <span className='issue-milestone badge is-light'>
           <BS.OverlayTrigger
             rootClose
             trigger={['click', 'focus']}
