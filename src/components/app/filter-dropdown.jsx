@@ -1,6 +1,5 @@
 import _ from 'underscore';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
@@ -28,9 +27,8 @@ const FilterCategory = React.createClass({
       return true;
     });
   },
-  onFilterInputChange() {
-    const filterStr = ReactDOM.findDOMNode(this._filterInput).value;
-    this.setState({filterStr});
+  onFilterInputChange(e) {
+    this.setState({filterStr: e.currentTarget.value});
   },
   renderItem(item) {
     const {isSelected, isExcluded, text, iconNode} = item;
@@ -75,7 +73,7 @@ const FilterCategory = React.createClass({
     let searchInput;
     if (!noSearch) {
       searchInput = (
-        <BS.FormControl type='text' ref={r => this._filterInput = r} placeholder='Filter text' onChange={this.onFilterInputChange}/>
+        <BS.FormControl type='text' placeholder='Filter text' onChange={this.onFilterInputChange}/>
       );
     }
     return (
