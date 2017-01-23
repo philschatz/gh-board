@@ -1,6 +1,4 @@
 import _ from 'underscore';
-import EventEmitter from 'events';
-
 // 3 implementations: indexedDB, LocalStorage, In-mem
 import levelup from 'levelup';
 import leveljs from 'level-js';
@@ -8,25 +6,9 @@ import leveljs from 'level-js';
 import levelQuery from 'level-queryengine';
 import jsonqueryEngine from 'jsonquery-engine';
 
-
-
-import Octo from 'octokat';
-import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs';
-import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only';
-import AuthorizationPlugin from 'octokat/dist/node/plugins/authorization';
-import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case';
-import CacheHandlerPlugin from 'octokat/dist/node/plugins/cache-handler';
-import FetchAllPlugin from 'octokat/dist/node/plugins/fetch-all';
-import PaginationPlugin from 'octokat/dist/node/plugins/pagination';
-import toQueryString from 'octokat/dist/node/helpers/querystring';
-
 const MAX_CACHED_URLS = 2000;
 
-let cachedClient = null;
-
-// Try to load/save to IndexedDB and fall back to localStorage for persisting the cache.
-// localStorage support is needed because IndexedDB is disabled for Private browsing in Safari/Firefox
-const cacheHandler = new class CacheHandler {
+export default class CacheHandler {
   constructor() {
     // Pull data from `localStorage`
     this.storage = window.localStorage;
@@ -36,7 +18,6 @@ const cacheHandler = new class CacheHandler {
     } else {
       this.cachedETags = {};
     }
-
 
     // See https://github.com/Level/levelup/wiki/Modules for more
     let driver;
@@ -68,7 +49,7 @@ const cacheHandler = new class CacheHandler {
           let {methodAndPath, eTag, data, status} = entry;
           this.cachedETags[methodAndPath] = {eTag, data, status};
         })
-        .on('stats', (stats) => {
+        .on('stats', () => {
           this._db = db;
           resolve();
         });
@@ -144,94 +125,4 @@ const cacheHandler = new class CacheHandler {
       }
     }
   }
-};
-
-
-
-const FetchOnePlugin = {
-  asyncVerbs: {
-    fetchOne: function(requester, path) {
-      return function(cb, query) {
-        return requester.request('GET', `${path}${toQueryString(query)}`, null, null, function(err, result) {
-          if (err) {
-            return cb(err);
-          }
-          return cb(null, result.items);
-        });
-      };
-    }
-  }
-};
-
-class Client extends EventEmitter {
-  constructor() {
-    super();
-    this.LOW_RATE_LIMIT = 60;
-  }
-  // Used for checking if we should retreive ALL Issues or just open ones
-  canCacheLots() { return this.hasCredentials() /*&& !!cacheHandler._db*/; }
-  dbPromise() { return cacheHandler.dbPromise; }
-  off() { // EventEmitter has `.on` but no matching `.off`
-    const slice = [].slice;
-    const args = arguments.length >= 1 ? slice.call(arguments, 0) : [];
-    return this.removeListener.apply(this, args);
-  }
-  getCredentials() {
-    return {
-      plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin, FetchOnePlugin],
-      token: window.localStorage.getItem('gh-token'),
-      username: window.localStorage.getItem('gh-username'),
-      password: window.localStorage.getItem('gh-password'),
-      cacheHandler,
-      rootURL: window.localStorage.getItem('gh-rootURL'),
-      emitter: this.emit.bind(this)
-    };
-  }
-  hasCredentials() {
-    let {token, password} = this.getCredentials();
-    return !!token || !!password;
-  }
-  getOcto() {
-    if (!cachedClient) {
-      let credentials = this.getCredentials();
-      cachedClient = new Octo(credentials);
-      // update the rateLimit for issue-duck so it can gracefully back off
-      // making requests when the rate limit is low
-      this.on('request', ({rate: {remaining}}) => {
-        this.rateLimitRemaining = remaining;
-      });
-    }
-    return cachedClient;
-  }
-  getAnonymousOcto() {
-    return new Octo();
-  }
-  readMessage() {
-    return this.getOcto().zen.read();
-  }
-  getRateLimitRemaining() {
-    return this.rateLimitRemaining;
-  }
-
-  setRootUrl(rootURL) {
-    cachedClient = null;
-    if (rootURL) {
-      window.localStorage.setItem('gh-rootURL', rootURL);
-    } else {
-      window.localStorage.removeItem('gh-rootURL');
-    }
-  }
-
-  setToken(token) {
-    cachedClient = null;
-    if (token) {
-      window.localStorage.setItem('gh-token', token);
-    } else {
-      window.localStorage.removeItem('gh-token');
-    }
-    this.emit('changeToken');
-  }
 }
-
-// Singleton
-export default new Client();

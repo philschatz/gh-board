@@ -21,15 +21,12 @@ const config = {
     filename: 'bundle.js'
   },
   plugins: [
-    new webpack.NoErrorsPlugin(),
-    new ExtractTextPlugin('app.css')
+    new ExtractTextPlugin('app.css'),
+    new webpack.DefinePlugin({ 'process.env': { NODE_ENV: process.env['NODE_ENV'] } })
   ].concat(isBuild ? [
-    new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } })
+    new webpack.NoErrorsPlugin(),
   ] : []),
   module: {
-    preLoaders: [
-      { test: /\.jsx?$/, loader: 'eslint-loader', exclude: [/node_modules|gantt-chart.*/, /octokat\.js/] },
-    ],
     loaders: [
       {
         test: /\.jsx?$/,

@@ -1,9 +1,14 @@
 {
   "parser": "babel-eslint",
-  "plugins": [ "react" ],
+  "plugins": [ "react", "duck", "import" ],
+  "extends": [ "eslint:recommended", "plugin:duck/recommended", "plugin:import/recommended" ],
   "env": {
     "es6": true,
     "browser": true,
+    "node": true
+  },
+  "settings": {
+    "import/resolver": "webpack"
   },
   "ecmaFeatures": {
     "templateStrings": true,
@@ -22,6 +27,7 @@
     "quotes": [1, "single", "avoid-escape"],
     "no-console": 1,
     "semi": 1,
-    "indent": [2, 2]
+    "indent": [2, 2],
+    "duck/meta-validation": [2, ["optimist", "promise", "feedbackOnError", "feedbackOnSuccess", "feedbackDirectly", "updateSettingStorage", "updateUserStorage", "github"]]
   }
 }

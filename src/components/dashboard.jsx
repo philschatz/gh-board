@@ -1,15 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
+import {connect} from 'react-redux';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 import {BeakerIcon, SyncIcon, LockIcon, RepoForkedIcon, RepoIcon, PersonIcon, OrganizationIcon} from 'react-octicons';
-import history from '../history';
+
+import {
+  fetchRepositories
+} from '../redux/ducks/user';
+import {history} from '../redux/store';
 
 import {buildRoute} from '../route-utils';
-import Client from '../github-client';
-import CurrentUserStore from '../user-store';
 import AsyncButton from './async-button';
 import Time from './time';
 
@@ -128,7 +131,7 @@ const RepoGroup = React.createClass({
         selectedRepos[repoName] = true;
       }
       this.setState({selectedRepos});
-      // this.forceUpdate(); // since we are modifying hte object directly
+      // this.forceUpdate(); // since we are modifying the object directly
     };
   },
   goToBoard() {
@@ -170,7 +173,7 @@ const RepoGroup = React.createClass({
     }
 
     let orgIcon;
-    if (CurrentUserStore.getUser() && CurrentUserStore.getUser().login === repoOwner) {
+    if (this.props.user && this.props.user.login === repoOwner) {
       orgIcon = (<PersonIcon className='org-icon'/>);
     } else {
       orgIcon = (<OrganizationIcon className='org-icon'/>);
@@ -197,9 +200,8 @@ const RepoGroup = React.createClass({
 });
 
 const Dashboard = React.createClass({
-  displayName: 'Dashboard',
   render() {
-    const {repos} = this.props;
+    const {repos, user} = this.props;
 
     const repoOwnersUpdatedAt = {};
     const reposByOwner = {};
@@ -230,6 +232,7 @@ const Dashboard = React.createClass({
       const groupRepos = reposByOwner[repoOwner];
       return (
         <RepoGroup
+          user={user}
           key={repoOwner}
           repoOwner={repoOwner}
           repos={groupRepos}
@@ -238,7 +241,7 @@ const Dashboard = React.createClass({
     });
 
     return (
-          <span>{repoOwnersNodes}</span>
+      <span>{repoOwnersNodes}</span>
     );
   }
 });
@@ -326,38 +329,25 @@ const ExamplesPanel = React.createClass({
   }
 });
 
-
-let allMyReposHack = null;
-
 const DashboardShell = React.createClass({
   getInitialState() {
     return {repos: null};
   },
+  componentWillMount() {
+    if (this.props.user && !this.props.user.repositories) {
+      this.props.dispatch(fetchRepositories());
+    }
+  },
   render() {
-    let {repos} = this.state;
-
-    // HACK to not keep re-fetching the user's list of repos
-    if (repos) { allMyReposHack = repos; }
-    else { repos = allMyReposHack; }
+    let {user, ready} = this.props;
 
     let myRepos;
 
-    if (repos) {
+    if (ready) {
       myRepos = (
-        <Dashboard repos={repos}/>
+        <Dashboard repos={user.repositories} user={user}/>
       );
     } else {
-      CurrentUserStore.fetchUser()
-      .then((currentUser) => {
-        if (currentUser) {
-          return Client.dbPromise().then(() => Client.getOcto().user.repos.fetchAll());
-        } else {
-          return []; // Anonymous has no repos
-        }
-      })
-      .then((allRepos) => this.setState({repos: allRepos}))
-      .catch(() => this.setState({repos: []}));
-      // TODO: Use Loadable component
       myRepos = (
         <span className='custom-loading is-loading'>
           <SyncIcon className='icon-spin'/>
@@ -380,4 +370,9 @@ const DashboardShell = React.createClass({
   }
 });
 
-export default DashboardShell;
+export default connect((state) => {
+  return {
+    ready: state.user.ready,
+    user: state.user.info
+  };
+})(DashboardShell);

@@ -1,8 +1,7 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 import {GearIcon} from 'react-octicons';
-
-import CurrentUserStore from '../user-store';
 
 let hasAlreadyShownAnonymousModal = false;
 
@@ -13,7 +12,7 @@ const AnonymousModal = React.createClass({
       this.setState({ showModal: false});
     };
     let showModal;
-    if (CurrentUserStore.getUser()) {
+    if (this.props.token) {
       showModal = false;
     } else {
       showModal = !hasAlreadyShownAnonymousModal;
@@ -42,4 +41,4 @@ const AnonymousModal = React.createClass({
   }
 });
 
-export default AnonymousModal;
+export default connect(state => state.user)(AnonymousModal);

@@ -62,21 +62,23 @@ export function getCardColumn(card) {
   return {name: UNCATEGORIZED_NAME, color: 'cccccc'};
 }
 
-export function getReposFromStr(repoStr) {
+export function getReposFromStr(repoStr = '') {
   let lastRepoOwner = null;
-  return repoStr.split('|').map((repoInfo) => {
+  return repoStr.split('|').reduce((prev, repoInfo) => {
+    if (!repoInfo) { return prev; }
     const repoInfoArr = repoInfo.split(':');
     if (repoInfoArr.length === 1) {
       const [repoName] = repoInfoArr;
-      return {repoOwner:lastRepoOwner, repoName};
+      prev.push({repoOwner:lastRepoOwner, repoName});
     } else if (repoInfoArr.length === 2){
       const [repoOwner, repoName] = repoInfoArr;
       lastRepoOwner = repoOwner;
-      return {repoOwner, repoName};
+      prev.push({repoOwner, repoName});
     } else {
       throw new Error('Invalid repo format!');
     }
-  });
+    return prev;
+  }, []);
 }
 
 export function convertRepoInfosToStr(repoInfos) {

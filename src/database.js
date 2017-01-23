@@ -215,7 +215,7 @@ const database = new class Database {
     //   });
     // });
   }
-  patchCard(card) {
+  patchCard(card, cardFields) {
     // this is atomic only because the get is instant because it's in-mem
     const {repoOwner, repoName, number} = card;
     return this.getCard(repoOwner, repoName, number).then((cardData) => {

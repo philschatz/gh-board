@@ -1,10 +1,10 @@
 import _ from 'underscore';
 import React from 'react';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 
 import {getCardColumn} from '../helpers';
 import IssueStore from '../issue-store';
-import CurrentUserStore from '../user-store';
 import IssueOrPullRequestBlurb from './issue-blurb';
 import LabelBadge from './label-badge';
 
@@ -94,7 +94,7 @@ const MoveModal = React.createClass({
       const related = card.getRelated();
 
       let anonymousComment = null;
-      const isAnonymous = !CurrentUserStore.getUser();
+      const isAnonymous = !this.props.user;
       if (isAnonymous) {
         anonymousComment = 'Sign In to move items ';
       }
@@ -189,4 +189,8 @@ const MoveModal = React.createClass({
 });
 
 
-export default MoveModal;
+export default connect(state => {
+  return {
+    user: state.user.info
+  };
+})(MoveModal);

@@ -90,9 +90,7 @@ export const MergedSinceInner = React.createClass({
     let {startShas, endShas, repoInfos} = this.props;
 
     if (startShas.length !== repoInfos.length || endShas.length !== repoInfos.length) {
-      /*eslint-disable no-alert */
       alert('The number of shas to compare does not match the number of repositories');
-      /*eslint-enable no-alert */
     }
 
     const allPromise = Promise.all(_.map(repoInfos, ({repoOwner, repoName}, i) => {

@@ -1,80 +1,68 @@
 import _ from 'underscore';
+import * as Database from '../../middlewares/utils/indexedDB';
+import {getDataFromHtml} from '../../../gfm-dom';
 
-import SettingsStore from './settings-store';
-import Client from './github-client';
-import {getDataFromHtml} from './gfm-dom';
-import Database from './database';
+const toIssueKey = (repoOwner, repoName, number) => {
+  return `${repoOwner}/${repoName}#${number}`;
+};
 
-const MAX_LISTENERS = 5;
+export const cardFactory = (CARD_CACHE, GRAPH_CACHE) => ({repoOwner, repoName, number, issue, pr = null, prStatuses = null}, cast) => {
+  const key = toIssueKey(repoOwner, repoName, number);
+  let card = CARD_CACHE[key];
+  if (card && issue) {
+    card.resetPromisesAndState(issue, pr, prStatuses);
+    return card;
+  } else if (card) {
+    return card;
+  } else {
+    card = new Card(repoOwner, repoName, number, GRAPH_CACHE, issue, pr, prStatuses);
+    if (!cast) {
+      GRAPH_CACHE.addCards([card], cardFactory(CARD_CACHE, GRAPH_CACHE));
+    }
+    CARD_CACHE[key] = card;
+    return card;
+  }
+};
 
 export default class Card {
   constructor(repoOwner, repoName, number, graph, issue, pr, prStatus) {
     if (!repoOwner) { throw new Error('BUG! missing repoOwner'); }
     if (!repoName) { throw new Error('BUG! missing repoName'); }
     if (!number) { throw new Error('BUG! missing number'); }
-    if (!graph) { throw new Error('BUG! missing graph'); }
     this.repoOwner = repoOwner;
     this.repoName = repoName;
     this.number = number;
     this.issue = issue;
     this._graph = graph;
-    this._pr = pr;
-    this._prStatus = prStatus;
+    this.pr = pr;
+    this.prStatus = prStatus;
     this._prPromise = pr ? Promise.resolve(pr) : null;
     this._prStatusPromise = prStatus ? Promise.resolve(prStatus) : null;
-    this._changeListeners = [];
   }
   key() {
     const {repoOwner, repoName, number} = this;
     return `${repoOwner}/${repoName}#${number}`;
   }
-  onChange(listener) {
-    if (typeof listener !== 'function') {
-      throw new Error('Expected listener to be a function.');
-    }
-
-    let isSubscribed = true;
-
-    const len = this._changeListeners.length;
-    if (len > MAX_LISTENERS) {
-      /*eslint-disable no-console */
-      console.warn('MAX_LISTENERS reached. Maybe a bug?', len);
-      /*eslint-enable no-console */
-    }
-
-    this._changeListeners.push(listener);
-
-    return () => {
-      if (!isSubscribed) {
-        return;
-      }
-
-      isSubscribed = false;
-
-      const index = this._changeListeners.indexOf(listener);
-      this._changeListeners.splice(index, 1);
-    };
-  }
   isPullRequest() {
     return this.issue && !!this.issue.pullRequest;
   }
   isPullRequestMerged() {
-    return !! this.isPullRequest() && this._pr && this._pr.mergedAt;
+    return !! this.isPullRequest() && this.pr && this.pr.mergedAt;
   }
   hasMergeConflict() {
-    if (this._pr) {
-      if (this._pr.merged) { return false; }
-      return !this._pr.mergeable;
+    if (this.pr) {
+      if (this.pr.merged) { return false; }
+      return !this.pr.mergeable;
     } else {
       return false; // return false for now just to be safe
     }
   }
   getPullRequestStatus() {
-    if (!this._prStatus) {
+    if (!this.prStatus) {
       return {};
     }
 
-    const {state, statuses} = this._prStatus;
+    const {state, statuses} = this.prStatus;
     // Pull out the 1st status which matches the overall status of the commit.
     // That way we get the targetURL and message.
     // When 'pending', there might not be entries in statuses
@@ -88,18 +76,17 @@ export default class Card {
     if (!this.isPullRequest()) {
       throw new Error('BUG! Did not check if this was a PullRequest first');
     }
-    if (!this._pr) {
+    if (!this.pr) {
       return true;
     }
-    return this._pr.base.ref === this._pr.base.repo.defaultBranch;
+    return this.pr.base.ref === this.pr.base.repo.defaultBranch;
   }
   getIssueType() {
     return this.isPullRequest() ? 'pull-request' : 'issue';
   }
   getRelated() {
-    const key = this._graph.cardToKey(this);
     // return this._graph.getB(key).concat(this._graph.getA(key));
-    return this._graph.getB(key);
+    return this._graph.getB(this._graph.cardToKey(this));
   }
   getRelatedIssues() {
     return this._graph.getB(this._graph.cardToKey(this));
@@ -108,11 +95,11 @@ export default class Card {
     return this._graph.getA(this._graph.cardToKey(this));
   }
   getUpdatedAt() {
-    if (this.isPullRequest() && !this._pr) {
+    if (this.isPullRequest() && !this.pr) {
       // TODO: Fetch the Pull Request Promise
     }
-    if (this.isPullRequest() && this._pr) {
-      return this._pr.updatedAt;
+    if (this.isPullRequest() && this.pr) {
+      return this.pr.updatedAt;
     } else {
       return this.issue.updatedAt;
     }
@@ -139,58 +126,67 @@ export default class Card {
   getCommentCount() {
     let count = this.issue.comments;
     // include comments on code in the count
-    if (this._pr) {
-      count += this._pr.reviewComments;
+    if (this.pr) {
+      count += this.pr.reviewComments;
     }
     return count;
   }
-  _getOcto() {
-    return Client.getOcto().repos(this.repoOwner, this.repoName);
-  }
-  fetchPR(isForced) {
-    if (!this.isPullRequest()) { throw new Error('BUG! Should not be fetching PR for an Issue'); }
-    if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
-    if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
+  fetchPR(githubClient, shouldShowPullRequestData, isForced) {
+    if (!this.isPullRequest()) {
+      throw new Error('BUG! Should not be fetching PR for an Issue');
+    }
+    if (!shouldShowPullRequestData) {
+      return Promise.resolve('user selected not to show additional PR data');
+    }
+    if (githubClient.getRateLimitRemaining() < githubClient.LOW_RATE_LIMIT) {
+      return Promise.resolve('Rate limit low');
+    }
     if (!this._prPromise || isForced) {
-      const oldHead = this._pr && this._pr.head.sha;
-      return this._prPromise = this._getOcto().pulls(this.number).fetch().then((pr) => {
-        if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
-        if (pr.head.sha !== oldHead) {
-          this._prStatus = null;
-          this._prStatusPromise = null;
-        }
-        const isSame = this._pr && pr && JSON.stringify(this._pr) === JSON.stringify(pr);
-        this._pr = pr;
-        if (!isSame) {
-          Database.putCard(this);
-          this._emitChange();
-        }
-      });
+      const oldHead = this.pr && this.pr.head.sha;
+      return this._prPromise = githubClient.getOcto()
+        .then(({repos}) => repos(this.repoOwner, this.repoName).pulls(this.number).fetch())
+        .then((pr) => {
+          if (!pr.head) { throw new Error('BUG! PR from Octokat should be an object!'); }
+          if (pr.head.sha !== oldHead) {
+            this.prStatus = null;
+            this._prStatusPromise = null;
+          }
+          const isSame = this.pr && pr && JSON.stringify(this.pr) === JSON.stringify(pr);
+          this.pr = pr;
+          if (!isSame) {
+            Database.putCard(this);
+          }
+        });
     }
     return this._prPromise;
   }
-  fetchPRStatus(isForced) {
-    if (!SettingsStore.getShowPullRequestData()) { return Promise.resolve('user selected not to show additional PR data'); }
-    if (Client.getRateLimitRemaining() < Client.LOW_RATE_LIMIT) { return Promise.resolve('Rate limit low'); }
+  fetchPRStatus(githubClient, shouldShowPullRequestData, isForced) {
+    if (!shouldShowPullRequestData) {
+      return Promise.resolve('user selected not to show additional PR data');
+    }
+    if (githubClient.getRateLimitRemaining() < githubClient.LOW_RATE_LIMIT) {
+      return Promise.resolve('Rate limit low');
+    }
     return this.fetchPR(isForced).then(() => {
       if (!this._prStatusPromise || isForced) {
         // Stop fetching the status once it is success. Some failed tests might get re-run.
-        if (!this._prStatus || this._prStatus.state !== 'success') {
-          this._prStatusPromise = this._getOcto().commits(this._pr.head.sha).status.fetch()
-          .then((status) => {
-            const isSame = this._prStatus && status && JSON.stringify(this._prStatus) === JSON.stringify(status);
-            this._prStatus = status;
-            if (!isSame) {
-              Database.putCard(this);
-              this._emitChange();
-            }
-          });
+        if (!this.prStatus || this.prStatus.state !== 'success') {
+          this._prStatusPromise = githubClient.getOcto()
+            .then(({repos}) => repos(this.repoOwner, this.repoName).commits(this.pr.head.sha).status.fetch())
+            .then((status) => {
+              const isSame = this.prStatus && status && JSON.stringify(this.prStatus) === JSON.stringify(status);
+              this.prStatus = status;
+              if (!isSame) {
+                Database.putCard(this);
+              }
+            });
         }
       }
     });
   }
-  fetchIssue(skipSavingToDb) {
-    return this._getOcto().issues(this.number).fetch().then((issue) => {
+  fetchIssue(githubClient, skipSavingToDb) {
+    return githubClient.getOcto().then(({issues}) => issues(this.number).fetch())
+    .then((issue) => {
       this.issue = issue;
       if (!skipSavingToDb) {
         Database.putCard(this);
@@ -206,32 +202,24 @@ export default class Card {
     delete this._prStatusPromise;
     this.issue = issue;
     if (pr) {
-      this._pr = pr;
+      this.pr = pr;
       this._prPromise = Promise.resolve('PR resolved because it was loaded from DB');
     }
     if (prStatus) {
-      this._prStatus = prStatus;
+      this.prStatus = prStatus;
       this._prStatusPromise = Promise.resolve('PRStatus resolved because it was loaded from DB');
     }
-    // if (_prStatus) {
+    // if (prStatus) {
     //   this.fetchPRStatus(); // Trigger fetching PR and status
-    // } else if (_pr) {
+    // } else if (pr) {
     //   this.fetchPR(); // Trigger fetching PR
-    // } else {
-    //   this._emitChange();
     // }
-    this._emitChange();
   }
-  _emitChange() {
-    this._changeListeners.forEach(function (listener) {
-      listener();
-    });
-  }
-  isLoaded() {
+  isLoaded(shouldShowPullRequestData) {
     if (!this.issue) { return false; }
-    if (SettingsStore.getShowPullRequestData() && this.isPullRequest()) {
+    if (shouldShowPullRequestData && this.isPullRequest()) {
       // Check if the statuses are loaded
-      return !!this._prStatus;
+      return !!this.prStatus;
     }
     return true; // It is an issue and is loaded
   }
@@ -241,7 +229,6 @@ export default class Card {
         return this.fetchPRStatus();
       } else {
         return Promise.resolve('There is already an issue. no need to fetch again');
-        return this.fetchIssue(); // fetch it again
       }
     } else {
       return this.fetchIssue();

@@ -29,7 +29,7 @@ function toQueryString(options) {
   } else {
     return '';
   }
-};
+}
 
 function addParams(options, key, vals, defaults) {
   const arr = options[key] || [];
@@ -43,7 +43,7 @@ function addParams(options, key, vals, defaults) {
   } else {
     // it was null, so ignore it
   }
-};
+}
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
@@ -249,7 +249,7 @@ function isUser(issue, userName) {
   }
   if (issue.user.login !== userName) { return false; }
   return true;
-};
+}
 
 
 function matchesRepoInfo(repoInfos, card) {

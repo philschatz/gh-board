@@ -21,14 +21,14 @@
 
 import _ from 'underscore';
 import React from 'react';
+import {connect} from 'react-redux';
 import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
 import IssueStore from '../issue-store';
-import Database from '../database';
 import Client from '../github-client';
-import {getFilters} from '../route-utils';
+import {getReposFromStr} from '../helpers';
 
 import Loadable from './loadable';
 import LabelBadge from './label-badge';
@@ -313,7 +313,7 @@ const BatchLabelsShell = React.createClass({
     );
   },
   render() {
-    const {repoInfos} = getFilters().getState();
+    const {repoInfos} = this.props;
     const promise = IssueStore.fetchConcreteRepoInfos(repoInfos)
     .then((concreteRepoInfos) => {
       return Promise.all(concreteRepoInfos.map(({repoOwner, repoName}) => {
@@ -329,4 +329,8 @@ const BatchLabelsShell = React.createClass({
   }
 });
 
-export default BatchLabelsShell;
+export default connect((state, ownProps) => {
+  return {
+    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+  };
+})(BatchLabelsShell);

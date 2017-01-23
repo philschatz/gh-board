@@ -1,15 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {connect} from 'react-redux';
 import _ from 'underscore';
 
-import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import Client from '../github-client';
-import {getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
+import {getCardColumn, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
 import Loadable from './loadable';
 import LabelBadge from './label-badge';
 
-import d3 from 'd3';
+import d3 from 'd3'; // eslint-disable-line
 import gantt from '../gantt-chart';
 
 
@@ -116,31 +115,27 @@ const GanttChart = React.createClass({
       let format;
       switch (timeDomainString) {
       case '1hr':
-        	format = '%H:%M:%S';
-        	chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
-        	break;
+        format = '%H:%M:%S';
+        chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
+        break;
       case '3hr':
-        	format = '%H:%M';
-        	chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
-        	break;
-
+        format = '%H:%M';
+        chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
+        break;
       case '6hr':
-        	format = '%H:%M';
-        	chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
-        	break;
-
+        format = '%H:%M';
+        chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
+        break;
       case '1day':
-        	format = '%H:%M';
-        	chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
-        	break;
-
+        format = '%H:%M';
+        chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
+        break;
       case '1week':
-        	format = '%m/%d';
-        	chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
-        	break;
+        format = '%m/%d';
+        chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
+        break;
       default:
-        	format = '%H:%M';
-
+        format = '%H:%M';
       }
       chart.tickFormat(format);
       chart.redraw(tasks);
@@ -185,7 +180,7 @@ const RepoKanbanShell = React.createClass({
     IssueStore.stopPolling();
   },
   renderLoaded([allMilestones, cards]) {
-    const {milestoneTitles} = getFilters().getState();
+    const {milestoneTitles} = this.props.settings;
 
     let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(cards);
     // COPYPASTA: Taken from repo-kanban
@@ -215,7 +210,7 @@ const RepoKanbanShell = React.createClass({
     );
   },
   render() {
-    const {repoInfos} = getFilters().getState();
+    const {repoInfos} = this.props;
     // Get the "Primary" repo for milestones and labels
     const [{repoOwner, repoName}] = repoInfos;
 
@@ -231,4 +226,9 @@ const RepoKanbanShell = React.createClass({
   }
 });
 
-export default RepoKanbanShell;
+export default connect((state, ownProps) => {
+  return {
+    settings: state.settings,
+    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+  };
+})(RepoKanbanShell);

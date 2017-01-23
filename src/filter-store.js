@@ -1,45 +1,11 @@
 import _ from 'underscore';
 import {EventEmitter} from 'events';
 
-import SettingsStore from './settings-store';
-// import {filterCards} from './issue-store';
-
 import {contains} from './helpers';
 
 let userFilter = null;
 let filteredMilestones = [];
 let filteredLabels = [];
-
-const filterReferencedCards = (cards, isFilteringPullRequests) => {
-  const allPossiblyRelatedCards = {};
-  _.each(cards, (card) => {
-    // XOR
-    if (isFilteringPullRequests ? !card.isPullRequest() : card.isPullRequest()) {
-      allPossiblyRelatedCards[card.key()] = true;
-    }
-  });
-  return _.filter(cards, (card) => {
-    // XOR
-    if (isFilteringPullRequests ? card.isPullRequest() : !card.isPullRequest()) {
-      // loop through all the related PR's. If one matches, remove this issue
-      let related = [];
-      if (isFilteringPullRequests &&  card.isPullRequest()) {
-        related = card.getRelated().filter(({vertex}) => { return !vertex.isPullRequest(); });
-      } else if (!isFilteringPullRequests && !card.isPullRequest()) {
-        related = card.getRelated().filter(({vertex}) => { return vertex.isPullRequest(); });
-      }
-      const hasVisiblePullRequest = _.filter(related, ({vertex: otherCard}) => {
-        if (allPossiblyRelatedCards[otherCard.key()]) {
-          return true;
-        }
-        return false;
-      });
-      return !hasVisiblePullRequest.length;
-    } else {
-      return true;
-    }
-  });
-};
 
 
 class Store extends EventEmitter {
@@ -164,10 +130,10 @@ class Store extends EventEmitter {
     });
 
     // Filter out any Issues that are associated with at least one Pull request in the list of cards
-    if (!SettingsStore.getRelatedShowAll()) {
-      const isFilteringPullRequests = SettingsStore.getRelatedHidePullRequests();
-      sortedCards = filterReferencedCards(sortedCards, isFilteringPullRequests);
-    }
+    // if (!SettingsStore.getRelatedShowAll()) {
+    //   const isFilteringPullRequests = SettingsStore.getRelatedHidePullRequests();
+    //   sortedCards = filterReferencedCards(sortedCards, isFilteringPullRequests);
+    // }
     return sortedCards;
   }
 }

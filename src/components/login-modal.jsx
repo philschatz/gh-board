@@ -1,17 +1,20 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Client from '../github-client';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 import {LinkExternalIcon} from 'react-octicons';
 
-export default React.createClass({
-  displayName: 'Login',
+import {
+  login,
+  logout
+} from '../redux/ducks/user';
+
+const Login = React.createClass({
   onSave() {
     let rootURLVal = ReactDOM.findDOMNode(this._rootURL).value;
     if (rootURLVal) {
       rootURLVal = rootURLVal.trim();
     }
-    Client.setRootUrl(rootURLVal);
     let tokenVal = ReactDOM.findDOMNode(this._token).value;
     if (tokenVal) {
       // needs trimming because just copying the token
@@ -19,21 +22,16 @@ export default React.createClass({
       // clicking the Copy button) adds a leading space character
       tokenVal = tokenVal.trim();
     }
-    Client.setToken(tokenVal);
+    this.props.dispatch(login(tokenVal, rootURLVal));
     // Close the modal
-    this.onCancel();
-  },
-  onClear() {
-    Client.setRootUrl(null);
-    Client.setToken(null);
-    // Re-render the modal
-    this.setState({});
-  },
-  onCancel() {
     this.props.onHide();
   },
+  onClear() {
+    this.props.dispatch(logout());
+  },
+
   render() {
-    const {token, rootURL} = Client.getCredentials();
+    const {token, rootURL} = this.props;
 
     let defaultRootURL = rootURL || (() => {
 
@@ -102,3 +100,5 @@ export default React.createClass({
     );
   }
 });
+
+export default connect((state) => state.user)(Login);

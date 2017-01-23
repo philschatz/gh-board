@@ -1,12 +1,25 @@
 import _ from 'underscore';
 import React from 'react';
+import {connect} from 'react-redux';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import {HomeIcon, StarIcon, GearIcon, QuestionIcon, GraphIcon, TagIcon} from 'react-octicons';
 
-import SettingsStore from '../../settings-store';
+import {
+  toggleShowSimpleList,
+  toggleHideUncategorized,
+  toggleShowEmptyColumns,
+  toggleShowPullRequestData,
+  setViewingMode,
+  VIEWING_MODE
+} from '../../redux/ducks/settings';
+import {
+  fetchUser,
+  logout
+} from '../../redux/ducks/user';
+
+import {getReposFromStr} from '../../helpers';
 import Client from '../../github-client';
-import CurrentUserStore from '../../user-store';
 import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
 import Database from '../../database';
 
@@ -34,42 +47,20 @@ const SettingsItem = React.createClass({
 
 
 const AppNav = React.createClass({
+  propTypes: {
+    settings: React.PropTypes.object,
+    filter: React.PropTypes.object,
+    repoInfos: React.PropTypes.array,
+    dispatch: React.PropTypes.func,
+    userInfo: React.PropTypes.object
+  },
   getInitialState() {
-    return {info: null, showModal: false};
+    return {showModal: false};
   },
   componentDidMount() {
-    SettingsStore.on('change', this.update);
-    SettingsStore.on('change:showPullRequestData', this.update);
-    SettingsStore.on('change:tableLayout', this.update);
-    Client.on('changeToken', this.onChangeToken);
-    this.onChangeToken();
+    this.props.dispatch(fetchUser());
   },
-  componentWillUnmount() {
-    SettingsStore.off('change', this.update);
-    SettingsStore.off('change:showPullRequestData', this.update);
-    SettingsStore.off('change:tableLayout', this.update);
-    Client.off('changeToken', this.onChangeToken);
-  },
-  update() {
-    this.setState({});
-  },
-  onChangeToken() {
-    CurrentUserStore.fetchUser()
-    .then((info) => {
-      // TODO: when anonymous, getting the current user should be an error.
-      // probably a bug in CurrentUserStore
-      // if (info) {
-      //   SettingsStore.setShowPullRequestData();
-      // }
-      this.setState({info});
-    }).catch(() => {
-      this.setState({info: null});
-    });
-  },
-  onSignOut() {
-    Client.setToken(null);
-    CurrentUserStore.clear();
-  },
+
   starThisProject() {
     Client.getOcto().user.starred('philschatz/gh-board').add().then(() => {
       /*eslint-disable no-alert */
@@ -85,9 +76,9 @@ const AppNav = React.createClass({
     }
   },
   render() {
-    let routeInfo = getFilters().getState();
-    let {repoInfos} = routeInfo;
-    const {info, showModal} = this.state;
+    let {userInfo, repoInfos, settings, filter} = this.props;
+    const {showModal} = this.state;
+    const {userName, tagNames} = filter;
 
     // Note: The dashboard page does not have a list of repos
     const close = () => this.setState({ showModal: false});
@@ -95,7 +86,7 @@ const AppNav = React.createClass({
     const brand = (
       <Link to={buildRoute('dashboard')}><HomeIcon/></Link>
     );
-    const filtering = _.map(getFilters().getState().tagNames, (tagName) => {
+    const filtering = _.map(tagNames, (tagName) => {
       // TODO: HACK. Find a better way to update the color of labels
       const label = LABEL_CACHE[tagName] || {name: tagName, color: 'ffffff'};
       return (
@@ -103,7 +94,6 @@ const AppNav = React.createClass({
       );
     });
 
-    const {userName} = getFilters().getState();
     if (userName) {
       filtering.push(
         <Link
@@ -116,19 +106,19 @@ const AppNav = React.createClass({
     }
 
     let loginButton;
-    if (info) {
+    if (userInfo) {
       const avatarImage = (
         <img
-          alt={'@' + info.login}
+          alt={'@' + userInfo.login}
           className='avatar-image'
-          src={info.avatarUrl}/>
+          src={userInfo.avatarUrl}/>
       );
       loginButton = (
         <BS.NavDropdown key='signin-dropdown' id='signin-dropdown' title={avatarImage}>
-          <BS.MenuItem key='1' header>Signed in as <strong>{info.login}</strong></BS.MenuItem>
+          <BS.MenuItem key='1' header>Signed in as <strong>{userInfo.login}</strong></BS.MenuItem>
           <BS.MenuItem key='2' onSelect={this.starThisProject}>Click to <StarIcon className='icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
           <BS.MenuItem key='3' divider/>
-          <BS.MenuItem key='4' eventKey='1'><span onClick={this.onSignOut}>Sign Out</span></BS.MenuItem>
+          <BS.MenuItem key='4' eventKey='1'><span onClick={() => this.props.dispatch(logout())}>Sign Out</span></BS.MenuItem>
         </BS.NavDropdown>
       );
     } else {
@@ -205,22 +195,22 @@ const AppNav = React.createClass({
               <BS.MenuItem key='display' header>Display Settings</BS.MenuItem>
               <SettingsItem
                 key='ShowSimpleList'
-                onSelect={SettingsStore.toggleShowSimpleList.bind(SettingsStore)}
-                isChecked={SettingsStore.getShowSimpleList()}
+                onSelect={() => this.props.dispatch(toggleShowSimpleList())}
+                isChecked={settings.isShowSimpleList}
                 >
                 Show Simple List
               </SettingsItem>
               <SettingsItem
                 key='HideUncategorized'
-                onSelect={SettingsStore.toggleHideUncategorized.bind(SettingsStore)}
-                isChecked={SettingsStore.getHideUncategorized()}
+                onSelect={() => this.props.dispatch(toggleHideUncategorized())}
+                isChecked={settings.isHideUncategorized}
                 >
                 Hide Uncategorized
               </SettingsItem>
               <SettingsItem
                 key='ShowEmptyColumns'
-                onSelect={SettingsStore.toggleShowEmptyColumns.bind(SettingsStore)}
-                isChecked={SettingsStore.getShowEmptyColumns()}
+                onSelect={() => this.props.dispatch(toggleShowEmptyColumns())}
+                isChecked={settings.isShowEmptyColumns}
                 >
                 Show Empty Columns
               </SettingsItem>
@@ -235,22 +225,22 @@ const AppNav = React.createClass({
               </BS.MenuItem>
               <SettingsItem
                 key='RelatedHideIssues'
-                onSelect={SettingsStore.setRelatedHideIssues.bind(SettingsStore)}
-                isChecked={SettingsStore.getRelatedHideIssues()}
+                onSelect={() => this.props.dispatch(setViewingMode(VIEWING_MODE.DEV))}
+                isChecked={settings.viewingMode === VIEWING_MODE.DEV}
                 >
                 Developer-Friendly
               </SettingsItem>
               <SettingsItem
                 key='RelatedHidePullRequests'
-                onSelect={SettingsStore.setRelatedHidePullRequests.bind(SettingsStore)}
-                isChecked={SettingsStore.getRelatedHidePullRequests()}
+                onSelect={() => this.props.dispatch(setViewingMode(VIEWING_MODE.QA))}
+                isChecked={settings.viewingMode === VIEWING_MODE.QA}
                 >
                 QA-Friendly
               </SettingsItem>
               <SettingsItem
                 key='RelatedShowAll'
-                onSelect={SettingsStore.setRelatedShowAll.bind(SettingsStore)}
-                isChecked={SettingsStore.getRelatedShowAll()}
+                onSelect={() => this.props.dispatch(setViewingMode(VIEWING_MODE.COMBINED))}
+                isChecked={settings.viewingMode === VIEWING_MODE.COMBINED}
                 >
                 Combined
               </SettingsItem>
@@ -258,8 +248,8 @@ const AppNav = React.createClass({
               <BS.MenuItem key='api-settings' header>GitHub API Settings</BS.MenuItem>
               <SettingsItem
                 key='ShowPullRequestData'
-                onSelect={SettingsStore.toggleShowPullRequestData.bind(SettingsStore)}
-                isChecked={SettingsStore.getShowPullRequestData()}
+                onSelect={() => this.props.dispatch(toggleShowPullRequestData())}
+                isChecked={settings.isShowPullRequestData}
                 >
                 Show More Pull Request Info
               </SettingsItem>
@@ -284,4 +274,11 @@ const AppNav = React.createClass({
 
 });
 
-export default AppNav;
+export default connect((state, ownProps) => {
+  return {
+    userInfo: state.user.info,
+    settings: state.settings,
+    filter: state.filter,
+    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || '')
+  };
+})(AppNav);

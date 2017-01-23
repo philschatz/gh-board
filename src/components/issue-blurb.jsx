@@ -1,7 +1,7 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
-import {LockIcon, ListUnorderedIcon, GitPullRequestIcon, IssueOpenedIcon, IssueReopenedIcon, IssueClosedIcon} from 'react-octicons';
+import {LockIcon, ListUnorderedIcon, GitPullRequestIcon, IssueOpenedIcon, IssueReopenedIcon, IssueClosedIcon, QuestionIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
 import Database from '../database';

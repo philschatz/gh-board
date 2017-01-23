@@ -1,11 +1,12 @@
 import React from 'react';
 import { DropTarget } from 'react-dnd';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 import {DesktopDownloadIcon, PlusIcon} from 'react-octicons';
 
-import Client from '../github-client';
-import SettingsStore from '../settings-store';
-import IssueStore from '../issue-store';
+import {
+  selectors
+} from '../redux/ducks/issue';
 import {UNCATEGORIZED_NAME} from '../helpers';
 
 import ColoredIcon from './colored-icon';
@@ -15,6 +16,27 @@ const MIN_CHILDREN_TO_SHOW = 10;
 const ItemTypes = {
   CARD: 'card'
 };
+
+function generateCSV(state, cards) {
+  // merged-since does not have the actual card object yet, so we look it up
+  const data = cards.map(({repoOwner, repoName, number}) => {
+    const card = selectors.getCard(state, {repoOwner, repoName, number});
+    if (card.issue) {
+      const ret = [repoOwner, repoName, number, card.issue.updatedAt, card.issue.user.login, card.issue.title];
+      // Some PR's have an image; if so, include it in the CSV
+      if (card.getFeaturedImageSrc()) {
+        ret.push(card.getFeaturedImageSrc());
+      }
+      return ret;
+    } else {
+      return [repoOwner, repoName, number];
+    }
+
+  });
+  // Add the CSV column headers
+  data.unshift(['repoOwner', 'repoName', 'number', 'updatedAt', 'createdBy', 'title', 'imageHref']);
+  return toCSVString(data);
+}
 
 const cardListTarget = {
   drop: function (props) {
@@ -46,7 +68,6 @@ function toCSVString(table) {
 
 
 const IssueList = React.createClass({
-  displayName: 'IssueList',
   getInitialState() {
     return {morePressedCount: 0, showCSVModal: false};
   },
@@ -81,27 +102,6 @@ const IssueList = React.createClass({
 
     let countOrDownloadLink;
     if (cards) {
-      function generateCSV() {
-        // merged-since does not have the actual card object yet, so we look it up
-        const data = cards.map(({repoOwner, repoName, number}) => {
-          const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-          if (card.issue) {
-            const ret = [repoOwner, repoName, number, card.issue.updatedAt, card.issue.user.login, card.issue.title];
-            // Some PR's have an image; if so, include it in the CSV
-            if (card.getFeaturedImageSrc()) {
-              ret.push(card.getFeaturedImageSrc());
-            }
-            return ret;
-          } else {
-            return [repoOwner, repoName, number];
-          }
-
-        });
-        // Add the CSV column headers
-        data.unshift(['repoOwner', 'repoName', 'number', 'updatedAt', 'createdBy', 'title', 'imageHref']);
-        return toCSVString(data);
-      }
-
       countOrDownloadLink = (
         <BS.Button bsStyle='link' onClick={this.toggleCSVModal} title='Generate CSV'
           >
@@ -113,7 +113,7 @@ const IssueList = React.createClass({
               <BS.Modal.Title>CSV Data</BS.Modal.Title>
             </BS.Modal.Header>
             <BS.Modal.Body>
-              <textarea>{generateCSV()}</textarea>
+              <textarea>{generateCSV(this.props.issues, cards)}</textarea>
             </BS.Modal.Body>
           </BS.Modal>
         </BS.Button>
@@ -122,7 +122,7 @@ const IssueList = React.createClass({
       countOrDownloadLink = children.length;
     }
 
-    let {rootURL} = Client.getCredentials();
+    let {rootURL} = this.props;
     rootURL = rootURL || 'https://github.com/';
     rootURL = rootURL.replace('api/v3', '');
 
@@ -178,4 +178,9 @@ const IssueList = React.createClass({
 });
 
 // Export the wrapped version
-export default DropTarget(ItemTypes.CARD, cardListTarget, collect)(IssueList);
+export default DropTarget(ItemTypes.CARD, cardListTarget, collect)(connect(state => {
+  return {
+    rootURL: state.user.rootURL,
+    issues: state.issues,
+  };
+})(IssueList));

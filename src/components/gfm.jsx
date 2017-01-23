@@ -1,17 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {connect} from 'react-redux';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
 import classnames from 'classnames';
 
-// import mermaid, {mermaidAPI} from 'mermaid';
-// import mermaidAPI from 'mermaid/dist/mermaidAPI';
-
-// import Client from '../github-client';
-// import Loadable from './loadable';
 import IssueStore from '../issue-store';
-import CurrentUserStore from '../user-store';
 import {forEachRelatedIssue} from '../gfm-dom';
 import {getFilters} from '../route-utils';
 import {isLight} from '../helpers';
@@ -228,7 +223,7 @@ const InnerMarkdown = React.createClass({
     this.updateDOM();
   },
   replaceEmojis(text) {
-    const emojisMap = CurrentUserStore.getEmojis() || {};
+    const emojisMap = this.props.emojis || {};
     return text.replace(EMOJI_RE, (m, p1) => {
       const emojiName = p1.substring(1, p1.length-1); // Strip off the leading and trailing `:`
       const emojiUrl = emojisMap[camelize(emojiName)];
@@ -279,4 +274,8 @@ const InnerMarkdown = React.createClass({
 
 });
 
-export default InnerMarkdown;
+export default connect(state => {
+  return {
+    emojis: state.emojis
+  };
+})(InnerMarkdown);
