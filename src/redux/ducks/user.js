@@ -4,7 +4,9 @@ import {
   LOGOUT,
   LOGIN,
   FETCH_USER,
-  FETCH_REPOS
+  FETCH_REPOS,
+  STAR_REPO,
+  RESET_DATABASES
 } from '../actions';
 
 let storedSettings;
@@ -34,6 +36,19 @@ export const logout = duck.defineAction(LOGOUT, {
   },
   reducer() {
     return DEFAULT_STATE;
+  },
+});
+
+export const starRepo = duck.defineAction(STAR_REPO, {
+  creator(repo) {
+    return {
+      payload: {
+        repo,
+      },
+      meta: {
+        github: {action: 'starRepo'}
+      }
+    };
   },
 });
 
@@ -97,6 +112,7 @@ export const fetchUser = duck.defineAction(FETCH_USER, {
     };
   },
   reject(state) {
+    // TODO handle 403 and clear info and user
     return {
       ...state,
       ready: true,
@@ -149,6 +165,14 @@ export const fetchRepositories = duck.defineAction(FETCH_REPOS, {
       ready: true,
     };
   }
+});
+
+export const resetDatabases = duck.defineAction(RESET_DATABASES, {
+  creator() {
+    return {meta: {
+      github: {action: 'reset'}
+    }};
+  },
 });
 
 export default duck.reducer;

@@ -6,9 +6,8 @@ import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
 import classnames from 'classnames';
 
-import IssueStore from '../issue-store';
+import {selectors} from '../redux/ducks/issue';
 import {forEachRelatedIssue} from '../gfm-dom';
-import {getFilters} from '../route-utils';
 import {isLight} from '../helpers';
 
 const insertAfter = (newNode, node) => {
@@ -35,7 +34,7 @@ const camelize = (string) => {
 
 // Construct the little [Open], [Closed], [Merged] badge next to a PR/Issue number
 // Done in the DOM instead of React because it is injected into arbitrary HTML.
-const buildStatusBadge = (card) => {
+const buildStatusBadge = (card, columnRegExp) => {
   const wrapNode = document.createElement('span');
   wrapNode.classList.add('issue-status-badges');
   const newNode = document.createElement('span');
@@ -44,7 +43,6 @@ const buildStatusBadge = (card) => {
     const isPullRequest = card.isPullRequest();
     const state = card.issue.state; // open, closed, reopened
 
-    const {columnRegExp} = getFilters().getState();
     const kanbanLabel = card.issue.labels.filter((label) => {
       return columnRegExp.test(label.name);
     })[0];
@@ -112,7 +110,6 @@ const buildStatusBadge = (card) => {
 };
 
 const InnerMarkdown = React.createClass({
-  displayName: 'InnerMarkdown',
   updateLinks() {
     const {disableLinks} = this.props;
 
@@ -143,8 +140,8 @@ const InnerMarkdown = React.createClass({
       _.each(root.querySelectorAll('.issue-status-badges'), (node) => node.remove());
 
       forEachRelatedIssue(root, ({repoOwner, repoName, number}, link) => {
-        const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-        const newNode = buildStatusBadge(card);
+        const card = this.props.getCard({repoOwner, repoName, number});
+        const newNode = buildStatusBadge(card, this.props.columnRegExp);
         insertAfter(newNode, link);
       });
     }
@@ -276,6 +273,8 @@ const InnerMarkdown = React.createClass({
 
 export default connect(state => {
   return {
-    emojis: state.emojis
+    emojis: state.emojis,
+    columnRegExp: state.filter.columnRegExp,
+    getCard: selectors.getCard.bind(this, state.issues)
   };
 })(InnerMarkdown);

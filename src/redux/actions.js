@@ -15,6 +15,8 @@ export const LOGIN = duck + 'LOGIN';
 export const LOGOUT = duck + 'LOGOUT';
 export const FETCH_USER = duck + 'FETCH_USER';
 export const FETCH_REPOS = duck + 'FETCH_REPOS';
+export const STAR_REPO = duck + 'STAR_REPO';
+export const RESET_DATABASES = duck + 'RESET_DATABASES';
 
 duck = 'issues.';
 
@@ -22,6 +24,12 @@ export const FETCH_ISSUES = duck + 'FETCH_ISSUES';
 export const CLEAR_CACHE = duck + 'CLEAR_CACHE';
 export const FETCH_LABELS = duck + 'FETCH_LABELS';
 export const FETCH_MILESTONES = duck + 'FETCH_MILESTONES';
+export const UPDATE_LABEL = duck + 'UPDATE_LABEL';
+export const DELETE_LABEL = duck + 'DELETE_LABEL';
+export const UPDATE_ISSUE = duck + 'UPDATE_ISSUE';
+export const TRY_MOVE_ISSUE = duck + 'TRY_MOVE_ISSUE';
+export const MOVE_ISSUES = duck + 'MOVE_ISSUES';
+export const CANCEL_MOVING_ISSUE = duck + 'CANCEL_MOVING_ISSUE';
 
 duck = 'emojis.';
 

@@ -15,13 +15,13 @@ import {
 } from '../../redux/ducks/settings';
 import {
   fetchUser,
-  logout
+  logout,
+  starRepo,
+  resetDatabases
 } from '../../redux/ducks/user';
 
 import {getReposFromStr} from '../../helpers';
-import Client from '../../github-client';
 import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
-import Database from '../../database';
 
 import LoginModal from '../login-modal';
 import LabelBadge from '../label-badge';
@@ -62,7 +62,7 @@ const AppNav = React.createClass({
   },
 
   starThisProject() {
-    Client.getOcto().user.starred('philschatz/gh-board').add().then(() => {
+    this.props.dispatch(starRepo('philschatz/gh-board')).then(() => {
       /*eslint-disable no-alert */
       alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!');
       /*eslint-enable no-alert */
@@ -70,7 +70,7 @@ const AppNav = React.createClass({
   },
   promptAndResetDatabases() {
     if (confirm('Are you sure you want to reset all the local data? It will take some time to repopulate all the data from GitHub and you may need to reload the page')) {
-      Database.resetDatabases().then(() => {
+      this.props.dispatch(resetDatabases()).then(() => {
         alert('Local cache has been cleared');
       });
     }

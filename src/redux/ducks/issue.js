@@ -1,14 +1,20 @@
 import Duck from 'reduck';
 
 import BipartiteGraph from './utils/bipartite-graph';
-import {cardFactory} from './utils/card';
+import {cardFactory, toIssueKey} from './utils/card';
 
 import {
   LOGOUT,
   CLEAR_CACHE,
   FETCH_ISSUES,
   FETCH_LABELS,
-  FETCH_MILESTONES
+  FETCH_MILESTONES,
+  UPDATE_LABEL,
+  DELETE_LABEL,
+  UPDATE_ISSUE,
+  TRY_MOVE_ISSUE,
+  MOVE_ISSUES,
+  CANCEL_MOVING_ISSUE
 } from '../actions';
 
 const initialState = {
@@ -19,7 +25,8 @@ const initialState = {
   cards: [],
   labels: [],
   milestones: [],
-  isPollingEnabled: false
+  isPollingEnabled: false,
+  movingIssue: null,
 };
 
 const duck = new Duck('issues', initialState);
@@ -68,6 +75,52 @@ export const fetchLabels = duck.defineAction(FETCH_LABELS, {
   }
 });
 
+export const updateLabel = duck.defineAction(UPDATE_LABEL, {
+  creator(repoInfos, oldName, newName) {
+    return {
+      payload: {repoInfos, oldName, newName},
+      meta: {
+        github: {action: 'updateLabel'},
+        optimist: true
+      }
+    };
+  },
+  resolve(state, {payload}) {
+    (state.LABEL_CACHE[payload.oldName] || {}).name = payload.newName;
+    return {
+      ...state,
+      labels: state.labels.map(l => {
+        if (l.name === payload.oldName) {
+          return {
+            ...l,
+            name: payload.newName,
+          };
+        }
+        return l;
+      }),
+    };
+  },
+});
+
+export const deleteLabel = duck.defineAction(DELETE_LABEL, {
+  creator(repoInfos, name) {
+    return {
+      payload: {repoInfos, name},
+      meta: {
+        github: {action: 'deleteLabel'},
+        optimist: true
+      }
+    };
+  },
+  resolve(state, {payload}) {
+    delete state.LABEL_CACHE[payload.name];
+    return {
+      ...state,
+      labels: state.labels.filter(l => l.name !== payload.name),
+    };
+  },
+});
+
 export const fetchMilestones = duck.defineAction(FETCH_MILESTONES, {
   creator(repoOwner, repoName) {
     return {
@@ -87,6 +140,32 @@ export const fetchMilestones = duck.defineAction(FETCH_MILESTONES, {
     return {
       ...state,
       ready: true,
+    };
+  }
+});
+
+export const tryToMoveIssue = duck.defineAction(TRY_MOVE_ISSUE, {
+  creator({card, primaryRepoName, label, milestone}) {
+    return {
+      payload: {card, primaryRepoName, label, milestone},
+    };
+  },
+  reducer(state, {payload}) {
+    return {
+      ...state,
+      movingIssue: payload,
+    };
+  }
+});
+
+export const cancelMovingIssue = duck.defineAction(CANCEL_MOVING_ISSUE, {
+  creator() {
+    return {};
+  },
+  reducer(state) {
+    return {
+      ...state,
+      movingIssue: null,
     };
   }
 });
@@ -140,6 +219,69 @@ export const fetchIssues = duck.defineAction(FETCH_ISSUES, {
       ready: true,
     };
   }
+});
+
+export const updateIssue = duck.defineAction(UPDATE_ISSUE, {
+  creator(card, update) {
+    return {
+      payload: {card, update},
+      meta: {
+        github: {action: 'updateIssue'},
+        optimist: true
+      }
+    };
+  },
+  reducer(state, {payload}) {
+    const key = toIssueKey(payload.card);
+    state.CARD_CACHE[key] = {
+      ...state.CARD_CACHE[key],
+      ...payload.update,
+    };
+    return {
+      ...state,
+      cards: state.cards.map(c => {
+        if (toIssueKey(c) === toIssueKey(payload.card)) {
+          return {
+            ...c,
+            ...payload.update
+          };
+        }
+        return c;
+      }),
+    };
+  },
+});
+
+export const moveIssues = duck.defineAction(MOVE_ISSUES, {
+  creator(cards, {label, milestone}) {
+    return {
+      payload: {cards, update: {label, milestone}},
+      meta: {
+        github: {action: 'moveIssue'},
+        optimist: true
+      }
+    };
+  },
+  reducer(state, {payload}) {
+    // TODO optimist update
+    const key = toIssueKey(payload.card);
+    state.CARD_CACHE[key] = {
+      ...state.CARD_CACHE[key],
+      ...payload.update,
+    };
+    return {
+      ...state,
+      cards: state.cards.map(c => {
+        if (toIssueKey(c) === toIssueKey(payload.card)) {
+          return {
+            ...c,
+            ...payload.update
+          };
+        }
+        return c;
+      }),
+    };
+  },
 });
 
 export const selectors = {

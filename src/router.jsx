@@ -6,9 +6,9 @@ import ByMilestoneView from './components/by-milestone-view';
 import ByUserView from './components/by-user-view';
 // import MergedSince, {MergedSinceFormShell} from './components/merged-since';
 // import DiffEnvs from './components/diff-envs';
-import EtherpadIssueShell from './components/etherpad-issue';
-import EtherpadFileShell from './components/etherpad-file';
-import BatchLabelsShell from './components/batch-labels';
+// import EtherpadIssueShell from './components/etherpad-issue';
+// import EtherpadFileShell from './components/etherpad-file';
+// import BatchLabelsShell from './components/batch-labels';
 
 import {parseRoute, buildRoute} from './route-utils';
 
@@ -28,9 +28,9 @@ export default [
     indexRoute: { component: Dashboard },
     childRoutes: [
       // { path: '/diff-envs/:startHost/:endHost', component: DiffEnvs},
-      { path: '/p-issue/:repoOwner/:repoName/:number', component: EtherpadIssueShell},
-      { path: '/p-file/:repoOwner/:repoName/:branch/**', component: EtherpadFileShell},
-      { path: '/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:userName)(/x/:columnRegExpStr)',
+      // { path: '/p-issue/:repoOwner/:repoName/:number', component: EtherpadIssueShell},
+      // { path: '/p-file/:repoOwner/:repoName/:branch/**', component: EtherpadFileShell},
+      { path: '/r/:repoStr',
         indexRoute: {component: RepoKanban},
         // If you change these children (or the parents) make sure you edit RELEVANT_PATH_SEGMENT in another file.
         childRoutes: [
@@ -45,11 +45,11 @@ export default [
           // { path: 'compare/:startShas(/:endShas)', component: MergedSince},
           { path: 'by-milestone', component: ByMilestoneView },
           { path: 'by-user', component: ByUserView },
-          { path: 'labels', component: BatchLabelsShell },
+          // { path: 'labels', component: BatchLabelsShell },
           // Redirect to the gantt URL
           { path: 'milestone-review', onEnter: (state, replace) => replace(null, buildRoute('gantt', parseRoute(state))) },
-          { path: 'p-issue/:repoOwner/:repoName/:number', component: EtherpadIssueShell},
-          { path: 'p-file/:repoOwner/:repoName/:branch/**', component: EtherpadFileShell},
+          // { path: 'p-issue/:repoOwner/:repoName/:number', component: EtherpadIssueShell},
+          // { path: 'p-file/:repoOwner/:repoName/:branch/**', component: EtherpadFileShell},
           { path: 'gantt',
             // Keep the review page as a separate chunk because it contains d3
             getComponent(location, callback) {

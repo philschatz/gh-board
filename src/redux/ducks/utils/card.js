@@ -2,7 +2,7 @@ import _ from 'underscore';
 import * as Database from '../../middlewares/utils/indexedDB';
 import {getDataFromHtml} from '../../../gfm-dom';
 
-const toIssueKey = (repoOwner, repoName, number) => {
+export const toIssueKey = (repoOwner, repoName, number) => {
   return `${repoOwner}/${repoName}#${number}`;
 };
 

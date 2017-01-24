@@ -1,17 +1,10 @@
 import Duck from 'reduck';
-import {LOCATION_CHANGE} from 'react-router-redux';
+import {LOCATION_CHANGE, CALL_HISTORY_METHOD} from 'react-router-redux';
 import qs from 'qs';
 
-import {KANBAN_LABEL} from '../../helpers';
+import buildRoute, {DEFAULT_STATE} from './utils/buildRoute';
 
-const initialState = {
-  milestoneTitles: [],
-  tagNames: [],
-  states: ['open'],
-  types: ['issue', 'pull-request'],
-  columnLabels: [],
-  columnRegExp: KANBAN_LABEL
-};
+const initialState = DEFAULT_STATE;
 
 const duck = new Duck('filter', initialState);
 
@@ -22,6 +15,15 @@ function parseArray(x) {
     return [x];
   }
 }
+
+export const fetchEmojis = duck.defineAction(CALL_HISTORY_METHOD, {
+  creator(filter, pathname) {
+    return {payload: {
+      methods: 'push',
+      args: buildRoute(pathname, filter)
+    }};
+  },
+});
 
 duck.addReducerCase(LOCATION_CHANGE, {
   reducer(state, {payload}) {

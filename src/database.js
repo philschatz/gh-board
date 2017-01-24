@@ -2,7 +2,7 @@ import _ from 'underscore';
 import moment from 'moment';
 
 import {getFilters, filterCardsByFilter} from './route-utils';
-import IssueStore from './issue-store';
+// import IssueStore from './issue-store';
 
 // 3 implementations: indexedDB, LocalStorage, In-mem
 import Dexie from 'dexie';
@@ -172,32 +172,32 @@ const database = new class Database {
     return Promise.all(Object.keys(DB_DATA).map((dbName) => this._resetDatabase(dbName)));
   }
   getCard(repoOwner, repoName, number) {
-    return this._doOp('issues', 'get', `${repoOwner}/${repoName}#${number}`, this._opts);
+    // return this._doOp('issues', 'get', `${repoOwner}/${repoName}#${number}`, this._opts);
   }
   // TODO: pass a filter as an arg so it can smartly (using Indexes) fetch the cards
   // ie: If there is just 1 repo then use the repoName index.
   // ie: If just getting open (or closed) Issues then use the `state` index.
   fetchCards(filter) {
-    filter = filter || getFilters();
-    const {states} = filter.getState();
-    const db = new Dexie('issues');
-    db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'});
-    return db.open().then(function() {
-      const cards = [];
-      let query;
-      if (states.length === 1) {
-        query = db.issues.where('state').equals('open');
-      } else if (states.length === 2 /* [open, closed] */) {
-        query = db.issues;
-      }
-      return query.each((value) => {
-        const {repoOwner, repoName, issue, pr, status} = value;
-        const number = issue.number;
-        cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));
-      }).then(() => {
-        return filterCardsByFilter(cards, filter);
-      });
-    });
+    // filter = filter || getFilters();
+    // const {states} = filter.getState();
+    // const db = new Dexie('issues');
+    // db.version(DB_DATA['issues'].dbVersion / 10 /*Dexie multiplies everything by 10 bc IE*/).stores({'issues': 'id, state'});
+    // return db.open().then(function() {
+    //   const cards = [];
+    //   let query;
+    //   if (states.length === 1) {
+    //     query = db.issues.where('state').equals('open');
+    //   } else if (states.length === 2 /* [open, closed] */) {
+    //     query = db.issues;
+    //   }
+    //   return query.each((value) => {
+    //     const {repoOwner, repoName, issue, pr, status} = value;
+    //     const number = issue.number;
+    //     cards.push(IssueStore.issueNumberToCard(repoOwner, repoName, number, issue, pr, status));
+    //   }).then(() => {
+    //     return filterCardsByFilter(cards, filter);
+    //   });
+    // });
 
     // // Alternative Method using leveDB (slow)
     // const cards = [];
@@ -217,10 +217,10 @@ const database = new class Database {
   }
   patchCard(card, cardFields) {
     // this is atomic only because the get is instant because it's in-mem
-    const {repoOwner, repoName, number} = card;
-    return this.getCard(repoOwner, repoName, number).then((cardData) => {
-      _.extend({}, cardData, cardFields);
-    });
+    // const {repoOwner, repoName, number} = card;
+    // return this.getCard(repoOwner, repoName, number).then((cardData) => {
+    //   _.extend({}, cardData, cardFields);
+    // });
   }
   toCardValue(card) {
     const {repoOwner, repoName, issue, _pr, _prStatus} = card;
@@ -244,22 +244,22 @@ const database = new class Database {
   }
   putCard(card) {
     // return Promise.resolve();
-    const {repoOwner, repoName, number} = card;
-    const value = this.toCardValue(card);
-    // console.log(`database.putCard ${repoOwner}/${repoName}#${number}`);
-    return this._doOp('issues', 'put', `${repoOwner}/${repoName}#${number}`, value, this._opts);
+    // const {repoOwner, repoName, number} = card;
+    // const value = this.toCardValue(card);
+    // // console.log(`database.putCard ${repoOwner}/${repoName}#${number}`);
+    // return this._doOp('issues', 'put', `${repoOwner}/${repoName}#${number}`, value, this._opts);
   }
   putCards(cards) {
-    const batchOps = cards.map((card) => {
-      const {repoOwner, repoName, number} = card;
-      const value = this.toCardValue(card);
-      return {
-        type: 'put',
-        key: `${repoOwner}/${repoName}#${number}`,
-        value: value
-      };
-    });
-    return this._doOp('issues', 'batch', batchOps, this._opts);
+    // const batchOps = cards.map((card) => {
+    //   const {repoOwner, repoName, number} = card;
+    //   const value = this.toCardValue(card);
+    //   return {
+    //     type: 'put',
+    //     key: `${repoOwner}/${repoName}#${number}`,
+    //     value: value
+    //   };
+    // });
+    // return this._doOp('issues', 'batch', batchOps, this._opts);
   }
 
   // getLabel(labelName) {
@@ -271,72 +271,72 @@ const database = new class Database {
   // }
 
   putRepoLabels(repoOwner, repoName, labels) {
-    return this._doOp('repoLabels', 'put', `${repoOwner}/${repoName}`, {repoOwner, repoName, labels});
+    // return this._doOp('repoLabels', 'put', `${repoOwner}/${repoName}`, {repoOwner, repoName, labels});
   }
   getRepoLabels(repoOwner, repoName) {
-    return this._doOp('repoLabels', 'get', `${repoOwner}/${repoName}`);
+    // return this._doOp('repoLabels', 'get', `${repoOwner}/${repoName}`);
   }
   getRepoLabelsOrNull(repoOwner, repoName) {
-    return new Promise((resolve) => {
-      this.getRepoLabels(repoOwner, repoName)
-      .then((val) => {
-        resolve(val);
-      })
-      .catch(() => { resolve(null); });
-    });
+    // return new Promise((resolve) => {
+    //   this.getRepoLabels(repoOwner, repoName)
+    //   .then((val) => {
+    //     resolve(val);
+    //   })
+    //   .catch(() => { resolve(null); });
+    // });
   }
 
   getRepo(repoOwner, repoName) {
-    return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`, this._opts);
+    // return this._doOp('repositories', 'get', `${repoOwner}/${repoName}`, this._opts);
   }
   getRepoOrNull(repoOwner, repoName) {
-    return new Promise((resolve) => {
-      this.getRepo(repoOwner, repoName)
-      .then((val) => {
-        if (!val.repoName) {
-          console.error('BUG: Looks like we retrieved something that is not a repo. Maybe it was a string?', val);
-          throw new Error('BUG: Looks like we retrieved something that is not a repo. Maybe it was a string?');
-        }
-        resolve(val);
-      })
-      .catch(() => { resolve(null); });
-    });
+    // return new Promise((resolve) => {
+    //   this.getRepo(repoOwner, repoName)
+    //   .then((val) => {
+    //     if (!val.repoName) {
+    //       console.error('BUG: Looks like we retrieved something that is not a repo. Maybe it was a string?', val);
+    //       throw new Error('BUG: Looks like we retrieved something that is not a repo. Maybe it was a string?');
+    //     }
+    //     resolve(val);
+    //   })
+    //   .catch(() => { resolve(null); });
+    // });
   }
 
   putRepo(repoOwner, repoName, value) {
-    return this._doOp('repositories', 'put', `${repoOwner}/${repoName}`, value, this._opts);
+    // return this._doOp('repositories', 'put', `${repoOwner}/${repoName}`, value, this._opts);
   }
 
   putRepos(repos) {
-    const batchOps = repos.map((repo) => {
-      const {repoOwner, repoName} = repo;
-      return {
-        type: 'put',
-        key: `${repoOwner}/${repoName}`,
-        value: repo
-      };
-    });
-    return this._doOp('repositories', 'batch', batchOps, this._opts);
+    // const batchOps = repos.map((repo) => {
+    //   const {repoOwner, repoName} = repo;
+    //   return {
+    //     type: 'put',
+    //     key: `${repoOwner}/${repoName}`,
+    //     value: repo
+    //   };
+    // });
+    // return this._doOp('repositories', 'batch', batchOps, this._opts);
   }
 
   putCardsAndRepos(cards, repos) {
-    return this.putCards(cards).then(() => {
-      return this.putRepos(repos);
-    })
-    .catch((err) => {
-      console.error(err);
-      return err;
-    });
+    // return this.putCards(cards).then(() => {
+    //   return this.putRepos(repos);
+    // })
+    // .catch((err) => {
+    //   console.error(err);
+    //   return err;
+    // });
   }
 
   patchRepo(repoOwner, repoName, changes) {
-    const putRepo = (repoData) => {
-      return this.putRepo(repoOwner, repoName, _.extend({}, repoData || {}, {repoOwner, repoName}, changes));
-    };
-    return this.getRepo(repoOwner, repoName) // this is atomic only because the get is instant because it's in-mem
-      .then(putRepo)
-      .catch(() => putRepo()) // this error means the entry wasn't in the DB (which is OK for a PATCH)
-      .then(() => null);
+    // const putRepo = (repoData) => {
+    //   return this.putRepo(repoOwner, repoName, _.extend({}, repoData || {}, {repoOwner, repoName}, changes));
+    // };
+    // return this.getRepo(repoOwner, repoName) // this is atomic only because the get is instant because it's in-mem
+    //   .then(putRepo)
+    //   .catch(() => putRepo()) // this error means the entry wasn't in the DB (which is OK for a PATCH)
+    //   .then(() => null);
   }
 };
 

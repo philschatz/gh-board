@@ -2,6 +2,7 @@ import GithubClient from './utils/githubClient';
 import fetchIssues from './utils/fetchIssues';
 import fetchLabels from './utils/fetchLabels';
 import fetchMilestones from './utils/fetchMilestones';
+import moveIssues from './utils/moveIssues';
 
 const githubClient = new GithubClient();
 
@@ -14,6 +15,9 @@ export default ({getState}) => next => action => {
   switch (action.meta.github.action) {
   case 'logout':
     promise = githubClient.reset();
+    break;
+  case 'starRepo':
+    promise = githubClient.getOcto().then(({user}) => user.starred(action.payload.repo).add());
     break;
   case 'login':
     promise = githubClient.reset().then(() => {
@@ -57,6 +61,31 @@ export default ({getState}) => next => action => {
     break;
   case 'fetchMilestones':
     promise = fetchMilestones(githubClient, action.payload.repoOwner, action.payload.repoName);
+    break;
+  case 'updateLabel':
+    promise = githubClient.getOcto().then(({repos}) =>
+      Promise.all(action.payload.repoInfos.map(repoInfo =>
+        repos(repoInfo).labels(action.payload.oldName).update({name: action.payload.newName})
+      ))
+    );
+    break;
+  case 'deleteLabel':
+    promise = githubClient.getOcto().then(({repos}) =>
+      Promise.all(action.payload.repoInfos.map(repoInfo =>
+        repos(repoInfo).labels(action.payload.name).remove()
+      ))
+    );
+    break;
+  case 'updateIssue':
+    promise = githubClient.getOcto().then(({repos}) =>
+      repos(action.payload.card.repoOwner, action.payload.card.repoName).issues(action.payload.card.number).update(action.payload.update)
+    );
+    break;
+  case 'moveIssues':
+    promise = moveIssues(githubClient, action.payload.cards, action.payload.update);
+    break;
+  case 'reset':
+    promise = githubClient.reset();
     break;
   }
 

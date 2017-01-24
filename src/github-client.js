@@ -179,11 +179,11 @@ class Client extends EventEmitter {
   getCredentials() {
     return {
       plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin, FetchOnePlugin],
-      token: window.localStorage.getItem('gh-token'),
-      username: window.localStorage.getItem('gh-username'),
-      password: window.localStorage.getItem('gh-password'),
-      cacheHandler,
-      rootURL: window.localStorage.getItem('gh-rootURL'),
+      // token: window.localStorage.getItem('gh-token'),
+      // username: window.localStorage.getItem('gh-username'),
+      // password: window.localStorage.getItem('gh-password'),
+      // cacheHandler,
+      // rootURL: window.localStorage.getItem('gh-rootURL'),
       emitter: this.emit.bind(this)
     };
   }

@@ -3,9 +3,8 @@ import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
 import _ from 'underscore';
 
-import IssueStore from '../issue-store';
+import {fetchMilestones, fetchIssues} from '../redux/ducks/issue';
 import {getCardColumn, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
-import Loadable from './loadable';
 import LabelBadge from './label-badge';
 
 import d3 from 'd3'; // eslint-disable-line
@@ -41,6 +40,10 @@ const filterByMilestoneAndKanbanColumn = (cards) => {
 
 
 const GanttChart = React.createClass({
+  componentWillMount() {
+    this.props.dispatch(fetchMilestones(this.props.repoInfos[0].repoOwner, this.props.repoInfos[0].repoName));
+    this.props.dispatch(fetchIssues(this.props.repoInfos));
+  },
   componentDidMount() {
     this.renderChart();
   },
@@ -171,64 +174,36 @@ const GanttChart = React.createClass({
 
 });
 
-const RepoKanbanShell = React.createClass({
-  componentWillMount() {
-    // Needs to be called before `render()`
-    IssueStore.startPolling();
-  },
-  componentWillUnmount() {
-    IssueStore.stopPolling();
-  },
-  renderLoaded([allMilestones, cards]) {
-    const {milestoneTitles} = this.props.settings;
-
-    let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(cards);
-    // COPYPASTA: Taken from repo-kanban
-    columns = _.sortBy(columns, ({name}) => {
-      if (name === UNCATEGORIZED_NAME) {
-        // make sure Uncategorized is the left-most column
-        return -1;
-      } else {
-        const result = /^(\d+)/.exec(name);
-        return result && result[1] || name;
-      }
-    });
-    columns = columns.reverse();
-
-    // Remove milestones that are not in the URL filter
-    let milestones;
-    if (milestoneTitles.length > 0) {
-      milestones = allMilestones.filter((milestone) => {
-        return milestoneTitles.indexOf(milestone.title) >= 0;
-      });
-    } else {
-      milestones = allMilestones;
-    }
-
-    return (
-      <GanttChart milestones={milestones} data={data} columns={columns} columnCounts={columnCounts}/>
-    );
-  },
-  render() {
-    const {repoInfos} = this.props;
-    // Get the "Primary" repo for milestones and labels
-    const [{repoOwner, repoName}] = repoInfos;
-
-    // TODO: Actually do all the milestones
-    const allPromises = Promise.all([IssueStore.fetchMilestones(repoOwner, repoName), IssueStore.fetchIssues()]);
-
-    return (
-      <Loadable
-        promise={allPromises}
-        renderLoaded={this.renderLoaded}
-      />
-    );
-  }
-});
-
 export default connect((state, ownProps) => {
+  const {milestoneTitles} = state.settings;
+
+  let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(state.issues.cards);
+
+  columns = _.sortBy(columns, ({name}) => {
+    if (name === UNCATEGORIZED_NAME) {
+      // make sure Uncategorized is the left-most column
+      return -1;
+    } else {
+      const result = /^(\d+)/.exec(name);
+      return result && result[1] || name;
+    }
+  });
+  columns = columns.reverse();
+
+  // Remove milestones that are not in the URL filter
+  let milestones;
+  if (milestoneTitles.length > 0) {
+    milestones = state.issues.milestones.filter((milestone) => {
+      return milestoneTitles.indexOf(milestone.title) >= 0;
+    });
+  } else {
+    milestones = state.issues.milestones;
+  }
   return {
-    settings: state.settings,
+    milestones,
+    data,
+    columns,
+    columnCounts,
     repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
   };
-})(RepoKanbanShell);
+})(GanttChart);

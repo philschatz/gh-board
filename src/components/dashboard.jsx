@@ -345,7 +345,7 @@ const DashboardShell = React.createClass({
 
     if (ready) {
       myRepos = (
-        <Dashboard repos={user.repositories} user={user}/>
+        <Dashboard repos={(user || {}).repositories || []} user={user}/>
       );
     } else {
       myRepos = (

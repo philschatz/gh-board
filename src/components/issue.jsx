@@ -8,8 +8,8 @@ import classnames from 'classnames';
 import {Link} from 'react-router';
 import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, PencilIcon, CheckIcon, PrimitiveDotIcon, XIcon} from 'react-octicons';
 
+import {tryToMoveIssue} from '../redux/ducks/issue';
 import {getFilters} from '../route-utils';
-import IssueStore from '../issue-store';
 import {PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 
 import Loadable from './loadable';
@@ -39,9 +39,9 @@ const issueSource = {
     const dropResult = monitor.getDropResult();
 
     if (dropResult.label) {
-      IssueStore.tryToMoveLabel(card, primaryRepoName, dropResult.label);
+      props.dispatch(tryToMoveIssue({card, primaryRepoName, label: dropResult.label}))
     } else if (dropResult.milestone){
-      IssueStore.tryToMoveMilestone(card, primaryRepoName, dropResult.milestone);
+      props.dispatch(tryToMoveIssue({card, primaryRepoName, milestone: dropResult.milestone}))
     } else if (dropResult.title === 'No Milestone') {
       alert('BUG: gh-board is currently unable to remove a milestone. Help us out by submitting a Pull Request!');
     } else {
@@ -545,11 +545,11 @@ let Issue = React.createClass({
 });
 
 
-Issue = DragSource(ItemTypes.CARD, issueSource, collect)(connect(state => {
+Issue = connect(state => {
   return {
     settings: state.settings
   };
-})(Issue));
+})(DragSource(ItemTypes.CARD, issueSource, collect)(Issue));
 
 // Wrap the issue possibly in a Loadable so we can determine if the Pull Request
 // has merge conflicts.
