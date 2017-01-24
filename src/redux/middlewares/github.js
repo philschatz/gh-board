@@ -1,4 +1,5 @@
 import GithubClient from './utils/githubClient';
+import * as Database from './utils/indexedDB';
 import fetchIssues from './utils/fetchIssues';
 import fetchLabels from './utils/fetchLabels';
 import fetchMilestones from './utils/fetchMilestones';
@@ -85,7 +86,10 @@ export default ({getState}) => next => action => {
     promise = moveIssues(githubClient, action.payload.cards, action.payload.update);
     break;
   case 'reset':
-    promise = githubClient.reset();
+    promise = Promise.all([
+      githubClient.reset(),
+      Database.resetDatabases()
+    ]);
     break;
   }
 
