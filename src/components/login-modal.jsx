@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import Client from '../github-client';
 import * as BS from 'react-bootstrap';
 import {LinkExternalIcon} from 'react-octicons';
@@ -7,12 +6,12 @@ import {LinkExternalIcon} from 'react-octicons';
 export default React.createClass({
   displayName: 'Login',
   onSave() {
-    let rootURLVal = ReactDOM.findDOMNode(this._rootURL).value;
+    let rootURLVal = this._rootURL.value;
     if (rootURLVal) {
       rootURLVal = rootURLVal.trim();
     }
     Client.setRootUrl(rootURLVal);
-    let tokenVal = ReactDOM.findDOMNode(this._token).value;
+    let tokenVal = this._token.value;
     if (tokenVal) {
       // needs trimming because just copying the token
       // from GitHub (by double-clicking the string instead of
@@ -65,7 +64,7 @@ export default React.createClass({
             defaultValue={token}
             disabled={!!token}
             placeholder='Enter GitHub token'
-            ref={r => this._token = r}
+            inputRef={r => this._token = r}
           />
           <div className='github-token-instructions'>
             <h4>"Why do I need a token?"</h4>
@@ -90,7 +89,7 @@ export default React.createClass({
                 type='text'
                 defaultValue={defaultRootURL}
                 placeholder='Enter GitHub API URL, e.g. https://github.example.com/api/v3'
-                ref={r => this._rootURL = r}
+                inputRef={r => this._rootURL = r}
               />
             </p>
           </div>
