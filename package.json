@@ -60,7 +60,7 @@
     "levelup": "^1.3.1",
     "memdown": "^1.1.2",
     "mermaid": "^7.0.0",
-    "moment": "2.17.1",
+    "moment": "2.18.0",
     "octicons": "^5.0.1",
     "octokat": "^0.6.2",
     "puzzle-script": "0.0.2",
