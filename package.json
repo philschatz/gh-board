@@ -41,7 +41,7 @@
     "webdriver-manager": "^11.1.0",
     "webdriverio": "^4.5.2",
     "webpack": "^1.9.10",
-    "webpack-dev-server": "^1.9.0"
+    "webpack-dev-server": "^2.4.3"
   },
   "dependencies": {
     "babel-polyfill": "^6.3.14",
