@@ -84,7 +84,7 @@ const AppNav = React.createClass({
     const close = () => this.setState({ showModal: false});
 
     const brand = (
-      <Link to={buildRoute('dashboard')}><HomeIcon/></Link>
+      <Link to={'/'}><HomeIcon/></Link>
     );
     const filtering = _.map(tagNames, (tagName) => {
       // TODO: HACK. Find a better way to update the color of labels
