@@ -1,16 +1,19 @@
 import React from 'react';
-import Client from '../github-client';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 import {LinkExternalIcon} from 'react-octicons';
 
-export default React.createClass({
-  displayName: 'Login',
+import {
+  login,
+  logout
+} from '../redux/ducks/user';
+
+const Login = React.createClass({
   onSave() {
     let rootURLVal = this._rootURL.value;
     if (rootURLVal) {
       rootURLVal = rootURLVal.trim();
     }
-    Client.setRootUrl(rootURLVal);
     let tokenVal = this._token.value;
     if (tokenVal) {
       // needs trimming because just copying the token
@@ -18,21 +21,16 @@ export default React.createClass({
       // clicking the Copy button) adds a leading space character
       tokenVal = tokenVal.trim();
     }
-    Client.setToken(tokenVal);
+    this.props.dispatch(login(tokenVal, rootURLVal));
     // Close the modal
-    this.onCancel();
-  },
-  onClear() {
-    Client.setRootUrl(null);
-    Client.setToken(null);
-    // Re-render the modal
-    this.setState({});
-  },
-  onCancel() {
     this.props.onHide();
   },
+  onClear() {
+    this.props.dispatch(logout());
+  },
+
   render() {
-    const {token, rootURL} = Client.getCredentials();
+    const {token, rootURL} = this.props;
 
     let defaultRootURL = rootURL || (() => {
 
@@ -54,7 +52,7 @@ export default React.createClass({
     );
 
     return (
-      <BS.Modal {...this.props}>
+      <BS.Modal show={this.props.show} container={this.props.container} onHide={this.props.onHide}>
         <BS.Modal.Header closeButton>
           <BS.Modal.Title>GitHub Credentials</BS.Modal.Title>
         </BS.Modal.Header>
@@ -74,10 +72,10 @@ export default React.createClass({
               <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new{' '}<LinkExternalIcon/></a></li>
               <li>Provide a descriptive title (like "gh-board") in the "Token Description"</li>
               <li>Unselect all the checkboxes to just look at public repositories</li>
-                <ul>
-                  <li>Select <code>public_repo</code> to be able to update/move issues</li>
-                  <li>Select <code>repo</code> if you want to see/update information for <strong>private</strong> repositories</li>
-                </ul>
+              <ul>
+                <li>Select <code>public_repo</code> to be able to update/move issues</li>
+                <li>Select <code>repo</code> if you want to see/update information for <strong>private</strong> repositories</li>
+              </ul>
               <li>Click <code>Generate Token</code></li>
               <li>Copy the new token and paste it in here!</li>
               <li><strong>Note:</strong> You may need to refresh the page when you click "Save"</li>
@@ -97,7 +95,9 @@ export default React.createClass({
         <BS.Modal.Footer className='modal-footer'>
           {footer}
         </BS.Modal.Footer>
-    </BS.Modal>
+      </BS.Modal>
     );
   }
 });
+
+export default connect((state) => state.user)(Login);

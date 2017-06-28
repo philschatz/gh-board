@@ -1,100 +1,79 @@
 import _ from 'underscore';
 import React from 'react';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 
+import {moveIssues, cancelMovingIssue} from '../redux/ducks/issue';
 import {getCardColumn} from '../helpers';
-import IssueStore from '../issue-store';
-import CurrentUserStore from '../user-store';
 import IssueOrPullRequestBlurb from './issue-blurb';
 import LabelBadge from './label-badge';
 
 const MoveModal = React.createClass({
   getInitialState() {
     return {
-      showModal: false,
-      card: null,
-      primaryRepoName: null,
-      label: null,
       unCheckedCards: {}
     };
   },
-  componentDidMount() {
-    IssueStore.on('tryToMoveLabel', this.onTryToMoveLabel);
-    IssueStore.on('tryToMoveMilestone', this.onTryToMoveMilestone);
-  },
-  componentWillUnmount() {
-    IssueStore.off('tryToMoveMilestone', this.onTryToMoveMilestone);
-  },
-  onTryToMoveLabel(card, primaryRepoName, label) {
-    this.performMoveOrShowModal(card, primaryRepoName, label, null);
-  },
-  onTryToMoveMilestone(card, primaryRepoName, milestone) {
-    this.performMoveOrShowModal(card, primaryRepoName, null, milestone);
-  },
-  performMoveOrShowModal(card, primaryRepoName, label, milestone) {
+  componentWillReceiveProps(nextProps) {
     // If this card has related cards then show the modal.
     // Otherwise, just perform the move
-    if (card.getRelated().length === 0) {
-      // FIXME : The code to move the label/milestone should be pulled out and just done here instead of setting the state
-      this.setState({showModal: false, card, primaryRepoName, label, milestone, unCheckedCards: {}});
-      if (label) {
-        this.onClickMoveLabel();
-      }
-      if (milestone) {
-        this.onClickMoveMilestone();
+    if (nextProps.movingIssue && nextProps.movingIssue.card.getRelated().length === 0) {
+      if (nextProps.movingIssue.label || nextProps.movingIssue.milestone) {
+        this.moveIssue(nextProps);
       }
     } else {
-      this.setState({showModal: true, card, primaryRepoName, label, milestone, unCheckedCards: {}});
+      this.setState({unCheckedCards: {}});
     }
-
   },
+
+  // performMoveOrShowModal(card, primaryRepoName, label, milestone) {
+  //   // If this card has related cards then show the modal.
+  //   // Otherwise, just perform the move
+  //   if (card.getRelated().length === 0) {
+  //     // FIXME : The code to move the label/milestone should be pulled out and just done here instead of setting the state
+  //     this.setState({showModal: false, card, primaryRepoName, label, milestone, unCheckedCards: {}});
+  //     if (label) {
+  //       this.onClickMoveLabel();
+  //     }
+  //     if (milestone) {
+  //       this.onClickMoveMilestone();
+  //     }
+  //   } else {
+  //     this.setState({showModal: true, card, primaryRepoName, label, milestone, unCheckedCards: {}});
+  //   }
+  //
+  // },
   onToggleCheckbox(card) {
     return () => {
       const {unCheckedCards} = this.state;
+      const copy = {...unCheckedCards};
       const key = card.key();
-      if (!unCheckedCards[key]) {
-        unCheckedCards[key] = card;
+      if (!copy[key]) {
+        copy[key] = card;
       } else {
-        delete unCheckedCards[key];
+        delete copy[key];
       }
-      this.setState({unCheckedCards});
+      this.setState({unCheckedCards: copy});
     };
   },
-  onClickMoveLabel() {
-    const {card, label, unCheckedCards} = this.state;
+  moveIssue(props) {
+    const {card, label, milestone} = props.movingIssue;
+    const {unCheckedCards} = this.state;
     const allOtherCards = _.map(card.getRelated(), ({vertex}) => vertex);
     const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
 
-    // Move the card and then all the others
-    const promises = _.map(otherCardsToMove, (otherCard) => {
-      return IssueStore.moveLabel(otherCard.repoOwner, otherCard.repoName, otherCard.issue, label);
-    });
-    promises.push(IssueStore.moveLabel(card.repoOwner, card.repoName, card.issue, label));
-    Promise.all(promises).then(() => this.setState({showModal: false}));
-  },
-  // TODO: Copy/pasta from above
-  onClickMoveMilestone() {
-    const {card, milestone, unCheckedCards} = this.state;
-    const allOtherCards = _.map(card.getRelated(), ({vertex}) => vertex);
-    const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
-
-    // Move the card and then all the others
-    const promises = _.map(otherCardsToMove, (otherCard) => {
-      return IssueStore.moveMilestone(otherCard.repoOwner, otherCard.repoName, otherCard.issue, milestone);
-    });
-    promises.push(IssueStore.moveMilestone(card.repoOwner, card.repoName, card.issue, milestone));
-    Promise.all(promises).then(() => this.setState({showModal: false}));
+    props.dispatch(moveIssues(otherCardsToMove.concat(card), {label, milestone}));
   },
   render() {
-    const {container} = this.props;
-    const {showModal, card, primaryRepoName, label, milestone, unCheckedCards} = this.state;
-    const close = () => this.setState({showModal: false});
+    const {container, movingIssue} = this.props;
+    const {unCheckedCards} = this.state;
+    const close = () => this.props.dispatch(cancelMovingIssue());
 
-    if (showModal) {
-      const related = card.getRelated();
+    if (movingIssue) {
+      const related = movingIssue.card.getRelated();
 
       let anonymousComment = null;
-      const isAnonymous = !CurrentUserStore.getUser();
+      const isAnonymous = !this.props.user;
       if (isAnonymous) {
         anonymousComment = 'Sign In to move items ';
       }
@@ -104,12 +83,12 @@ const MoveModal = React.createClass({
         const makeRelated = ({vertex}) => {
           const relatedColumn = getCardColumn(vertex);
           let relatedLabel = null;
-          if (relatedColumn.name !== getCardColumn(card).name) {
+          if (relatedColumn.name !== getCardColumn(movingIssue.card).name) {
             relatedLabel = (<LabelBadge label={relatedColumn}/>);
           }
           const checkLabel = (
             <span>
-              <IssueOrPullRequestBlurb card={vertex} primaryRepoName={primaryRepoName}/>
+              <IssueOrPullRequestBlurb card={vertex} primaryRepoName={movingIssue.primaryRepoName}/>
               <span className='issue-title'>
                 {': '}
                 {vertex.issue.title}
@@ -123,7 +102,7 @@ const MoveModal = React.createClass({
                 className='select-related-issue'
                 onClick={this.onToggleCheckbox(vertex)}
                 checked={!unCheckedCards[vertex.key()]}
-                >{checkLabel}</BS.Checkbox>
+              >{checkLabel}</BS.Checkbox>
             </li>
           );
         };
@@ -144,20 +123,17 @@ const MoveModal = React.createClass({
       }
 
       let title;
-      if (card.issue.pullRequest) {
+      if (movingIssue.card.issue.pullRequest) {
         title = 'Move Pull Request';
       } else {
         title = 'Move Issue';
       }
 
       let dest;
-      let onClick;
-      if (label) {
-        dest = (<LabelBadge label={label}/>);
-        onClick = this.onClickMoveLabel;
-      } else if (milestone) {
-        dest = milestone.title;
-        onClick = this.onClickMoveMilestone;
+      if (movingIssue.label) {
+        dest = (<LabelBadge label={movingIssue.label}/>);
+      } else if (movingIssue.milestone) {
+        dest = movingIssue.milestone.title;
       } else {
         throw new Error('BUG: only know how to move to a label or milestone');
       }
@@ -165,7 +141,7 @@ const MoveModal = React.createClass({
       return (
         <BS.Modal
           className='move-issue'
-          show={showModal}
+          show={!!movingIssue}
           container={container}
           onHide={close}>
           <BS.Modal.Header closeButton>
@@ -176,7 +152,7 @@ const MoveModal = React.createClass({
           {body}
           <BS.Modal.Footer>
             {anonymousComment}
-            <BS.Button bsStyle='primary' onClick={onClick}>Move</BS.Button>
+            <BS.Button bsStyle='primary' onClick={() => this.moveIssue(this.props)}>Move</BS.Button>
             <BS.Button onClick={close}>Cancel</BS.Button>
           </BS.Modal.Footer>
         </BS.Modal>
@@ -189,4 +165,9 @@ const MoveModal = React.createClass({
 });
 
 
-export default MoveModal;
+export default connect(state => {
+  return {
+    user: state.user.info,
+    movingIssue: state.issues.movingIssue,
+  };
+})(MoveModal);

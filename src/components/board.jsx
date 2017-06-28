@@ -1,14 +1,11 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 import {SyncIcon} from 'react-octicons';
 
-import {getFilters, filterCardsByFilter} from '../route-utils';
-import IssueStore from '../issue-store';
-import SettingsStore from '../settings-store';
-import FilterStore from '../filter-store';
+import {fetchIssues} from '../redux/ducks/issue';
 import Loadable from './loadable';
 import Progress from '../progress';
-import Database from '../database';
 
 const ProgressView = React.createClass({
   getInitialState() {
@@ -53,29 +50,11 @@ const Board = React.createClass({
   propTypes: {
     type: React.PropTypes.func.isRequired, // A React Component
     repoInfos: React.PropTypes.array.isRequired,
-    columnDataPromise: React.PropTypes.object.isRequired
+    columnDataPromise: React.PropTypes.object.isRequired,
+    dispatch: React.PropTypes.func
   },
-  componentDidMount() {
-    IssueStore.on('change', this.onChange);
-    FilterStore.on('change', this.onChange);
-    SettingsStore.on('change', this.onChange);
-    SettingsStore.on('change:showPullRequestData', this.onChangeAndRefetch);
-  },
-  componentWillUnmount() {
-    IssueStore.off('change', this.onChange);
-    FilterStore.off('change', this.onChange);
-    SettingsStore.off('change', this.onChange);
-    SettingsStore.off('change:showPullRequestData', this.onChangeAndRefetch);
-  },
-  onChangeAndRefetch() {
-    IssueStore.clearCacheCards();
-    this.forceUpdate();
-  },
-  onChange() {
-    this.setState({});
-  },
-  onLabelsChanged() {
-    this.setState({});
+  componentWillMount() {
+    this._promise = this.props.dispatch(fetchIssues(this.props.repoInfos));
   },
   // Curried func to squirrell the primaryRepoName var
   renderKanbanRepos(repoInfos) {
@@ -115,13 +94,10 @@ const Board = React.createClass({
   render() {
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
-    const cardsPromise = IssueStore.fetchIssues().then((cards) => {
-      return Database.fetchCards(getFilters()) || cards;
-    });
 
     return (
       <Loadable key='board'
-        promise={Promise.all([columnDataPromise, cardsPromise])}
+        promise={Promise.all([columnDataPromise, this._promise])}
         renderLoading={() => (<ProgressView progress={progress}/>)}
         renderLoaded={this.renderKanbanRepos(repoInfos)}
         renderError={this.renderError}
@@ -130,4 +106,4 @@ const Board = React.createClass({
   }
 });
 
-export default Board;
+export default connect()(Board);

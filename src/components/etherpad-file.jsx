@@ -1,7 +1,6 @@
 import React from 'react';
 
 import Client from '../github-client';
-import IssueStore from '../issue-store';
 
 import Etherpad from './etherpad';
 

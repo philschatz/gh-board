@@ -1,19 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {connect} from 'react-redux';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
 import linkify from 'gfm-linkify';
 import classnames from 'classnames';
 
-// import mermaid, {mermaidAPI} from 'mermaid';
-// import mermaidAPI from 'mermaid/dist/mermaidAPI';
-
-// import Client from '../github-client';
-// import Loadable from './loadable';
-import IssueStore from '../issue-store';
-import CurrentUserStore from '../user-store';
+import {selectors} from '../redux/ducks/issue';
 import {forEachRelatedIssue} from '../gfm-dom';
-import {getFilters} from '../route-utils';
 import {isLight} from '../helpers';
 
 const insertAfter = (newNode, node) => {
@@ -24,7 +18,7 @@ const insertAfter = (newNode, node) => {
   }
 };
 
-const EMOJI_RE = /(:\+?\-?[\+a-z0-9_\-]+:)/g;
+const EMOJI_RE = /(:\+?-?[+a-z0-9_-]+:)/g;
 
 // HACK: Octokat converts underscores to camelCase so for now we do too
 const camelize = (string) => {
@@ -40,7 +34,7 @@ const camelize = (string) => {
 
 // Construct the little [Open], [Closed], [Merged] badge next to a PR/Issue number
 // Done in the DOM instead of React because it is injected into arbitrary HTML.
-const buildStatusBadge = (card) => {
+const buildStatusBadge = (card, columnRegExp) => {
   const wrapNode = document.createElement('span');
   wrapNode.classList.add('issue-status-badges');
   const newNode = document.createElement('span');
@@ -49,7 +43,6 @@ const buildStatusBadge = (card) => {
     const isPullRequest = card.isPullRequest();
     const state = card.issue.state; // open, closed, reopened
 
-    const {columnRegExp} = getFilters().getState();
     const kanbanLabel = card.issue.labels.filter((label) => {
       return columnRegExp.test(label.name);
     })[0];
@@ -117,7 +110,6 @@ const buildStatusBadge = (card) => {
 };
 
 const InnerMarkdown = React.createClass({
-  displayName: 'InnerMarkdown',
   updateLinks() {
     const {disableLinks} = this.props;
 
@@ -148,8 +140,8 @@ const InnerMarkdown = React.createClass({
       _.each(root.querySelectorAll('.issue-status-badges'), (node) => node.remove());
 
       forEachRelatedIssue(root, ({repoOwner, repoName, number}, link) => {
-        const card = IssueStore.issueNumberToCard(repoOwner, repoName, number);
-        const newNode = buildStatusBadge(card);
+        const card = this.props.getCard({repoOwner, repoName, number});
+        const newNode = buildStatusBadge(card, this.props.columnRegExp);
         insertAfter(newNode, link);
       });
     }
@@ -166,7 +158,7 @@ const InnerMarkdown = React.createClass({
     }
 
     _.each(div.querySelectorAll('li'), (listItem) => {
-      if (/^\[x\]\ /.test(listItem.textContent)) {
+      if (/^\[x\] /.test(listItem.textContent)) {
         const textChild = listItem.firstChild;
         const checkbox = buildCheckbox(true);
 
@@ -177,7 +169,7 @@ const InnerMarkdown = React.createClass({
           textChild.textContent = textChild.textContent.substring(3);
           listItem.insertBefore(checkbox, textChild);
         }
-      } else if (/^\[\ \]\ /.test(listItem.textContent)) {
+      } else if (/^\[ \] /.test(listItem.textContent)) {
         const textChild = listItem.firstChild;
         const checkbox = buildCheckbox(false);
 
@@ -228,7 +220,7 @@ const InnerMarkdown = React.createClass({
     this.updateDOM();
   },
   replaceEmojis(text) {
-    const emojisMap = CurrentUserStore.getEmojis() || {};
+    const emojisMap = this.props.emojis || {};
     return text.replace(EMOJI_RE, (m, p1) => {
       const emojiName = p1.substring(1, p1.length-1); // Strip off the leading and trailing `:`
       const emojiUrl = emojisMap[camelize(emojiName)];
@@ -279,4 +271,10 @@ const InnerMarkdown = React.createClass({
 
 });
 
-export default InnerMarkdown;
+export default connect(state => {
+  return {
+    emojis: state.emojis,
+    columnRegExp: state.filter.columnRegExp,
+    getCard: selectors.getCard.bind(this, state.issues)
+  };
+})(InnerMarkdown);

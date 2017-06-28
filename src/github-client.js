@@ -64,14 +64,14 @@ const cacheHandler = new class CacheHandler {
           alert('Problem opening database. are you incognito? ' + err.message);
         }
         db.query({})
-        .on('data', (entry) => {
-          let {methodAndPath, eTag, data, status} = entry;
-          this.cachedETags[methodAndPath] = {eTag, data, status};
-        })
-        .on('stats', (stats) => {
-          this._db = db;
-          resolve();
-        });
+          .on('data', (entry) => {
+            let {methodAndPath, eTag, data, status} = entry;
+            this.cachedETags[methodAndPath] = {eTag, data, status};
+          })
+          .on('stats', (stats) => {
+            this._db = db;
+            resolve();
+          });
       });
     });
 
@@ -179,11 +179,11 @@ class Client extends EventEmitter {
   getCredentials() {
     return {
       plugins: [SimpleVerbsPlugin, NativePromiseOnlyPlugin, AuthorizationPlugin, CamelCasePlugin, PaginationPlugin, CacheHandlerPlugin, FetchAllPlugin, FetchOnePlugin],
-      token: window.localStorage.getItem('gh-token'),
-      username: window.localStorage.getItem('gh-username'),
-      password: window.localStorage.getItem('gh-password'),
-      cacheHandler,
-      rootURL: window.localStorage.getItem('gh-rootURL'),
+      // token: window.localStorage.getItem('gh-token'),
+      // username: window.localStorage.getItem('gh-username'),
+      // password: window.localStorage.getItem('gh-password'),
+      // cacheHandler,
+      // rootURL: window.localStorage.getItem('gh-rootURL'),
       emitter: this.emit.bind(this)
     };
   }
@@ -195,7 +195,7 @@ class Client extends EventEmitter {
     if (!cachedClient) {
       let credentials = this.getCredentials();
       cachedClient = new Octo(credentials);
-      // update the rateLimit for issue-store so it can gracefully back off
+      // update the rateLimit for issue-duck so it can gracefully back off
       // making requests when the rate limit is low
       this.on('request', ({rate: {remaining}}) => {
         this.rateLimitRemaining = remaining;

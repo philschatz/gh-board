@@ -2,20 +2,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import _ from 'underscore';
+import {connect} from 'react-redux';
 import { DragSource } from 'react-dnd';
 import classnames from 'classnames';
 import {Link} from 'react-router';
 import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, PencilIcon, CheckIcon, PrimitiveDotIcon, XIcon} from 'react-octicons';
 
+import {tryToMoveIssue} from '../redux/ducks/issue';
 import {getFilters} from '../route-utils';
-import IssueStore from '../issue-store';
 import {PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
-import SettingsStore from '../settings-store';
 
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
-import Time from './time';
-import {Timer} from './time'; // used for polling PR status
+import Time, {Timer} from './time';
 import LabelBadge from './label-badge';
 import IssueOrPullRequestBlurb from './issue-blurb';
 
@@ -40,9 +39,9 @@ const issueSource = {
     const dropResult = monitor.getDropResult();
 
     if (dropResult.label) {
-      IssueStore.tryToMoveLabel(card, primaryRepoName, dropResult.label);
+      props.dispatch(tryToMoveIssue({card, primaryRepoName, label: dropResult.label}));
     } else if (dropResult.milestone){
-      IssueStore.tryToMoveMilestone(card, primaryRepoName, dropResult.milestone);
+      props.dispatch(tryToMoveIssue({card, primaryRepoName, milestone: dropResult.milestone}));
     } else if (dropResult.title === 'No Milestone') {
       alert('BUG: gh-board is currently unable to remove a milestone. Help us out by submitting a Pull Request!');
     } else {
@@ -456,11 +455,11 @@ let IssueCard = React.createClass({
                 className='issue-title'
                 target='_blank'
                 href={issue.htmlUrl}>
-                  <GithubFlavoredMarkdown
-                    inline
-                    repoOwner={repoOwner}
-                    repoName={repoName}
-                    text={issue.title}/>
+                <GithubFlavoredMarkdown
+                  inline
+                  repoOwner={repoOwner}
+                  repoName={repoName}
+                  text={issue.title}/>
               </a>
               {featuredImage}
             </span>
@@ -492,16 +491,12 @@ let IssueCard = React.createClass({
 // `GET .../pulls` returns an object with `mergeable` so for Pull Requests
 // we have to have both to fully render an Issue.
 let Issue = React.createClass({
-  displayName: 'Issue',
   componentWillMount() {
     const {card} = this.props;
     if (!card.isLoaded()) { card.load(); }
-    // TODO: Not sure why React no longer automatically binds all functions to `this`
-    this._unsubscribe = card.onChange(this.forceUpdate.bind(this));
     Timer.onTick(this.pollPullRequestStatus);
   },
   componentWillUnmount() {
-    this._unsubscribe && this._unsubscribe();
     Timer.offTick(this.pollPullRequestStatus);
   },
   update(issue) {
@@ -509,7 +504,6 @@ let Issue = React.createClass({
   },
   pollPullRequestStatus() {
     const {card} = this.props;
-    const {repoOwner, repoName, number} = card;
     if (card.isPullRequest()) {
       card.fetchPRStatus(true/*force*/);
     }
@@ -527,13 +521,13 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, primaryRepoName, columnRegExp} = this.props;
+    const {card, primaryRepoName, columnRegExp, settings} = this.props;
     const { isDragging, connectDragSource } = this.props;
-    const {issue, repoOwner, repoName} = card;
+    const {issue} = card;
     let node;
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);
-    } else if (SettingsStore.getShowSimpleList()){
+    } else if (settings.isShowSimpleList){
       node = (
         <IssueSimple card={card} isDragging={isDragging}/>
       );
@@ -551,7 +545,11 @@ let Issue = React.createClass({
 });
 
 
-Issue = DragSource(ItemTypes.CARD, issueSource, collect)(Issue);
+Issue = connect(state => {
+  return {
+    settings: state.settings
+  };
+})(DragSource(ItemTypes.CARD, issueSource, collect)(Issue));
 
 // Wrap the issue possibly in a Loadable so we can determine if the Pull Request
 // has merge conflicts.

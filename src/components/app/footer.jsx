@@ -1,12 +1,12 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
-import {GiftIcon, CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
+import {CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
 
-import Client from '../../github-client';
-import NewVersionChecker from '../../new-version-checker';
+// import Client from '../../github-client';
+// import NewVersionChecker from '../../new-version-checker';
 
 import Time from '../time';
-import GameModal from '../game-modal';
+// import GameModal from '../game-modal';
 import GithubFlavoredMarkdown from '../gfm';
 import SavedFiltersButton from './saved-filters';
 
@@ -14,14 +14,14 @@ const KarmaWarning = React.createClass({
   getInitialState() {
     return {timer: null, limit: null, remaining: null, newestVersion: null, isConnected: true};
   },
-  componentDidMount() {
-    NewVersionChecker.on('change', this.updateNewestVersion);
-    Client.on('end', this.updateRateLimit);
-  },
-  componentWillUnmount() {
-    NewVersionChecker.off('change', this.updateNewestVersion);
-    Client.off('request', this.updateRateLimit);
-  },
+  // componentDidMount() {
+  // NewVersionChecker.on('change', this.updateNewestVersion);
+  // Client.on('end', this.updateRateLimit);
+  // },
+  // componentWillUnmount() {
+  // NewVersionChecker.off('change', this.updateNewestVersion);
+  // Client.off('request', this.updateRateLimit);
+  // },
   // ('end', eventId, {method, path, data, options}, jqXHR.status, emitterRate)
   updateRateLimit(eventId, config, status, rate) {
     if (status !== 0 && rate) {
@@ -88,22 +88,22 @@ const KarmaWarning = React.createClass({
     return (
       <BS.Navbar fixedBottom className='bottombar-nav'>
         <BS.Nav>
-          <li>
+          {/* <li>
             <span className={'karma-stats' + (isKarmaLow && ' is-karma-low' || '')}>
               <CloudDownloadIcon title='GitHub API'/>
               {' API Requests Left: '}
               {karmaText}
               {resetText}
             </span>
-          </li>
+          </li> */}
           {newestText}
         </BS.Nav>
         <BS.Nav pullRight>
-          <BS.NavItem className='nav-secret-game' onClick={this.showGameModal}><GiftIcon title='Oooh, a present!'/></BS.NavItem>
+          {/* <BS.NavItem className='nav-secret-game' onClick={this.showGameModal}><GiftIcon title='Oooh, a present!'/></BS.NavItem> */}
           <BS.NavItem target='_blank' href='https://github.com/philschatz/gh-board'><MarkGithubIcon/> Source Code</BS.NavItem>
           <SavedFiltersButton/>
         </BS.Nav>
-        <GameModal show={isGameOpen} onHide={this.onHideGameModal}/>
+        {/* <GameModal show={isGameOpen} onHide={this.onHideGameModal}/> */}
       </BS.Navbar>
     );
   }

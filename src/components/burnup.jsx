@@ -1,22 +1,12 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import _ from 'underscore';
 import {GraphIcon} from 'react-octicons';
 
 import Chart from './chart';
-import Database from '../database';
-import {getFilters} from '../route-utils';
-import IssueStore from '../issue-store';
-import Loadable from './loadable';
 import moment from 'moment';
 
 const BurnupShell = React.createClass({
-  componentWillMount() {
-    // Needs to be called before `render()`
-    IssueStore.startPolling();
-  },
-  componentWillUnmount() {
-    IssueStore.stopPolling();
-  },
   renderLoaded(cards) {
     function getDay(dateStr) {
       return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24);
@@ -232,21 +222,19 @@ const BurnupShell = React.createClass({
     );
   },
   render() {
-    // TODO: send the current filter as an arg to `Database.fetchCards()` so it can smartly (using Indexes) fetch the cards
-    const promise = Database.fetchCards(getFilters());
-
     return (
       <div className='burnup'>
         <h2><GraphIcon size='mega'/>  Burnup Chart</h2>
         <p>Make sure you selected <strong>closed</strong> and <strong>Issues</strong> and optionally a Milestone from the filter dropdown at the top of this page</p>
         <p>Also, this chart only fills the area when something changed (useful for weekends/open-source projects that frequently have periods of no change)</p>
-        <Loadable
-          promise={promise}
-          renderLoaded={this.renderLoaded}
-        />
+        {this.renderChart(this.props.cards)}
       </div>
     );
   }
 });
 
-export default BurnupShell;
+export default connect(state => {
+  return {
+    cards: state.issues.cards,
+  };
+})(BurnupShell);

@@ -1,14 +1,12 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import _ from 'underscore';
 
-import {getFilters} from '../route-utils';
-import IssueStore from '../issue-store';
-import Client from '../github-client';
-import {getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
-import Loadable from './loadable';
+import {fetchMilestones, fetchIssues} from '../redux/ducks/issue';
+import {getCardColumn, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
 import LabelBadge from './label-badge';
 
-import d3 from 'd3';
+import d3 from 'd3'; // eslint-disable-line
 import gantt from '../gantt-chart';
 
 
@@ -41,6 +39,10 @@ const filterByMilestoneAndKanbanColumn = (cards) => {
 
 
 const GanttChart = React.createClass({
+  componentWillMount() {
+    this.props.dispatch(fetchMilestones(this.props.repoInfos[0].repoOwner, this.props.repoInfos[0].repoName));
+    this.props.dispatch(fetchIssues(this.props.repoInfos));
+  },
   componentDidMount() {
     this.renderChart();
   },
@@ -115,31 +117,27 @@ const GanttChart = React.createClass({
       let format;
       switch (timeDomainString) {
       case '1hr':
-        	format = '%H:%M:%S';
-        	chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
-        	break;
+        format = '%H:%M:%S';
+        chart.timeDomain([ d3.time.hour.offset(maxDate, -1), maxDate ]);
+        break;
       case '3hr':
-        	format = '%H:%M';
-        	chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
-        	break;
-
+        format = '%H:%M';
+        chart.timeDomain([ d3.time.hour.offset(maxDate, -3), maxDate ]);
+        break;
       case '6hr':
-        	format = '%H:%M';
-        	chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
-        	break;
-
+        format = '%H:%M';
+        chart.timeDomain([ d3.time.hour.offset(maxDate, -6), maxDate ]);
+        break;
       case '1day':
-        	format = '%H:%M';
-        	chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
-        	break;
-
+        format = '%H:%M';
+        chart.timeDomain([ d3.time.day.offset(maxDate, -1), maxDate ]);
+        break;
       case '1week':
-        	format = '%m/%d';
-        	chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
-        	break;
+        format = '%m/%d';
+        chart.timeDomain([ d3.time.day.offset(maxDate, -7), maxDate ]);
+        break;
       default:
-        	format = '%H:%M';
-
+        format = '%H:%M';
       }
       chart.tickFormat(format);
       chart.redraw(tasks);
@@ -175,59 +173,36 @@ const GanttChart = React.createClass({
 
 });
 
-const RepoKanbanShell = React.createClass({
-  componentWillMount() {
-    // Needs to be called before `render()`
-    IssueStore.startPolling();
-  },
-  componentWillUnmount() {
-    IssueStore.stopPolling();
-  },
-  renderLoaded([allMilestones, cards]) {
-    const {milestoneTitles} = getFilters().getState();
+export default connect((state, ownProps) => {
+  const {milestoneTitles} = state.settings;
 
-    let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(cards);
-    // COPYPASTA: Taken from repo-kanban
-    columns = _.sortBy(columns, ({name}) => {
-      if (name === UNCATEGORIZED_NAME) {
-        // make sure Uncategorized is the left-most column
-        return -1;
-      } else {
-        const result = /^(\d+)/.exec(name);
-        return result && result[1] || name;
-      }
-    });
-    columns = columns.reverse();
+  let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(state.issues.cards);
 
-    // Remove milestones that are not in the URL filter
-    let milestones;
-    if (milestoneTitles.length > 0) {
-      milestones = allMilestones.filter((milestone) => {
-        return milestoneTitles.indexOf(milestone.title) >= 0;
-      });
+  columns = _.sortBy(columns, ({name}) => {
+    if (name === UNCATEGORIZED_NAME) {
+      // make sure Uncategorized is the left-most column
+      return -1;
     } else {
-      milestones = allMilestones;
+      const result = /^(\d+)/.exec(name);
+      return result && result[1] || name;
     }
+  });
+  columns = columns.reverse();
 
-    return (
-      <GanttChart milestones={milestones} data={data} columns={columns} columnCounts={columnCounts}/>
-    );
-  },
-  render() {
-    const {repoInfos} = getFilters().getState();
-    // Get the "Primary" repo for milestones and labels
-    const [{repoOwner, repoName}] = repoInfos;
-
-    // TODO: Actually do all the milestones
-    const allPromises = Promise.all([IssueStore.fetchMilestones(repoOwner, repoName), IssueStore.fetchIssues()]);
-
-    return (
-      <Loadable
-        promise={allPromises}
-        renderLoaded={this.renderLoaded}
-      />
-    );
+  // Remove milestones that are not in the URL filter
+  let milestones;
+  if (milestoneTitles.length > 0) {
+    milestones = state.issues.milestones.filter((milestone) => {
+      return milestoneTitles.indexOf(milestone.title) >= 0;
+    });
+  } else {
+    milestones = state.issues.milestones;
   }
-});
-
-export default RepoKanbanShell;
+  return {
+    milestones,
+    data,
+    columns,
+    columnCounts,
+    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+  };
+})(GanttChart);

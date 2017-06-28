@@ -6,7 +6,6 @@ const isBuild = process.env['NODE_ENV'] === 'production';
 
 const config = {
   // devtool: '#eval-source-map',
-  debug: !isBuild,
   devtool: 'source-map',
   context: path.resolve(__dirname),
   entry: [
@@ -21,19 +20,16 @@ const config = {
     filename: 'bundle.js'
   },
   plugins: [
-    new webpack.NoErrorsPlugin(),
-    new ExtractTextPlugin('app.css')
+    new ExtractTextPlugin('app.css'),
+    new webpack.DefinePlugin({ 'process.env': { NODE_ENV: process.env['NODE_ENV'] } })
   ].concat(isBuild ? [
-    new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } })
+    new webpack.NoErrorsPlugin(),
   ] : []),
   module: {
-    preLoaders: [
-      { test: /\.jsx?$/, loader: 'eslint-loader', exclude: [/node_modules|gantt-chart.*/, /octokat\.js/] },
-    ],
     loaders: [
       {
         test: /\.jsx?$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: [/node_modules/, /puzzle-script/, /octokat\.js/],
         query: {
           presets: ['react', 'es2015'],
@@ -41,13 +37,13 @@ const config = {
         }
       },
       { test: /\.json$/, loader: 'json-loader'},
-      { test: /\.less$/,  loader: ExtractTextPlugin.extract('css!less') },
+      { test: /\.less$/,  loader: ExtractTextPlugin.extract('css-loader!less-loader') },
       { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
       { test: /\.(woff|woff2|eot|ttf)/, loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
     ]
   },
   resolve: {
-    extensions: ['', '.js', '.jsx', '.json'],
+    extensions: ['.js', '.jsx', '.json'],
     alias: {
       xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
       fs: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
@@ -55,9 +51,6 @@ const config = {
       rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
       'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
     },
-  },
-  devServer: {
-    hotComponents: !isBuild
   }
 };
 

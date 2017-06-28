@@ -1,8 +1,8 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import classnames from 'classnames';
 
 import {isLight} from '../helpers';
-import {getFilters} from '../route-utils';
 
 const ColoredIcon = React.createClass({
   render() {
@@ -18,14 +18,18 @@ const ColoredIcon = React.createClass({
     }
     className = classnames(className, 'colored-icon', {'is-light': isLightColor});
     if (name) {
-      name = name.replace(getFilters().getState().columnRegExp, '');
+      name = name.replace(this.props.columnRegExp, '');
     }
 
     return (
-        <span className={className} style={headerStyle} title={name}>{children}</span>
+      <span className={className} style={headerStyle} title={name}>{children}</span>
     );
 
   }
 });
 
-export default ColoredIcon;
+export default connect((state) => {
+  return {
+    columnRegExp: state.settings.columnRegExp
+  };
+})(ColoredIcon);

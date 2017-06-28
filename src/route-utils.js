@@ -29,7 +29,7 @@ function toQueryString(options) {
   } else {
     return '';
   }
-};
+}
 
 function addParams(options, key, vals, defaults) {
   const arr = options[key] || [];
@@ -43,7 +43,7 @@ function addParams(options, key, vals, defaults) {
   } else {
     // it was null, so ignore it
   }
-};
+}
 
 // Generate a URL based on various filters and whatnot
 // `/r/:repoStr(/m/:milestonesStr)(/t/:tagsStr)(/u/:user)(/x/:columnRegExp)/:name(/:startShas)(/:endShas)
@@ -103,7 +103,7 @@ export function parseRoute({params, routes, location}) {
   }
   let routeSegmentName;
   if (routes[RELEVANT_PATH_SEGMENT]) {
-    if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
+    if (/[:/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
       /* eslint-disable no-console */
       console.error('BUG! the path segment should be simple so we can create links with it');
       /* eslint-enable no-console */
@@ -249,7 +249,7 @@ function isUser(issue, userName) {
   }
   if (issue.user.login !== userName) { return false; }
   return true;
-};
+}
 
 
 function matchesRepoInfo(repoInfos, card) {

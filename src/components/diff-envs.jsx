@@ -29,40 +29,40 @@ const DiffEnvs = React.createClass({
     let {startHost, endHost} = this.props.params;
 
     const allPromise = Promise.all([this.requestRev(startHost), this.requestRev(endHost)])
-    .then(([startShaInfos, endShaInfos]) => {
+      .then(([startShaInfos, endShaInfos]) => {
       // Make sure repoInfos only contains repos that are in both the start and end
-      Object.keys(endShaInfos).forEach((key) => {
-        if (!startShaInfos[key]) {
-          delete endShaInfos[key];
-        }
-      });
-      Object.keys(startShaInfos).forEach((key) => {
-        if (!endShaInfos[key]) {
-          delete startShaInfos[key];
-        }
-      });
+        Object.keys(endShaInfos).forEach((key) => {
+          if (!startShaInfos[key]) {
+            delete endShaInfos[key];
+          }
+        });
+        Object.keys(startShaInfos).forEach((key) => {
+          if (!endShaInfos[key]) {
+            delete startShaInfos[key];
+          }
+        });
 
 
-      // build up an array of shas
-      let repoInfos = Object.keys(endShaInfos).map((repoPath) => {
+        // build up an array of shas
+        let repoInfos = Object.keys(endShaInfos).map((repoPath) => {
         // HACK: assume the org is openstax
-        const [repoOwner, repoName] = repoPath.split('/');
-        return {repoOwner, repoName};
-      });
-      const startShas = repoInfos.map(({repoOwner, repoName}) => {
-        return startShaInfos[`${repoOwner}/${repoName}`];
-      });
-      const endShas = repoInfos.map(({repoOwner, repoName}) => {
-        return endShaInfos[`${repoOwner}/${repoName}`];
-      });
+          const [repoOwner, repoName] = repoPath.split('/');
+          return {repoOwner, repoName};
+        });
+        const startShas = repoInfos.map(({repoOwner, repoName}) => {
+          return startShaInfos[`${repoOwner}/${repoName}`];
+        });
+        const endShas = repoInfos.map(({repoOwner, repoName}) => {
+          return endShaInfos[`${repoOwner}/${repoName}`];
+        });
 
-      console.log('startShaInfos');
-      console.log(startShaInfos);
-      console.log('endShaInfos');
-      console.log(endShaInfos);
+        console.log('startShaInfos');
+        console.log(startShaInfos);
+        console.log('endShaInfos');
+        console.log(endShaInfos);
 
-      return {repoInfos, startShas, endShas};
-    });
+        return {repoInfos, startShas, endShas};
+      });
 
     return (
       <Loadable

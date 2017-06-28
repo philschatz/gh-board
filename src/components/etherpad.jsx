@@ -2,12 +2,11 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 import EtherpadClient from 'etherpad-lite-client';
 import {Link} from 'react-router';
+import {connect} from 'react-redux';
 
-import history from '../history';
+import {history} from '../redux/store';
 import Client from '../github-client';
 import IssueStore from '../issue-store';
-import UserStore from '../user-store';
-import Database from '../database';
 import {getFilters} from '../route-utils';
 
 import Loadable from './loadable';
@@ -83,9 +82,9 @@ const EtherpadInner = React.createClass({
       // TODO: un-disable the state
       this.setState({isSaving: false});
     })
-    .catch((err) => {
-      alert('There was an error saving.\n' + JSON.stringify(err));
-    });
+      .catch((err) => {
+        alert('There was an error saving.\n' + JSON.stringify(err));
+      });
   },
   promptLoadIssueBody() {
     if (confirm('Are you sure you want to discard the current collaborative edits and replace it with what is currently in GitHub?')) {
@@ -112,7 +111,7 @@ const EtherpadInner = React.createClass({
     if (text.trim() !== getBody().trim()) {
       isLoadEnabled = true;
       // Only if the text changed and the user is authenticated should we allow saving
-      if (UserStore.getUser()) {
+      if (this.props.user) {
         isSaveEnabled = !isSaving;
       }
     }
@@ -157,4 +156,8 @@ const Etherpad = React.createClass({
   }
 });
 
-export default Etherpad;
+export default connect(state => {
+  return {
+    user: state.user.info
+  };
+})(Etherpad);

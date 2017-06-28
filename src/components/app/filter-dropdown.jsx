@@ -1,15 +1,14 @@
 import _ from 'underscore';
 import React from 'react';
+import {connect} from 'react-redux';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 import {XIcon, SearchIcon, CheckIcon, MilestoneIcon} from 'react-octicons';
 
-import IssueStore from '../../issue-store';
 import {getFilters} from '../../route-utils';
 import {UNCATEGORIZED_NAME} from '../../helpers';
 
-import Loadable from '../loadable';
 import GithubFlavoredMarkdown from '../gfm';
 
 const FilterCategory = React.createClass({
@@ -338,26 +337,31 @@ const FilterDropdown = React.createClass({
 });
 
 
-const FilterDropdownShell = React.createClass({
-  render() {
-    const {repoInfos} = this.props;
+// const FilterDropdownShell = React.createClass({
+//   render() {
+//     const {repoInfos} = this.props;
+//
+//     if (repoInfos.length) {
+//       const [{repoOwner, repoName}] = repoInfos;
+//
+//       // TODO: Poll all of these so we get updates
+//       // TODO: Include *all* labels, not just the ones in the primary repo
+//       const milestones = IssueStore.fetchMilestones(repoOwner, repoName);
+//       const labels = IssueStore.fetchLabels(repoOwner, repoName);
+//       const promise = Promise.all([milestones, labels]);
+//       return (
+//         <Loadable promise={promise} renderLoaded={([milestones, labels]) => <FilterDropdown milestones={milestones} labels={labels}/>} />
+//       );
+//     } else {
+//       return null;
+//     }
+//
+//   }
+// });
 
-    if (repoInfos.length) {
-      const [{repoOwner, repoName}] = repoInfos;
-
-      // TODO: Poll all of these so we get updates
-      // TODO: Include *all* labels, not just the ones in the primary repo
-      const milestones = IssueStore.fetchMilestones(repoOwner, repoName);
-      const labels = IssueStore.fetchLabels(repoOwner, repoName);
-      const promise = Promise.all([milestones, labels]);
-      return (
-        <Loadable promise={promise} renderLoaded={([milestones, labels]) => <FilterDropdown milestones={milestones} labels={labels}/>} />
-      );
-    } else {
-      return null;
-    }
-
-  }
-});
-
-export default FilterDropdownShell;
+export default connect((state) => {
+  return {
+    labels: state.issues.labels,
+    milestones: state.issues.milestones
+  };
+})(FilterDropdown);

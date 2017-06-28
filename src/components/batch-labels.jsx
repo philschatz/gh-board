@@ -21,13 +21,16 @@
 
 import _ from 'underscore';
 import React from 'react';
+import {connect} from 'react-redux';
 import * as BS from 'react-bootstrap';
 import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
 import IssueStore from '../issue-store';
-import Database from '../database';
-import Client from '../github-client';
-import {getFilters} from '../route-utils';
+import {
+  updateLabel,
+  deleteLabel,
+} from '../redux/ducks/issue';
+import {getReposFromStr} from '../helpers';
 
 import Loadable from './loadable';
 import LabelBadge from './label-badge';
@@ -55,14 +58,11 @@ const LabelViewEdit = React.createClass({
       message = `Are you sure you want to change this label in ${repoInfos[0]}?`;
     }
     if (confirm(message)) {
-      Promise.all(repoInfos.map((repoInfo) => {
-        return Client.getOcto().repos(repoInfo).labels(label.name).update({name: name});
-      }))
-      .then(() => {
-        alert('Done renaming. To see the updates, go back to the kanban board and then back here (because the developer is lazy)');
-        this.setState({isEditing: false});
-      })
-      .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
+      this.props.dispatch(updateLabel(repoInfos, label.name, name))
+        .then(() => {
+          this.setState({isEditing: false});
+        })
+        .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
   },
   onClickRemove() {
@@ -74,14 +74,11 @@ const LabelViewEdit = React.createClass({
       message = `Are you sure you want to remove this label in ${repoInfos[0]}?`;
     }
     if (confirm(message)) {
-      Promise.all(repoInfos.map((repoInfo) => {
-        return Client.getOcto().repos(repoInfo).labels(label.name).remove();
-      }))
-      .then(() => {
-        alert('Done removing. To see the updates, go back to the kanban board and then back here (because the developer is lazy)');
-        this.setState({isRemoved: true});
-      })
-      .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
+      this.props.dispatch(deleteLabel(repoInfos, label.name))
+        .then(() => {
+          this.setState({isRemoved: true});
+        })
+        .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
   },
   render() {
@@ -177,22 +174,10 @@ const LabelViewEdit = React.createClass({
 });
 
 const BatchLabelsShell = React.createClass({
-  componentDidMount() {
-    IssueStore.on('change', this.onChange);
-    IssueStore.startPolling();
-    IssueStore.fetchIssues(); // TODO: start up the polling in a better way
-  },
-  componentWillUnmount() {
-    IssueStore.off('change', this.onChange);
-  },
-  onChange() {
-    this.setState({});
-  },
-
   renderLabels(labels, skipPrimaryRepo) {
     return _.sortBy(labels, ({name}) => name).map(({label, repoInfos}) => {
       return (
-        <LabelViewEdit key={label.name} label={label} repoInfos={repoInfos} skipPrimaryRepo={skipPrimaryRepo}/>
+        <LabelViewEdit key={label.name} label={label} repoInfos={repoInfos} skipPrimaryRepo={skipPrimaryRepo} dispatch={this.props.dispatch} />
       );
     });
   },
@@ -311,13 +296,13 @@ const BatchLabelsShell = React.createClass({
     );
   },
   render() {
-    const {repoInfos} = getFilters().getState();
+    const {repoInfos} = this.props;
     const promise = IssueStore.fetchConcreteRepoInfos(repoInfos)
-    .then((concreteRepoInfos) => {
-      return Promise.all(concreteRepoInfos.map(({repoOwner, repoName}) => {
-        return IssueStore.fetchRepoLabels(repoOwner, repoName);
-      }));
-    });
+      .then((concreteRepoInfos) => {
+        return Promise.all(concreteRepoInfos.map(({repoOwner, repoName}) => {
+          return IssueStore.fetchRepoLabels(repoOwner, repoName);
+        }));
+      });
     return (
       <Loadable
         promise={promise}
@@ -327,4 +312,8 @@ const BatchLabelsShell = React.createClass({
   }
 });
 
-export default BatchLabelsShell;
+export default connect((state, ownProps) => {
+  return {
+    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+  };
+})(BatchLabelsShell);

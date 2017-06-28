@@ -43,13 +43,13 @@ export function isLight(hexColor) {
   //    color.g * color.g * .587 +
   //    color.b * color.b * .114) >= 130;
   return Math.sqrt(
-     color.r * color.r * .099 +
+    color.r * color.r * .099 +
      color.g * color.g * .587 +
      color.b * color.b * .114) >= 130;
 }
 
 // Of the form `# - ...`
-export const KANBAN_LABEL = /^\d+\ -\ /;
+export const KANBAN_LABEL = /^\d+ - /;
 export const UNCATEGORIZED_NAME = '999 - Uncategorized';
 
 export function getCardColumn(card) {
@@ -62,21 +62,23 @@ export function getCardColumn(card) {
   return {name: UNCATEGORIZED_NAME, color: 'cccccc'};
 }
 
-export function getReposFromStr(repoStr) {
+export function getReposFromStr(repoStr = '') {
   let lastRepoOwner = null;
-  return repoStr.split('|').map((repoInfo) => {
+  return repoStr.split('|').reduce((prev, repoInfo) => {
+    if (!repoInfo) { return prev; }
     const repoInfoArr = repoInfo.split(':');
     if (repoInfoArr.length === 1) {
       const [repoName] = repoInfoArr;
-      return {repoOwner:lastRepoOwner, repoName};
+      prev.push({repoOwner:lastRepoOwner, repoName});
     } else if (repoInfoArr.length === 2){
       const [repoOwner, repoName] = repoInfoArr;
       lastRepoOwner = repoOwner;
-      return {repoOwner, repoName};
+      prev.push({repoOwner, repoName});
     } else {
       throw new Error('Invalid repo format!');
     }
-  });
+    return prev;
+  }, []);
 }
 
 export function convertRepoInfosToStr(repoInfos) {

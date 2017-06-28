@@ -30,9 +30,9 @@ function getTaskCounts(div) {
   let taskFinishedCount = 0;
   let taskUnfinishedCount = 0;
   _.each(div.querySelectorAll('li'), (listItem) => {
-    if (/^\[x\]\ /.test(listItem.textContent)) {
+    if (/^\[x\] /.test(listItem.textContent)) {
       taskFinishedCount++;
-    } else if (/^\[\ \]\ /.test(listItem.textContent)) {
+    } else if (/^\[ \] /.test(listItem.textContent)) {
       taskUnfinishedCount++;
     }
   });
@@ -90,7 +90,7 @@ export const PULL_REQUEST_ISSUE_RELATION = {
 
 const CLOSE_STRINGS = Object.keys(PULL_REQUEST_ISSUE_RELATION);
 const POSSIBLE_RELATED_ISSUE_SELECTOR = 'a[href^="https://github.com/"]';
-const RELATED_ISSUE_RE = /^https\:\/\/github\.com\/([^\/]+)\/([^\/]+)\/(pull|issues)\/(\d+)$/;
+const RELATED_ISSUE_RE = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/(pull|issues)\/(\d+)$/;
 
 export function forEachRelatedIssue(div, fn) {
   _.each(div.querySelectorAll(POSSIBLE_RELATED_ISSUE_SELECTOR), (link) => {
