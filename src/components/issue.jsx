@@ -39,9 +39,9 @@ const issueSource = {
     const dropResult = monitor.getDropResult();
 
     if (dropResult.label) {
-      props.dispatch(tryToMoveIssue({card, primaryRepoName, label: dropResult.label}))
+      props.dispatch(tryToMoveIssue({card, primaryRepoName, label: dropResult.label}));
     } else if (dropResult.milestone){
-      props.dispatch(tryToMoveIssue({card, primaryRepoName, milestone: dropResult.milestone}))
+      props.dispatch(tryToMoveIssue({card, primaryRepoName, milestone: dropResult.milestone}));
     } else if (dropResult.title === 'No Milestone') {
       alert('BUG: gh-board is currently unable to remove a milestone. Help us out by submitting a Pull Request!');
     } else {
@@ -455,11 +455,11 @@ let IssueCard = React.createClass({
                 className='issue-title'
                 target='_blank'
                 href={issue.htmlUrl}>
-                  <GithubFlavoredMarkdown
-                    inline
-                    repoOwner={repoOwner}
-                    repoName={repoName}
-                    text={issue.title}/>
+                <GithubFlavoredMarkdown
+                  inline
+                  repoOwner={repoOwner}
+                  repoName={repoName}
+                  text={issue.title}/>
               </a>
               {featuredImage}
             </span>

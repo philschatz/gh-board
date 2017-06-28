@@ -77,7 +77,7 @@ export function getRepoOrNull(repoOwner, repoName) {
     }
     return val;
   })
-  .catch(() => null);
+    .catch(() => null);
 }
 
 export function putRepos(repos) {
@@ -96,5 +96,5 @@ export function getRepoLabelsOrNull(repoOwner, repoName) {
     repoOwner,
     repoName
   })
-  .catch(() => null);
+    .catch(() => null);
 }

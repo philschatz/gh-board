@@ -26,19 +26,19 @@ export default class CacheHandler {
         let {methodAndPath, eTag, data, status} = entry;
         this.cachedETags[methodAndPath] = {eTag, data, status};
       })
-      .then(() => {
-        this._initialiazed = true;
-      })
-      .catch(() => {
-        alert('It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.');
-        // fall back to localStorage
-        const cache = window.localStorage.getItem('octokat-cache');
-        if (cache) {
-          this.cachedETags = JSON.parse(cache);
-        }
-        this._dbWorking = false;
-        this._initialiazed = true;
-      });
+        .then(() => {
+          this._initialiazed = true;
+        })
+        .catch(() => {
+          alert('It looks like your browser is in private browsing mode. gh-board uses IndexedDB to cache requests to GitHub. Please disable Private Browsing to see it work.');
+          // fall back to localStorage
+          const cache = window.localStorage.getItem('octokat-cache');
+          if (cache) {
+            this.cachedETags = JSON.parse(cache);
+          }
+          this._dbWorking = false;
+          this._initialiazed = true;
+        });
     });
 
     // Async save once now new JSON has been fetched after X seconds

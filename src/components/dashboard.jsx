@@ -7,7 +7,8 @@ import classnames from 'classnames';
 import {BeakerIcon, SyncIcon, LockIcon, RepoForkedIcon, RepoIcon, PersonIcon, OrganizationIcon} from 'react-octicons';
 
 import {
-  fetchRepositories
+  fetchRepositories,
+  fetchRepo
 } from '../redux/ducks/user';
 import {history} from '../redux/store';
 
@@ -160,7 +161,7 @@ const RepoGroup = React.createClass({
           repo={repo}
           isSelected={selectedRepos[repoName]}
           onSelect={this.toggleSelect(repoName)}
-          />
+        />
       );
     });
 
@@ -261,7 +262,7 @@ const CustomRepoModal = React.createClass({
   render() {
     const {customRepoName} = this.state;
     // Make sure the repo contains a '/'
-    const isInvalid = customRepoName && !/[^\/]\/[^\/]/.test(customRepoName);
+    const isInvalid = customRepoName && !/[^/]\/[^/]/.test(customRepoName);
     const isDisabled = !customRepoName || isInvalid;
     return (
       <BS.Modal {...this.props}>
@@ -283,10 +284,10 @@ const CustomRepoModal = React.createClass({
             disabled={isDisabled}
             bsStyle='primary'
             waitingText='Checking...'
-            action={() => Client.dbPromise().then(() => Client.getOcto().repos(customRepoName).fetchAll.bind(Client.getOcto()))}
+            action={() => this.props.dispatch(fetchRepo(customRepoName))}
             onResolved={() => this.goToBoard(customRepoName)}
             renderError={() => <span>Invalid Repo. Please try again.</span>}
-            >Show Board</AsyncButton>
+          >Show Board</AsyncButton>
         </BS.Modal.Footer>
       </BS.Modal>
     );
@@ -319,7 +320,7 @@ const ExamplesPanel = React.createClass({
             <RepoIcon className='repo-icon'/>
             Choose your own...
           </BS.ListGroupItem>
-          <CustomRepoModal show={showModal} container={this} onHide={close}/>
+          <CustomRepoModal show={showModal} container={this} onHide={close} dispatch={this.props.dispatch} />
         </BS.ListGroup>
       </BS.Panel>
     );
@@ -336,7 +337,7 @@ const DashboardShell = React.createClass({
     }
   },
   render() {
-    let {user, ready} = this.props;
+    let {user, ready, dispatch} = this.props;
 
     let myRepos;
 
@@ -358,7 +359,7 @@ const DashboardShell = React.createClass({
       <BS.Grid fluid className='dashboard' data-org-count={myRepos.length}>
         <BS.Row>
           <BS.Col md={6}>
-            <ExamplesPanel/>
+            <ExamplesPanel dispatch={dispatch} />
           </BS.Col>
           {myRepos}
         </BS.Row>

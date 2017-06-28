@@ -28,7 +28,7 @@ let _middlewares = [
 ];
 
 if (process.env.NODE_ENV !== 'production') {
-  const createLogger = require('redux-logger');
+  const { createLogger } = require('redux-logger');
   _middlewares.push(createLogger({
     collapsed: true,
     duration: true,

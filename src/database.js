@@ -114,16 +114,16 @@ const database = new class Database {
     const loadedPromise = new Promise((resolve, reject) => {
       // TODO: somehow tell other code to wait until memDb is loaded
       actualDb.createReadStream()
-      .on('data', ({key, value}) => {
-        memDb.put(key, value);
-      })
-      .on('error', (err) => {
-        reject(err);
-      })
-      .on('end', () => {
-        console.log('Done loading DB into memDb for ', dbName);
-        resolve(dbName);
-      });
+        .on('data', ({key, value}) => {
+          memDb.put(key, value);
+        })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('end', () => {
+          console.log('Done loading DB into memDb for ', dbName);
+          resolve(dbName);
+        });
 
     });
     return {memDb, actualDb, loadedPromise};

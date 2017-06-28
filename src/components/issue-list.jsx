@@ -104,7 +104,7 @@ const IssueList = React.createClass({
     if (cards) {
       countOrDownloadLink = (
         <BS.Button bsStyle='link' onClick={this.toggleCSVModal} title='Generate CSV'
-          >
+        >
           {children.length}
           {' '}
           <DesktopDownloadIcon/>

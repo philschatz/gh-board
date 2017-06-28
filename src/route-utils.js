@@ -103,7 +103,7 @@ export function parseRoute({params, routes, location}) {
   }
   let routeSegmentName;
   if (routes[RELEVANT_PATH_SEGMENT]) {
-    if (/[:\/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
+    if (/[:/]/.test(routeSegmentName)) { // Check for paths containing a '/' or a ':'
       /* eslint-disable no-console */
       console.error('BUG! the path segment should be simple so we can create links with it');
       /* eslint-enable no-console */

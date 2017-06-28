@@ -44,33 +44,33 @@ function _fetchLastSeenUpdatesForRepo(githubClient, repoOwner, repoName, lastSee
   }
   const method = githubClient.canCacheLots() ? 'fetchAll' : 'fetchOne';
   return githubClient.getOcto()
-  .then(({repos}) => repos(repoOwner, repoName).issues[method](opts))
-  .then((items) => {
+    .then(({repos}) => repos(repoOwner, repoName).issues[method](opts))
+    .then((items) => {
     // If a repository has 0 events it probably has not changed in a while
     // or never had any commits. Do not keep trying to fetch all the Issues though
     // so set the lastSeenAt to be something non-zero
     // since `null` means gh-board has not fetched all the Issues before.
-    const newLastSeenAt = items.length ? items[0].updatedAt : null;
+      const newLastSeenAt = items.length ? items[0].updatedAt : null;
 
-    let cards = items.reduce((prev, issue) => {
-      if (lastSeenAt === issue.updatedAt) {
+      let cards = items.reduce((prev, issue) => {
+        if (lastSeenAt === issue.updatedAt) {
         // If this Issue was updated at the same time then ignore it
         // TODO: this is a bit imprecise. maybe it's safer to not exclude it this way
-        return prev;
-      }
-      console.log('Saw an updated/new issue!', repoName, issue.number, 'updated:', issue.updatedAt, 'last saw this repo:', lastSeenAt);
+          return prev;
+        }
+        console.log('Saw an updated/new issue!', repoName, issue.number, 'updated:', issue.updatedAt, 'last saw this repo:', lastSeenAt);
 
-      prev.push({repoOwner, repoName, number: issue.number, issue});
-      return prev;
-    }, []);
-    const ret = { cards, didLabelsChange };
-    // only include the repository key if the lastSeenAt changed
-    // That way fewer things will need to be saved to the DB
-    if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
-      ret.repository = {repoOwner, repoName, lastSeenAt: newLastSeenAt, isPrivate};
-    }
-    return ret;
-  });
+        prev.push({repoOwner, repoName, number: issue.number, issue});
+        return prev;
+      }, []);
+      const ret = { cards, didLabelsChange };
+      // only include the repository key if the lastSeenAt changed
+      // That way fewer things will need to be saved to the DB
+      if (lastSeenAt !== newLastSeenAt || !lastSeenAt) {
+        ret.repository = {repoOwner, repoName, lastSeenAt: newLastSeenAt, isPrivate};
+      }
+      return ret;
+    });
 }
 
 function _fetchUpdatesForRepo(githubClient, repo) {
@@ -102,26 +102,26 @@ function _fetchUpdatesForRepo(githubClient, repo) {
         });
       });
     })
-    .then((cardsArrays) => {
-      const cards = _.unique(_.flatten(cardsArrays));
-      // Re-fetch each Issue
-      return Promise.all(cards.map((card) => card.fetchIssue(githubClient, true/*skipSavingToDb*/)));
-    })
-    .then((cards) => {
-      return Database.putCards(cards);
-    }).then(() => {
+      .then((cardsArrays) => {
+        const cards = _.unique(_.flatten(cardsArrays));
+        // Re-fetch each Issue
+        return Promise.all(cards.map((card) => card.fetchIssue(githubClient, true/*skipSavingToDb*/)));
+      })
+      .then((cards) => {
+        return Database.putCards(cards);
+      }).then(() => {
       // Update the list of labels now that all the Issues have been updated
-      return Database.putRepoLabels(repoOwner, repoName, newLabels);
-    }).then(() => {
+        return Database.putRepoLabels(repoOwner, repoName, newLabels);
+      }).then(() => {
       // FINALLY, actually fetch the updates
-      return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
-        let lastSeenAt;
-        if (repo && repo.lastSeenAt) {
-          lastSeenAt = repo.lastSeenAt;
-        }
-        return _fetchLastSeenUpdatesForRepo(githubClient, repoOwner, repoName, lastSeenAt, isPrivate, _getDidLabelsChange(newLabels, oldLabels));
+        return Database.getRepoOrNull(repoOwner, repoName).then((repo) => {
+          let lastSeenAt;
+          if (repo && repo.lastSeenAt) {
+            lastSeenAt = repo.lastSeenAt;
+          }
+          return _fetchLastSeenUpdatesForRepo(githubClient, repoOwner, repoName, lastSeenAt, isPrivate, _getDidLabelsChange(newLabels, oldLabels));
+        });
       });
-    });
   });
 }
 
@@ -182,10 +182,10 @@ export default function fetchIssues (githubClient, filter, repoInfos) {
             return _fetchUpdatesForRepo(githubClient, repo);
           }));
         })
-        .then((issuesByRepo) => {
+          .then((issuesByRepo) => {
           // exclude the null repos (ones that were explicitly listed in the URL)
-          return _.flatten(_.filter(issuesByRepo, (v) => !!v), true/*shallow*/);
-        });
+            return _.flatten(_.filter(issuesByRepo, (v) => !!v), true/*shallow*/);
+          });
       } else {
         return repos(repoOwner, repoName).fetch().then((repo) => {
           return _fetchUpdatesForRepo(githubClient, repo);

@@ -5,6 +5,7 @@ import {
   LOGIN,
   FETCH_USER,
   FETCH_REPOS,
+  FETCH_REPO,
   STAR_REPO,
   RESET_DATABASES
 } from '../actions';
@@ -172,6 +173,19 @@ export const resetDatabases = duck.defineAction(RESET_DATABASES, {
     return {meta: {
       github: {action: 'reset'}
     }};
+  },
+});
+
+export const fetchRepo = duck.defineAction(FETCH_REPO, {
+  creator(repoFullName) {
+    return {
+      payload: {
+        repoFullName,
+      },
+      meta: {
+        github: {action: 'fetchRepo'}
+      }
+    };
   },
 });
 

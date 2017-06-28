@@ -92,7 +92,7 @@ const IssueOrPullRequestBlurb = React.createClass({
           <a className='blurb-number-link'
             target='_blank'
             href={issue.htmlUrl}
-            >
+          >
             <span className='blurb-number'>{issue.number}</span>
           </a>
           <BS.OverlayTrigger

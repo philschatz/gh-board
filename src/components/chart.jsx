@@ -72,8 +72,8 @@ const ChartComponent = React.createClass({
     }
     return (
       <div className={className}
-           id={this.props.element}
-           style={this.props.styles}>
+        id={this.props.element}
+        style={this.props.styles}>
       </div>
     );
   }

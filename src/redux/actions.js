@@ -15,6 +15,7 @@ export const LOGIN = duck + 'LOGIN';
 export const LOGOUT = duck + 'LOGOUT';
 export const FETCH_USER = duck + 'FETCH_USER';
 export const FETCH_REPOS = duck + 'FETCH_REPOS';
+export const FETCH_REPO = duck + 'FETCH_REPO';
 export const STAR_REPO = duck + 'STAR_REPO';
 export const RESET_DATABASES = duck + 'RESET_DATABASES';
 

@@ -19,10 +19,6 @@ import {parseRoute, buildRoute} from './route-utils';
 // The *only* exception is the `indexRoute: RepoKanban` on. It's nice to have an index
 
 export default [
-  // Redirect from `/dashboard` to `/`
-  { path: '/dashboard',
-    onEnter: (state, replace) => replace(null, '/')
-  },
   { path: '/',
     component: App,
     indexRoute: { component: Dashboard },

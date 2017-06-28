@@ -10,14 +10,6 @@
   "settings": {
     "import/resolver": "webpack"
   },
-  "ecmaFeatures": {
-    "templateStrings": true,
-    "arrowFunctions": true,
-    "modules": true,
-    "blockBindings": true,
-    "forOf": true,
-    "jsx": true
-  },
   "rules": {
     "no-alert": 1,
     "no-unused-vars": 1,
@@ -28,6 +20,6 @@
     "no-console": 1,
     "semi": 1,
     "indent": [2, 2],
-    "duck/meta-validation": [2, ["optimist", "promise", "feedbackOnError", "feedbackOnSuccess", "feedbackDirectly", "updateSettingStorage", "updateUserStorage", "github"]]
+    "duck/meta-validation": [2, ["optimist", "promise", "feedbackOnError", "feedbackOnSuccess", "feedbackDirectly", "updateSettingStorage", "updateUserStorage", "github", "updateEmojisStorage"]]
   }
 }

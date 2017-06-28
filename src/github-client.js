@@ -64,14 +64,14 @@ const cacheHandler = new class CacheHandler {
           alert('Problem opening database. are you incognito? ' + err.message);
         }
         db.query({})
-        .on('data', (entry) => {
-          let {methodAndPath, eTag, data, status} = entry;
-          this.cachedETags[methodAndPath] = {eTag, data, status};
-        })
-        .on('stats', (stats) => {
-          this._db = db;
-          resolve();
-        });
+          .on('data', (entry) => {
+            let {methodAndPath, eTag, data, status} = entry;
+            this.cachedETags[methodAndPath] = {eTag, data, status};
+          })
+          .on('stats', (stats) => {
+            this._db = db;
+            resolve();
+          });
       });
     });
 

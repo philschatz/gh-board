@@ -10,7 +10,7 @@ import IssueStore from '../issue-store';
 import IssueList from './issue-list';
 import Issue from './issue';
 
-const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
+const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge pull request #(\d+)/;
 
 const MergedSince = React.createClass({
   renderPullRequest(repoOwner, repoName, pr) {
@@ -99,11 +99,11 @@ export const MergedSinceInner = React.createClass({
       return Client.dbPromise().then(() => {
         return new Promise((resolve, reject) => {
           Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch()
-          .then(resolve)
-          .catch((err) => {
+            .then(resolve)
+            .catch((err) => {
             // Some repositories are private so don't error, just silently fail
-            resolve({_UNABLE_TO_COMPARE:true, commits:[]});
-          });
+              resolve({_UNABLE_TO_COMPARE:true, commits:[]});
+            });
         });
 
       });

@@ -15,12 +15,12 @@ const KarmaWarning = React.createClass({
     return {timer: null, limit: null, remaining: null, newestVersion: null, isConnected: true};
   },
   // componentDidMount() {
-    // NewVersionChecker.on('change', this.updateNewestVersion);
-    // Client.on('end', this.updateRateLimit);
+  // NewVersionChecker.on('change', this.updateNewestVersion);
+  // Client.on('end', this.updateRateLimit);
   // },
   // componentWillUnmount() {
-    // NewVersionChecker.off('change', this.updateNewestVersion);
-    // Client.off('request', this.updateRateLimit);
+  // NewVersionChecker.off('change', this.updateNewestVersion);
+  // Client.off('request', this.updateRateLimit);
   // },
   // ('end', eventId, {method, path, data, options}, jqXHR.status, emitterRate)
   updateRateLimit(eventId, config, status, rate) {

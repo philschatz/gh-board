@@ -43,13 +43,13 @@ export function isLight(hexColor) {
   //    color.g * color.g * .587 +
   //    color.b * color.b * .114) >= 130;
   return Math.sqrt(
-     color.r * color.r * .099 +
+    color.r * color.r * .099 +
      color.g * color.g * .587 +
      color.b * color.b * .114) >= 130;
 }
 
 // Of the form `# - ...`
-export const KANBAN_LABEL = /^\d+\ -\ /;
+export const KANBAN_LABEL = /^\d+ - /;
 export const UNCATEGORIZED_NAME = '999 - Uncategorized';
 
 export function getCardColumn(card) {

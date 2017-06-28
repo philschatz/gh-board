@@ -26,7 +26,7 @@ const KanbanColumn = React.createClass({
           primaryRepoName={primaryRepoName}
           card={card}
           columnRegExp={columnRegExp}
-          />
+        />
       );
     });
 

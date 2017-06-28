@@ -100,7 +100,7 @@ const AppNav = React.createClass({
           key='user'
           className='badge'
           to={getFilters().toggleUserName(userName).url()}
-          >{userName}
+        >{userName}
         </Link>
       );
     }
@@ -197,21 +197,21 @@ const AppNav = React.createClass({
                 key='ShowSimpleList'
                 onSelect={() => this.props.dispatch(toggleShowSimpleList())}
                 isChecked={settings.isShowSimpleList}
-                >
+              >
                 Show Simple List
               </SettingsItem>
               <SettingsItem
                 key='HideUncategorized'
                 onSelect={() => this.props.dispatch(toggleHideUncategorized())}
                 isChecked={settings.isHideUncategorized}
-                >
+              >
                 Hide Uncategorized
               </SettingsItem>
               <SettingsItem
                 key='ShowEmptyColumns'
                 onSelect={() => this.props.dispatch(toggleShowEmptyColumns())}
                 isChecked={settings.isShowEmptyColumns}
-                >
+              >
                 Show Empty Columns
               </SettingsItem>
               <BS.MenuItem key='divider' divider/>
@@ -219,7 +219,7 @@ const AppNav = React.createClass({
                 <button
                   className='btn btn-xs btn-default'
                   onClick={settingsMenuHelp}
-                  >
+                >
                   <QuestionIcon/>
                 </button>
               </BS.MenuItem>
@@ -227,21 +227,21 @@ const AppNav = React.createClass({
                 key='RelatedHideIssues'
                 onSelect={() => this.props.dispatch(setViewingMode(VIEWING_MODE.DEV))}
                 isChecked={settings.viewingMode === VIEWING_MODE.DEV}
-                >
+              >
                 Developer-Friendly
               </SettingsItem>
               <SettingsItem
                 key='RelatedHidePullRequests'
                 onSelect={() => this.props.dispatch(setViewingMode(VIEWING_MODE.QA))}
                 isChecked={settings.viewingMode === VIEWING_MODE.QA}
-                >
+              >
                 QA-Friendly
               </SettingsItem>
               <SettingsItem
                 key='RelatedShowAll'
                 onSelect={() => this.props.dispatch(setViewingMode(VIEWING_MODE.COMBINED))}
                 isChecked={settings.viewingMode === VIEWING_MODE.COMBINED}
-                >
+              >
                 Combined
               </SettingsItem>
               <BS.MenuItem key='divider2' divider/>
@@ -250,7 +250,7 @@ const AppNav = React.createClass({
                 key='ShowPullRequestData'
                 onSelect={() => this.props.dispatch(toggleShowPullRequestData())}
                 isChecked={settings.isShowPullRequestData}
-                >
+              >
                 Show More Pull Request Info
               </SettingsItem>
 
@@ -266,7 +266,7 @@ const AppNav = React.createClass({
             {loginButton}
           </BS.Nav>
         </BS.Navbar>
-        <LoginModal show={showModal} container={this} onHide={close}/>
+        <LoginModal show={showModal} container={this} onHide={close} />
         <MoveModal container={this}/>
       </div>
     );

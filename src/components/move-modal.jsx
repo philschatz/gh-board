@@ -102,7 +102,7 @@ const MoveModal = React.createClass({
                 className='select-related-issue'
                 onClick={this.onToggleCheckbox(vertex)}
                 checked={!unCheckedCards[vertex.key()]}
-                >{checkLabel}</BS.Checkbox>
+              >{checkLabel}</BS.Checkbox>
             </li>
           );
         };

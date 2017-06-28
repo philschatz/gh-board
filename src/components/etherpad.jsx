@@ -82,9 +82,9 @@ const EtherpadInner = React.createClass({
       // TODO: un-disable the state
       this.setState({isSaving: false});
     })
-    .catch((err) => {
-      alert('There was an error saving.\n' + JSON.stringify(err));
-    });
+      .catch((err) => {
+        alert('There was an error saving.\n' + JSON.stringify(err));
+      });
   },
   promptLoadIssueBody() {
     if (confirm('Are you sure you want to discard the current collaborative edits and replace it with what is currently in GitHub?')) {

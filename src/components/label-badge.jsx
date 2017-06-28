@@ -25,7 +25,7 @@ const LabelBadge = React.createClass({
 
     if (KANBAN_LABEL.test(label.name)) {
       icon = (<ListUnorderedIcon/>);
-      name = label.name.replace(/^\d+\ -\ /, ' ');
+      name = label.name.replace(/^\d+ - /, ' ');
     } else {
       icon = (<TagIcon/>);
       name = label.name;

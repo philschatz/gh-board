@@ -22,7 +22,7 @@ const ColoredIcon = React.createClass({
     }
 
     return (
-        <span className={className} style={headerStyle} title={name}>{children}</span>
+      <span className={className} style={headerStyle} title={name}>{children}</span>
     );
 
   }

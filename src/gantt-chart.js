@@ -21,7 +21,7 @@ export default function(milestoneCount) {
   let timeDomainMode = FIT_TIME_DOMAIN_MODE;// fixed or fit
   let taskTypes = [];
   let taskStatus = [];
-    // var height = document.body.clientHeight - margin.top - margin.bottom-5;
+  // var height = document.body.clientHeight - margin.top - margin.bottom-5;
   let height = milestoneCount * 50; // height of chart is based on # of milestones
   let width = document.body.clientWidth - margin.right - margin.left-5;
 
@@ -130,21 +130,21 @@ export default function(milestoneCount) {
       });
 
 
-   // PHIL: Copy-pasta to show the 2nd half of the milestone (unfinished)
- //   PHIL.selectAll('rect.milestone-remaining').data(tasks, keyFunction).enter()
- //
- // 	 .append("rect")
- // // 	 .attr("rx", 5)
- //  //         .attr("ry", 5)
- // 	 .attr("class", function(d){
- // 	     return 'milestone-remaining ' + d.status;
- // 	     })
- // 	 .attr("y", 0)
- // 	 .attr("transform", rectTransformRemaining)
- // 	 .attr("height", function(d) { return y.rangeBand(); })
- // 	 .attr("width", function(d) {
- // 	     return (1-d.percent) * (x(d.endDate) - x(d.startDate));
- // 	     });
+    // PHIL: Copy-pasta to show the 2nd half of the milestone (unfinished)
+    //   PHIL.selectAll('rect.milestone-remaining').data(tasks, keyFunction).enter()
+    //
+    // 	 .append("rect")
+    // // 	 .attr("rx", 5)
+    //  //         .attr("ry", 5)
+    // 	 .attr("class", function(d){
+    // 	     return 'milestone-remaining ' + d.status;
+    // 	     })
+    // 	 .attr("y", 0)
+    // 	 .attr("transform", rectTransformRemaining)
+    // 	 .attr("height", function(d) { return y.rangeBand(); })
+    // 	 .attr("width", function(d) {
+    // 	     return (1-d.percent) * (x(d.endDate) - x(d.startDate));
+    // 	     });
 
 
     svg.append('g')
@@ -171,12 +171,12 @@ export default function(milestoneCount) {
     rect.enter()
       .append('g')
       .attr('class', 'milestone-bars')
-       // 	 .attr("y", 0)
-       // 	 .attr("transform", rectTransformCompleted)
-       // 	 .attr("height", function(d) { return y.rangeBand(); })
-       // 	 .attr("width", function(d) {
-       // 	     return d.percent * (x(d.endDate) - x(d.startDate));
-        //     })
+    // 	 .attr("y", 0)
+    // 	 .attr("transform", rectTransformCompleted)
+    // 	 .attr("height", function(d) { return y.rangeBand(); })
+    // 	 .attr("width", function(d) {
+    // 	     return d.percent * (x(d.endDate) - x(d.startDate));
+    //     })
       .selectAll('rect').data((task) => {
         const total = task.segments.reduce((acc, segment) => acc + segment.count, 0);
         let prev = 0;
@@ -187,11 +187,11 @@ export default function(milestoneCount) {
         });
         return segments;
       }).enter()
-     .append('rect')
-          //  .attr('class', 'milestone-segment')
+      .append('rect')
+    //  .attr('class', 'milestone-segment')
       .style('fill', ({task, segment}) => `#${segment.color}`)
-          // .attr('class', ({task, segment}) => {return {fill: segment.color}; })
-           // .transform()
+    // .attr('class', ({task, segment}) => {return {fill: segment.color}; })
+    // .transform()
       .attr('transform', rectTransformSegment)
       .attr('height', (d) => y.rangeBand())
       .attr('width', ({task, total, segment}) => {
@@ -200,54 +200,54 @@ export default function(milestoneCount) {
       });
 
 
-  //       rect.enter()
-  //        .append("rect")
-	//  .attr("class", function(d){
-	//      return 'milestone-bars ' +d.status;
-	//      })
-	//  .transition()
-	//  .attr("y", 0)
-	//  .attr("transform", rectTransformCompleted)
-	//  .attr("height", function(d) { return y.rangeBand(); })
-	//  .attr("width", function(d) {
-	//      return d.percent*(x(d.endDate) - x(d.startDate));
-	//      });
-   //
-  //       rect.transition()
-  //         .attr("transform", rectTransform)
-	//  .attr("height", function(d) { return y.rangeBand(); })
-	//  .attr("width", function(d) {
-	//      return d.percent*(x(d.endDate) - x(d.startDate));
-	//      });
+    //       rect.enter()
+    //        .append("rect")
+    //  .attr("class", function(d){
+    //      return 'milestone-bars ' +d.status;
+    //      })
+    //  .transition()
+    //  .attr("y", 0)
+    //  .attr("transform", rectTransformCompleted)
+    //  .attr("height", function(d) { return y.rangeBand(); })
+    //  .attr("width", function(d) {
+    //      return d.percent*(x(d.endDate) - x(d.startDate));
+    //      });
+    //
+    //       rect.transition()
+    //         .attr("transform", rectTransform)
+    //  .attr("height", function(d) { return y.rangeBand(); })
+    //  .attr("width", function(d) {
+    //      return d.percent*(x(d.endDate) - x(d.startDate));
+    //      });
 
-// 	rect.exit().remove();
-//
-//   //PHIL Copy-pasta
-//   var rect = ganttChartGroup.selectAll("rect.milestone-remaining").data(tasks, keyFunction);
-//
-//   rect.enter()
-//    .append("rect")
-//    .attr("rx", 5)
-//    .attr("ry", 5)
-// .attr("class", function(d){
-//  return 'milestone-remaining ' +d.status;
-//  })
-// .transition()
-// .attr("y", 0)
-// .attr("transform", rectTransformRemaining)
-// .attr("height", function(d) { return y.rangeBand(); })
-// .attr("width", function(d) {
-//  return (1-d.percent)*(x(d.endDate) - x(d.startDate));
-//  });
-//
-//   rect.transition()
-//     .attr("transform", rectTransformRemaining)
-// .attr("height", function(d) { return y.rangeBand(); })
-// .attr("width", function(d) {
-//  return (1-d.percent)*(x(d.endDate) - x(d.startDate));
-//  });
-//
-// rect.exit().remove();
+    // 	rect.exit().remove();
+    //
+    //   //PHIL Copy-pasta
+    //   var rect = ganttChartGroup.selectAll("rect.milestone-remaining").data(tasks, keyFunction);
+    //
+    //   rect.enter()
+    //    .append("rect")
+    //    .attr("rx", 5)
+    //    .attr("ry", 5)
+    // .attr("class", function(d){
+    //  return 'milestone-remaining ' +d.status;
+    //  })
+    // .transition()
+    // .attr("y", 0)
+    // .attr("transform", rectTransformRemaining)
+    // .attr("height", function(d) { return y.rangeBand(); })
+    // .attr("width", function(d) {
+    //  return (1-d.percent)*(x(d.endDate) - x(d.startDate));
+    //  });
+    //
+    //   rect.transition()
+    //     .attr("transform", rectTransformRemaining)
+    // .attr("height", function(d) { return y.rangeBand(); })
+    // .attr("width", function(d) {
+    //  return (1-d.percent)*(x(d.endDate) - x(d.startDate));
+    //  });
+    //
+    // rect.exit().remove();
 
 
     svg.select('.x').transition().call(xAxis);

@@ -186,13 +186,13 @@ export default class Card {
   }
   fetchIssue(githubClient, skipSavingToDb) {
     return githubClient.getOcto().then(({issues}) => issues(this.number).fetch())
-    .then((issue) => {
-      this.issue = issue;
-      if (!skipSavingToDb) {
-        Database.putCard(this);
-      }
-      return issue;
-    });
+      .then((issue) => {
+        this.issue = issue;
+        if (!skipSavingToDb) {
+          Database.putCard(this);
+        }
+        return issue;
+      });
   }
   resetPromisesAndState(issue, pr, prStatus) {
     if (!issue) {

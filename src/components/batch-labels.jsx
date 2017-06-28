@@ -59,10 +59,10 @@ const LabelViewEdit = React.createClass({
     }
     if (confirm(message)) {
       this.props.dispatch(updateLabel(repoInfos, label.name, name))
-      .then(() => {
-        this.setState({isEditing: false});
-      })
-      .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
+        .then(() => {
+          this.setState({isEditing: false});
+        })
+        .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
   },
   onClickRemove() {
@@ -75,10 +75,10 @@ const LabelViewEdit = React.createClass({
     }
     if (confirm(message)) {
       this.props.dispatch(deleteLabel(repoInfos, label.name))
-      .then(() => {
-        this.setState({isRemoved: true});
-      })
-      .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
+        .then(() => {
+          this.setState({isRemoved: true});
+        })
+        .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
   },
   render() {
@@ -298,11 +298,11 @@ const BatchLabelsShell = React.createClass({
   render() {
     const {repoInfos} = this.props;
     const promise = IssueStore.fetchConcreteRepoInfos(repoInfos)
-    .then((concreteRepoInfos) => {
-      return Promise.all(concreteRepoInfos.map(({repoOwner, repoName}) => {
-        return IssueStore.fetchRepoLabels(repoOwner, repoName);
-      }));
-    });
+      .then((concreteRepoInfos) => {
+        return Promise.all(concreteRepoInfos.map(({repoOwner, repoName}) => {
+          return IssueStore.fetchRepoLabels(repoOwner, repoName);
+        }));
+      });
     return (
       <Loadable
         promise={promise}

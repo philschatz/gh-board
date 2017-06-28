@@ -84,7 +84,7 @@ export default React.createClass({
         className={classes}
         disabled={disabled}
         onClick={this.onClick}
-        >{kids}</BS.Button>
+      >{kids}</BS.Button>
     );
   }
 });

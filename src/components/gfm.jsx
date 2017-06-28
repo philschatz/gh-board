@@ -18,7 +18,7 @@ const insertAfter = (newNode, node) => {
   }
 };
 
-const EMOJI_RE = /(:\+?\-?[\+a-z0-9_\-]+:)/g;
+const EMOJI_RE = /(:\+?-?[+a-z0-9_-]+:)/g;
 
 // HACK: Octokat converts underscores to camelCase so for now we do too
 const camelize = (string) => {
@@ -158,7 +158,7 @@ const InnerMarkdown = React.createClass({
     }
 
     _.each(div.querySelectorAll('li'), (listItem) => {
-      if (/^\[x\]\ /.test(listItem.textContent)) {
+      if (/^\[x\] /.test(listItem.textContent)) {
         const textChild = listItem.firstChild;
         const checkbox = buildCheckbox(true);
 
@@ -169,7 +169,7 @@ const InnerMarkdown = React.createClass({
           textChild.textContent = textChild.textContent.substring(3);
           listItem.insertBefore(checkbox, textChild);
         }
-      } else if (/^\[\ \]\ /.test(listItem.textContent)) {
+      } else if (/^\[ \] /.test(listItem.textContent)) {
         const textChild = listItem.firstChild;
         const checkbox = buildCheckbox(false);
 

@@ -38,6 +38,11 @@ export default ({getState}) => next => action => {
       ? githubClient.getOcto().then(({user}) => user.repos.fetchAll())
       : Promise.reject('no credentials');
     break;
+  case 'fetchRepo':
+    promise = githubClient.hasCredentials()
+      ? githubClient.getOcto().then(({repos}) => repos(action.payload.repoFullName).fetch())
+      : Promise.reject('no credentials');
+    break;
   case 'fetchEmojis':
     promise = githubClient.getAnonymousOcto().then(({emojis}) => emojis.fetch());
     break;

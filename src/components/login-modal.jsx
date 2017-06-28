@@ -1,6 +1,5 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import Client from '../github-client';
 import * as BS from 'react-bootstrap';
 import {LinkExternalIcon} from 'react-octicons';
 
@@ -15,7 +14,6 @@ const Login = React.createClass({
     if (rootURLVal) {
       rootURLVal = rootURLVal.trim();
     }
-    Client.setRootUrl(rootURLVal);
     let tokenVal = this._token.value;
     if (tokenVal) {
       // needs trimming because just copying the token
@@ -54,7 +52,7 @@ const Login = React.createClass({
     );
 
     return (
-      <BS.Modal {...this.props}>
+      <BS.Modal show={this.props.show} container={this.props.container} onHide={this.props.onHide}>
         <BS.Modal.Header closeButton>
           <BS.Modal.Title>GitHub Credentials</BS.Modal.Title>
         </BS.Modal.Header>
@@ -74,10 +72,10 @@ const Login = React.createClass({
               <li>Go to <a href='https://github.com/settings/tokens/new' target='_blank'>https://github.com/settings/tokens/new{' '}<LinkExternalIcon/></a></li>
               <li>Provide a descriptive title (like "gh-board") in the "Token Description"</li>
               <li>Unselect all the checkboxes to just look at public repositories</li>
-                <ul>
-                  <li>Select <code>public_repo</code> to be able to update/move issues</li>
-                  <li>Select <code>repo</code> if you want to see/update information for <strong>private</strong> repositories</li>
-                </ul>
+              <ul>
+                <li>Select <code>public_repo</code> to be able to update/move issues</li>
+                <li>Select <code>repo</code> if you want to see/update information for <strong>private</strong> repositories</li>
+              </ul>
               <li>Click <code>Generate Token</code></li>
               <li>Copy the new token and paste it in here!</li>
               <li><strong>Note:</strong> You may need to refresh the page when you click "Save"</li>
@@ -97,7 +95,7 @@ const Login = React.createClass({
         <BS.Modal.Footer className='modal-footer'>
           {footer}
         </BS.Modal.Footer>
-    </BS.Modal>
+      </BS.Modal>
     );
   }
 });

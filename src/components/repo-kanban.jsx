@@ -70,7 +70,7 @@ const KanbanColumn = React.createClass({
           primaryRepoName={primaryRepo.repoName}
           card={card}
           columnRegExp={columnRegExp}
-          />
+        />
       );
     });
 
@@ -78,7 +78,7 @@ const KanbanColumn = React.createClass({
     let name;
     if (columnRegExp.test(label.name)) {
       icon = (<ListUnorderedIcon/>);
-      name = label.name.replace(/^\d+\ -\ /, ' ');
+      name = label.name.replace(/^\d+ - /, ' ');
     } else {
       icon = null;
       name = label.name;
