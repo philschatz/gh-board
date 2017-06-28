@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import {TagIcon} from 'react-octicons';
 
@@ -9,7 +8,7 @@ const AddFilterModal = React.createClass({
   onSave() {
     const {onHide} = this.props;
     const data = JSON.parse(window.localStorage[LOCALSTORAGE_KEY] || '[]');
-    const title = ReactDOM.findDOMNode(this._title).value;
+    const title = this._title.value;
     data.push({title: title, hashStr: window.location.hash});
     window.localStorage[LOCALSTORAGE_KEY] = JSON.stringify(data);
     onHide();
@@ -21,7 +20,7 @@ const AddFilterModal = React.createClass({
           <BS.Modal.Title><TagIcon size='mega'/> Save Filter</BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body>
-          <BS.FormControl type='text' ref={r => this._title = r}/>
+          <BS.FormControl type='text' inputRef={r => this._title = r}/>
         </BS.Modal.Body>
         <BS.Modal.Footer>
           <BS.Button bsStyle='primary' onClick={this.onSave}>Save</BS.Button>

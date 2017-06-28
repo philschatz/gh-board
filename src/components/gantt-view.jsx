@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
 import _ from 'underscore';
 
@@ -54,7 +53,7 @@ const GanttChart = React.createClass({
     const {milestones, data, columns} = this.props;
     const now = new Date();
 
-    ReactDOM.findDOMNode(this._ganttWrapper).innerHTML = '';
+    this._ganttWrapper.innerHTML = '';
 
     const tasks = milestones.map((milestone) => {
       const {createdAt, dueOn, title, state, closedIssues, openIssues} = milestone;

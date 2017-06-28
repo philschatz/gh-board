@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import {connect} from 'react-redux';
 import {Link} from 'react-router';
@@ -250,9 +249,8 @@ const CustomRepoModal = React.createClass({
   getInitialState() {
     return {customRepoName: null};
   },
-  onCustomRepoChange() {
-    const customRepoName = ReactDOM.findDOMNode(this._customRepo).value;
-    this.setState({customRepoName: customRepoName});
+  onCustomRepoChange(e) {
+    this.setState({customRepoName: e.currentTarget.value});
   },
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
@@ -275,7 +273,6 @@ const CustomRepoModal = React.createClass({
         <BS.Modal.Body className='modal-body'>
           <p>Enter the repository owner and name:</p>
           <BS.FormControl
-            ref={r => this._customRepo = r}
             type='text'
             placeholder='Example: philschatz/gh-board'
             bsStyle={isInvalid && 'error' || null}

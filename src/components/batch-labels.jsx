@@ -22,7 +22,6 @@
 import _ from 'underscore';
 import React from 'react';
 import {connect} from 'react-redux';
-import ReactDOM from 'react-dom';
 import * as BS from 'react-bootstrap';
 import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
@@ -38,21 +37,20 @@ import LabelBadge from './label-badge';
 
 const LabelViewEdit = React.createClass({
   getInitialState() {
-    return {isEditing: false, name: null};
+    return {isEditing: false, name: (this.props.label || {}).name};
   },
-  onChangeName() {
-    const name = ReactDOM.findDOMNode(this._labelName).value;
-    this.setState({name});
+  onChangeName(e) {
+    this.setState({name: e.currentTarget.value});
   },
   onClickEdit() {
     this.setState({isEditing: true});
   },
   onClickCancel() {
-    this.setState({isEditing: false, name: null});
+    this.setState({isEditing: false, name: (this.props.label || {}).name});
   },
   onClickSave() {
     const {repoInfos, label} = this.props;
-    const name = ReactDOM.findDOMNode(this._labelName).value;
+    const {name} = this.state;
     let message;
     if (repoInfos.length > 1) {
       message = `Are you sure you want to change this label in ${repoInfos.length} repositories?`;
@@ -99,7 +97,7 @@ const LabelViewEdit = React.createClass({
       const isSaveEnabled = name && name !== label.name;
       return (
         <tr>
-          <td><BS.FormControl ref={r => this._labelName = r} type='text' onChange={this.onChangeName} defaultValue={name || label.name}/></td>
+          <td><BS.FormControl type='text' onChange={this.onChangeName} value={name}/></td>
           <td></td>
           <td>
             <BS.Button bsStyle='default' onClick={this.onClickCancel}>Cancel</BS.Button>
