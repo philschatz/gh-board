@@ -27,7 +27,7 @@
     "eslint": "^3.8.1",
     "eslint-loader": "^1.1.1",
     "eslint-plugin-react": "^6.4.1",
-    "extract-text-webpack-plugin": "^1.0.1",
+    "extract-text-webpack-plugin": "^3.0.0",
     "favico.js": "^0.3.10",
     "file-loader": "^0.11.0",
     "http-server": "^0.9.0",
