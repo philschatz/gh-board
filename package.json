@@ -17,7 +17,7 @@
   "license": "AGPL3.0",
   "devDependencies": {
     "ava": "^0.18.0",
-    "babel-core": "^6.3.17",
+    "babel-core": "6.25.0",
     "babel-eslint": "^7.1.0",
     "babel-loader": "^7.0.0",
     "babel-plugin-transform-object-rest-spread": "^6.20.2",
