@@ -64,7 +64,7 @@
     "octicons": "^6.0.0",
     "octokat": "^0.7.0",
     "puzzle-script": "0.0.2",
-    "qs": "^6.3.0",
+    "qs": "6.5.0",
     "react": "^15.3.2",
     "react-bootstrap": "^0.31.0",
     "react-dnd": "^2.1.2",
