@@ -199,7 +199,7 @@ const InnerMarkdown = React.createClass({
       // Only import the mermaid chunk if actually used
       /*eslint-disable no-undef */
       require.ensure([], (require) => {
-        const mermaidAPI = require('mermaid/dist/mermaidAPI');
+        const mermaidAPI = require('mermaid/src/mermaidAPI');
         /*eslint-enable no-undef */
 
         this._mermaidCount += 1;
