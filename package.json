@@ -65,7 +65,7 @@
     "octokat": "^0.7.0",
     "puzzle-script": "0.0.2",
     "qs": "^6.3.0",
-    "react": "^15.3.2",
+    "react": "^15.6.2",
     "react-bootstrap": "^0.31.0",
     "react-dnd": "^2.1.2",
     "react-dnd-html5-backend": "^2.1.2",
