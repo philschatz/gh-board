@@ -57,7 +57,7 @@
     "level-js": "philschatz/level.js#master",
     "level-queryengine": "^3.0.1",
     "levelidb": "^0.2.6",
-    "levelup": "^1.3.1",
+    "levelup": "^2.0.1",
     "memdown": "^1.1.2",
     "mermaid": "^7.0.0",
     "moment": "2.18.0",
