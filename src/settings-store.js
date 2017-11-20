@@ -23,7 +23,7 @@ function localSet(key, val) {
 let isShowSimpleList = localGet('isShowSimpleList') || false;
 let isHideUncategorized = localGet('isHideUncategorized') || false;
 let isShowEmptyColumns = localGet('isShowEmptyColumns') || false;
-let isTableLayout = localGet('isTableLayout') || false;
+let isTableLayout = localGet('isTableLayout') || false; // eslint-disable-line
 let isRelated = localGet('isRelated') || 1; // The "I want to focus on Issues" or "PullRequests" tri-state
 let isShowPullRequestData = localGet('isShowPullRequestData') || false; // By default (anon users) this is unchecked. Gets checked when user logs in
 

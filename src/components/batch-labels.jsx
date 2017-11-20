@@ -25,7 +25,6 @@ import * as BS from 'react-bootstrap';
 import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
 import IssueStore from '../issue-store';
-import Database from '../database';
 import Client from '../github-client';
 import {getFilters} from '../route-utils';
 

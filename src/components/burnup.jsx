@@ -80,7 +80,7 @@ const BurnupShell = React.createClass({
     // Get the total number of Issues
     const total = cards.length;
 
-    if (!cards.length) {
+    if (!total) {
       return (
         <span>Not showing a chart because there are 0 cards to show</span>
       );

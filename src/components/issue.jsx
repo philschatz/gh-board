@@ -509,7 +509,6 @@ let Issue = React.createClass({
   },
   pollPullRequestStatus() {
     const {card} = this.props;
-    const {repoOwner, repoName, number} = card;
     if (card.isPullRequest()) {
       card.fetchPRStatus(true/*force*/);
     }
@@ -529,7 +528,7 @@ let Issue = React.createClass({
   render() {
     const {card, primaryRepoName, columnRegExp} = this.props;
     const { isDragging, connectDragSource } = this.props;
-    const {issue, repoOwner, repoName} = card;
+    const {issue} = card;
     let node;
     if (!issue) {
       return (<span>Maybe moving Issue...</span>);

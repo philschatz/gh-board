@@ -7,7 +7,6 @@ import history from '../history';
 import Client from '../github-client';
 import IssueStore from '../issue-store';
 import UserStore from '../user-store';
-import Database from '../database';
 import {getFilters} from '../route-utils';
 
 import Loadable from './loadable';

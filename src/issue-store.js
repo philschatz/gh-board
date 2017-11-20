@@ -271,7 +271,7 @@ const issueStore = new class IssueStore extends EventEmitter {
         const cards = _.unique(_.flatten(cardsArrays));
         // Re-fetch each Issue
         return Promise.all(cards.map((card) => card.fetchIssue(true/*skipSavingToDb*/)))
-        .then((newIssues) => {
+        .then(() => {
           return Database.putCards(cards)
           .then(() => {
             // Update the list of labels now that all the Issues have been updated

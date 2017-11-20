@@ -3,7 +3,6 @@ import _ from 'underscore';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import Client from '../github-client';
 import {getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
 import Loadable from './loadable';
 import LabelBadge from './label-badge';

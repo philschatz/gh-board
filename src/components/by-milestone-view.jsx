@@ -1,6 +1,5 @@
 import React from 'react';
 import _ from 'underscore';
-import * as BS from 'react-bootstrap';
 import {Link} from 'react-router';
 import {MilestoneIcon} from 'react-octicons';
 

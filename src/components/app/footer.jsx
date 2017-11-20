@@ -1,6 +1,6 @@
 import React from 'react';
 import * as BS from 'react-bootstrap';
-import {GiftIcon, CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
+import {CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
 
 import Client from '../../github-client';
 import NewVersionChecker from '../../new-version-checker';

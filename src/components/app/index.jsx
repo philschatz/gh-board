@@ -25,7 +25,7 @@ const App = React.createClass({
   componentWillUnmount() {
     this._historyListener();
   },
-  storeHistory(locationChangeEvent) {
+  storeHistory() {
     if (window.ga) {
       const {pathname, hash} = window.location;
       window.ga('set', 'page', pathname + hash);

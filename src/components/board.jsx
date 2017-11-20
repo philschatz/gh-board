@@ -2,7 +2,7 @@ import React from 'react';
 import * as BS from 'react-bootstrap';
 import {SyncIcon} from 'react-octicons';
 
-import {getFilters, filterCardsByFilter} from '../route-utils';
+import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
 import SettingsStore from '../settings-store';
 import FilterStore from '../filter-store';
@@ -31,9 +31,8 @@ const ProgressView = React.createClass({
     this.setState({ticks: ticks, max: max, message: context});
     this.forceUpdate();
   },
-  onStop(context, ticks) { this.setState({ticks: this.props.progress.ticks, max: this.props.progress.max, message: 'Finished: ' + context}); },
+  onStop(context) { this.setState({ticks: this.props.progress.ticks, max: this.props.progress.max, message: 'Finished: ' + context}); },
   render() {
-    const {progress} = this.props;
     const {ticks, max} = this.state;
     const {message} = this.state;
     const label = `${ticks}/${max}`;

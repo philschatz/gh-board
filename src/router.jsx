@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; // eslint-disable-line
 import ReactDOM from 'react-dom';
 import {Router} from 'react-router';
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import _ from 'underscore';
-import * as BS from 'react-bootstrap';
 import {UserIcon} from 'react-octicons';
 
 import {getFilters} from '../route-utils';
