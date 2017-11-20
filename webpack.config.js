@@ -20,7 +20,7 @@ module.exports = {
   context: path.resolve(__dirname),
   devtool: isBuild ? false : 'source-map',
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
         exclude: [/node_modules/, /puzzle-script/, /octokat\.js/],
@@ -55,9 +55,9 @@ module.exports = {
         }) :
         ['style-loader', 'css-loader', 'less-loader']
       },
-      { test: /\.json$/, loader: 'json-loader'},
-      { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
-      { test: /\.(woff|woff2|eot|ttf)/, loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
+      { test: /\.json$/, use: 'json-loader'},
+      { test: /\.(png|jpg|svg)/, use: 'file-loader?name=[name].[ext]'},
+      { test: /\.(woff|woff2|eot|ttf)/, use: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
     ]
   },
   resolve: {
