@@ -1,5 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const isBuild = process.env['NODE_ENV'] === 'production';
 
@@ -16,7 +18,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   context: path.resolve(__dirname),
-  devtool: 'source-map',
+  devtool: isBuild ? false : 'source-map',
   module: {
     loaders: [
       {
@@ -37,8 +39,23 @@ module.exports = {
           }
         },
       },
-      { test: /\.json$/, loader: 'json-loader'}, 
-      { test: /\.less$/,  loader: ['style-loader', 'css-loader', 'less-loader'] },
+      {
+        test: /\.less$/,
+        use: isBuild ? ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                minimize: true
+              }
+            },
+            'less-loader'
+          ]
+        }) :
+        ['style-loader', 'css-loader', 'less-loader']
+      },
+      { test: /\.json$/, loader: 'json-loader'},
       { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
       { test: /\.(woff|woff2|eot|ttf)/, loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
     ]
@@ -52,5 +69,12 @@ module.exports = {
       rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
       'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
     }
-  }
+  },
+  plugins: isBuild ? [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production')
+    }),
+    new ExtractTextPlugin('app.css'),
+    new UglifyJsPlugin()
+  ] : []
 };
