@@ -55,7 +55,6 @@ module.exports = {
         }) :
         ['style-loader', 'css-loader', 'less-loader']
       },
-      { test: /\.json$/, use: 'json-loader'},
       { test: /\.(png|jpg|svg)/, use: 'file-loader?name=[name].[ext]'},
       { test: /\.(woff|woff2|eot|ttf)/, use: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
     ]
