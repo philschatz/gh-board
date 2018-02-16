@@ -66,18 +66,18 @@ class IssueOrPullRequestBlurb extends React.Component {
           />
         )
       } else {
-        let iconType
+        let IconType
         if (issue.state === 'open' && !issue.closedBy) {
-          iconType = IssueOpenedIcon
+          IconType = IssueOpenedIcon
         } else if (issue.state === 'open' && issue.closedBy) {
-          iconType = IssueReopenedIcon
+          IconType = IssueReopenedIcon
         } else if (issue.state === 'closed') {
-          iconType = IssueClosedIcon
+          IconType = IssueClosedIcon
         } else {
-          iconType = QuestionIcon
+          IconType = QuestionIcon
         }
         icon = (
-          <iconType
+          <IconType
             title="Click for Issue Details"
             className="blurb-icon"
             onClick={this.onClickIcon}

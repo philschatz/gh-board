@@ -2,7 +2,6 @@ import EventEmitter from 'events'
 
 import Octo from 'octokat'
 import SimpleVerbsPlugin from 'octokat/dist/node/plugins/simple-verbs'
-import NativePromiseOnlyPlugin from 'octokat/dist/node/plugins/promise/native-only'
 import AuthorizationPlugin from 'octokat/dist/node/plugins/authorization'
 import CamelCasePlugin from 'octokat/dist/node/plugins/camel-case'
 import CacheHandlerPlugin from 'octokat/dist/node/plugins/cache-handler'
@@ -63,7 +62,6 @@ export default class GithubClient extends EventEmitter {
     return {
       plugins: [
         SimpleVerbsPlugin,
-        NativePromiseOnlyPlugin,
         AuthorizationPlugin,
         CamelCasePlugin,
         PaginationPlugin,

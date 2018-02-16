@@ -1,10 +1,6 @@
 import { applyMiddleware, createStore, combineReducers } from 'redux'
 import optimist from 'redux-optimist'
 import optimistPromiseMiddleware from 'redux-optimist-promise'
-import {
-  middleware as feedbackMiddleware,
-  reducer as feedback,
-} from 'redux-toast-feedback'
 
 import createHashHistory from 'history/lib/createHashHistory'
 import { useRouterHistory } from 'react-router'
@@ -23,7 +19,6 @@ import reducers from './reducers'
 let reducer = optimist(
   combineReducers({
     routing,
-    feedback,
     ...reducers,
   })
 )
@@ -48,7 +43,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 _middlewares = _middlewares.concat([
-  feedbackMiddleware(),
   githubMiddleware,
   optimistPromiseMiddleware(),
 ])

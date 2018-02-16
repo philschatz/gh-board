@@ -27,9 +27,6 @@
       [
         "optimist",
         "promise",
-        "feedbackOnError",
-        "feedbackOnSuccess",
-        "feedbackDirectly",
         "updateSettingStorage",
         "updateUserStorage",
         "github",
