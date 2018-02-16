@@ -1,7 +1,12 @@
 {
   "parser": "babel-eslint",
-  "plugins": [ "react", "duck", "import", "prettier" ],
-  "extends": [ "eslint:recommended", "plugin:duck/recommended", "plugin:import/recommended", "prettier" ],
+  "plugins": ["react", "duck", "import", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:duck/recommended",
+    "plugin:import/recommended",
+    "prettier"
+  ],
   "env": {
     "es6": true,
     "browser": true,
@@ -17,6 +22,19 @@
     "no-var": 2,
     "new-cap": 0,
     "no-console": 1,
-    "duck/meta-validation": [2, ["optimist", "promise", "feedbackOnError", "feedbackOnSuccess", "feedbackDirectly", "updateSettingStorage", "updateUserStorage", "github", "updateEmojisStorage"]]
+    "duck/meta-validation": [
+      2,
+      [
+        "optimist",
+        "promise",
+        "feedbackOnError",
+        "feedbackOnSuccess",
+        "feedbackDirectly",
+        "updateSettingStorage",
+        "updateUserStorage",
+        "github",
+        "updateEmojisStorage"
+      ]
+    ]
   }
 }

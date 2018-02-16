@@ -10,20 +10,24 @@
 }
 .x-stripes(@color; @opacity) {
   background-color: @color;
-  background-image: linear-gradient(to bottom left,
-    rgba(255,255,255, @opacity) 25%,
+  background-image: linear-gradient(
+    to bottom left,
+    rgba(255, 255, 255, @opacity) 25%,
     transparent 25%,
     transparent 50%,
-    rgba(255,255,255, @opacity) 50%,
-    rgba(255,255,255, @opacity) 75%,
+    rgba(255, 255, 255, @opacity) 50%,
+    rgba(255, 255, 255, @opacity) 75%,
     transparent 75%,
-    transparent);
+    transparent
+  );
   background-size: 1pc 1pc;
 }
 
 .x-font-and-emoji(@size) {
   font-size: @size;
-  .emoji { height: @size; }
+  .emoji {
+    height: @size;
+  }
 }
 
 .x-clearfix() {
@@ -33,7 +37,9 @@
   }
 }
 
-body { background-color: #ddd; }
+body {
+  background-color: #ddd;
+}
 
 .app {
   height: 100vh;
@@ -45,14 +51,20 @@ body { background-color: #ddd; }
   // TODO: Mixin?
   .badge {
     cursor: pointer;
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.12); // From GH Issues
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12); // From GH Issues
     font-size: 1rem;
-    &.is-light { color: black; }
-    &:not(.is-light) { color: white; }
+    &.is-light {
+      color: black;
+    }
+    &:not(.is-light) {
+      color: white;
+    }
     .x-font-and-emoji(1.25rem);
   }
 
-  .badge { margin-right: .3rem; }
+  .badge {
+    margin-right: 0.3rem;
+  }
 
   .avatar-image {
     display: inline-block;
@@ -64,12 +76,13 @@ body { background-color: #ddd; }
     border-radius: 1.25rem;
   }
 
-  .bottombar-nav { opacity: .9; }
+  .bottombar-nav {
+    opacity: 0.9;
+  }
 
   // .bottombar-nav .navbar-right:not(:hover) .nav-secret-game { display: none; }
 
   .dashboard {
-
     .example-repo-input {
       width: 100px;
       display: inline;
@@ -78,15 +91,20 @@ body { background-color: #ddd; }
     .repo-item {
       .repo-icon,
       .repo-open-link,
-      .repo-private-label { margin-right: 1rem; }
+      .repo-private-label {
+        margin-right: 1rem;
+      }
       .repo-updated-at {
         color: #888;
-        &::before { content: '('; }
-        &::after  { content: ')'; }
+        &::before {
+          content: '(';
+        }
+        &::after {
+          content: ')';
+        }
       }
     }
   }
-
 
   .bottombar-nav .karma-stats {
     padding: 5px;
@@ -113,9 +131,10 @@ body { background-color: #ddd; }
   &.popover-issue-body {
     min-width: 400px; // some popovers are inside an <a> which is inside an Issue body
 
-    .arrow { display: none; }
+    .arrow {
+      display: none;
+    }
   }
-
 
   .popover-content {
     max-height: 300px;
@@ -126,9 +145,10 @@ body { background-color: #ddd; }
   &.task-list-details .markdown-body {
     > :not(.task-list),
     // also hide any child list items that do not have a checkbox
-    .task-list li:not(.task-list-item) { display: none; }
+    .task-list li:not(.task-list-item) {
+      display: none;
+    }
   }
-
 }
 
 // Move this into a mixin if we use it outside of popovers
@@ -136,29 +156,41 @@ body { background-color: #ddd; }
   &.is-empty {
     color: #ccc;
     font-style: italic;
-    &::before { content: 'No Content provided.'; }
+    &::before {
+      content: 'No Content provided.';
+    }
   }
 
   /* Make sure images are scaled to fit in the modal */
-  img { max-width: 100%; }
+  img {
+    max-width: 100%;
+  }
 
   .x-font-and-emoji(1.5rem);
 
   // Style code blocks similar to GitHub (Override bootstrap's default)
-  code { color: initial; }
+  code {
+    color: initial;
+  }
 
   // Mostly from GH Issues and PRs
   .issue-status-badge {
     &[data-state='reopened'],
-    &[data-state='open']   { background-color: #6cc644; }
-    &[data-state='closed'] { background-color: #bd2c00; }
-    &[data-state='merged'] { background-color: #6e5494; }
+    &[data-state='open'] {
+      background-color: #6cc644;
+    }
+    &[data-state='closed'] {
+      background-color: #bd2c00;
+    }
+    &[data-state='merged'] {
+      background-color: #6e5494;
+    }
 
     background-color: #666; // default (no state)
     color: white;
     display: inline-block;
     white-space: nowrap;
-    margin-left: .5rem;
+    margin-left: 0.5rem;
     padding: 1px 5px;
     font-size: 12px;
     border-radius: 3px;
@@ -176,7 +208,7 @@ body { background-color: #ddd; }
       .task-list-item-checkbox {
         cursor: default;
         vertical-align: middle;
-        margin-right: .5rem;
+        margin-right: 0.5rem;
       }
     }
   }
@@ -188,31 +220,45 @@ body { background-color: #ddd; }
   .blurb-context,
   .blurb-icon {
     cursor: pointer;
-    margin-left: .5rem;
+    margin-left: 0.5rem;
 
-    &[data-state='merged'] { color: #6e5494; }
-    &[data-state='closed'] { color: #bd2c00; }
-    &[data-state='open'] { color: #6cc644; }
+    &[data-state='merged'] {
+      color: #6e5494;
+    }
+    &[data-state='closed'] {
+      color: #bd2c00;
+    }
+    &[data-state='open'] {
+      color: #6cc644;
+    }
   }
-  .blurb-context { margin-right: .5rem; }
+  .blurb-context {
+    margin-right: 0.5rem;
+  }
   .blurb-number-link {
     // color: #66f;
-    &:hover { text-decoration: none; }
+    &:hover {
+      text-decoration: none;
+    }
   }
   .blurb-secondary-repo {
     display: inline-block;
-    margin-left: .5rem;
+    margin-left: 0.5rem;
     color: #ccc;
   }
 
-  &.is-pull-request .blurb-icon { color: #6cc644; }
+  &.is-pull-request .blurb-icon {
+    color: #6cc644;
+  }
   // color is from https://github.com/notifications
-  &.is-pull-request.is-merged .blurb-icon { color: #6e5494; }
+  &.is-pull-request.is-merged .blurb-icon {
+    color: #6e5494;
+  }
 
-  .blurb-context { color: #666; }
-
+  .blurb-context {
+    color: #666;
+  }
 }
-
 
 .modal .anonymous-instructions [disabled] {
   opacity: 1;
@@ -222,9 +268,13 @@ body { background-color: #ddd; }
   .related-issues .related-issue {
     list-style: none;
 
-    .select-related-issue { margin-left: -20px; }
+    .select-related-issue {
+      margin-left: -20px;
+    }
 
-    .issue-blurb .colored-icon { display: none; }
+    .issue-blurb .colored-icon {
+      display: none;
+    }
   }
 }
 
@@ -234,7 +284,9 @@ body { background-color: #ddd; }
   cursor: default;
 }
 // buttons made to look like links have extra padding
-.btn.btn-link { padding: 0; }
+.btn.btn-link {
+  padding: 0;
+}
 
 @-webkit-keyframes icon-spin {
   0% {
@@ -285,8 +337,6 @@ i.icon-spin {
   }
 }
 
-
-
 .game-modal {
   .modal-content {
     width: 720px;
@@ -301,10 +351,14 @@ i.icon-spin {
 // so I had to insert a wrapper div around ListGroupItem
 // .list-group > .-drag-source + .-drag-source { border-top: 1px solid #eee; }
 
+.badge {
+  border-radius: 3px;
+  font-weight: normal;
+}
 
-.badge { border-radius: 3px; font-weight: normal; }
-
-.navbar { min-height: 20px; } // bootstrap
+.navbar {
+  min-height: 20px;
+} // bootstrap
 
 // from bootstrap
 .topbar-nav .container {
@@ -319,11 +373,12 @@ i.icon-spin {
   }
 }
 
-.navbar-brand { height: 20px; }
+.navbar-brand {
+  height: 20px;
+}
 
 .filter-menu {
   > .dropdown-menu {
-
     width: 32rem; // this matches the ellipses for milestones
 
     .filter-panel {
@@ -349,24 +404,33 @@ i.icon-spin {
           overflow-y: auto;
 
           .list-group-item {
-
             padding: 5px 10px; // make it narrower than bootstrap's default
 
-            &:hover { background-color: #eee; }
+            &:hover {
+              background-color: #eee;
+            }
 
             // padd just enough for the missing octicon-check
-            &:not(.is-selected) { padding-left: 3.1rem; }
+            &:not(.is-selected) {
+              padding-left: 3.1rem;
+            }
 
             // Hide the exclude button unless hovering over the item
-            &:not(.is-excluded):not(:hover) .item-toggle-exclude { display: none; }
+            &:not(.is-excluded):not(:hover) .item-toggle-exclude {
+              display: none;
+            }
 
             // Make selected (or excluded) items bold
             &.is-selected,
             &.is-excluded {
-              .item-text { font-weight: bold; }
+              .item-text {
+                font-weight: bold;
+              }
             }
 
-            .item-checkmark { margin-right: 1rem; }
+            .item-checkmark {
+              margin-right: 1rem;
+            }
 
             .item-text {
               display: inline-block;
@@ -381,7 +445,9 @@ i.icon-spin {
               text-overflow: ellipsis;
             }
 
-            .item-toggle-exclude { float: right; }
+            .item-toggle-exclude {
+              float: right;
+            }
 
             .item-icon {
               width: 1em;
@@ -390,16 +456,11 @@ i.icon-spin {
               border-radius: 3px;
             }
           }
-
         }
       }
-
     }
   }
 }
-
-
-
 
 .colored-icon {
   display: inline-block;
@@ -407,9 +468,10 @@ i.icon-spin {
   padding: 1px 6px;
   margin: 2px;
   border-radius: 3px;
-  &:not(.is-light) { color: white; }
+  &:not(.is-light) {
+    color: white;
+  }
 }
-
 
 .octicon.private {
   color: #e9dba5;
@@ -424,7 +486,6 @@ i.icon-spin {
   }
 }
 
-
 .featured-image {
   max-width: 100%;
   max-height: 100px;
@@ -433,16 +494,16 @@ i.icon-spin {
   margin-right: auto;
 }
 
-
 .batch-label .label-actions {
   text-align: right;
 
-  .action-delete { color: #bd2c00; }
+  .action-delete {
+    color: #bd2c00;
+  }
 }
 
 // These are the badges for Issues that are in GFM.
 .issue-status-badges .issue-title {
-
   color: #666;
   background-color: #eee;
   display: inline-block;
@@ -455,6 +516,10 @@ i.icon-spin {
     text-overflow: ellipsis;
   }
 
-  &::before { content: '('; }
-  &::after { content: ')'; }
+  &::before {
+    content: '(';
+  }
+  &::after {
+    content: ')';
+  }
 }

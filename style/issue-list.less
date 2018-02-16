@@ -19,7 +19,9 @@
       // display: inline-block;
 
       // give the icon some padding so we can make a colored square
-      &:not(.has-icon) { padding: 10px 40px 10px 15px; }
+      &:not(.has-icon) {
+        padding: 10px 40px 10px 15px;
+      }
       &.has-icon {
         padding-left: 0;
         padding-right: 40px;
@@ -41,7 +43,9 @@
         padding: 10px 15px;
         margin: 0; // override colored-icon has a margin
         border-radius: 0; //override colored-icon
-        &:not(.is-light) { color: white; }
+        &:not(.is-light) {
+          color: white;
+        }
       }
 
       /* Support filtering on a single kanban column */
@@ -50,9 +54,13 @@
         color: inherit; // It's an <a> but don't make it blue
         cursor: pointer;
 
-        .octicon { padding-right: 1rem; }
+        .octicon {
+          padding-right: 1rem;
+        }
 
-        &:hover { text-decoration: none; }
+        &:hover {
+          text-decoration: none;
+        }
       }
     }
 
@@ -69,7 +77,9 @@
 
   // DnD styling
 
-  &:not(.is-over) .dnd-placeholder { display: none; }
+  &:not(.is-over) .dnd-placeholder {
+    display: none;
+  }
   .dnd-placeholder {
     background-color: #fefefe;
     height: 5rem;
@@ -80,6 +90,8 @@
     line-height: 2.5rem;
     color: #888;
 
-    &::before { content: 'Release to drop me in this list'; }
+    &::before {
+      content: 'Release to drop me in this list';
+    }
   }
 }

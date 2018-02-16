@@ -14,7 +14,7 @@
     "test": "./script/run-test.sh",
     "deploy": "./script/deploy.sh",
     "prettier:base": "prettier --write",
-    "prettify": "find . -name \"*.jsx\" -o -name \"*.js\" | grep -v -f .gitignore | xargs npm run prettier:base"
+    "prettify": "find . -name \"*.jsx\" -o -name \"*.js\" -o -name \"*.less\" | grep -v -f .gitignore | xargs npm run prettier:base"
   },
   "author": "Philip Schatz",
   "license": "AGPL3.0",

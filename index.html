@@ -1,20 +1,25 @@
 <!doctype html>
 <html>
-  <head>
-    <link rel="stylesheet" href="./dist/app.css"/>
-    <link rel="shortcut icon" type="image/png" href="./favicon32.png">
-  </head>
-  <body>
-    <div id="container"></div>
-    <script>
-      window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-      window.ga('create', 'UA-48498113-3', 'auto');
-      window.ga('set', 'page', window.location.pathname + window.location.hash);
-      window.ga('send', 'pageview');
 
-    </script>
-    <script src="./dist/bundle.js"></script>
-    <script async src='https://www.google-analytics.com/analytics.js'></script>
+<head>
+  <link rel="stylesheet" href="./dist/app.css" />
+  <link rel="shortcut icon" type="image/png" href="./favicon32.png">
+</head>
 
-  </body>
+<body>
+  <div id="container"></div>
+  <script>
+    window.ga = window.ga || function () {
+      (ga.q = ga.q || []).push(arguments)
+    };
+    ga.l = +new Date;
+    window.ga('create', 'UA-48498113-3', 'auto');
+    window.ga('set', 'page', window.location.pathname + window.location.hash);
+    window.ga('send', 'pageview');
+  </script>
+  <script src="./dist/bundle.js"></script>
+  <script async src='https://www.google-analytics.com/analytics.js'></script>
+
+</body>
+
 </html>

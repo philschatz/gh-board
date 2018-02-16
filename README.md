@@ -1,27 +1,26 @@
 # Serverless Kanban Board for GitHub Issues
-[![issues][gh-board-image]][gh-board-url]
-[![dependency status][dependency-image]][dependency-url]
-[![dev dependency status][dev-dependency-image]][dev-dependency-url]
+
+[![issues][gh-board-image]][gh-board-url] [![dependency status][dependency-image]][dependency-url] [![dev dependency status][dev-dependency-image]][dev-dependency-url]
 
 Why waste time and money paying for a Ticket Tracker when you already work in GitHub? Now, you don't have to.
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13620649/4ef888cc-e55f-11e5-8576-8970abba8660.png)
 
-- [Features](#features)
-  - [Multiple Repositories](#multiple-repositories)
-  - [Linked Issues and Pull Requests](#linked-issues-and-pull-requests)
-  - [Filtering](#filtering)
-  - [Milestone Planning](#milestone-planning)
-  - [Moving Cards](#moving-cards)
-  - [Task Lists](#task-lists)
-  - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
-  - [Issue Images](#issue-images)
-  - [Pull Request to non-default branch](#pull-request-to-non-default-branch)
-  - [Burnup Chart](#burnup-chart)
-- [Examples](#examples)
-- [Development](#development)
-  - [How Does it Work?](#how-does-it-work)
-- [TODO List](#todo-list)
+* [Features](#features)
+  * [Multiple Repositories](#multiple-repositories)
+  * [Linked Issues and Pull Requests](#linked-issues-and-pull-requests)
+  * [Filtering](#filtering)
+  * [Milestone Planning](#milestone-planning)
+  * [Moving Cards](#moving-cards)
+  * [Task Lists](#task-lists)
+  * [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
+  * [Issue Images](#issue-images)
+  * [Pull Request to non-default branch](#pull-request-to-non-default-branch)
+  * [Burnup Chart](#burnup-chart)
+* [Examples](#examples)
+* [Development](#development)
+  * [How Does it Work?](#how-does-it-work)
+* [TODO List](#todo-list)
 
 # Features
 
@@ -31,21 +30,18 @@ Multiple Repositories in an organization can be shown on a board (from different
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13621991/70bb1312-e569-11e5-86ef-82372752fbff.png)
 
-
 ### Linked Issues and Pull Requests
 
 Just add `#123` or `orgName/RepoName#123` to the Issue or Pull Request body and linked Issues will show up with the column they are in, both below the Card and in the preview popup.
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13620658/63f99478-e55f-11e5-8e9f-9babcfb69a29.png)
 
-
 ### Filtering
 
-- cards can be filtered by label, milestone, board column, or user
-- filters can be inclusive as well as exclusive
+* cards can be filtered by label, milestone, board column, or user
+* filters can be inclusive as well as exclusive
 
 ![gh-board_filters](https://cloud.githubusercontent.com/assets/253202/13621706/958fafec-e567-11e5-9411-405de7f34664.gif)
-
 
 ### Milestone Planning
 
@@ -70,8 +66,8 @@ By using the `- [ ]` notation in the body of an Issue or Pull Request, the progr
 
 ### CI Status and Merge Conflict
 
-- CI Status shows up as a green :heavy_check_mark: or a red :x: on the top-right corner of a card
-- Merge conflicts are shown with a yellow :warning: and have a diagonal striped background
+* CI Status shows up as a green :heavy_check_mark: or a red :x: on the top-right corner of a card
+* Merge conflicts are shown with a yellow :warning: and have a diagonal striped background
 
 <!-- ![image](https://cloud.githubusercontent.com/assets/253202/13620679/862188ee-e55f-11e5-831f-f5059c18d3ac.png) -->
 
@@ -85,8 +81,7 @@ By using the `- [ ]` notation in the body of an Issue or Pull Request, the progr
 
 [Why Burnup instead of Burndown?](http://brodzinski.com/2012/10/burn-up-better-burn-down.html)
 
-Shows a burnup chart for a Milestone (ie "Sprint" or "Iteration").
-If you use select multiple repositories it will include all of them.
+Shows a burnup chart for a Milestone (ie "Sprint" or "Iteration"). If you use select multiple repositories it will include all of them.
 
 It also skips when nothing was opened or closed that day/month/year (useful to see weekends or holidays).
 
@@ -108,26 +103,24 @@ Sometimes Pull Requests go to a branch other than the main branch. This makes it
 
 Just specify a GitHub repository in the URL and off you go!
 
-- [openstax/tutor-js](http://philschatz.com/gh-board/#/r/openstax:tutor-js)
-- [openstax/tutor-js + tutor-server](http://philschatz.com/gh-board/#/r/openstax:tutor-js|tutor-server) (multiple repositories)
-- [huboard/huboard](http://philschatz.com/gh-board/#/r/huboard:huboard)
-- [jquery/jquery](http://philschatz.com/gh-board/#/r/jquery:jquery)
-- Or wildcards! (must be logged in) using `http://philschatz.com/gh-board/#/r/openstax:tutor-js|*`
-
+* [openstax/tutor-js](http://philschatz.com/gh-board/#/r/openstax:tutor-js)
+* [openstax/tutor-js + tutor-server](http://philschatz.com/gh-board/#/r/openstax:tutor-js|tutor-server) (multiple repositories)
+* [huboard/huboard](http://philschatz.com/gh-board/#/r/huboard:huboard)
+* [jquery/jquery](http://philschatz.com/gh-board/#/r/jquery:jquery)
+* Or wildcards! (must be logged in) using `http://philschatz.com/gh-board/#/r/openstax:tutor-js|*`
 
 # Development
 
-- `npm start` to start up the dev server and go to `http://localhost:8080`
-- `npm run build` to generate the JS and CSS files in `./dist`
+* `npm start` to start up the dev server and go to `http://localhost:8080`
+* `npm run build` to generate the JS and CSS files in `./dist`
 
 ### How Does it Work?
 
-- JavaScript calls the GitHub API and pulls in the Issues for a given repository.
-  - Since there is no server to do OAuth, people need to provide a GitHub token which is stored in `localStorage`
-- It uses the first repository to get the Issue Labels and Milestones.
-- There are special Labels which represent the board columns (in the format `# - Column Title`)
-- To be a "Good API Citizen" `gh-board` uses eTags provided by GitHub and saves them in `localStorage` (or `IndexedDB`)
-
+* JavaScript calls the GitHub API and pulls in the Issues for a given repository.
+  * Since there is no server to do OAuth, people need to provide a GitHub token which is stored in `localStorage`
+* It uses the first repository to get the Issue Labels and Milestones.
+* There are special Labels which represent the board columns (in the format `# - Column Title`)
+* To be a "Good API Citizen" `gh-board` uses eTags provided by GitHub and saves them in `localStorage` (or `IndexedDB`)
 
 ### Hosting your own Forked Version
 
@@ -147,25 +140,23 @@ Just specify a GitHub repository in the URL and off you go!
 1. `git pull https://github.com/philschatz/gh-board.git master`
 2. run `npm run deploy`
 
-
 # TODO List
 
-- [x] combine Issue and the Pull Requests that fixes it
-- [x] handle dragging in multiple repos:
+* [x] combine Issue and the Pull Requests that fixes it
+* [x] handle dragging in multiple repos:
   1. auto-create the label in the new repo (confirm first)
-- [x] add checkbox for selecting multiple repos in dashboard
-- [x] select between Issue-centric and PullRequest-centric view
-- [x] support milestone (sprint) planning by making each milestone a column
-- [x] show labels unique to each repository
-- [x] linked Issues & PR's should include the title
-- [x] collaboratively edit Milestones and any GitHub file by going to `/p-file/:repoOwner/:repoName/:branch/path-to-file`
-- [x] add a list view in addition to a board
-  - [ ] Sort by Due At, Updated At, and ascending/descending
-- [ ] add a way to add labels/milestones to an Issue (autocreate the label/milestone in the repo)
-- [ ] cache issues-updated-since requests and CI status requests in Session Storage instead of IndexedDB so they can be cleared easier
-- [ ] add effort labels XS, S, M, L, XL
-- [ ] add GitHub search
-
+* [x] add checkbox for selecting multiple repos in dashboard
+* [x] select between Issue-centric and PullRequest-centric view
+* [x] support milestone (sprint) planning by making each milestone a column
+* [x] show labels unique to each repository
+* [x] linked Issues & PR's should include the title
+* [x] collaboratively edit Milestones and any GitHub file by going to `/p-file/:repoOwner/:repoName/:branch/path-to-file`
+* [x] add a list view in addition to a board
+  * [ ] Sort by Due At, Updated At, and ascending/descending
+* [ ] add a way to add labels/milestones to an Issue (autocreate the label/milestone in the repo)
+* [ ] cache issues-updated-since requests and CI status requests in Session Storage instead of IndexedDB so they can be cleared easier
+* [ ] add effort labels XS, S, M, L, XL
+* [ ] add GitHub search
 
 [gh-board-image]: https://img.shields.io/github/issues/philschatz/gh-board.svg?label=Issues%20%28gh-board%29
 [gh-board-url]: http://philschatz.com/gh-board/

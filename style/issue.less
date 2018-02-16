@@ -15,7 +15,7 @@
     border-radius: 0 !important;
     margin: 1px;
     // border: 1px solid black;
-    padding: .5rem;
+    padding: 0.5rem;
     display: flex;
 
     flex-direction: row;
@@ -24,7 +24,9 @@
     align-items: flex-start;
     align-content: stretch;
 
-    .avatar-filter { flex: 0 0 auto; }
+    .avatar-filter {
+      flex: 0 0 auto;
+    }
     .issue-title {
       flex: 1 1 auto;
       white-space: nowrap;
@@ -39,21 +41,32 @@
   }
 
   /* Just make the issue gray so it is clear we are dragging this element from */
-  &.is-dragging { opacity: .25; }
+  &.is-dragging {
+    opacity: 0.25;
+  }
 
-  &[data-state='closed'] { opacity: 0.5; }
+  &[data-state='closed'] {
+    opacity: 0.5;
+  }
 
   // When remotely updated since you last looked, mark the issue as yellow
-  &.is-updated { background-color: #fcfcd9; }
-  &.is-pull-request-to-different-branch { background-color: #e9e9fc; }
-
+  &.is-updated {
+    background-color: #fcfcd9;
+  }
+  &.is-pull-request-to-different-branch {
+    background-color: #e9e9fc;
+  }
 
   // The little `[4/5]` section
   .task-list-overview {
     cursor: pointer;
     font-size: 1.2rem;
-    &.is-done { color: #0c0; }
-    &:not(.is-done) { color: #ccc; }
+    &.is-done {
+      color: #0c0;
+    }
+    &:not(.is-done) {
+      color: #ccc;
+    }
   }
 
   // Hide the Issue icon if it is an Issue
@@ -72,26 +85,39 @@
     .x-font-and-emoji(14px); // This is what is set on the <h4>
 
     > .issue-blurb {
-      .blurb-number-link { color: #337ab7; } // bootstrap link color
+      .blurb-number-link {
+        color: #337ab7;
+      } // bootstrap link color
 
       // all blurbs contain the column they are in, so hide it here
-      .colored-icon { display: none; }
+      .colored-icon {
+        display: none;
+      }
     }
-
 
     // a.issue-status:hover { text-decoration: none; }
     .issue-status {
       font-size: 1rem;
 
-      &[data-status-state='success'] { color: #6cdf44; }
-      &[data-status-state='pending'] { color: #fb0; }
+      &[data-status-state='success'] {
+        color: #6cdf44;
+      }
+      &[data-status-state='pending'] {
+        color: #fb0;
+      }
       &[data-status-state='error'],
-      &[data-status-state='failure'] { color: #d00; font-weight: bold; }
+      &[data-status-state='failure'] {
+        color: #d00;
+        font-weight: bold;
+      }
 
-      .status-icon { }
+      .status-icon {
+      }
     }
 
-    .merge-conflict-warning { color: #ee0; }
+    .merge-conflict-warning {
+      color: #ee0;
+    }
 
     // .related-issues .issue-blurb {
     //   color: #999;
@@ -109,13 +135,20 @@
 
   // Depending on the issue listing type (simple or card) this element could be in the footer, or not
   .issue-due-at {
-    &.is-overdue { color: #d00; font-weight: bold; }
-    &.is-near { color: #fb0; }
-    &:not(.is-near):not(.is-overdue) { color: #ccc; }
+    &.is-overdue {
+      color: #d00;
+      font-weight: bold;
+    }
+    &.is-near {
+      color: #fb0;
+    }
+    &:not(.is-near):not(.is-overdue) {
+      color: #ccc;
+    }
 
     font-size: 1rem;
-    padding-left: .5rem;
-    padding-right: .5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
     white-space: nowrap; // because of flexbox
   }
   .issue-title {
@@ -126,7 +159,9 @@
     text-decoration: none;
 
     .x-font-and-emoji(1.5rem);
-    &:hover { text-decoration: none; }
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   .list-group-item-text {
@@ -158,9 +193,13 @@
     //   .blurb-number-link:hover * { text-decoration: underline; }
     // }
 
-    .task-list-overview { padding: 0 2rem; }
+    .task-list-overview {
+      padding: 0 2rem;
+    }
 
-    .issue-labels { display: block; }
+    .issue-labels {
+      display: block;
+    }
 
     .badge {
       max-width: 15rem;
@@ -186,15 +225,18 @@
       background-color: inherit;
       font-weight: normal;
       text-decoration: none;
-      &:hover { text-decoration: none; }
-
+      &:hover {
+        text-decoration: none;
+      }
 
       .x-font-and-emoji(1.2rem); // same as font size
 
-      .milestone-icon { color: #ccc; }
+      .milestone-icon {
+        color: #ccc;
+      }
       .milestone-title {
-        color:inherit; // it's an <a> but don't make it blue
-        padding-left: .5rem;
+        color: inherit; // it's an <a> but don't make it blue
+        padding-left: 0.5rem;
       }
     }
 
@@ -217,7 +259,9 @@
           vertical-align: middle;
         }
 
-        .comments-count-number { padding-right: .5rem; }
+        .comments-count-number {
+          padding-right: 0.5rem;
+        }
 
         time.updated-at {
           max-width: 9rem;
@@ -225,12 +269,12 @@
           text-overflow: ellipsis;
         }
 
-        .avatar-image { cursor: pointer; }
+        .avatar-image {
+          cursor: pointer;
+        }
       }
     }
-
   }
-
 
   // Elements that can occur anywhere in an issue
 
@@ -238,9 +282,15 @@
   /* Default merge conflict color when no CI status */
   &.is-pull-request {
     // &:not(.is-mergeable) .list-group-item-heading .issue-blurb .blurb-icon { .x-stripes(#ccc; .8); }
-    &.is-merge-conflict:not(.is-updated) { .x-stripes(#fcfcfc; .9); }
-    &.is-merge-conflict.is-updated       { .x-stripes(#fcfcd9; .9); }
-    &.is-merge-conflict.is-pull-request-to-different-branch { .x-stripes(#e9e9fc; .9); }
+    &.is-merge-conflict:not(.is-updated) {
+      .x-stripes(#fcfcfc; 0.9);
+    }
+    &.is-merge-conflict.is-updated {
+      .x-stripes(#fcfcd9; 0.9);
+    }
+    &.is-merge-conflict.is-pull-request-to-different-branch {
+      .x-stripes(#e9e9fc; 0.9);
+    }
   }
 
   /* Color the blurb icon to be gray if there is an issue */
@@ -271,7 +321,6 @@
   //   &[data-status-state='failure'] { background-color: #d00; }
   //
   // }
-
 } /* End Issue */
 
 .related-issues {
@@ -288,13 +337,13 @@
   box-shadow: inset 0 2px 7px -5px #333;
 
   .related-issue {
-
     overflow: hidden;
     white-space: nowrap;
     // max-width: 100%;
     text-overflow: ellipsis;
 
-    .colored-icon { opacity: .5; }
-
+    .colored-icon {
+      opacity: 0.5;
+    }
   }
 }
