@@ -1,156 +1,155 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import _ from 'underscore';
-import {GraphIcon} from 'react-octicons';
+import React from 'react'
+import { connect } from 'react-redux'
+import _ from 'underscore'
+import { GraphIcon } from 'react-octicons'
 
-import Chart from './chart';
-import moment from 'moment';
+import Chart from './chart'
+import moment from 'moment'
 
 const BurnupShell = React.createClass({
   renderLoaded(cards) {
     function getDay(dateStr) {
-      return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24);
+      return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24)
     }
 
-    let chunkType = null;
+    let chunkType = null
     function getChunk(dateStr) {
       if (chunkType === 'day') {
-        return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24);
-      // } else if (chunkType === 'week') {
-      //   return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24 / 7);
+        return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24)
+        // } else if (chunkType === 'week') {
+        //   return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24 / 7);
       } else if (chunkType === 'month') {
-        const d = new Date(dateStr);
-        return d.getFullYear() * 100 + d.getMonth();
+        const d = new Date(dateStr)
+        return d.getFullYear() * 100 + d.getMonth()
       } else if (chunkType === 'year') {
-        const d = new Date(dateStr);
-        return d.getFullYear();
+        const d = new Date(dateStr)
+        return d.getFullYear()
       } else {
-        throw new Error('BUG: Invalid date range chunk type');
+        throw new Error('BUG: Invalid date range chunk type')
       }
     }
     function formatChunk(chunk) {
       if (chunkType === 'day') {
-        const m = new moment(chunk * 1000 * 60 * 60 * 24);
-        return m.format('MMM DD');
-      // } else if (chunkType === 'week') {
-      //   return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24 / 7);
+        const m = new moment(chunk * 1000 * 60 * 60 * 24)
+        return m.format('MMM DD')
+        // } else if (chunkType === 'week') {
+        //   return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24 / 7);
       } else if (chunkType === 'month') {
-        const month = chunk % 100;
+        const month = chunk % 100
         if (month === 0) {
-          const year = (chunk / 100) % 100; // only use the last 2 digits of the year
-          return `${moment.monthsShort(month)} '${year}`; // moment months are 0-indexed
+          const year = (chunk / 100) % 100 // only use the last 2 digits of the year
+          return `${moment.monthsShort(month)} '${year}` // moment months are 0-indexed
         } else {
-          return moment.monthsShort(month); // moment months are 0-indexed
+          return moment.monthsShort(month) // moment months are 0-indexed
         }
       } else if (chunkType === 'year') {
-        return chunk;
+        return chunk
       } else {
-        throw new Error('BUG: Invalid date range chunk type');
+        throw new Error('BUG: Invalid date range chunk type')
       }
     }
     function incrementChunk(chunk) {
       if (chunkType === 'day') {
-        return chunk + 1;
-      // } else if (chunkType === 'week') {
-      //   return chunk + 7;
+        return chunk + 1
+        // } else if (chunkType === 'week') {
+        //   return chunk + 7;
       } else if (chunkType === 'month') {
-        const month = chunk % 100; // split off the year
+        const month = chunk % 100 // split off the year
         if (month >= 12) {
-          return chunk - month + 100;
+          return chunk - month + 100
         } else {
-          return chunk + 1;
+          return chunk + 1
         }
       } else if (chunkType === 'year') {
-        return chunk + 1;
+        return chunk + 1
       } else {
-        throw new Error('BUG: Invalid date range chunk type');
+        throw new Error('BUG: Invalid date range chunk type')
       }
     }
-
-    // Get the total number of Issues
-    const total = cards.length;
 
     if (!cards.length) {
-      return (
-        <span>Not showing a chart because there are 0 cards to show</span>
-      );
+      return <span>Not showing a chart because there are 0 cards to show</span>
     }
 
-    cards = _.sortBy(cards, (card) => getDay(card.issue.createdAt));
+    cards = _.sortBy(cards, card => getDay(card.issue.createdAt))
     // Get the oldest Issue and the newest Issue Date
-    const startDate = cards[0].issue.createdAt;
+    const startDate = cards[0].issue.createdAt
 
-    let openedCards = cards;
+    let openedCards = cards
 
     // From this point, we only care about closed Issues
-    let closedCards = cards.filter((card) => card.issue.closedAt);
-    closedCards = _.sortBy(closedCards, (card) => getDay(card.issue.closedAt));
-    let endDate;
+    let closedCards = cards.filter(card => card.issue.closedAt)
+    closedCards = _.sortBy(closedCards, card => getDay(card.issue.closedAt))
+    let endDate
     if (closedCards.length && openedCards.length) {
-      const lastOpened = openedCards[openedCards.length - 1].issue.createdAt;
-      const lastClosed = closedCards[closedCards.length - 1].issue.closedAt;
+      const lastOpened = openedCards[openedCards.length - 1].issue.createdAt
+      const lastClosed = closedCards[closedCards.length - 1].issue.closedAt
       if (Date.parse(lastOpened) < Date.parse(lastClosed)) {
-        endDate = lastClosed;
+        endDate = lastClosed
       } else {
-        endDate = lastOpened;
+        endDate = lastOpened
       }
     } else if (openedCards.length) {
-      endDate = openedCards[openedCards.length - 1].issue.createdAt;
+      endDate = openedCards[openedCards.length - 1].issue.createdAt
     } else if (closedCards.length) {
-      endDate = closedCards[closedCards.length - 1].issue.closedAt;
+      endDate = closedCards[closedCards.length - 1].issue.closedAt
     } else {
-      throw new Error('BUG: should not have gotten here');
+      throw new Error('BUG: should not have gotten here')
     }
 
-    const startDays = getDay(startDate);
-    const endDays = getDay(endDate);
+    const startDays = getDay(startDate)
+    const endDays = getDay(endDate)
 
     if (endDays - startDays < 90) {
-      chunkType = 'day';
-    // } else if (endDays - startDays < 100) {
-    //   chunkType = 'week';
-    } else if (endDays - startDays < 1500){
-      chunkType = 'month';
+      chunkType = 'day'
+      // } else if (endDays - startDays < 100) {
+      //   chunkType = 'week';
+    } else if (endDays - startDays < 1500) {
+      chunkType = 'month'
     } else {
-      chunkType = 'year';
+      chunkType = 'year'
     }
 
-    const startChunk = getChunk(startDate);
-    const endChunk = getChunk(endDate);
+    const startChunk = getChunk(startDate)
+    const endChunk = getChunk(endDate)
 
     // TODO: If the number of days is more than, say 50, then show changes per week.
     // Loop over the days and build a chart
-    let closedCount = 0;
-    let openedCount = 0;
-    const rows = [];
-    for (let currentChunk = startChunk; currentChunk <= endChunk; currentChunk = incrementChunk(currentChunk)) {
+    let closedCount = 0
+    let openedCount = 0
+    const rows = []
+    for (
+      let currentChunk = startChunk;
+      currentChunk <= endChunk;
+      currentChunk = incrementChunk(currentChunk)
+    ) {
       // loop through the cards to count how many have closed on this day
-      let closedToday = 0;
-      let openedToday = 0;
+      let closedToday = 0
+      let openedToday = 0
       for (let cardIndex = 0; cardIndex < closedCards.length; cardIndex++) {
-        const cardClosedDay = getChunk(closedCards[cardIndex].issue.closedAt);
+        const cardClosedDay = getChunk(closedCards[cardIndex].issue.closedAt)
         if (cardClosedDay <= currentChunk) {
-          closedToday++;
+          closedToday++
         } else {
-          break;
+          break
         }
       }
       for (let cardIndex = 0; cardIndex < openedCards.length; cardIndex++) {
-        const cardOpenedDay = getChunk(openedCards[cardIndex].issue.createdAt);
+        const cardOpenedDay = getChunk(openedCards[cardIndex].issue.createdAt)
         if (cardOpenedDay <= currentChunk) {
-          openedToday++;
+          openedToday++
         } else {
-          break;
+          break
         }
       }
       // remove the cards since they are now accounted for
       if (closedToday) {
-        closedCards.splice(0, closedToday);
-        closedCount += closedToday;
+        closedCards.splice(0, closedToday)
+        closedCount += closedToday
       }
       if (openedToday) {
-        openedCards.splice(0, openedToday);
-        openedCount += openedToday;
+        openedCards.splice(0, openedToday)
+        openedCount += openedToday
       }
       // Only add an entry if it changed
       rows.push([
@@ -159,8 +158,8 @@ const BurnupShell = React.createClass({
         // openedToday ? openedCount : null,
         closedCount,
         openedCount,
-        openedToday || null
-      ]);
+        openedToday || null,
+      ])
     }
 
     // if (closedCards.length > 0) {
@@ -168,9 +167,9 @@ const BurnupShell = React.createClass({
     // }
 
     // Add the row titles and the "Ideal" line
-    rows[0].push(0); // ideal start
-    rows[rows.length - 1].push(openedCount); // ideal end
-    rows.unshift(['chunk', 'closed', 'total', 'new', 'ideal']);
+    rows[0].push(0) // ideal start
+    rows[rows.length - 1].push(openedCount) // ideal end
+    rows.unshift(['chunk', 'closed', 'total', 'new', 'ideal'])
 
     const chartData = {
       x: 'chunk',
@@ -178,18 +177,18 @@ const BurnupShell = React.createClass({
       colors: {
         closed: '#ff0000',
         total: '#00ff00',
-        'new': '#0000ff',
-        ideal: '#999999'
+        new: '#0000ff',
+        ideal: '#999999',
       },
       types: {
         closed: 'area-spline',
         total: 'area-spline',
-        'new': 'bar'
+        new: 'bar',
       },
       // groups: [['opened', 'closed']]
-    };
+    }
     function formatChunkIndex(index) {
-      return formatChunk(rows[index+1][0]);// +1 because 1st row is the headers
+      return formatChunk(rows[index + 1][0]) // +1 because 1st row is the headers
     }
     const options = {
       axis: {
@@ -198,10 +197,10 @@ const BurnupShell = React.createClass({
           tick: {
             format: formatChunkIndex,
             culling: {
-              max: 20
-            }
-          }
-        }
+              max: 20,
+            },
+          },
+        },
       },
       // tooltip: { // Doesn't work with the far-right item yet
       //   position: function(dataToShow, tWidth, tHeight, element) {
@@ -216,25 +215,40 @@ const BurnupShell = React.createClass({
       //     return {top: 10, left: tooltipLeft};
       //   }
       // }
-    };
+    }
     return (
-      <Chart className='burnup-chart' data={chartData} options={options} element='burnup'/>
-    );
+      <Chart
+        className="burnup-chart"
+        data={chartData}
+        options={options}
+        element="burnup"
+      />
+    )
   },
   render() {
     return (
-      <div className='burnup'>
-        <h2><GraphIcon size='mega'/>  Burnup Chart</h2>
-        <p>Make sure you selected <strong>closed</strong> and <strong>Issues</strong> and optionally a Milestone from the filter dropdown at the top of this page</p>
-        <p>Also, this chart only fills the area when something changed (useful for weekends/open-source projects that frequently have periods of no change)</p>
+      <div className="burnup">
+        <h2>
+          <GraphIcon size="mega" /> Burnup Chart
+        </h2>
+        <p>
+          Make sure you selected <strong>closed</strong> and{' '}
+          <strong>Issues</strong> and optionally a Milestone from the filter
+          dropdown at the top of this page
+        </p>
+        <p>
+          Also, this chart only fills the area when something changed (useful
+          for weekends/open-source projects that frequently have periods of no
+          change)
+        </p>
         {this.renderLoaded(this.props.cards)}
       </div>
-    );
-  }
-});
+    )
+  },
+})
 
 export default connect(state => {
   return {
     cards: state.issues.cards,
-  };
-})(BurnupShell);
+  }
+})(BurnupShell)

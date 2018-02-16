@@ -1,7 +1,7 @@
-import Duck from 'reduck';
+import Duck from 'reduck'
 
-import BipartiteGraph from './utils/bipartite-graph';
-import {cardFactory, toIssueKey} from './utils/card';
+import BipartiteGraph from './utils/bipartite-graph'
+import { cardFactory, toIssueKey } from './utils/card'
 
 import {
   LOGOUT,
@@ -14,8 +14,8 @@ import {
   UPDATE_ISSUE,
   TRY_MOVE_ISSUE,
   MOVE_ISSUES,
-  CANCEL_MOVING_ISSUE
-} from '../actions';
+  CANCEL_MOVING_ISSUE,
+} from '../actions'
 
 const initialState = {
   GRAPH_CACHE: new BipartiteGraph(),
@@ -27,67 +27,67 @@ const initialState = {
   milestones: [],
   isPollingEnabled: false,
   movingIssue: null,
-};
+}
 
-const duck = new Duck('issues', initialState);
+const duck = new Duck('issues', initialState)
 
 duck.addReducerCase(LOGOUT, {
   reducer(state) {
     return {
       ...initialState,
-      isPollingEnabled: state.isPollingEnabled
-    };
+      isPollingEnabled: state.isPollingEnabled,
+    }
   },
-});
+})
 
 export const clearCache = duck.defineAction(CLEAR_CACHE, {
   creator() {
-    return {};
+    return {}
   },
   reducer(state) {
     return {
       ...initialState,
-      isPollingEnabled: state.isPollingEnabled
-    };
+      isPollingEnabled: state.isPollingEnabled,
+    }
   },
-});
+})
 
 export const fetchLabels = duck.defineAction(FETCH_LABELS, {
   creator(repoOwner, repoName) {
     return {
-      payload: {repoOwner, repoName},
+      payload: { repoOwner, repoName },
       meta: {
-        github: {action: 'fetchLabels'}
-      }
-    };
+        github: { action: 'fetchLabels' },
+      },
+    }
   },
-  resolve(state, {payload: labels}) {
+  resolve(state, { payload: labels }) {
     return {
       ...state,
       labels,
-    };
+    }
   },
   reject(state) {
     return {
       ...state,
       ready: true,
-    };
-  }
-});
+    }
+  },
+})
 
 export const updateLabel = duck.defineAction(UPDATE_LABEL, {
   creator(repoInfos, oldName, newName) {
     return {
-      payload: {repoInfos, oldName, newName},
+      payload: { repoInfos, oldName, newName },
       meta: {
-        github: {action: 'updateLabel'},
-        optimist: true
-      }
-    };
+        github: { action: 'updateLabel' },
+        optimist: true,
+      },
+    }
   },
-  resolve(state, {payload}) {
-    (state.LABEL_CACHE[payload.oldName] || {}).name = payload.newName;
-    state.LABEL_CACHE[payload.newName] = state.LABEL_CACHE[payload.oldName];
+  resolve(state, { payload }) {
+    ;(state.LABEL_CACHE[payload.oldName] || {}).name = payload.newName
+    state.LABEL_CACHE[payload.newName] = state.LABEL_CACHE[payload.oldName]
     return {
       ...state,
       labels: state.labels.map(l => {
@@ -95,200 +95,205 @@ export const updateLabel = duck.defineAction(UPDATE_LABEL, {
           return {
             ...l,
             name: payload.newName,
-          };
+          }
         }
-        return l;
+        return l
       }),
-    };
+    }
   },
-});
+})
 
 export const deleteLabel = duck.defineAction(DELETE_LABEL, {
   creator(repoInfos, name) {
     return {
-      payload: {repoInfos, name},
+      payload: { repoInfos, name },
       meta: {
-        github: {action: 'deleteLabel'},
-        optimist: true
-      }
-    };
+        github: { action: 'deleteLabel' },
+        optimist: true,
+      },
+    }
   },
-  resolve(state, {payload}) {
-    delete state.LABEL_CACHE[payload.name];
+  resolve(state, { payload }) {
+    delete state.LABEL_CACHE[payload.name]
     return {
       ...state,
       labels: state.labels.filter(l => l.name !== payload.name),
-    };
+    }
   },
-});
+})
 
 export const fetchMilestones = duck.defineAction(FETCH_MILESTONES, {
   creator(repoOwner, repoName) {
     return {
-      payload: {repoOwner, repoName},
+      payload: { repoOwner, repoName },
       meta: {
-        github: {action: 'fetchMilestones'}
-      }
-    };
+        github: { action: 'fetchMilestones' },
+      },
+    }
   },
-  resolve(state, {payload: milestones}) {
+  resolve(state, { payload: milestones }) {
     return {
       ...state,
       milestones,
-    };
+    }
   },
   reject(state) {
     return {
       ...state,
       ready: true,
-    };
-  }
-});
+    }
+  },
+})
 
 export const tryToMoveIssue = duck.defineAction(TRY_MOVE_ISSUE, {
-  creator({card, primaryRepoName, label, milestone}) {
+  creator({ card, primaryRepoName, label, milestone }) {
     return {
-      payload: {card, primaryRepoName, label, milestone},
-    };
+      payload: { card, primaryRepoName, label, milestone },
+    }
   },
-  reducer(state, {payload}) {
+  reducer(state, { payload }) {
     return {
       ...state,
       movingIssue: payload,
-    };
-  }
-});
+    }
+  },
+})
 
 export const cancelMovingIssue = duck.defineAction(CANCEL_MOVING_ISSUE, {
   creator() {
-    return {};
+    return {}
   },
   reducer(state) {
     return {
       ...state,
       movingIssue: null,
-    };
-  }
-});
+    }
+  },
+})
 
 function sortCards(cards) {
   return cards.sort((a, b) => {
     if (a.getDueAt() && b.getDueAt()) {
-      return a.getDueAt() - b.getDueAt();
+      return a.getDueAt() - b.getDueAt()
     } else if (a.getDueAt()) {
-      return -1;
+      return -1
     } else if (b.getDueAt()) {
-      return 1;
+      return 1
     } else {
       // newest on top
-      return Date.parse(b.getUpdatedAt()) - Date.parse(a.getUpdatedAt());
+      return Date.parse(b.getUpdatedAt()) - Date.parse(a.getUpdatedAt())
     }
-  });
+  })
 }
 
 export const fetchIssues = duck.defineAction(FETCH_ISSUES, {
   creator(repoInfos, forced) {
     return {
-      payload: {repoInfos, forced},
+      payload: { repoInfos, forced },
       meta: {
-        github: {action: 'fetchIssues'}
-      }
-    };
+        github: { action: 'fetchIssues' },
+      },
+    }
   },
-  reducer(state, {payload}) {
+  reducer(state, { payload }) {
     return {
       ...state,
-      cacheCardsRepoInfos: JSON.stringify((payload.repoInfos)),
-    };
+      cacheCardsRepoInfos: JSON.stringify(payload.repoInfos),
+    }
   },
-  resolve(state, {payload: cards}) {
-    const boundCards = cards.map(c => cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true));
-    state.GRAPH_CACHE.addCards(boundCards, cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)); // mutating the state, that's bad
-    boundCards.forEach(({issue}) => {
-      issue.labels.forEach((label) => {
-        state.LABEL_CACHE[label.name] = label; // mutating the state, that's bad
-      });
-    });
+  resolve(state, { payload: cards }) {
+    const boundCards = cards.map(c =>
+      cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true)
+    )
+    state.GRAPH_CACHE.addCards(
+      boundCards,
+      cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)
+    ) // mutating the state, that's bad
+    boundCards.forEach(({ issue }) => {
+      issue.labels.forEach(label => {
+        state.LABEL_CACHE[label.name] = label // mutating the state, that's bad
+      })
+    })
     return {
       ...state,
       cards: sortCards(boundCards),
-    };
+    }
   },
   reject(state) {
     return {
       ...state,
       ready: true,
-    };
-  }
-});
+    }
+  },
+})
 
 export const updateIssue = duck.defineAction(UPDATE_ISSUE, {
   creator(card, update) {
     return {
-      payload: {card, update},
+      payload: { card, update },
       meta: {
-        github: {action: 'updateIssue'},
-        optimist: true
-      }
-    };
+        github: { action: 'updateIssue' },
+        optimist: true,
+      },
+    }
   },
-  reducer(state, {payload}) {
-    const key = toIssueKey(payload.card);
+  reducer(state, { payload }) {
+    const key = toIssueKey(payload.card)
     state.CARD_CACHE[key] = {
       ...state.CARD_CACHE[key],
       ...payload.update,
-    };
+    }
     return {
       ...state,
       cards: state.cards.map(c => {
         if (toIssueKey(c) === toIssueKey(payload.card)) {
           return {
             ...c,
-            ...payload.update
-          };
+            ...payload.update,
+          }
         }
-        return c;
+        return c
       }),
-    };
+    }
   },
-});
+})
 
 export const moveIssues = duck.defineAction(MOVE_ISSUES, {
-  creator(cards, {label, milestone}) {
+  creator(cards, { label, milestone }) {
     return {
-      payload: {cards, update: {label, milestone}},
+      payload: { cards, update: { label, milestone } },
       meta: {
-        github: {action: 'moveIssue'},
-        optimist: true
-      }
-    };
+        github: { action: 'moveIssue' },
+        optimist: true,
+      },
+    }
   },
-  reducer(state, {payload}) {
+  reducer(state, { payload }) {
     // TODO optimist update
-    const key = toIssueKey(payload.card);
+    const key = toIssueKey(payload.card)
     state.CARD_CACHE[key] = {
       ...state.CARD_CACHE[key],
       ...payload.update,
-    };
+    }
     return {
       ...state,
       cards: state.cards.map(c => {
         if (toIssueKey(c) === toIssueKey(payload.card)) {
           return {
             ...c,
-            ...payload.update
-          };
+            ...payload.update,
+          }
         }
-        return c;
+        return c
       }),
-    };
+    }
   },
-});
+})
 
 export const selectors = {
   getCard(state, c) {
-    return cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true);
-  }
-};
+    return cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true)
+  },
+}
 
-export default duck.reducer;
+export default duck.reducer

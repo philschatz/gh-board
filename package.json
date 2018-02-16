@@ -12,7 +12,9 @@
     "test:only": "ava --verbose --serial",
     "pretest": "npm run lint",
     "test": "./script/run-test.sh",
-    "deploy": "./script/deploy.sh"
+    "deploy": "./script/deploy.sh",
+    "prettier:base": "prettier --write",
+    "prettify": "find . -name \"*.jsx\" -o -name \"*.js\" | grep -v -f .gitignore | xargs npm run prettier:base"
   },
   "author": "Philip Schatz",
   "license": "AGPL3.0",
@@ -26,8 +28,10 @@
     "babel-preset-react": "^6.3.13",
     "css-loader": "^0.27.0",
     "eslint": "^4.1.1",
+    "eslint-config-prettier": "^2.9.0",
     "eslint-import-resolver-webpack": "^0.8.3",
     "eslint-plugin-import": "^2.6.0",
+    "eslint-plugin-prettier": "^2.6.0",
     "eslint-plugin-react": "^7.1.0",
     "extract-text-webpack-plugin": "^2.1.2",
     "http-server": "^0.10.0",
@@ -35,6 +39,7 @@
     "less-loader": "^3.0.0",
     "node-libs-browser": "^2.0.0",
     "parallelshell": "^3.0.1",
+    "prettier": "^1.10.2",
     "webdriver-manager": "^12.0.6",
     "webdriverio": "^4.5.2",
     "webpack": "^3.0.0",
@@ -73,5 +78,11 @@
     "redux-toast-feedback": "^0.1.0",
     "ultramarked": "^1.7.0",
     "underscore": "^1.8.3"
+  },
+  "prettier": {
+    "proseWrap": "never",
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "semi": false
   }
 }

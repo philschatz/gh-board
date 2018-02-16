@@ -1,27 +1,24 @@
-const path = require('path');
-const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const path = require('path')
+const webpack = require('webpack')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
-const isBuild = process.env['NODE_ENV'] === 'production';
+const isBuild = process.env['NODE_ENV'] === 'production'
 
 const config = {
   devtool: isBuild ? 'source-map' : 'eval-source-map',
   context: path.resolve(__dirname),
-  entry: [
-    './style/index.js',
-    './src/index.js'
-  ],
+  entry: ['./style/index.js', './src/index.js'],
   output: {
     path: __dirname + '/dist',
     publicPath: isBuild ? './dist/' : '/dist/', // gh-pages needs this to have a '.' for bundles
-    filename: 'bundle.js'
+    filename: 'bundle.js',
   },
   plugins: [
     new ExtractTextPlugin('app.css'),
-    new webpack.DefinePlugin({ 'process.env': { NODE_ENV: process.env['NODE_ENV'] } })
-  ].concat(isBuild ? [
-    new webpack.NoErrorsPlugin(),
-  ] : []),
+    new webpack.DefinePlugin({
+      'process.env': { NODE_ENV: process.env['NODE_ENV'] },
+    }),
+  ].concat(isBuild ? [new webpack.NoErrorsPlugin()] : []),
   module: {
     loaders: [
       {
@@ -30,15 +27,18 @@ const config = {
         exclude: [/node_modules/],
         query: {
           presets: ['react', 'es2015'],
-          plugins: ['transform-object-rest-spread']
-        }
+          plugins: ['transform-object-rest-spread'],
+        },
       },
-      { test: /\.less$/,  loader: ExtractTextPlugin.extract('css-loader!less-loader') }
-    ]
+      {
+        test: /\.less$/,
+        loader: ExtractTextPlugin.extract('css-loader!less-loader'),
+      },
+    ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.json']
-  }
-};
+    extensions: ['.js', '.jsx', '.json'],
+  },
+}
 
-module.exports = config;
+module.exports = config

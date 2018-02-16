@@ -3,25 +3,25 @@ const webdriverio = require('webdriverio') // Does not support ES6 imports yet
 
 const browser = webdriverio.remote({
   // use the default driver (Travis-CI has Firefox)
-  desiredCapabilities: {browserName: process.env['CI'] ? 'firefox' : 'chrome'}
+  desiredCapabilities: {
+    browserName: process.env['CI'] ? 'firefox' : 'chrome',
+  },
 })
 
 const waitUntilDoneLoading = async () => {
-  await browser.waitUntil(async ()=> {
+  await browser.waitUntil(async () => {
     const isLoading = await browser.isExisting('.is-loading')
     return !isLoading
   }, 60 * 1000) // May take a long time to fetch the issues
 }
 
-
 const GITHUB_TOKEN = process.env['GH_TOKEN']
 
 test.before(async t => {
-  await browser.init()
-    .url('http://localhost:8080')
+  await browser.init().url('http://localhost:8080')
 
   // Set a GitHub token if one is defined
-  if(GITHUB_TOKEN) {
+  if (GITHUB_TOKEN) {
     await browser.execute(function(token) {
       window.localStorage['gh-token'] = token
     }, GITHUB_TOKEN)
@@ -35,12 +35,10 @@ test.after.always(async t => {
   await browser.end()
 })
 
-
 test.beforeEach(async t => {
   await browser.url('http://localhost:8080')
   await browser.refresh()
 })
-
 
 test('shows a repo', async t => {
   await browser.click('.list-group > .repo-item > a')
@@ -64,7 +62,6 @@ test('checks that the games load up', async t => {
   await browser.click('.nav-secret-game')
   await browser.waitForExist('.secret-game-is-playing', 30 * 1000) // It may take some time to fetch the game from the Gist
 })
-
 
 // test('shows the label-editing screen', async t => {
 //   await browser.click('.list-group > .repo-item > a')

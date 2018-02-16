@@ -1,7 +1,7 @@
 {
   "parser": "babel-eslint",
-  "plugins": [ "react", "duck", "import" ],
-  "extends": [ "eslint:recommended", "plugin:duck/recommended", "plugin:import/recommended" ],
+  "plugins": [ "react", "duck", "import", "prettier" ],
+  "extends": [ "eslint:recommended", "plugin:duck/recommended", "plugin:import/recommended", "prettier" ],
   "env": {
     "es6": true,
     "browser": true,
@@ -12,14 +12,11 @@
   },
   "rules": {
     "no-alert": 1,
-    "no-unused-vars": 1,
+    "no-unused-vars": 2,
     "react/jsx-uses-vars": 1,
     "no-var": 2,
     "new-cap": 0,
-    "quotes": [1, "single", "avoid-escape"],
     "no-console": 1,
-    "semi": 1,
-    "indent": [2, 2],
     "duck/meta-validation": [2, ["optimist", "promise", "feedbackOnError", "feedbackOnSuccess", "feedbackDirectly", "updateSettingStorage", "updateUserStorage", "github", "updateEmojisStorage"]]
   }
 }

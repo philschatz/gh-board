@@ -1,113 +1,138 @@
-import React from 'react';
-import { DropTarget } from 'react-dnd';
-import {connect} from 'react-redux';
-import * as BS from 'react-bootstrap';
-import {DesktopDownloadIcon, PlusIcon} from 'react-octicons';
+import React from 'react'
+import { DropTarget } from 'react-dnd'
+import { connect } from 'react-redux'
+import * as BS from 'react-bootstrap'
+import { DesktopDownloadIcon, PlusIcon } from 'react-octicons'
 
-import {
-  selectors
-} from '../redux/ducks/issue';
-import {UNCATEGORIZED_NAME} from '../helpers';
+import { selectors } from '../redux/ducks/issue'
+import { UNCATEGORIZED_NAME } from '../helpers'
 
-import ColoredIcon from './colored-icon';
+import ColoredIcon from './colored-icon'
 
-const MIN_CHILDREN_TO_SHOW = 10;
+const MIN_CHILDREN_TO_SHOW = 10
 
 const ItemTypes = {
-  CARD: 'card'
-};
+  CARD: 'card',
+}
 
 function generateCSV(state, cards) {
   // merged-since does not have the actual card object yet, so we look it up
-  const data = cards.map(({repoOwner, repoName, number}) => {
-    const card = selectors.getCard(state, {repoOwner, repoName, number});
+  const data = cards.map(({ repoOwner, repoName, number }) => {
+    const card = selectors.getCard(state, { repoOwner, repoName, number })
     if (card.issue) {
-      const ret = [repoOwner, repoName, number, card.issue.updatedAt, card.issue.user.login, card.issue.title];
+      const ret = [
+        repoOwner,
+        repoName,
+        number,
+        card.issue.updatedAt,
+        card.issue.user.login,
+        card.issue.title,
+      ]
       // Some PR's have an image; if so, include it in the CSV
       if (card.getFeaturedImageSrc()) {
-        ret.push(card.getFeaturedImageSrc());
+        ret.push(card.getFeaturedImageSrc())
       }
-      return ret;
+      return ret
     } else {
-      return [repoOwner, repoName, number];
+      return [repoOwner, repoName, number]
     }
-
-  });
+  })
   // Add the CSV column headers
-  data.unshift(['repoOwner', 'repoName', 'number', 'updatedAt', 'createdBy', 'title', 'imageHref']);
-  return toCSVString(data);
+  data.unshift([
+    'repoOwner',
+    'repoName',
+    'number',
+    'updatedAt',
+    'createdBy',
+    'title',
+    'imageHref',
+  ])
+  return toCSVString(data)
 }
 
 const cardListTarget = {
-  drop: function (props) {
+  drop: function(props) {
     // TODO: Do something simpler than just props
-    return props;
-  }
-};
+    return props
+  },
+}
 
 function collect(connect, monitor) {
   return {
     connectDropTarget: connect.dropTarget(),
-    isOver: monitor.isOver()
-  };
+    isOver: monitor.isOver(),
+  }
 }
-
 
 // Converts a table to a CSV string for downloading
 function toCSVString(table) {
-  return table.map((row) => {
-    return row.map((column) => {
-      if (typeof column === 'number') {
-        return column;
-      } else {
-        return '"' + column + '"';
-      }
-    }).join(', ');
-  }).join('\n');
+  return table
+    .map(row => {
+      return row
+        .map(column => {
+          if (typeof column === 'number') {
+            return column
+          } else {
+            return '"' + column + '"'
+          }
+        })
+        .join(', ')
+    })
+    .join('\n')
 }
-
 
 const IssueList = React.createClass({
   getInitialState() {
-    return {morePressedCount: 0, showCSVModal: false};
+    return { morePressedCount: 0, showCSVModal: false }
   },
   showAllIssues() {
-    this.setState({showAllIssues: true});
+    this.setState({ showAllIssues: true })
   },
   onClickMore() {
-    this.setState({morePressedCount: this.state.morePressedCount + 1});
+    this.setState({ morePressedCount: this.state.morePressedCount + 1 })
   },
   toggleCSVModal() {
-    const {showCSVModal} = this.state;
-    this.setState({showCSVModal: !showCSVModal});
+    const { showCSVModal } = this.state
+    this.setState({ showCSVModal: !showCSVModal })
   },
   render() {
-    const {icon, title, backgroundColor, children, cards, primaryRepo, label} = this.props;
-    const {connectDropTarget} = this.props;
-    const {isOver} = this.props; // from the collector
-    const {showAllIssues, morePressedCount, showCSVModal} = this.state;
-    const multiple = 25; // Add 25 results at a time
+    const {
+      icon,
+      title,
+      backgroundColor,
+      children,
+      cards,
+      primaryRepo,
+      label,
+    } = this.props
+    const { connectDropTarget } = this.props
+    const { isOver } = this.props // from the collector
+    const { showAllIssues, morePressedCount, showCSVModal } = this.state
+    const multiple = 25 // Add 25 results at a time
 
-    let className = 'column-title';
+    let className = 'column-title'
     if (icon) {
-      className += ' has-icon';
+      className += ' has-icon'
     }
 
-    let iconEl;
+    let iconEl
     if (icon) {
       iconEl = (
-        <ColoredIcon className='column-icon' color={backgroundColor}>{icon}</ColoredIcon>
-      );
+        <ColoredIcon className="column-icon" color={backgroundColor}>
+          {icon}
+        </ColoredIcon>
+      )
     }
 
-    let countOrDownloadLink;
+    let countOrDownloadLink
     if (cards) {
       countOrDownloadLink = (
-        <BS.Button bsStyle='link' onClick={this.toggleCSVModal} title='Generate CSV'
+        <BS.Button
+          bsStyle="link"
+          onClick={this.toggleCSVModal}
+          title="Generate CSV"
         >
-          {children.length}
-          {' '}
-          <DesktopDownloadIcon/>
+          {children.length} <DesktopDownloadIcon />
           <BS.Modal show={showCSVModal} onHide={this.toggleCSVModal}>
             <BS.Modal.Header closeButton>
               <BS.Modal.Title>CSV Data</BS.Modal.Title>
@@ -117,70 +142,86 @@ const IssueList = React.createClass({
             </BS.Modal.Body>
           </BS.Modal>
         </BS.Button>
-      );
+      )
     } else {
-      countOrDownloadLink = children.length;
+      countOrDownloadLink = children.length
     }
 
-    let {rootURL} = this.props;
-    rootURL = rootURL || 'https://github.com/';
-    rootURL = rootURL.replace('api/v3', '');
+    let { rootURL } = this.props
+    rootURL = rootURL || 'https://github.com/'
+    rootURL = rootURL.replace('api/v3', '')
 
-    let newIssueURL = primaryRepo &&
-      `${rootURL}${primaryRepo.repoOwner}/${primaryRepo.repoName}/issues/new`;
+    let newIssueURL =
+      primaryRepo &&
+      `${rootURL}${primaryRepo.repoOwner}/${primaryRepo.repoName}/issues/new`
     if (primaryRepo && label && label.name !== UNCATEGORIZED_NAME) {
-      newIssueURL = `${newIssueURL}?labels=${encodeURIComponent(label.name)}`;
+      newIssueURL = `${newIssueURL}?labels=${encodeURIComponent(label.name)}`
     }
 
     const header = (
       <h2 className={className}>
-        {iconEl}{title} ({countOrDownloadLink})
-        {primaryRepo && <a className="add-issue"
-          href={newIssueURL}
-          title="Create an issue"
-          target="_blank">
-          <PlusIcon />
-        </a>}
+        {iconEl}
+        {title} ({countOrDownloadLink})
+        {primaryRepo && (
+          <a
+            className="add-issue"
+            href={newIssueURL}
+            title="Create an issue"
+            target="_blank"
+          >
+            <PlusIcon />
+          </a>
+        )}
       </h2>
-    );
+    )
 
     const classes = {
       'issue-list': true,
-      'is-over': isOver
-    };
+      'is-over': isOver,
+    }
 
-    let partialChildren;
-    let moreButton;
-    if (!showAllIssues && MIN_CHILDREN_TO_SHOW + (1 + morePressedCount) * multiple < children.length) {
-      partialChildren = children.slice(0, MIN_CHILDREN_TO_SHOW + morePressedCount * multiple);
+    let partialChildren
+    let moreButton
+    if (
+      !showAllIssues &&
+      MIN_CHILDREN_TO_SHOW + (1 + morePressedCount) * multiple < children.length
+    ) {
+      partialChildren = children.slice(
+        0,
+        MIN_CHILDREN_TO_SHOW + morePressedCount * multiple
+      )
       moreButton = (
-        <BS.Button onClick={this.onClickMore} className='list-group-item'>
+        <BS.Button onClick={this.onClickMore} className="list-group-item">
           {children.length - (morePressedCount + 1) * multiple} more...
         </BS.Button>
-      );
+      )
     } else {
-      partialChildren = children;
+      partialChildren = children
     }
 
     return connectDropTarget(
-      <div className='-drop-target'>
+      <div className="-drop-target">
         <BS.Panel className={classes} header={header}>
           <BS.ListGroup fill>
-            <BS.ListGroupItem key='dnd-placeholder' className='dnd-placeholder'/>
+            <BS.ListGroupItem
+              key="dnd-placeholder"
+              className="dnd-placeholder"
+            />
             {partialChildren}
             {moreButton}
           </BS.ListGroup>
         </BS.Panel>
       </div>
-    );
-
-  }
-});
+    )
+  },
+})
 
 // Export the wrapped version
-export default DropTarget(ItemTypes.CARD, cardListTarget, collect)(connect(state => {
-  return {
-    rootURL: state.user.rootURL,
-    issues: state.issues,
-  };
-})(IssueList));
+export default DropTarget(ItemTypes.CARD, cardListTarget, collect)(
+  connect(state => {
+    return {
+      rootURL: state.user.rootURL,
+      issues: state.issues,
+    }
+  })(IssueList)
+)

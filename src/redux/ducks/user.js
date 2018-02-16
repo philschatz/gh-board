@@ -1,4 +1,4 @@
-import Duck from 'reduck';
+import Duck from 'reduck'
 
 import {
   LOGOUT,
@@ -6,15 +6,14 @@ import {
   FETCH_USER,
   FETCH_REPOS,
   FETCH_REPO,
-  STAR_REPO,
-  RESET_DATABASES
-} from '../actions';
+  RESET_DATABASES,
+} from '../actions'
 
-let storedSettings;
+let storedSettings
 try {
-  storedSettings = JSON.parse(window.localStorage.getItem('gh-board-user'));
+  storedSettings = JSON.parse(window.localStorage.getItem('gh-board-user'))
 } catch (err) {
-  storedSettings = undefined;
+  storedSettings = undefined
 }
 
 const DEFAULT_STATE = {
@@ -22,23 +21,25 @@ const DEFAULT_STATE = {
   rootURL: undefined,
   info: undefined,
   token: undefined,
-};
+}
 
-const initialState = storedSettings || DEFAULT_STATE;
+const initialState = storedSettings || DEFAULT_STATE
 
-const duck = new Duck('user', initialState);
+const duck = new Duck('user', initialState)
 
 export const logout = duck.defineAction(LOGOUT, {
   creator() {
-    return {meta: {
-      updateUserStorage: true,
-      github: {action: 'logout'}
-    }};
+    return {
+      meta: {
+        updateUserStorage: true,
+        github: { action: 'logout' },
+      },
+    }
   },
   reducer() {
-    return DEFAULT_STATE;
+    return DEFAULT_STATE
   },
-});
+})
 
 export const login = duck.defineAction(LOGIN, {
   creator(token, rootURL) {
@@ -49,84 +50,88 @@ export const login = duck.defineAction(LOGIN, {
       },
       meta: {
         updateUserStorage: true,
-        github: {action: 'login'}
-      }
-    };
+        github: { action: 'login' },
+      },
+    }
   },
-  reducer(state, {payload}) {
+  reducer(state, { payload }) {
     return {
       ...state,
       token: payload.token,
       rootURL: payload.rootURL,
-      ready: false
-    };
+      ready: false,
+    }
   },
-  resolve(state, {payload}) {
+  resolve(state, { payload }) {
     return {
       ...state,
       ready: true,
-      info: payload
-    };
+      info: payload,
+    }
   },
   reject(state) {
     return {
       ...state,
       ready: true,
-    };
-  }
-});
+    }
+  },
+})
 
 export const fetchUser = duck.defineAction(FETCH_USER, {
   creator() {
-    return {meta: {
-      updateUserStorage: true,
-      github: {action: 'fetchUser'}
-    }};
+    return {
+      meta: {
+        updateUserStorage: true,
+        github: { action: 'fetchUser' },
+      },
+    }
   },
   reducer(state) {
     return {
       ...state,
-      ready: false
-    };
+      ready: false,
+    }
   },
-  resolve(state, {payload}) {
+  resolve(state, { payload }) {
     if (state.info && state.info.repositories) {
-      payload.repositories = state.info.repositories; // don't overwrite repos if already fetched
+      payload.repositories = state.info.repositories // don't overwrite repos if already fetched
     }
     return {
       ...state,
       ready: true,
-      info: payload
-    };
+      info: payload,
+    }
   },
   reject(state) {
     // TODO handle 403 and clear info and user
     return {
       ...state,
       ready: true,
-    };
-  }
-});
+    }
+  },
+})
 
 export const fetchRepositories = duck.defineAction(FETCH_REPOS, {
   creator() {
-    return {meta: {
-      github: {action: 'fetchRepos'}
-    }};
+    return {
+      meta: {
+        github: { action: 'fetchRepos' },
+      },
+    }
   },
   reducer(state) {
     return {
       ...state,
-      ready: false
-    };
+      ready: false,
+    }
   },
-  resolve(state, {payload}) {
+  resolve(state, { payload }) {
     return {
       ...state,
       ready: true,
       info: {
         ...(state.info || {}),
-        repositories: payload.map((r) => ({
+        repositories: payload.map(r => ({
           createdAt: r.createdAt,
           defaultBranch: r.defaultBranch,
           description: r.description,
@@ -142,26 +147,28 @@ export const fetchRepositories = duck.defineAction(FETCH_REPOS, {
           private: r.private,
           stargazersCount: r.stargazersCount,
           updatedAt: r.updatedAt,
-          hasIssues: r.hasIssues
-        }))
-      }
-    };
+          hasIssues: r.hasIssues,
+        })),
+      },
+    }
   },
   reject(state) {
     return {
       ...state,
       ready: true,
-    };
-  }
-});
+    }
+  },
+})
 
 export const resetDatabases = duck.defineAction(RESET_DATABASES, {
   creator() {
-    return {meta: {
-      github: {action: 'reset'}
-    }};
+    return {
+      meta: {
+        github: { action: 'reset' },
+      },
+    }
   },
-});
+})
 
 export const fetchRepo = duck.defineAction(FETCH_REPO, {
   creator(repoFullName) {
@@ -170,10 +177,10 @@ export const fetchRepo = duck.defineAction(FETCH_REPO, {
         repoFullName,
       },
       meta: {
-        github: {action: 'fetchRepo'}
-      }
-    };
+        github: { action: 'fetchRepo' },
+      },
+    }
   },
-});
+})
 
-export default duck.reducer;
+export default duck.reducer

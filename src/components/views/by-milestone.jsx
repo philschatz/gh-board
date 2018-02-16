@@ -1,24 +1,26 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import _ from 'underscore';
-import {Link} from 'react-router';
-import {MilestoneIcon} from 'react-octicons';
+import React from 'react'
+import { connect } from 'react-redux'
+import _ from 'underscore'
+import { Link } from 'react-router'
+import { MilestoneIcon } from 'react-octicons'
 
-import {selectors} from '../../redux/ducks/filter';
-import {
-  fetchMilestones,
-  fetchIssues
-} from '../../redux/ducks/issue';
-import IssueList from '../issue-list';
-import Issue from '../issue';
-import GithubFlavoredMarkdown from '../gfm';
-
+import { selectors } from '../../redux/ducks/filter'
+import { fetchMilestones, fetchIssues } from '../../redux/ducks/issue'
+import IssueList from '../issue-list'
+import Issue from '../issue'
+import GithubFlavoredMarkdown from '../gfm'
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, primaryRepoName, columnRegExp, filters} = this.props;
+    const {
+      milestone,
+      cards,
+      primaryRepoName,
+      columnRegExp,
+      filters,
+    } = this.props
 
-    const issueComponents = _.map(cards, (card) => {
+    const issueComponents = _.map(cards, card => {
       return (
         <Issue
           key={card.key()}
@@ -27,55 +29,62 @@ const KanbanColumn = React.createClass({
           card={card}
           columnRegExp={columnRegExp}
         />
-      );
-    });
+      )
+    })
 
-    let heading;
+    let heading
     if (milestone) {
       heading = (
-        <Link className='milestone-title' to={this.props.filters.toggleMilestoneTitle(milestone.title).url()}>
-          <MilestoneIcon/>
+        <Link
+          className="milestone-title"
+          to={this.props.filters.toggleMilestoneTitle(milestone.title).url()}
+        >
+          <MilestoneIcon />
           <GithubFlavoredMarkdown
             inline
             disableLinks={true}
-            text={milestone.title}/>
+            text={milestone.title}
+          />
         </Link>
-      );
+      )
     } else {
-      heading = 'No Milestone';
+      heading = 'No Milestone'
     }
 
     return (
-      <div className='kanban-board-column'>
-        <IssueList
-          title={heading}
-          milestone={milestone}
-        >
+      <div className="kanban-board-column">
+        <IssueList title={heading} milestone={milestone}>
           {issueComponents}
         </IssueList>
       </div>
-    );
-  }
-});
-
+    )
+  },
+})
 
 const ByMilestoneView = React.createClass({
   componentWillMount() {
-    const {repoInfos, dispatch} = this.props;
+    const { repoInfos, dispatch } = this.props
     // pull out the primaryRepoName
-    const [{repoOwner, repoName}] = repoInfos;
-    dispatch(fetchIssues(repoInfos));
-    dispatch(fetchMilestones(repoOwner, repoName));
+    const [{ repoOwner, repoName }] = repoInfos
+    dispatch(fetchIssues(repoInfos))
+    dispatch(fetchMilestones(repoOwner, repoName))
   },
   render() {
-    const {milestones, cards, repoInfos, columnRegExp, settings, filters} = this.props;
+    const {
+      milestones,
+      cards,
+      repoInfos,
+      columnRegExp,
+      settings,
+      filters,
+    } = this.props
 
     // Get the primary repo
-    const [primaryRepo] = repoInfos;
+    const [primaryRepo] = repoInfos
 
-    const uncategorizedCards = _.filter(cards, (card) => {
-      return !card.issue.milestone;
-    });
+    const uncategorizedCards = _.filter(cards, card => {
+      return !card.issue.milestone
+    })
 
     const uncategorizedColumn = (
       <KanbanColumn
@@ -85,18 +94,23 @@ const ByMilestoneView = React.createClass({
         primaryRepoName={primaryRepo.repoName}
         columnRegExp={columnRegExp}
       />
-    );
+    )
 
     const kanbanColumns = milestones.reduce((prev, milestone) => {
-      if (filters.state.milestoneTitles.length && filters.state.milestoneTitles.indexOf(milestone.title) === -1) {
-        return prev;
+      if (
+        filters.state.milestoneTitles.length &&
+        filters.state.milestoneTitles.indexOf(milestone.title) === -1
+      ) {
+        return prev
       }
 
       // If we are filtering by a kanban column then only show that column
       // Otherwise show all columns
-      const columnCards = _.filter(cards, (card) => {
-        return card.issue.milestone && card.issue.milestone.title === milestone.title;
-      });
+      const columnCards = _.filter(cards, card => {
+        return (
+          card.issue.milestone && card.issue.milestone.title === milestone.title
+        )
+      })
 
       /*HACK: Column should handle milestones */
       prev.push(
@@ -109,21 +123,21 @@ const ByMilestoneView = React.createClass({
           primaryRepoName={primaryRepo.repoName}
           columnRegExp={columnRegExp}
         />
-      );
-      return prev;
-    }, []);
+      )
+      return prev
+    }, [])
 
     return (
-      <div className='kanban-board'>
+      <div className="kanban-board">
         {!settings.isHideUncategorized && uncategorizedColumn}
         {kanbanColumns}
       </div>
-    );
-  }
-});
+    )
+  },
+})
 
 export default connect((state, ownProps) => {
-  const repoInfos = selectors.getReposFromParams(ownProps.params);
+  const repoInfos = selectors.getReposFromParams(ownProps.params)
   return {
     repoInfos,
     filters: new selectors.FilterBuilder(state.filter, repoInfos),
@@ -131,8 +145,8 @@ export default connect((state, ownProps) => {
     cards: state.issues.cards,
     columnRegExp: state.filter.columnRegExp,
     milestones: state.issues.milestones,
-  };
-})(ByMilestoneView);
+  }
+})(ByMilestoneView)
 
 //
 // const RepoKanbanShell = React.createClass({
