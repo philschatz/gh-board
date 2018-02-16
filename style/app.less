@@ -38,9 +38,8 @@ body { background-color: #ddd; }
 .app {
   height: 100vh;
 
-  /* Allow enough space on top/bottom of screen for fixed header/footer */
+  /* Allow enough space on top of screen for fixed header */
   padding-top: 5rem;
-  padding-bottom: 4rem;
 
   // Styles for the whole app (no matter where they occur)
   // TODO: Mixin?
@@ -321,37 +320,6 @@ i.icon-spin {
 }
 
 .navbar-brand { height: 20px; }
-
-.etherpad-wrapper {
-  // display: table;
-  // width: 100%;
-  // .etherpad-inner {
-    // display: table-row;
-    // .etherpad-edit {
-    //   // display: table-cell;
-    //   // vertical-align: top;
-    //   iframe {
-    //     min-width: 600px;
-    //     height: 600px;
-    //   }
-    // }
-    iframe { height: 600px; }
-    .etherpad-preview {
-      // display: table-cell;
-      // vertical-align: top;
-      .markdown-body {
-        height: 600px;
-        overflow-y: auto;
-
-        background-color: #fff;
-        padding: 1em;
-      }
-    }
-  // }
-  // display: flex;
-  // flex-direction: row;
-}
-
 
 .filter-menu {
   > .dropdown-menu {

@@ -4,21 +4,21 @@ import {connect} from 'react-redux';
 import {Link} from 'react-router';
 import {ListUnorderedIcon} from 'react-octicons';
 
-import {getFilters} from '../route-utils';
-import {contains, KANBAN_LABEL, getReposFromStr, UNCATEGORIZED_NAME} from '../helpers';
+import { selectors } from '../../redux/ducks/filter';
+import {KANBAN_LABEL, UNCATEGORIZED_NAME} from '../../helpers';
 import {
   fetchLabels,
   fetchIssues
-} from '../redux/ducks/issue';
-import IssueList from './issue-list';
-import Issue from './issue';
-import AnonymousModal from './anonymous-modal';
+} from '../../redux/ducks/issue';
+import IssueList from '../issue-list';
+import Issue from '../issue';
+import AnonymousModal from '../anonymous-modal';
 
 function filterCards(cards, labels) {
   let filtered = cards;
   // Curry the fn so it is not declared inside a loop
   const filterFn = (label) => (card) => {
-    const containsLabel = contains(card.issue.labels, (cardLabel) => {
+    const containsLabel = card.issue.labels.some((cardLabel) => {
       return cardLabel.name === label.name;
     });
     if (containsLabel) {
@@ -61,12 +61,13 @@ const filterKanbanLabels = (labels, columnRegExp) => {
 
 const KanbanColumn = React.createClass({
   render() {
-    const {label, cards, primaryRepo, settings, columnRegExp} = this.props;
+    const {label, cards, primaryRepo, settings, columnRegExp, filters} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.issue.id}
+          filters={filters}
           primaryRepoName={primaryRepo.repoName}
           card={card}
           columnRegExp={columnRegExp}
@@ -84,7 +85,7 @@ const KanbanColumn = React.createClass({
       name = label.name;
     }
     const title = (
-      <Link className='label-title' to={getFilters().toggleColumnLabel(label.name).url()}>
+      <Link className='label-title' to={filters.toggleColumnLabel(label.name).url()}>
         {name}
       </Link>
     );
@@ -118,7 +119,7 @@ const KanbanRepo = React.createClass({
     dispatch(fetchIssues(repoInfos));
   },
   render() {
-    const {labels, cards, repoInfos, settings, columnRegExp} = this.props;
+    const {labels, cards, repoInfos, settings, columnRegExp, filters} = this.props;
 
     // Get the primary repo
     const [primaryRepo] = repoInfos;
@@ -149,6 +150,7 @@ const KanbanRepo = React.createClass({
         return (
           <KanbanColumn
             columnRegExp={columnRegExp}
+            filters={filters}
             settings={settings}
             key={label.name}
             label={label}
@@ -172,11 +174,13 @@ const KanbanRepo = React.createClass({
 });
 
 
-let showedWarning = false;
+// let showedWarning = false;
 
 export default connect((state, ownProps) => {
+  const repoInfos = selectors.getReposFromParams(ownProps.params);
   return {
-    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+    repoInfos,
+    filters: new selectors.FilterBuilder(state.filter, repoInfos),
     settings: state.settings,
     columnRegExp: state.filter.columnRegExp,
     cards: state.issues.cards,

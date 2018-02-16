@@ -2,9 +2,7 @@ import * as BS from 'react-bootstrap';
 import React from 'react';
 
 import {Link} from 'react-router';
-import {ListUnorderedIcon, TagIcon} from 'react-octicons';
 
-import {getFilters} from '../route-utils';
 import {KANBAN_LABEL, isLight} from '../helpers';
 
 const LabelBadge = React.createClass({
@@ -14,20 +12,17 @@ const LabelBadge = React.createClass({
     extra: React.PropTypes.string
   },
   render() {
-    const {label, isFilterLink, onClick} = this.props;
+    const {label, isFilterLink, onClick, filters} = this.props;
     let {className, extra} = this.props;
 
     let name;
-    let icon;
 
     className = className || '';
     className += ' badge';
 
     if (KANBAN_LABEL.test(label.name)) {
-      icon = (<ListUnorderedIcon/>);
       name = label.name.replace(/^\d+ - /, ' ');
     } else {
-      icon = (<TagIcon/>);
       name = label.name;
     }
     if (label.color && isLight(label.color)) {
@@ -39,12 +34,11 @@ const LabelBadge = React.createClass({
 
     if (isFilterLink) {
       return (
-        <Link to={getFilters().toggleTagName(label.name).url()}
+        <Link to={filters.toggleTagName(label.name).url()}
           key={name}
           onClick={onClick}
           className={className}
           style={{backgroundColor: '#' + label.color}}>
-          {icon}
           {name}
           {extra}
         </Link>
@@ -57,7 +51,6 @@ const LabelBadge = React.createClass({
           className={className}
           onClick={onClick}
           style={{backgroundColor: '#' + label.color}}>
-          {icon}
           {name}
           {extra}
         </BS.Badge>

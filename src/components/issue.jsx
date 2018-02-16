@@ -6,10 +6,9 @@ import {connect} from 'react-redux';
 import { DragSource } from 'react-dnd';
 import classnames from 'classnames';
 import {Link} from 'react-router';
-import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, PencilIcon, CheckIcon, PrimitiveDotIcon, XIcon} from 'react-octicons';
+import {CalendarIcon, ChecklistIcon, MilestoneIcon, CommentIcon, AlertIcon, CheckIcon, PrimitiveDotIcon, XIcon} from 'react-octicons';
 
 import {tryToMoveIssue} from '../redux/ducks/issue';
-import {getFilters} from '../route-utils';
 import {PULL_REQUEST_ISSUE_RELATION} from '../gfm-dom';
 
 import Loadable from './loadable';
@@ -65,7 +64,7 @@ function collect(connect, monitor) {
 
 let IssueSimple = React.createClass({
   render() {
-    const {card} = this.props;
+    const {card, filters} = this.props;
     const {issue, repoOwner, repoName} = card;
 
     const issueDueAt = card.getDueAt();
@@ -80,7 +79,7 @@ let IssueSimple = React.createClass({
     let assignedAvatar;
     if (user) {
       assignedAvatar = (
-        <Link to={getFilters().toggleUserName(user.login).url()} className='avatar-filter'>
+        <Link to={filters.toggleUserName(user.login).url()} className='avatar-filter'>
           <img
             key='avatar'
             className='avatar-image'
@@ -155,7 +154,7 @@ let IssueSimple = React.createClass({
 
 let IssueCard = React.createClass({
   render() {
-    const {card, primaryRepoName, columnRegExp} = this.props;
+    const {card, primaryRepoName, columnRegExp, filters} = this.props;
     const {issue, repoOwner, repoName} = card;
 
     const {taskFinishedCount, taskTotalCount} = card.getTaskCounts();
@@ -171,7 +170,7 @@ let IssueCard = React.createClass({
 
     const user = issue.assignee ? issue.assignee : issue.user;
     const assignedAvatar = (
-      <Link to={getFilters().toggleUserName(user.login).url()}>
+      <Link to={filters.toggleUserName(user.login).url()}>
         <img
           key='avatar'
           className='avatar-image'
@@ -194,7 +193,7 @@ let IssueCard = React.createClass({
           placement='top'
           delayShow={1000}
           overlay={tooltip}>
-          <LabelBadge isFilterLink label={label}/>
+          <LabelBadge isFilterLink label={label} filters={filters} />
         </BS.OverlayTrigger>
       );
     });
@@ -277,7 +276,7 @@ let IssueCard = React.createClass({
             overlay={milestonePopover}>
             <MilestoneIcon className='milestone-icon'/>
           </BS.OverlayTrigger>
-          <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(issue.milestone.title).url()}>
+          <Link className='milestone-title' to={filters.toggleMilestoneTitle(issue.milestone.title).url()}>
             <GithubFlavoredMarkdown
               inline
               disableLinks={true}
@@ -304,6 +303,7 @@ let IssueCard = React.createClass({
       return (
         <div key={issueCard.key()} className='related-issue'>
           <IssueOrPullRequestBlurb
+            filters={filters}
             card={issueCard}
             primaryRepoName={card.repoName}
             context={context}/>
@@ -393,14 +393,11 @@ let IssueCard = React.createClass({
       // Click to add due date
     }
 
-    const etherpadHref = getFilters().setRouteName(`p-issue/${repoOwner}/${repoName}/${issue.number}`).url();
     const header = [
       <IssueOrPullRequestBlurb key='issue-blurb'
+        filters={filters}
         card={card}
         primaryRepoName={primaryRepoName} />,
-      <BS.OverlayTrigger key='etherpad' placement='top' overlay={<BS.Tooltip id={etherpadHref}>Click to Edit Collaboratively (really realtime)!</BS.Tooltip>}>
-        <Link to={etherpadHref} className='etherpad-issue-edit'><PencilIcon/></Link>
-      </BS.OverlayTrigger>,
       statusBlurb,
       taskCounts,
       mergeConflictBlurb
@@ -521,7 +518,7 @@ let Issue = React.createClass({
 
   },
   render() {
-    const {card, primaryRepoName, columnRegExp, settings} = this.props;
+    const {card, primaryRepoName, columnRegExp, settings, filters} = this.props;
     const { isDragging, connectDragSource } = this.props;
     const {issue} = card;
     let node;
@@ -529,11 +526,11 @@ let Issue = React.createClass({
       return (<span>Maybe moving Issue...</span>);
     } else if (settings.isShowSimpleList){
       node = (
-        <IssueSimple card={card} isDragging={isDragging}/>
+        <IssueSimple card={card} isDragging={isDragging} filters={filters} />
       );
     } else {
       node = (
-        <IssueCard card={card} primaryRepoName={primaryRepoName} columnRegExp={columnRegExp} isDragging={isDragging}/>
+        <IssueCard card={card} primaryRepoName={primaryRepoName} columnRegExp={columnRegExp} isDragging={isDragging} filters={filters} />
       );
     }
     return connectDragSource(
@@ -561,7 +558,7 @@ const IssueShell = React.createClass({
     const {card} = this.props;
     if (card.isLoaded()) {
       return (
-        <Issue key={card.key()} {...this.props}/>
+        <Issue {...this.props}/>
       );
     } else {
       return (
@@ -569,7 +566,7 @@ const IssueShell = React.createClass({
           key={card.key()}
           promise={card.load()}
           loadingText={card.key()}
-          renderLoaded={() => <Issue key={card.key()} {...this.props} />}
+          renderLoaded={() => <Issue {...this.props} />}
         />
       );
     }

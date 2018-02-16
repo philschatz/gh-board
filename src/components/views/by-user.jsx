@@ -3,21 +3,22 @@ import {connect} from 'react-redux';
 import _ from 'underscore';
 import {PersonIcon} from 'react-octicons';
 
-import {getReposFromStr} from '../helpers';
+import {selectors} from '../../redux/ducks/filter';
 import {
   fetchIssues
-} from '../redux/ducks/issue';
-import IssueList from './issue-list';
-import Issue from './issue';
+} from '../../redux/ducks/issue';
+import IssueList from '../issue-list';
+import Issue from '../issue';
 
 const KanbanColumn = React.createClass({
   render() {
-    const {login, cards, primaryRepoName, columnRegExp} = this.props;
+    const {login, cards, primaryRepoName, columnRegExp, filters} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.key()}
+          filters={filters}
           primaryRepoName={primaryRepoName}
           card={card}
           columnRegExp={columnRegExp}
@@ -53,7 +54,7 @@ const UsersView = React.createClass({
     dispatch(fetchIssues(repoInfos));
   },
   render() {
-    const {repoInfos, cards, columnRegExp} = this.props;
+    const {repoInfos, cards, columnRegExp, filters} = this.props;
     const [{repoName}] = repoInfos; // primaryRepoName
 
     const logins = new Set();
@@ -81,6 +82,7 @@ const UsersView = React.createClass({
       return (
         <KanbanColumn
           key={login}
+          filters={filters}
           login={login}
           cards={columnCards}
           primaryRepoName={repoName}
@@ -98,8 +100,10 @@ const UsersView = React.createClass({
 });
 
 export default connect((state, ownProps) => {
+  const repoInfos = selectors.getReposFromParams(ownProps.params);
   return {
-    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+    repoInfos,
+    filters: new selectors.FilterBuilder(state.filter, repoInfos),
     settings: state.settings,
     cards: state.issues.cards,
     columnRegExp: state.filter.columnRegExp,

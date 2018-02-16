@@ -5,15 +5,12 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const isBuild = process.env['NODE_ENV'] === 'production';
 
 const config = {
-  // devtool: '#eval-source-map',
-  devtool: 'source-map',
+  devtool: isBuild ? 'source-map' : 'eval-source-map',
   context: path.resolve(__dirname),
   entry: [
     './style/index.js',
     './src/index.js'
-  ].concat(isBuild ? [] : [
-    'webpack-dev-server/client?http://0.0.0.0:8080'
-  ]),
+  ],
   output: {
     path: __dirname + '/dist',
     publicPath: isBuild ? './dist/' : '/dist/', // gh-pages needs this to have a '.' for bundles
@@ -30,27 +27,17 @@ const config = {
       {
         test: /\.jsx?$/,
         loader: 'babel-loader',
-        exclude: [/node_modules/, /puzzle-script/, /octokat\.js/],
+        exclude: [/node_modules/],
         query: {
           presets: ['react', 'es2015'],
           plugins: ['transform-object-rest-spread']
         }
       },
-      { test: /\.json$/, loader: 'json-loader'},
-      { test: /\.less$/,  loader: ExtractTextPlugin.extract('css-loader!less-loader') },
-      { test: /\.(png|jpg|svg)/, loader: 'file-loader?name=[name].[ext]'},
-      { test: /\.(woff|woff2|eot|ttf)/, loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]' }
+      { test: /\.less$/,  loader: ExtractTextPlugin.extract('css-loader!less-loader') }
     ]
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.json'],
-    alias: {
-      xmlhttprequest: path.join(__dirname, '/src/hacks/xmlhttprequest-filler.js'),
-      fs: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-      proxyquire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-      rewire: path.join(__dirname, '/src/hacks/mermaid-stubs.js'),
-      'mock-browser': path.join(__dirname, '/src/hacks/mermaid-stubs.js')
-    },
+    extensions: ['.js', '.jsx', '.json']
   }
 };
 

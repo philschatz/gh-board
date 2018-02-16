@@ -4,25 +4,25 @@ import _ from 'underscore';
 import {Link} from 'react-router';
 import {MilestoneIcon} from 'react-octicons';
 
-import {getFilters} from '../route-utils';
-import {getReposFromStr} from '../helpers';
+import {selectors} from '../../redux/ducks/filter';
 import {
   fetchMilestones,
   fetchIssues
-} from '../redux/ducks/issue';
-import IssueList from './issue-list';
-import Issue from './issue';
-import GithubFlavoredMarkdown from './gfm';
+} from '../../redux/ducks/issue';
+import IssueList from '../issue-list';
+import Issue from '../issue';
+import GithubFlavoredMarkdown from '../gfm';
 
 
 const KanbanColumn = React.createClass({
   render() {
-    const {milestone, cards, primaryRepoName, columnRegExp} = this.props;
+    const {milestone, cards, primaryRepoName, columnRegExp, filters} = this.props;
 
     const issueComponents = _.map(cards, (card) => {
       return (
         <Issue
           key={card.key()}
+          filters={filters}
           primaryRepoName={primaryRepoName}
           card={card}
           columnRegExp={columnRegExp}
@@ -33,7 +33,7 @@ const KanbanColumn = React.createClass({
     let heading;
     if (milestone) {
       heading = (
-        <Link className='milestone-title' to={getFilters().toggleMilestoneTitle(milestone.title).url()}>
+        <Link className='milestone-title' to={this.props.filters.toggleMilestoneTitle(milestone.title).url()}>
           <MilestoneIcon/>
           <GithubFlavoredMarkdown
             inline
@@ -68,7 +68,7 @@ const ByMilestoneView = React.createClass({
     dispatch(fetchMilestones(repoOwner, repoName));
   },
   render() {
-    const {milestones, cards, repoInfos, columnRegExp, settings, filter} = this.props;
+    const {milestones, cards, repoInfos, columnRegExp, settings, filters} = this.props;
 
     // Get the primary repo
     const [primaryRepo] = repoInfos;
@@ -80,6 +80,7 @@ const ByMilestoneView = React.createClass({
     const uncategorizedColumn = (
       <KanbanColumn
         settings={settings}
+        filters={filters}
         cards={uncategorizedCards}
         primaryRepoName={primaryRepo.repoName}
         columnRegExp={columnRegExp}
@@ -87,7 +88,7 @@ const ByMilestoneView = React.createClass({
     );
 
     const kanbanColumns = milestones.reduce((prev, milestone) => {
-      if (filter.milestoneTitles.length && filter.milestoneTitles.indexOf(milestone.title) === -1) {
+      if (filters.state.milestoneTitles.length && filters.state.milestoneTitles.indexOf(milestone.title) === -1) {
         return prev;
       }
 
@@ -101,6 +102,7 @@ const ByMilestoneView = React.createClass({
       prev.push(
         <KanbanColumn
           settings={settings}
+          filters={this.props.filters}
           key={milestone.title}
           milestone={milestone}
           cards={columnCards}
@@ -121,13 +123,14 @@ const ByMilestoneView = React.createClass({
 });
 
 export default connect((state, ownProps) => {
+  const repoInfos = selectors.getReposFromParams(ownProps.params);
   return {
-    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+    repoInfos,
+    filters: new selectors.FilterBuilder(state.filter, repoInfos),
     settings: state.settings,
     cards: state.issues.cards,
     columnRegExp: state.filter.columnRegExp,
     milestones: state.issues.milestones,
-    filter: state.filter
   };
 })(ByMilestoneView);
 

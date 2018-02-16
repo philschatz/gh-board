@@ -87,6 +87,7 @@ export const updateLabel = duck.defineAction(UPDATE_LABEL, {
   },
   resolve(state, {payload}) {
     (state.LABEL_CACHE[payload.oldName] || {}).name = payload.newName;
+    state.LABEL_CACHE[payload.newName] = state.LABEL_CACHE[payload.oldName];
     return {
       ...state,
       labels: state.labels.map(l => {

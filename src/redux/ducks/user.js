@@ -40,19 +40,6 @@ export const logout = duck.defineAction(LOGOUT, {
   },
 });
 
-export const starRepo = duck.defineAction(STAR_REPO, {
-  creator(repo) {
-    return {
-      payload: {
-        repo,
-      },
-      meta: {
-        github: {action: 'starRepo'}
-      }
-    };
-  },
-});
-
 export const login = duck.defineAction(LOGIN, {
   creator(token, rootURL) {
     return {

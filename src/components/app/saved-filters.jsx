@@ -53,13 +53,13 @@ const SavedFiltersButton = React.createClass({
       <TagIcon title='Save Filter' onClick={this.showAddFilter}/>
     );
     return (
-      <li className='-saved-filters'>
+      <div className='saved-filters'>
         <BS.SplitButton id='saved-filters' title={addFilter}>
           <BS.MenuItem header>Apply Saved Filter</BS.MenuItem>
           {filters}
         </BS.SplitButton>
         <AddFilterModal show={showModal} onHide={this.hideAddFilter}/>
-      </li>
+      </div>
     );
   }
 });

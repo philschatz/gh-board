@@ -227,7 +227,7 @@ const BurnupShell = React.createClass({
         <h2><GraphIcon size='mega'/>  Burnup Chart</h2>
         <p>Make sure you selected <strong>closed</strong> and <strong>Issues</strong> and optionally a Milestone from the filter dropdown at the top of this page</p>
         <p>Also, this chart only fills the area when something changed (useful for weekends/open-source projects that frequently have periods of no change)</p>
-        {this.renderChart(this.props.cards)}
+        {this.renderLoaded(this.props.cards)}
       </div>
     );
   }

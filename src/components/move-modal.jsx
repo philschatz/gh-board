@@ -65,7 +65,7 @@ const MoveModal = React.createClass({
     props.dispatch(moveIssues(otherCardsToMove.concat(card), {label, milestone}));
   },
   render() {
-    const {container, movingIssue} = this.props;
+    const {container, movingIssue, filters} = this.props;
     const {unCheckedCards} = this.state;
     const close = () => this.props.dispatch(cancelMovingIssue());
 
@@ -84,11 +84,11 @@ const MoveModal = React.createClass({
           const relatedColumn = getCardColumn(vertex);
           let relatedLabel = null;
           if (relatedColumn.name !== getCardColumn(movingIssue.card).name) {
-            relatedLabel = (<LabelBadge label={relatedColumn}/>);
+            relatedLabel = (<LabelBadge label={relatedColumn} filters={filters} />);
           }
           const checkLabel = (
             <span>
-              <IssueOrPullRequestBlurb card={vertex} primaryRepoName={movingIssue.primaryRepoName}/>
+              <IssueOrPullRequestBlurb filters={filters} card={vertex} primaryRepoName={movingIssue.primaryRepoName}/>
               <span className='issue-title'>
                 {': '}
                 {vertex.issue.title}

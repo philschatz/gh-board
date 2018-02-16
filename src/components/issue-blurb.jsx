@@ -3,14 +3,12 @@ import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 import {ListUnorderedIcon, GitPullRequestIcon, IssueOpenedIcon, IssueReopenedIcon, IssueClosedIcon, QuestionIcon} from 'react-octicons';
 
-import {getFilters} from '../route-utils';
-
 import GithubFlavoredMarkdown from './gfm';
 import ColoredIcon from './colored-icon';
 
 const IssueOrPullRequestBlurb = React.createClass({
   render() {
-    const {card, primaryRepoName, context} = this.props;
+    const {card, primaryRepoName, context, filters} = this.props;
     const {issue, repoOwner, repoName, number} = card;
 
     const multipleRepoName = primaryRepoName === repoName ? null : repoName;
@@ -75,7 +73,7 @@ const IssueOrPullRequestBlurb = React.createClass({
 
       let kanbanColumnIcon;
       const kanbanColumn = issue.labels.filter((label) => {
-        return getFilters().getState().columnRegExp.test(label.name);
+        return filters.getState().columnRegExp.test(label.name);
       })[0];
       if (kanbanColumn) {
         const {color, name} = kanbanColumn;

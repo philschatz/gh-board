@@ -17,9 +17,6 @@ export default ({getState}) => next => action => {
   case 'logout':
     promise = githubClient.reset();
     break;
-  case 'starRepo':
-    promise = githubClient.getOcto().then(({user}) => user.starred(action.payload.repo).add());
-    break;
   case 'login':
     promise = githubClient.reset().then(() => {
       githubClient.credentials.token = action.payload.token;

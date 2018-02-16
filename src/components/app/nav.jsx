@@ -16,12 +16,9 @@ import {
 import {
   fetchUser,
   logout,
-  starRepo,
   resetDatabases
 } from '../../redux/ducks/user';
-
-import {getReposFromStr} from '../../helpers';
-import {getFilters, buildRoute, LABEL_CACHE} from '../../route-utils';
+import { selectors, goTo } from '../../redux/ducks/filter';
 
 import LoginModal from '../login-modal';
 import LabelBadge from '../label-badge';
@@ -49,7 +46,7 @@ const SettingsItem = React.createClass({
 const AppNav = React.createClass({
   propTypes: {
     settings: React.PropTypes.object,
-    filter: React.PropTypes.object,
+    filters: React.PropTypes.object,
     repoInfos: React.PropTypes.array,
     dispatch: React.PropTypes.func,
     userInfo: React.PropTypes.object
@@ -60,14 +57,6 @@ const AppNav = React.createClass({
   componentDidMount() {
     this.props.dispatch(fetchUser());
   },
-
-  starThisProject() {
-    this.props.dispatch(starRepo('philschatz/gh-board')).then(() => {
-      /*eslint-disable no-alert */
-      alert('Thanks for starring!\n I hope you enjoy the other pages more than this simple alert, but thank you for helping me out!');
-      /*eslint-enable no-alert */
-    });
-  },
   promptAndResetDatabases() {
     if (confirm('Are you sure you want to reset all the local data? It will take some time to repopulate all the data from GitHub and you may need to reload the page')) {
       this.props.dispatch(resetDatabases()).then(() => {
@@ -76,9 +65,9 @@ const AppNav = React.createClass({
     }
   },
   render() {
-    let {userInfo, repoInfos, settings, filter} = this.props;
+    let {userInfo, repoInfos, settings, filters, LABEL_CACHE} = this.props;
     const {showModal} = this.state;
-    const {userName, tagNames} = filter;
+    const {userName, tagNames} = filters.getState();
 
     // Note: The dashboard page does not have a list of repos
     const close = () => this.setState({ showModal: false});
@@ -90,7 +79,7 @@ const AppNav = React.createClass({
       // TODO: HACK. Find a better way to update the color of labels
       const label = LABEL_CACHE[tagName] || {name: tagName, color: 'ffffff'};
       return (
-        <LabelBadge key={tagName} isFilterLink label={label}/>
+        <LabelBadge key={tagName} isFilterLink label={label} filters={filters} />
       );
     });
 
@@ -99,7 +88,7 @@ const AppNav = React.createClass({
         <Link
           key='user'
           className='badge'
-          to={getFilters().toggleUserName(userName).url()}
+          to={filters.toggleUserName(userName).url()}
         >{userName}
         </Link>
       );
@@ -116,7 +105,7 @@ const AppNav = React.createClass({
       loginButton = (
         <BS.NavDropdown key='signin-dropdown' id='signin-dropdown' title={avatarImage}>
           <BS.MenuItem key='1' header>Signed in as <strong>{userInfo.login}</strong></BS.MenuItem>
-          <BS.MenuItem key='2' onSelect={this.starThisProject}>Click to <StarIcon className='icon-spin' style={{color: '#fbca04'}}/> the <strong>gh-board</strong> repo if you like this project</BS.MenuItem>
+          <BS.MenuItem key='2' target='_blank' title="View Source Code on GitHub" href='https://github.com/philschatz/gh-board'>View Source Code on GitHub</BS.MenuItem>
           <BS.MenuItem key='3' divider/>
           <BS.MenuItem key='4' eventKey='1'><span onClick={() => this.props.dispatch(logout())}>Sign Out</span></BS.MenuItem>
         </BS.NavDropdown>
@@ -137,14 +126,14 @@ const AppNav = React.createClass({
       const [{repoOwner, repoName}] = repoInfos;
       let repoNameItems;
       if (repoInfos.length === 1) {
-        const repoLink = buildRoute('kanban', {repoInfos});
         repoNameItems = (
-          <Link to={repoLink} className='repo-name'>{repoName}</Link>
+          <Link to={filters.url()} className='repo-name'>{repoName}</Link>
         );
       } else {
         repoNameItems = _.map(repoInfos, ({repoOwner, repoName}, index) => {
           const currentRepoInfos = [{repoOwner, repoName}];
-          const repoLink = buildRoute('kanban', {currentRepoInfos});
+
+          const repoLink = (new selectors.FilterBuilder(filters.state, currentRepoInfos)).url();
           return (
             <span key={repoLink} className='repo-name-wrap'>
               {index !== 0 && '&' || null}{/* Put an & between repo names */}
@@ -170,7 +159,7 @@ const AppNav = React.createClass({
     let managerMenu;
     if (repoInfos.length) {
       managerMenu = (
-        <SettingsItem key='manager' to={getFilters().setRouteName('by-user').url()}>Issues by User</SettingsItem>
+        <SettingsItem key='manager' to={filters.setRouteName('by-user').url()}>Issues by User</SettingsItem>
       );
     }
 
@@ -189,7 +178,7 @@ const AppNav = React.createClass({
             </li>
           </BS.Nav>
           <BS.Nav key='right' pullRight>
-            <FilterDropdown repoInfos={repoInfos}/>
+            <FilterDropdown filters={this.props.filters} />
 
             <BS.NavDropdown key='settings' id='display-settings' title={settingsTitle}>
               <BS.MenuItem key='display' header>Display Settings</BS.MenuItem>
@@ -257,17 +246,17 @@ const AppNav = React.createClass({
               <BS.MenuItem key='divider3' divider/>
               <BS.MenuItem key='manager-pages' header>Manager-ish Pages</BS.MenuItem>
               {managerMenu}
-              <SettingsItem key='milestone-planning' to={getFilters().setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
-              <SettingsItem key='burnup' to={getFilters().setRouteName('burnup').url()}><GraphIcon/> Burnup Chart</SettingsItem>
-              <SettingsItem key='gantt-chart' to={getFilters().setRouteName('gantt').url()}><GraphIcon/> Gantt Chart</SettingsItem>
-              <SettingsItem key='label-editing' to={getFilters().setRouteName('labels').url()}><TagIcon/> Label Editing</SettingsItem>
+              <SettingsItem key='milestone-planning' to={filters.setRouteName('by-milestone').url()}>Milestone Planning View</SettingsItem>
+              <SettingsItem key='burnup' to={filters.setRouteName('burnup').url()}><GraphIcon/> Burnup Chart</SettingsItem>
+              <SettingsItem key='gantt-chart' to={filters.setRouteName('gantt').url()}><GraphIcon/> Gantt Chart</SettingsItem>
+              <SettingsItem key='label-editing' to={filters.setRouteName('labels').url()}><TagIcon/> Label Editing</SettingsItem>
               <BS.MenuItem key='reset-databases' onClick={this.promptAndResetDatabases}>Reset Local Cache...</BS.MenuItem>
             </BS.NavDropdown>
             {loginButton}
           </BS.Nav>
         </BS.Navbar>
         <LoginModal show={showModal} container={this} onHide={close} />
-        <MoveModal container={this}/>
+        <MoveModal container={this} filters={filters} />
       </div>
     );
   }
@@ -275,10 +264,12 @@ const AppNav = React.createClass({
 });
 
 export default connect((state, ownProps) => {
+  const repoInfos = selectors.getReposFromParams(ownProps.params);
   return {
     userInfo: state.user.info,
     settings: state.settings,
-    filter: state.filter,
-    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || '')
+    LABEL_CACHE: state.issues.LABEL_CACHE,
+    filters: new selectors.FilterBuilder(state.filter, repoInfos),
+    repoInfos
   };
 })(AppNav);

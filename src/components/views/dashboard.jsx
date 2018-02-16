@@ -9,12 +9,10 @@ import {BeakerIcon, SyncIcon, LockIcon, RepoForkedIcon, RepoIcon, PersonIcon, Or
 import {
   fetchRepositories,
   fetchRepo
-} from '../redux/ducks/user';
-import {history} from '../redux/store';
-
-import {buildRoute} from '../route-utils';
-import AsyncButton from './async-button';
-import Time from './time';
+} from '../../redux/ducks/user';
+import {goTo, selectors} from '../../redux/ducks/filter';
+import AsyncButton from '../async-button';
+import Time from '../time';
 
 const SAMPLE_REPOS = [
   {repoOwner: 'huboard', repoName: 'huboard'},
@@ -99,12 +97,13 @@ const RepoItem = React.createClass({
         <input
           className='pull-right'
           type='checkbox'
-          checked={isSelected}
+          checked={isSelected || false}
           onChange={onSelect}/>
       );
     }
 
-    const repoLink = buildRoute('kanban', {repoInfos});
+    const filters = new selectors.FilterBuilder(undefined, repoInfos);
+    const repoLink = filters.url();
     return (
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         {repoIcon}
@@ -134,14 +133,6 @@ const RepoGroup = React.createClass({
       // this.forceUpdate(); // since we are modifying the object directly
     };
   },
-  goToBoard() {
-    const {repoOwner} = this.props;
-    const {selectedRepos} = this.state;
-    const repoInfos = Object.keys(selectedRepos).map((repoName) => {
-      return {repoOwner, repoName};
-    });
-    history.push(buildRoute('kanban', {repoInfos}));
-  },
   render() {
     let {repoOwner, repos, index} = this.props;
     const {selectedRepos} = this.state;
@@ -156,6 +147,7 @@ const RepoGroup = React.createClass({
       return (
         <RepoItem
           key={repoOwner + repoName}
+          dispatch={this.props.dispatch}
           repoOwner={repoOwner}
           repoName={repoName}
           repo={repo}
@@ -167,8 +159,13 @@ const RepoGroup = React.createClass({
 
     let viewBoard = null;
     if (Object.keys(selectedRepos).length) {
+      const repoInfos = Object.keys(selectedRepos).map((repoName) => {
+        return {repoOwner, repoName};
+      });
+      const filters = new selectors.FilterBuilder(undefined, repoInfos);
+      const repoLink = filters.url();
       viewBoard = (
-        <BS.Button className='pull-right' bsStyle='primary' bsSize='xs' onClick={this.goToBoard}>View Board</BS.Button>
+        <BS.Button className='pull-right' bsStyle='primary' bsSize='xs' href={'/#' + repoLink}>View Board</BS.Button>
       );
     }
 
@@ -232,6 +229,7 @@ const Dashboard = React.createClass({
       const groupRepos = reposByOwner[repoOwner];
       return (
         <RepoGroup
+          dispatch={this.props.dispatch}
           user={user}
           key={repoOwner}
           repoOwner={repoOwner}
@@ -256,8 +254,7 @@ const CustomRepoModal = React.createClass({
   goToBoard(customRepoName) {
     const [repoOwner, repoName] = customRepoName.split('/');
     const repoInfos = [{repoOwner, repoName}];
-    // TODO: Just make this a simple Link and no fancy history.push
-    history.push(buildRoute('kanban', {repoInfos}));
+    this.props.dispatch(goTo({repoInfos, pathname: 'kanban'}));
   },
   render() {
     const {customRepoName} = this.state;
@@ -320,7 +317,7 @@ const ExamplesPanel = React.createClass({
             <RepoIcon className='repo-icon'/>
             Choose your own...
           </BS.ListGroupItem>
-          <CustomRepoModal show={showModal} container={this} onHide={close} dispatch={this.props.dispatch} />
+          <CustomRepoModal dispatch={this.props.dispatch} show={showModal} container={this} onHide={close} dispatch={this.props.dispatch} />
         </BS.ListGroup>
       </BS.Panel>
     );
@@ -343,7 +340,7 @@ const DashboardShell = React.createClass({
 
     if (ready) {
       myRepos = (
-        <Dashboard repos={(user || {}).repositories || []} user={user}/>
+        <Dashboard repos={(user || {}).repositories || []} user={user} dispatch={dispatch} />
       );
     } else {
       myRepos = (

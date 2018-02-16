@@ -1,36 +1,3 @@
-export const FETCHALL_MAX = 10;
-
-export function fetchAll(maxRequests, fn, args) {
-  let acc = [];
-  if (!args) {
-    args = {per_page: 100};
-  }
-  let p = new Promise((resolve, reject) => {
-    fn(args).then((val) => {
-      acc = acc.concat(val);
-      if (val.nextPage && maxRequests) {
-        fetchAll(maxRequests - 1, val.nextPage).then((val2) => {
-          acc = acc.concat(val2);
-          resolve(acc);
-        }, reject);
-      } else {
-        resolve(acc);
-      }
-    }, reject);
-  });
-  return p;
-}
-
-
-export function contains(arr, condition) {
-  for (const item of arr) {
-    if (condition(item)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 // http://alienryderflex.com/hsp.html
 export function isLight(hexColor) {
   const color = {
@@ -60,35 +27,4 @@ export function getCardColumn(card) {
   }
   // not found. Must be uncategorized
   return {name: UNCATEGORIZED_NAME, color: 'cccccc'};
-}
-
-export function getReposFromStr(repoStr = '') {
-  let lastRepoOwner = null;
-  return repoStr.split('|').reduce((prev, repoInfo) => {
-    if (!repoInfo) { return prev; }
-    const repoInfoArr = repoInfo.split(':');
-    if (repoInfoArr.length === 1) {
-      const [repoName] = repoInfoArr;
-      prev.push({repoOwner:lastRepoOwner, repoName});
-    } else if (repoInfoArr.length === 2){
-      const [repoOwner, repoName] = repoInfoArr;
-      lastRepoOwner = repoOwner;
-      prev.push({repoOwner, repoName});
-    } else {
-      throw new Error('Invalid repo format!');
-    }
-    return prev;
-  }, []);
-}
-
-export function convertRepoInfosToStr(repoInfos) {
-  let lastRepoOwner = null;
-  return repoInfos.map(({repoOwner, repoName}) => {
-    if (lastRepoOwner === repoOwner) {
-      return repoName;
-    } else {
-      lastRepoOwner = repoOwner;
-      return [repoOwner, repoName].join(':');
-    }
-  }).join('|');
 }

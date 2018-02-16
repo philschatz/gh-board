@@ -2,12 +2,13 @@ import React from 'react';
 import {connect} from 'react-redux';
 import _ from 'underscore';
 
-import {fetchMilestones, fetchIssues} from '../redux/ducks/issue';
-import {getCardColumn, UNCATEGORIZED_NAME, getReposFromStr} from '../helpers';
-import LabelBadge from './label-badge';
+import {fetchMilestones, fetchIssues} from '../../../redux/ducks/issue';
+import {selectors} from '../../../redux/ducks/filter';
+import {getCardColumn, UNCATEGORIZED_NAME} from '../../../helpers';
+import LabelBadge from '../../label-badge';
 
 import d3 from 'd3'; // eslint-disable-line
-import gantt from '../gantt-chart';
+import gantt from './gantt-chart';
 
 
 const filterByMilestoneAndKanbanColumn = (cards) => {
@@ -101,7 +102,7 @@ const GanttChart = React.createClass({
     tasks.sort(function(a, b) {
       return a.endDate - b.endDate;
     });
-    const maxDate = tasks[tasks.length - 1].endDate;
+    const maxDate = (tasks[tasks.length - 1] || {}).endDate;
     tasks.sort(function(a, b) {
       return a.startDate - b.startDate;
     });
@@ -147,11 +148,11 @@ const GanttChart = React.createClass({
 
   },
   render() {
-    const {columns, columnCounts, milestones} = this.props;
+    const {columns, columnCounts, milestones, filters} = this.props;
 
     const legend = columns.map((label) => {
       return (
-        <LabelBadge key={label.name} label={label} extra={columnCounts[label.name]}/>
+        <LabelBadge key={label.name} label={label} extra={columnCounts[label.name]} filters={filters} />
       );
     });
     let closedCount = 0;
@@ -163,7 +164,7 @@ const GanttChart = React.createClass({
         <div ref={r => this._ganttWrapper = r} id='the-gantt-chart'/>
         <h3>Legend</h3>
         <p>Blue vertical line is Today</p>
-        <LabelBadge key='completed' label={{name:'0 - Closed', color: '666666'}} extra={closedCount}/>
+        <LabelBadge key='completed' label={{name:'0 - Closed', color: '666666'}} extra={closedCount} filters={filters} />
         {legend}
         <br/>{/* Add breaks to increase padding because I'm lazy and don't want to add CSS margins */}
         <br/>
@@ -174,7 +175,7 @@ const GanttChart = React.createClass({
 });
 
 export default connect((state, ownProps) => {
-  const {milestoneTitles} = state.settings;
+  const {milestoneTitles} = state.filter;
 
   let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(state.issues.cards);
 
@@ -198,11 +199,13 @@ export default connect((state, ownProps) => {
   } else {
     milestones = state.issues.milestones;
   }
+  const repoInfos = selectors.getReposFromParams(ownProps.params);
   return {
     milestones,
     data,
     columns,
     columnCounts,
-    repoInfos: getReposFromStr((ownProps.params || {}).repoStr || ''),
+    repoInfos,
+    filters: new selectors.FilterBuilder(state.filter, repoInfos)
   };
 })(GanttChart);

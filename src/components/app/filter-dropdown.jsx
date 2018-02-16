@@ -5,8 +5,8 @@ import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
 import {XIcon, SearchIcon, CheckIcon, MilestoneIcon} from 'react-octicons';
+import SavedFiltersButton from './saved-filters';
 
-import {getFilters} from '../../route-utils';
 import {UNCATEGORIZED_NAME} from '../../helpers';
 
 import GithubFlavoredMarkdown from '../gfm';
@@ -72,7 +72,7 @@ const FilterCategory = React.createClass({
     let searchInput;
     if (!noSearch) {
       searchInput = (
-        <BS.FormControl type='text' placeholder='Filter text' onChange={this.onFilterInputChange}/>
+        <BS.FormControl type='text' placeholder={'Search for ' + this.props.name + '...'} onChange={this.onFilterInputChange}/>
       );
     }
     return (
@@ -98,7 +98,7 @@ const FilterDropdown = React.createClass({
     this.setState({ activeKey });
   },
   renderTagNames(items) {
-    const filters = getFilters();
+    const {filters} = this.props;
     const state = filters.getState();
     items = items.map((item) => {
 
@@ -131,11 +131,11 @@ const FilterDropdown = React.createClass({
     items = _.sortBy(items, 'text');
 
     return (
-      <FilterCategory items={items}/>
+      <FilterCategory items={items} name="labels" />
     );
   },
   renderColumnNames(items) {
-    const filters = getFilters();
+    const {filters} = this.props;
     const state = filters.getState();
 
     // Add the "UNCATEGORIZED_NAME" label into the mix
@@ -145,8 +145,8 @@ const FilterDropdown = React.createClass({
 
       const name = item.name;
 
-      const isSelected = state.columnLabels.indexOf(name) >= 0;
-      const isExcluded = state.columnLabels.indexOf(`-${name}`) >= 0;
+      const isSelected = (state.columnLabels || []).indexOf(name) >= 0;
+      const isExcluded = (state.columnLabels || []).indexOf(`-${name}`) >= 0;
       const iconNode = (
         <i className='item-icon column-name-color' style={{backgroundColor: `#${item.color}`}}/>
       );
@@ -177,13 +177,13 @@ const FilterDropdown = React.createClass({
     });
 
     return (
-      <FilterCategory items={items}/>
+      <FilterCategory items={items} name="columns" />
     );
   },
 
   // copy/pasta from renderTagNames
   renderMilestones(items) {
-    const filters = getFilters();
+    const {filters} = this.props;
     const state = filters.getState();
     items = items.map((item) => {
       const name = item.title;
@@ -215,28 +215,28 @@ const FilterDropdown = React.createClass({
     items = _.sortBy(items, 'text');
 
     return (
-      <FilterCategory items={items}/>
+      <FilterCategory items={items} name="milestones" />
     );
   },
   renderStates() {
-    const filters = getFilters();
+    const {filters} = this.props;
     const {states} = filters.getState();
 
     const items = ['open', 'closed'].map((state) => {
       return {text: state, isSelected: states.indexOf(state) >= 0, toggleHref: filters.toggleState(state).url() };
     });
 
-    return (<FilterCategory noSearch items={items}/>);
+    return (<FilterCategory noSearch items={items} name="states" />);
   },
   renderTypes() {
-    const filters = getFilters();
+    const {filters} = this.props;
     const {types} = filters.getState();
 
     const items = ['issue', 'pull-request'].map((type) => {
       return {text: type, isSelected: types.indexOf(type) >= 0, toggleHref: filters.toggleType(type).url() };
     });
 
-    return (<FilterCategory noSearch items={items}/>);
+    return (<FilterCategory noSearch items={items} name="types" />);
   },
 
   render() {
@@ -273,7 +273,7 @@ const FilterDropdown = React.createClass({
     );
 
     const panel = (
-      <BS.Panel header='Filters' footer={footer} className='filter-panel'>
+      <BS.Panel header={<div><span>Filters</span><SavedFiltersButton /></div>} footer={footer} className='filter-panel'>
         <BS.Accordion>
           <BS.Panel className='filter-category' header='Labels' eventKey='1'>
             {this.renderTagNames(labels)}
@@ -294,7 +294,7 @@ const FilterDropdown = React.createClass({
       </BS.Panel>
     );
 
-    const {milestoneTitles} = getFilters().getState();
+    const {milestoneTitles} = this.props.filters.getState();
     let selectedMilestoneItem;
     if (milestoneTitles.length) {
       if (milestoneTitles.length > 1) {
@@ -304,7 +304,7 @@ const FilterDropdown = React.createClass({
         selectedMilestoneItem = renderMilestone({title: milestoneTitles[0]});
       }
     } else {
-      const {states, types} = getFilters().getState();
+      const {states, types} = this.props.filters.getState();
       let state = '';
       if (states.length === 1) {
         if (states[0] === 'open') { state = 'Open'; }

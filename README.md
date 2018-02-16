@@ -10,7 +10,6 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
 - [Features](#features)
   - [Multiple Repositories](#multiple-repositories)
   - [Linked Issues and Pull Requests](#linked-issues-and-pull-requests)
-  - [Real-Time Collaboration](#real-time-collaboration)
   - [Filtering](#filtering)
   - [Milestone Planning](#milestone-planning)
   - [Moving Cards](#moving-cards)
@@ -18,9 +17,7 @@ Why waste time and money paying for a Ticket Tracker when you already work in Gi
   - [CI Status and Merge Conflict](#ci-status-and-merge-conflict)
   - [Issue Images](#issue-images)
   - [Pull Request to non-default branch](#pull-request-to-non-default-branch)
-  - [Batch-Edit Labels in Multiple Repositories](#batch-edit-labels-in-multiple-repositories)
   - [Burnup Chart](#burnup-chart)
-  - [Easter Eggs](#easter-eggs)
 - [Examples](#examples)
 - [Development](#development)
   - [How Does it Work?](#how-does-it-work)
@@ -40,22 +37,6 @@ Multiple Repositories in an organization can be shown on a board (from different
 Just add `#123` or `orgName/RepoName#123` to the Issue or Pull Request body and linked Issues will show up with the column they are in, both below the Card and in the preview popup.
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13620658/63f99478-e55f-11e5-8e9f-9babcfb69a29.png)
-
-
-### Real-Time Collaboration
-
-By clicking the :pencil2: icon next to the card title, multiple people can edit the Issue Body at once (ie in a meeting), and when editing is done, one person clicks <kbd>Save to GitHub</kbd>.
-
-Features:
-
-- send anyone the link to edit
-- real-time preview of Markdown
-- references to Issues show with their state and board column
-- Sequence, State, Gantt, and other diagrams are supported (using [mermaid](https://knsv.github.io/mermaid/))
-
-<!-- ![image](https://cloud.githubusercontent.com/assets/253202/13620696/a0497c72-e55f-11e5-8e6d-abc2077d82bf.png) -->
-
-![gh-board_realtime-editing4](https://cloud.githubusercontent.com/assets/253202/13621429/8c917166-e565-11e5-8e80-10fab6d51253.gif)
 
 
 ### Filtering
@@ -100,7 +81,6 @@ By using the `- [ ]` notation in the body of an Issue or Pull Request, the progr
 
 ![image](https://cloud.githubusercontent.com/assets/253202/13621905/dfee5920-e568-11e5-94df-98a887f63d24.png)
 
-
 ### Burnup Chart
 
 [Why Burnup instead of Burndown?](http://brodzinski.com/2012/10/burn-up-better-burn-down.html)
@@ -111,7 +91,6 @@ If you use select multiple repositories it will include all of them.
 It also skips when nothing was opened or closed that day/month/year (useful to see weekends or holidays).
 
 ![burnup-chart](https://cloud.githubusercontent.com/assets/253202/14406693/5e05c870-fe7d-11e5-9564-ecddb08ebe0d.png)
-
 
 # Issue Image
 
@@ -124,20 +103,6 @@ If an Issue or Pull Request contains an image then it will be shown in the Issue
 Sometimes Pull Requests go to a branch other than the main branch. This makes it clear when that happens.
 
 ![image](https://cloud.githubusercontent.com/assets/253202/14266496/ac9581b4-fa96-11e5-9991-d15a146f1e3b.png)
-
-### Batch-Edit Labels in Multiple Repositories
-
-If you need to rename a column or remove a duplicate label you can get to this page from the Settings dropdown next to the filter link.
-
-![image](https://cloud.githubusercontent.com/assets/253202/14569597/b3388eba-030d-11e6-9b6e-ea03df2f2327.png)
-
-
-# Easter Eggs
-
-Plus, it comes with totally useful easter eggs you can unlock!
-
-![easter-eggs](https://cloud.githubusercontent.com/assets/253202/14037438/185532ee-f21a-11e5-8b83-20f8cd21b753.gif)
-
 
 # Examples
 
