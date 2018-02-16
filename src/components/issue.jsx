@@ -80,7 +80,7 @@ function collect(connect, monitor) {
   }
 }
 
-let IssueSimple = React.createClass({
+class IssueSimple extends React.Component {
   render() {
     const { card, filters } = this.props
     const { issue, repoOwner, repoName } = card
@@ -170,10 +170,10 @@ let IssueSimple = React.createClass({
         </a>
       </BS.ListGroupItem>
     )
-  },
-})
+  }
+}
 
-let IssueCard = React.createClass({
+class IssueCard extends React.Component {
   render() {
     const { card, primaryRepoName, columnRegExp, filters } = this.props
     const { issue, repoOwner, repoName } = card
@@ -495,7 +495,8 @@ let IssueCard = React.createClass({
         />
       </BS.Popover>
     )
-    const TitleLink = React.createClass({
+
+    class TitleLink extends React.Component {
       render() {
         const { children } = this.props
         return (
@@ -509,8 +510,8 @@ let IssueCard = React.createClass({
             {children}
           </BS.OverlayTrigger>
         )
-      },
-    })
+      }
+    }
 
     return (
       <div className="-card-and-related">
@@ -561,33 +562,37 @@ let IssueCard = React.createClass({
         </div>
       </div>
     )
-  },
-})
+  }
+}
 
 // `GET .../issues` returns an object with `labels` and
 // `GET .../pulls` returns an object with `mergeable` so for Pull Requests
 // we have to have both to fully render an Issue.
-let Issue = React.createClass({
+class Issue extends React.Component {
   componentWillMount() {
     const { card } = this.props
     if (!card.isLoaded()) {
       card.load()
     }
     Timer.onTick(this.pollPullRequestStatus)
-  },
+  }
+
   componentWillUnmount() {
     Timer.offTick(this.pollPullRequestStatus)
-  },
-  update(issue) {
+  }
+
+  update = issue => {
     this.setState({ issue })
-  },
-  pollPullRequestStatus() {
+  }
+
+  pollPullRequestStatus = () => {
     const { card } = this.props
     if (card.isPullRequest()) {
       card.fetchPRStatus(true /*force*/)
     }
-  },
-  onDragStart() {
+  }
+
+  onDragStart = () => {
     // Rotate the div just long enough for the browser to get a screenshot
     // so the element looks like it is being moved
     const { style } = ReactDOM.findDOMNode(this)
@@ -597,7 +602,8 @@ let Issue = React.createClass({
       style.transform = ''
       style.webkitTransform = ''
     }, 100)
-  },
+  }
+
   render() {
     const {
       card,
@@ -627,8 +633,8 @@ let Issue = React.createClass({
       )
     }
     return connectDragSource(<div className="-drag-source">{node}</div>)
-  },
-})
+  }
+}
 
 Issue = connect(state => {
   return {
@@ -641,7 +647,7 @@ Issue = connect(state => {
 // `GET .../issues` returns an object with `labels` and
 // `GET .../pulls` returns an object with `mergeable` so for Pull Requests
 // we have to get both.
-const IssueShell = React.createClass({
+class IssueShell extends React.Component {
   render() {
     const { card } = this.props
     if (card.isLoaded()) {
@@ -656,8 +662,8 @@ const IssueShell = React.createClass({
         />
       )
     }
-  },
-})
+  }
+}
 
 // Export the wrapped version
 export default IssueShell

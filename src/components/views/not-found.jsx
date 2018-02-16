@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 
-const NotFoundShell = React.createClass({
+class NotFoundShell extends React.Component {
   render() {
     return (
       <div>
@@ -13,7 +13,7 @@ const NotFoundShell = React.createClass({
         </p>
       </div>
     )
-  },
-})
+  }
+}
 
 export default NotFoundShell

@@ -7,35 +7,36 @@ const ASYNC_RESOLVED = 'ASYNC_RESOLVED'
 const ASYNC_REJECTED = 'ASYNC_REJECTED'
 const ASYNC_WAITING = 'ASYNC_WAITING'
 
-export default React.createClass({
-  getInitialState() {
-    return { val: null, asyncStatus: ASYNC_UNSTARTED }
-  },
-  getDefaultProps() {
-    return {
-      waitingText: 'Saving...',
-    }
-  },
+export default class extends React.Component {
+  static defaultProps = {
+    waitingText: 'Saving...',
+  }
+
+  state = { val: null, asyncStatus: ASYNC_UNSTARTED }
+
   componentDidUpdate(oldProps) {
     if (this.props.action !== oldProps.action) {
       this.setState({ val: null, asyncStatus: ASYNC_UNSTARTED })
     }
-  },
-  onResolve(val) {
+  }
+
+  onResolve = val => {
     const { onResolved } = this.props
     this.setState({ val, asyncStatus: ASYNC_RESOLVED })
     if (onResolved) {
       onResolved(val)
     }
-  },
-  onReject(val) {
+  }
+
+  onReject = val => {
     const { onRejected } = this.props
     this.setState({ val, asyncStatus: ASYNC_REJECTED })
     if (onRejected) {
       onRejected(val)
     }
-  },
-  onClick() {
+  }
+
+  onClick = () => {
     const { action } = this.props
     this.setState({ val: null, asyncStatus: ASYNC_WAITING })
     const p = action()
@@ -43,7 +44,8 @@ export default React.createClass({
     if (p) {
       p.then(this.onResolve, this.onReject)
     }
-  },
+  }
+
   render() {
     const {
       children,
@@ -95,5 +97,5 @@ export default React.createClass({
         {kids}
       </BS.Button>
     )
-  },
-})
+  }
+}

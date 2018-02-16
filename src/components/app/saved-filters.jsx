@@ -4,15 +4,16 @@ import { TagIcon } from 'react-octicons'
 
 const LOCALSTORAGE_KEY = 'saved-filters'
 
-const AddFilterModal = React.createClass({
-  onSave() {
+class AddFilterModal extends React.Component {
+  onSave = () => {
     const { onHide } = this.props
     const data = JSON.parse(window.localStorage[LOCALSTORAGE_KEY] || '[]')
     const title = this._title.value
     data.push({ title: title, hashStr: window.location.hash })
     window.localStorage[LOCALSTORAGE_KEY] = JSON.stringify(data)
     onHide()
-  },
+  }
+
   render() {
     return (
       <BS.Modal className="-add-filter-modal" {...this.props}>
@@ -31,19 +32,20 @@ const AddFilterModal = React.createClass({
         </BS.Modal.Footer>
       </BS.Modal>
     )
-  },
-})
+  }
+}
 
-const SavedFiltersButton = React.createClass({
-  getInitialState() {
-    return { showModal: false }
-  },
-  showAddFilter() {
+class SavedFiltersButton extends React.Component {
+  state = { showModal: false }
+
+  showAddFilter = () => {
     this.setState({ showModal: true })
-  },
-  hideAddFilter() {
+  }
+
+  hideAddFilter = () => {
     this.setState({ showModal: false })
-  },
+  }
+
   render() {
     const { showModal } = this.state
     const savedFilterData = JSON.parse(
@@ -69,7 +71,7 @@ const SavedFiltersButton = React.createClass({
         <AddFilterModal show={showModal} onHide={this.hideAddFilter} />
       </div>
     )
-  },
-})
+  }
+}
 
 export default SavedFiltersButton

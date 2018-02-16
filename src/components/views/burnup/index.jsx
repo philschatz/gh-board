@@ -6,8 +6,8 @@ import { GraphIcon } from 'react-octicons'
 import Chart from './chart'
 import moment from 'moment'
 
-const BurnupShell = React.createClass({
-  renderLoaded(cards) {
+class BurnupShell extends React.Component {
+  renderLoaded = cards => {
     function getDay(dateStr) {
       return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24)
     }
@@ -224,7 +224,8 @@ const BurnupShell = React.createClass({
         element="burnup"
       />
     )
-  },
+  }
+
   render() {
     return (
       <div className="burnup">
@@ -244,8 +245,8 @@ const BurnupShell = React.createClass({
         {this.renderLoaded(this.props.cards)}
       </div>
     )
-  },
-})
+  }
+}
 
 export default connect(state => {
   return {

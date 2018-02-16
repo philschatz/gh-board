@@ -8,7 +8,7 @@ import { fetchIssues } from '../../redux/ducks/issue'
 import IssueList from '../issue-list'
 import Issue from '../issue'
 
-const KanbanColumn = React.createClass({
+class KanbanColumn extends React.Component {
   render() {
     const { login, cards, primaryRepoName, columnRegExp, filters } = this.props
 
@@ -38,14 +38,15 @@ const KanbanColumn = React.createClass({
         </IssueList>
       </div>
     )
-  },
-})
+  }
+}
 
-const UsersView = React.createClass({
+class UsersView extends React.Component {
   componentWillMount() {
     const { repoInfos, dispatch } = this.props
     dispatch(fetchIssues(repoInfos))
-  },
+  }
+
   render() {
     const { repoInfos, cards, columnRegExp, filters } = this.props
     const [{ repoName }] = repoInfos // primaryRepoName
@@ -87,8 +88,8 @@ const UsersView = React.createClass({
     })
 
     return <div className="kanban-board">{kanbanColumns}</div>
-  },
-})
+  }
+}
 
 export default connect((state, ownProps) => {
   const repoInfos = selectors.getReposFromParams(ownProps.params)

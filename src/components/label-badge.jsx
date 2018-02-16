@@ -1,16 +1,18 @@
 import * as BS from 'react-bootstrap'
+import PropTypes from 'prop-types'
 import React from 'react'
 
 import { Link } from 'react-router'
 
 import { KANBAN_LABEL, isLight } from '../helpers'
 
-const LabelBadge = React.createClass({
-  propTypes: {
-    label: React.PropTypes.object.isRequired,
-    className: React.PropTypes.string,
-    extra: React.PropTypes.string,
-  },
+class LabelBadge extends React.Component {
+  static propTypes = {
+    label: PropTypes.object.isRequired,
+    className: PropTypes.string,
+    extra: PropTypes.string,
+  }
+
   render() {
     const { label, isFilterLink, onClick, filters } = this.props
     let { className, extra } = this.props
@@ -59,7 +61,7 @@ const LabelBadge = React.createClass({
         </BS.Badge>
       )
     }
-  },
-})
+  }
+}
 
 export default LabelBadge

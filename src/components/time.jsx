@@ -66,18 +66,17 @@ const handleVisibilityChange = () => {
 }
 document.addEventListener('visibilitychange', handleVisibilityChange, false)
 
-export default React.createClass({
-  getInitialState() {
-    // `this.forceUpdate` is not always bound to `this` react component
-    // so keep one around for the `tick` handler.
-    return { forceUpdate: this.forceUpdate.bind(this) }
-  },
+export default class extends React.Component {
+  state = { forceUpdate: this.forceUpdate.bind(this) }
+
   componentWillMount() {
     Timer.onTick(this.state.forceUpdate)
-  },
+  }
+
   componentWillUnmount() {
     Timer.offTick(this.state.forceUpdate)
-  },
+  }
+
   render() {
     const { dateTime, className } = this.props
     const humanized = Moment(dateTime).fromNow()
@@ -91,5 +90,5 @@ export default React.createClass({
         {humanized}
       </time>
     )
-  },
-})
+  }
+}

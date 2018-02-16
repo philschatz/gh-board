@@ -1,4 +1,5 @@
 import _ from 'underscore'
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
@@ -27,7 +28,7 @@ import LabelBadge from '../label-badge'
 import MoveModal from '../move-modal'
 import FilterDropdown from './filter-dropdown'
 
-const SettingsItem = React.createClass({
+class SettingsItem extends React.Component {
   render() {
     const { key, onSelect, isChecked, className, to, children } = this.props
     let { href } = this.props
@@ -48,24 +49,25 @@ const SettingsItem = React.createClass({
         </span>
       </BS.MenuItem>
     )
-  },
-})
+  }
+}
 
-const AppNav = React.createClass({
-  propTypes: {
-    settings: React.PropTypes.object,
-    filters: React.PropTypes.object,
-    repoInfos: React.PropTypes.array,
-    dispatch: React.PropTypes.func,
-    userInfo: React.PropTypes.object,
-  },
-  getInitialState() {
-    return { showModal: false }
-  },
+class AppNav extends React.Component {
+  static propTypes = {
+    settings: PropTypes.object,
+    filters: PropTypes.object,
+    repoInfos: PropTypes.array,
+    dispatch: PropTypes.func,
+    userInfo: PropTypes.object,
+  }
+
+  state = { showModal: false }
+
   componentDidMount() {
     this.props.dispatch(fetchUser())
-  },
-  promptAndResetDatabases() {
+  }
+
+  promptAndResetDatabases = () => {
     if (
       confirm(
         'Are you sure you want to reset all the local data? It will take some time to repopulate all the data from GitHub and you may need to reload the page'
@@ -75,7 +77,8 @@ const AppNav = React.createClass({
         alert('Local cache has been cleared')
       })
     }
-  },
+  }
+
   render() {
     let { userInfo, repoInfos, settings, filters, LABEL_CACHE } = this.props
     const { showModal } = this.state
@@ -354,8 +357,8 @@ const AppNav = React.createClass({
         <MoveModal container={this} filters={filters} />
       </div>
     )
-  },
-})
+  }
+}
 
 export default connect((state, ownProps) => {
   const repoInfos = selectors.getReposFromParams(ownProps.params)

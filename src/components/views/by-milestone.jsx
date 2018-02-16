@@ -10,7 +10,7 @@ import IssueList from '../issue-list'
 import Issue from '../issue'
 import GithubFlavoredMarkdown from '../gfm'
 
-const KanbanColumn = React.createClass({
+class KanbanColumn extends React.Component {
   render() {
     const {
       milestone,
@@ -58,17 +58,18 @@ const KanbanColumn = React.createClass({
         </IssueList>
       </div>
     )
-  },
-})
+  }
+}
 
-const ByMilestoneView = React.createClass({
+class ByMilestoneView extends React.Component {
   componentWillMount() {
     const { repoInfos, dispatch } = this.props
     // pull out the primaryRepoName
     const [{ repoOwner, repoName }] = repoInfos
     dispatch(fetchIssues(repoInfos))
     dispatch(fetchMilestones(repoOwner, repoName))
-  },
+  }
+
   render() {
     const {
       milestones,
@@ -133,8 +134,8 @@ const ByMilestoneView = React.createClass({
         {kanbanColumns}
       </div>
     )
-  },
-})
+  }
+}
 
 export default connect((state, ownProps) => {
   const repoInfos = selectors.getReposFromParams(ownProps.params)

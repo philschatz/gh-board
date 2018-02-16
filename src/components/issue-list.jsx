@@ -81,20 +81,22 @@ function toCSVString(table) {
     .join('\n')
 }
 
-const IssueList = React.createClass({
-  getInitialState() {
-    return { morePressedCount: 0, showCSVModal: false }
-  },
-  showAllIssues() {
+class IssueList extends React.Component {
+  state = { morePressedCount: 0, showCSVModal: false }
+
+  showAllIssues = () => {
     this.setState({ showAllIssues: true })
-  },
-  onClickMore() {
+  }
+
+  onClickMore = () => {
     this.setState({ morePressedCount: this.state.morePressedCount + 1 })
-  },
-  toggleCSVModal() {
+  }
+
+  toggleCSVModal = () => {
     const { showCSVModal } = this.state
     this.setState({ showCSVModal: !showCSVModal })
-  },
+  }
+
   render() {
     const {
       icon,
@@ -213,8 +215,8 @@ const IssueList = React.createClass({
         </BS.Panel>
       </div>
     )
-  },
-})
+  }
+}
 
 // Export the wrapped version
 export default DropTarget(ItemTypes.CARD, cardListTarget, collect)(

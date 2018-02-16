@@ -5,7 +5,7 @@ import { GearIcon } from 'react-octicons'
 
 let hasAlreadyShownAnonymousModal = false
 
-const AnonymousModal = React.createClass({
+class AnonymousModal extends React.Component {
   render() {
     const onHide = () => {
       hasAlreadyShownAnonymousModal = true
@@ -64,7 +64,7 @@ const AnonymousModal = React.createClass({
         </BS.Modal.Footer>
       </BS.Modal>
     )
-  },
-})
+  }
+}
 
 export default connect(state => state.user)(AnonymousModal)

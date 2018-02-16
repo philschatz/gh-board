@@ -4,7 +4,7 @@ import { DragDropContext } from 'react-dnd'
 
 import AppNav from './nav'
 
-const App = React.createClass({
+class App extends React.Component {
   render() {
     const { params } = this.props
 
@@ -15,7 +15,7 @@ const App = React.createClass({
         {this.props.children}
       </div>
     )
-  },
-})
+  }
+}
 
 export default DragDropContext(HTML5Backend)(App)

@@ -29,13 +29,13 @@ const SAMPLE_REPOS = [
   { repoOwner: 'jquery', repoName: 'jquery' },
 ]
 
-const ListGroupWithMore = React.createClass({
-  getInitialState() {
-    return { morePressedCount: 0 }
-  },
-  onClickMore() {
+class ListGroupWithMore extends React.Component {
+  state = { morePressedCount: 0 }
+
+  onClickMore = () => {
     this.setState({ morePressedCount: this.state.morePressedCount + 1 })
-  },
+  }
+
   render() {
     const { children } = this.props
     const { morePressedCount } = this.state
@@ -54,10 +54,10 @@ const ListGroupWithMore = React.createClass({
       partialChildren = children
     }
     return <BS.ListGroup>{partialChildren}</BS.ListGroup>
-  },
-})
+  }
+}
 
-const RepoItem = React.createClass({
+class RepoItem extends React.Component {
   render() {
     const { repoOwner, comment, isSelected, onSelect } = this.props
     let { repoName, repoNames } = this.props
@@ -127,14 +127,13 @@ const RepoItem = React.createClass({
         {multiSelectButton}
       </BS.ListGroupItem>
     )
-  },
-})
+  }
+}
 
-const RepoGroup = React.createClass({
-  getInitialState() {
-    return { selectedRepos: {} }
-  },
-  toggleSelect(repoName) {
+class RepoGroup extends React.Component {
+  state = { selectedRepos: {} }
+
+  toggleSelect = repoName => {
     return () => {
       const { selectedRepos } = this.state
       if (selectedRepos[repoName]) {
@@ -145,7 +144,8 @@ const RepoGroup = React.createClass({
       this.setState({ selectedRepos })
       // this.forceUpdate(); // since we are modifying the object directly
     }
-  },
+  }
+
   render() {
     let { repoOwner, repos, index } = this.props
     const { selectedRepos } = this.state
@@ -209,10 +209,10 @@ const RepoGroup = React.createClass({
         </BS.Panel>
       </BS.Col>
     )
-  },
-})
+  }
+}
 
-const Dashboard = React.createClass({
+class Dashboard extends React.Component {
   render() {
     const { repos, user } = this.props
 
@@ -264,21 +264,22 @@ const Dashboard = React.createClass({
     )
 
     return <span>{repoOwnersNodes}</span>
-  },
-})
+  }
+}
 
-const CustomRepoModal = React.createClass({
-  getInitialState() {
-    return { customRepoName: null }
-  },
-  onCustomRepoChange(e) {
+class CustomRepoModal extends React.Component {
+  state = { customRepoName: null }
+
+  onCustomRepoChange = e => {
     this.setState({ customRepoName: e.currentTarget.value })
-  },
-  goToBoard(customRepoName) {
+  }
+
+  goToBoard = customRepoName => {
     const [repoOwner, repoName] = customRepoName.split('/')
     const repoInfos = [{ repoOwner, repoName }]
     this.props.dispatch(goTo({ repoInfos, pathname: 'kanban' }))
-  },
+  }
+
   render() {
     const { customRepoName } = this.state
     // Make sure the repo contains a '/'
@@ -315,16 +316,16 @@ const CustomRepoModal = React.createClass({
         </BS.Modal.Footer>
       </BS.Modal>
     )
-  },
-})
+  }
+}
 
-const ExamplesPanel = React.createClass({
-  getInitialState() {
-    return { showModal: false }
-  },
-  onClickMore() {
+class ExamplesPanel extends React.Component {
+  state = { showModal: false }
+
+  onClickMore = () => {
     this.setState({ showModal: true })
-  },
+  }
+
   render() {
     const { showModal } = this.state
     const close = () => this.setState({ showModal: false })
@@ -356,18 +357,18 @@ const ExamplesPanel = React.createClass({
         </BS.ListGroup>
       </BS.Panel>
     )
-  },
-})
+  }
+}
 
-const DashboardShell = React.createClass({
-  getInitialState() {
-    return { repos: null }
-  },
+class DashboardShell extends React.Component {
+  state = { repos: null }
+
   componentWillMount() {
     if (this.props.user && !this.props.user.repositories) {
       this.props.dispatch(fetchRepositories())
     }
-  },
+  }
+
   render() {
     let { user, ready, dispatch } = this.props
 
@@ -400,8 +401,8 @@ const DashboardShell = React.createClass({
         </BS.Row>
       </BS.Grid>
     )
-  },
-})
+  }
+}
 
 export default connect(state => {
   return {

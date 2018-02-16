@@ -111,8 +111,8 @@ const buildStatusBadge = (card, columnRegExp) => {
   return wrapNode
 }
 
-const InnerMarkdown = React.createClass({
-  updateLinks() {
+class InnerMarkdown extends React.Component {
+  updateLinks = () => {
     const { disableLinks } = this.props
 
     if (!disableLinks) {
@@ -149,8 +149,9 @@ const InnerMarkdown = React.createClass({
         insertAfter(newNode, link)
       })
     }
-  },
-  updateCheckboxes() {
+  }
+
+  updateCheckboxes = () => {
     const div = ReactDOM.findDOMNode(this)
     function buildCheckbox(checked) {
       const checkbox = document.createElement('input')
@@ -186,21 +187,25 @@ const InnerMarkdown = React.createClass({
         }
       }
     })
-  },
-  updateDOM() {
+  }
+
+  updateDOM = () => {
     if (!ReactDOM.findDOMNode(this)) {
       return
     }
     this.updateLinks()
     this.updateCheckboxes()
-  },
+  }
+
   componentDidMount() {
     this.updateDOM()
-  },
+  }
+
   componentDidUpdate() {
     this.updateDOM()
-  },
-  replaceEmojis(text) {
+  }
+
+  replaceEmojis = text => {
     const emojisMap = this.props.emojis || {}
     return text.replace(EMOJI_RE, (m, p1) => {
       const emojiName = p1.substring(1, p1.length - 1) // Strip off the leading and trailing `:`
@@ -211,7 +216,8 @@ const InnerMarkdown = React.createClass({
         return p1
       }
     })
-  },
+  }
+
   render() {
     const { text, repoOwner, repoName, inline, className } = this.props
     if (!text) {
@@ -248,8 +254,8 @@ const InnerMarkdown = React.createClass({
         return <div className="markdown-body is-empty" />
       }
     }
-  },
-})
+  }
+}
 
 export default connect(state => {
   return {

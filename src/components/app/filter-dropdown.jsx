@@ -11,11 +11,10 @@ import { UNCATEGORIZED_NAME } from '../../helpers'
 
 import GithubFlavoredMarkdown from '../gfm'
 
-const FilterCategory = React.createClass({
-  getInitialState() {
-    return { filterStr: null }
-  },
-  filterItems() {
+class FilterCategory extends React.Component {
+  state = { filterStr: null }
+
+  filterItems = () => {
     const { items } = this.props
     const { filterStr } = this.state
     return items.filter(({ text }) => {
@@ -25,11 +24,13 @@ const FilterCategory = React.createClass({
       }
       return true
     })
-  },
-  onFilterInputChange(e) {
+  }
+
+  onFilterInputChange = e => {
     this.setState({ filterStr: e.currentTarget.value })
-  },
-  renderItem(item) {
+  }
+
+  renderItem = item => {
     const { isSelected, isExcluded, text, iconNode } = item
     const { toggleHref, excludeHref } = item
 
@@ -73,7 +74,8 @@ const FilterCategory = React.createClass({
         {excludeLink}
       </BS.ListGroupItem>
     )
-  },
+  }
+
   render() {
     const { noSearch } = this.props
     const items = this.filterItems()
@@ -94,20 +96,19 @@ const FilterCategory = React.createClass({
         <BS.ListGroup>{items.map(this.renderItem)}</BS.ListGroup>
       </form>
     )
-  },
-})
+  }
+}
 
-const FilterDropdown = React.createClass({
-  getInitialState() {
-    return {
-      activeKey: null,
-    }
-  },
+class FilterDropdown extends React.Component {
+  state = {
+    activeKey: null,
+  }
 
-  handleSelect(activeKey) {
+  handleSelect = activeKey => {
     this.setState({ activeKey })
-  },
-  renderTagNames(items) {
+  }
+
+  renderTagNames = items => {
     const { filters } = this.props
     const state = filters.getState()
     items = items.map(item => {
@@ -156,8 +157,9 @@ const FilterDropdown = React.createClass({
     items = _.sortBy(items, 'text')
 
     return <FilterCategory items={items} name="labels" />
-  },
-  renderColumnNames(items) {
+  }
+
+  renderColumnNames = items => {
     const { filters } = this.props
     const state = filters.getState()
 
@@ -224,10 +226,10 @@ const FilterDropdown = React.createClass({
     )
 
     return <FilterCategory items={items} name="columns" />
-  },
+  }
 
   // copy/pasta from renderTagNames
-  renderMilestones(items) {
+  renderMilestones = items => {
     const { filters } = this.props
     const state = filters.getState()
     items = items.map(item => {
@@ -272,8 +274,9 @@ const FilterDropdown = React.createClass({
     items = _.sortBy(items, 'text')
 
     return <FilterCategory items={items} name="milestones" />
-  },
-  renderStates() {
+  }
+
+  renderStates = () => {
     const { filters } = this.props
     const { states } = filters.getState()
 
@@ -286,8 +289,9 @@ const FilterDropdown = React.createClass({
     })
 
     return <FilterCategory noSearch items={items} name="states" />
-  },
-  renderTypes() {
+  }
+
+  renderTypes = () => {
     const { filters } = this.props
     const { types } = filters.getState()
 
@@ -300,7 +304,7 @@ const FilterDropdown = React.createClass({
     })
 
     return <FilterCategory noSearch items={items} name="types" />
-  },
+  }
 
   render() {
     const { milestones, labels } = this.props
@@ -420,8 +424,8 @@ const FilterDropdown = React.createClass({
         {panel}
       </BS.NavDropdown>
     )
-  },
-})
+  }
+}
 
 // const FilterDropdownShell = React.createClass({
 //   render() {

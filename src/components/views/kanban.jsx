@@ -55,7 +55,7 @@ const filterKanbanLabels = (labels, columnRegExp) => {
   })
 }
 
-const KanbanColumn = React.createClass({
+class KanbanColumn extends React.Component {
   render() {
     const {
       label,
@@ -113,17 +113,18 @@ const KanbanColumn = React.createClass({
     } else {
       return null // TODO: Maybe the panel should say "No Issues" (but only if it's the only column)
     }
-  },
-})
+  }
+}
 
-const KanbanRepo = React.createClass({
+class KanbanRepo extends React.Component {
   componentWillMount() {
     const { repoInfos, dispatch } = this.props
     // Get the "Primary" repo for milestones and labels
     const [{ repoOwner, repoName }] = repoInfos
     dispatch(fetchLabels(repoOwner, repoName))
     dispatch(fetchIssues(repoInfos))
-  },
+  }
+
   render() {
     const {
       labels,
@@ -186,8 +187,8 @@ const KanbanRepo = React.createClass({
         <AnonymousModal />
       </div>
     )
-  },
-})
+  }
+}
 
 // let showedWarning = false;
 

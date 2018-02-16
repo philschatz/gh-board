@@ -13,7 +13,7 @@ import {
 import GithubFlavoredMarkdown from './gfm'
 import ColoredIcon from './colored-icon'
 
-const IssueOrPullRequestBlurb = React.createClass({
+class IssueOrPullRequestBlurb extends React.Component {
   render() {
     const { card, primaryRepoName, context, filters } = this.props
     const { issue, repoOwner, repoName, number } = card
@@ -135,7 +135,7 @@ const IssueOrPullRequestBlurb = React.createClass({
         </span>
       )
     }
-  },
-})
+  }
+}
 
 export default IssueOrPullRequestBlurb

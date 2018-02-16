@@ -4,7 +4,7 @@ import classnames from 'classnames'
 
 import { isLight } from '../helpers'
 
-const ColoredIcon = React.createClass({
+class ColoredIcon extends React.Component {
   render() {
     let { className, children, name, color } = this.props
 
@@ -28,8 +28,8 @@ const ColoredIcon = React.createClass({
         {children}
       </span>
     )
-  },
-})
+  }
+}
 
 export default connect(state => {
   return {

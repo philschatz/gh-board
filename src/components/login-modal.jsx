@@ -5,8 +5,8 @@ import { LinkExternalIcon } from 'react-octicons'
 
 import { login, logout } from '../redux/ducks/user'
 
-const Login = React.createClass({
-  onSave() {
+class Login extends React.Component {
+  onSave = () => {
     let rootURLVal = this._rootURL.value
     if (rootURLVal) {
       rootURLVal = rootURLVal.trim()
@@ -21,10 +21,11 @@ const Login = React.createClass({
     this.props.dispatch(login(tokenVal, rootURLVal))
     // Close the modal
     this.props.onHide()
-  },
-  onClear() {
+  }
+
+  onClear = () => {
     this.props.dispatch(logout())
-  },
+  }
 
   render() {
     const { token, rootURL } = this.props
@@ -135,7 +136,7 @@ const Login = React.createClass({
         <BS.Modal.Footer className="modal-footer">{footer}</BS.Modal.Footer>
       </BS.Modal>
     )
-  },
-})
+  }
+}
 
 export default connect(state => state.user)(Login)

@@ -1,24 +1,27 @@
+import c3 from 'c3'
+
 /**
  * React-C3 Chart
  * Copyright 2015 - Cody Reichert <codyreichert@gmail.com>
  */
 
-import c3 from 'c3'
+import PropTypes from 'prop-types'
+
 import React from 'react'
 
-const ChartComponent = React.createClass({
-  displayName: 'React-C3-Chart',
+class ChartComponent extends React.Component {
+  static displayName = 'React-C3-Chart'
 
-  propTypes: {
-    className: React.PropTypes.string,
-    data: React.PropTypes.object.isRequired,
-    element: React.PropTypes.string.isRequired,
-    options: React.PropTypes.object,
-  },
+  static propTypes = {
+    className: PropTypes.string,
+    data: PropTypes.object.isRequired,
+    element: PropTypes.string.isRequired,
+    options: PropTypes.object,
+  }
 
-  chart: null,
+  chart = null
 
-  shouldComponentUpdate: function(nextProps) {
+  shouldComponentUpdate(nextProps) {
     if (this.props.data.rows.length !== nextProps.data.rows.length) {
       // shallow check
       return true
@@ -30,13 +33,13 @@ const ChartComponent = React.createClass({
       return true
     }
     return false
-  },
+  }
 
-  componentDidMount: function() {
+  componentDidMount() {
     this._generateChart(this.props.data, this.props.element, this.props.options)
-  },
+  }
 
-  componentDidUpdate: function(prevProps) {
+  componentDidUpdate(prevProps) {
     if (prevProps.data.rows !== this.props.data.rows) {
       this._generateChart(
         this.props.data,
@@ -44,13 +47,13 @@ const ChartComponent = React.createClass({
         this.props.options
       )
     }
-  },
+  }
 
-  componentWillUnmount: function() {
+  componentWillUnmount() {
     this._destroyChart()
-  },
+  }
 
-  _generateChart: function(data, element, options) {
+  _generateChart = (data, element, options) => {
     let build = Object.assign(
       {},
       {
@@ -60,13 +63,13 @@ const ChartComponent = React.createClass({
       options
     )
     this.chart = c3.generate(build)
-  },
+  }
 
-  _destroyChart: function() {
+  _destroyChart = () => {
     this.chart.destroy()
-  },
+  }
 
-  render: function() {
+  render() {
     let className
     if (this.props.className) {
       className = 'c3 ' + this.props.className
@@ -80,7 +83,7 @@ const ChartComponent = React.createClass({
         style={this.props.styles}
       />
     )
-  },
-})
+  }
+}
 
 export default ChartComponent

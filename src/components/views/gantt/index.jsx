@@ -37,7 +37,7 @@ const filterByMilestoneAndKanbanColumn = cards => {
   return { data, columns: _.values(columns), columnCounts }
 }
 
-const GanttChart = React.createClass({
+class GanttChart extends React.Component {
   componentWillMount() {
     this.props.dispatch(
       fetchMilestones(
@@ -46,14 +46,17 @@ const GanttChart = React.createClass({
       )
     )
     this.props.dispatch(fetchIssues(this.props.repoInfos))
-  },
+  }
+
   componentDidMount() {
     this.renderChart()
-  },
+  }
+
   componentDidUpdate() {
     this.renderChart()
-  },
-  renderChart() {
+  }
+
+  renderChart = () => {
     const { milestones, data, columns } = this.props
     const now = new Date()
 
@@ -166,7 +169,8 @@ const GanttChart = React.createClass({
     }
 
     changeTimeDomain('1week')
-  },
+  }
+
   render() {
     const { columns, columnCounts, milestones, filters } = this.props
 
@@ -201,8 +205,8 @@ const GanttChart = React.createClass({
         <br />
       </div>
     )
-  },
-})
+  }
+}
 
 export default connect((state, ownProps) => {
   const { milestoneTitles } = state.filter

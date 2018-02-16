@@ -8,12 +8,11 @@ import { getCardColumn } from '../helpers'
 import IssueOrPullRequestBlurb from './issue-blurb'
 import LabelBadge from './label-badge'
 
-const MoveModal = React.createClass({
-  getInitialState() {
-    return {
-      unCheckedCards: {},
-    }
-  },
+class MoveModal extends React.Component {
+  state = {
+    unCheckedCards: {},
+  }
+
   componentWillReceiveProps(nextProps) {
     // If this card has related cards then show the modal.
     // Otherwise, just perform the move
@@ -27,7 +26,7 @@ const MoveModal = React.createClass({
     } else {
       this.setState({ unCheckedCards: {} })
     }
-  },
+  }
 
   // performMoveOrShowModal(card, primaryRepoName, label, milestone) {
   //   // If this card has related cards then show the modal.
@@ -46,7 +45,7 @@ const MoveModal = React.createClass({
   //   }
   //
   // },
-  onToggleCheckbox(card) {
+  onToggleCheckbox = card => {
     return () => {
       const { unCheckedCards } = this.state
       const copy = { ...unCheckedCards }
@@ -58,8 +57,9 @@ const MoveModal = React.createClass({
       }
       this.setState({ unCheckedCards: copy })
     }
-  },
-  moveIssue(props) {
+  }
+
+  moveIssue = props => {
     const { card, label, milestone } = props.movingIssue
     const { unCheckedCards } = this.state
     const allOtherCards = _.map(card.getRelated(), ({ vertex }) => vertex)
@@ -71,7 +71,8 @@ const MoveModal = React.createClass({
     props.dispatch(
       moveIssues(otherCardsToMove.concat(card), { label, milestone })
     )
-  },
+  }
+
   render() {
     const { container, movingIssue, filters } = this.props
     const { unCheckedCards } = this.state
@@ -180,8 +181,8 @@ const MoveModal = React.createClass({
     } else {
       return null
     }
-  },
-})
+  }
+}
 
 export default connect(state => {
   return {
