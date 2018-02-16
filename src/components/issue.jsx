@@ -636,7 +636,7 @@ class Issue extends React.Component {
   }
 }
 
-Issue = connect(state => {
+const ConnectedIssue = connect(state => {
   return {
     settings: state.settings,
   }
@@ -651,14 +651,14 @@ class IssueShell extends React.Component {
   render() {
     const { card } = this.props
     if (card.isLoaded()) {
-      return <Issue {...this.props} />
+      return <ConnectedIssue {...this.props} />
     } else {
       return (
         <Loadable
           key={card.key()}
           promise={card.load()}
           loadingText={card.key()}
-          renderLoaded={() => <Issue {...this.props} />}
+          renderLoaded={() => <ConnectedIssue {...this.props} />}
         />
       )
     }

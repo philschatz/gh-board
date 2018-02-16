@@ -1,5 +1,5 @@
 import 'babel-polyfill'
-import * as React from 'react'
+import * as React from 'react' // eslint-disable-line
 import ReactDOM from 'react-dom'
 import { Router } from 'react-router'
 import { Provider } from 'react-redux'
