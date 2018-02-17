@@ -332,47 +332,45 @@ class FilterDropdown extends React.Component {
       ]
     }
 
-    const footer = (
-      <BS.ButtonGroup>
-        <BS.Button disabled>Issue Only</BS.Button>
-        <BS.Button disabled>Issues & PRs</BS.Button>
-        <BS.Button disabled>PRs Only</BS.Button>
-      </BS.ButtonGroup>
-    )
-
     const panel = (
-      <BS.Panel
-        header={
-          <div>
-            <span>Filters</span>
-            <SavedFiltersButton />
-          </div>
-        }
-        footer={footer}
-        className="filter-panel"
-      >
-        <BS.Accordion>
-          <BS.Panel className="filter-category" header="Labels" eventKey="1">
+      <BS.PanelGroup accordion id="filters-accordeon">
+        <BS.Panel className="filter-category" eventKey="1">
+          <BS.Panel.Heading>
+            <BS.Panel.Title toggle>Labels</BS.Panel.Title>
+          </BS.Panel.Heading>
+          <BS.Panel.Body collapsible>
             {this.renderTagNames(labels)}
-          </BS.Panel>
-          <BS.Panel
-            className="filter-category"
-            header="Milestones"
-            eventKey="2"
-          >
+          </BS.Panel.Body>
+        </BS.Panel>
+        <BS.Panel className="filter-category" eventKey="2">
+          <BS.Panel.Heading>
+            <BS.Panel.Title toggle>Milestones</BS.Panel.Title>
+          </BS.Panel.Heading>
+          <BS.Panel.Body collapsible>
             {this.renderMilestones(milestones)}
-          </BS.Panel>
-          <BS.Panel className="filter-category" header="Columns" eventKey="3">
+          </BS.Panel.Body>
+        </BS.Panel>
+        <BS.Panel className="filter-category" eventKey="3">
+          <BS.Panel.Heading>
+            <BS.Panel.Title toggle>Columns</BS.Panel.Title>
+          </BS.Panel.Heading>
+          <BS.Panel.Body collapsible>
             {this.renderColumnNames(labels)}
-          </BS.Panel>
-          <BS.Panel className="filter-category" header="States" eventKey="4">
-            {this.renderStates()}
-          </BS.Panel>
-          <BS.Panel className="filter-category" header="Types" eventKey="5">
-            {this.renderTypes()}
-          </BS.Panel>
-        </BS.Accordion>
-      </BS.Panel>
+          </BS.Panel.Body>
+        </BS.Panel>
+        <BS.Panel className="filter-category" eventKey="4">
+          <BS.Panel.Heading>
+            <BS.Panel.Title toggle>States</BS.Panel.Title>
+          </BS.Panel.Heading>
+          <BS.Panel.Body collapsible>{this.renderStates()}</BS.Panel.Body>
+        </BS.Panel>
+        <BS.Panel className="filter-category" eventKey="5">
+          <BS.Panel.Heading>
+            <BS.Panel.Title toggle>Types</BS.Panel.Title>
+          </BS.Panel.Heading>
+          <BS.Panel.Body collapsible>{this.renderTypes()}</BS.Panel.Body>
+        </BS.Panel>
+      </BS.PanelGroup>
     )
 
     const { milestoneTitles } = this.props.filters.getState()
@@ -421,6 +419,10 @@ class FilterDropdown extends React.Component {
           </span>
         }
       >
+        <div className="header">
+          <span>Filters</span>
+          <SavedFiltersButton />
+        </div>
         {panel}
       </BS.NavDropdown>
     )

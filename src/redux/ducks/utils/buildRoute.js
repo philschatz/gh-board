@@ -213,7 +213,7 @@ export class FilterBuilder {
       name = null
     }
     return this._immutable({
-      username: name,
+      userName: name,
     })
   }
   // setColumnRegExp(reStr)

@@ -1,6 +1,6 @@
 import React from 'react'
 import * as BS from 'react-bootstrap'
-import { TagIcon } from 'react-octicons'
+import { CloudUploadIcon } from 'react-octicons'
 
 const LOCALSTORAGE_KEY = 'saved-filters'
 
@@ -19,11 +19,15 @@ class AddFilterModal extends React.Component {
       <BS.Modal className="-add-filter-modal" {...this.props}>
         <BS.Modal.Header closeButton>
           <BS.Modal.Title>
-            <TagIcon size="mega" /> Save Filter
+            <CloudUploadIcon size="mega" /> Save Filter
           </BS.Modal.Title>
         </BS.Modal.Header>
         <BS.Modal.Body>
-          <BS.FormControl type="text" inputRef={r => (this._title = r)} />
+          <BS.FormControl
+            type="text"
+            inputRef={r => (this._title = r)}
+            placeholder="Name of the filter..."
+          />
         </BS.Modal.Body>
         <BS.Modal.Footer>
           <BS.Button bsStyle="primary" onClick={this.onSave}>
@@ -60,7 +64,7 @@ class SavedFiltersButton extends React.Component {
       )
     })
     const addFilter = (
-      <TagIcon title="Save Filter" onClick={this.showAddFilter} />
+      <CloudUploadIcon title="Save Filter" onClick={this.showAddFilter} />
     )
     return (
       <div className="saved-filters">

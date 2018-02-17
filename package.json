@@ -70,7 +70,6 @@
     "react-redux": "^5.0.2",
     "react-router": "^3.0.0",
     "react-router-redux": "^4.0.7",
-    "recordo": "^0.0.6",
     "reduck": "^0.2.2",
     "redux": "^3.6.0",
     "redux-logger": "^3.0.6",

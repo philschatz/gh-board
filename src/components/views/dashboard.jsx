@@ -116,12 +116,6 @@ class RepoItem extends React.Component {
       <BS.ListGroupItem key={repoName} className={classnames(classes)}>
         {repoIcon}
         <Link to={repoLink}>{repoName}</Link>
-        {(repo.private && (
-          <BS.Label className="repo-private-label" bsStyle="warning">
-            PRIVATE
-          </BS.Label>
-        )) ||
-          null}{' '}
         {updatedAt}
         {comment}
         {multiSelectButton}
@@ -204,7 +198,8 @@ class RepoGroup extends React.Component {
 
     return (
       <BS.Col md={6}>
-        <BS.Panel key={repoOwner} header={header} eventKey={index}>
+        <BS.Panel eventKey={index}>
+          <BS.Panel.Heading>{header}</BS.Panel.Heading>
           <ListGroupWithMore>{sortedRepoNodes}</ListGroupWithMore>
         </BS.Panel>
       </BS.Col>
@@ -338,7 +333,8 @@ class ExamplesPanel extends React.Component {
     )
 
     return (
-      <BS.Panel key="example-repos" header={examplesHeader}>
+      <BS.Panel>
+        <BS.Panel.Heading>{examplesHeader}</BS.Panel.Heading>
         <BS.ListGroup>
           {_.map(SAMPLE_REPOS, props => (
             <RepoItem key={JSON.stringify(props)} {...props} />

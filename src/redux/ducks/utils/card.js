@@ -200,30 +200,32 @@ export default class Card {
     if (githubClient.getRateLimitRemaining() < githubClient.LOW_RATE_LIMIT) {
       return Promise.resolve('Rate limit low')
     }
-    return this.fetchPR(isForced).then(() => {
-      if (!this._prStatusPromise || isForced) {
-        // Stop fetching the status once it is success. Some failed tests might get re-run.
-        if (!this.prStatus || this.prStatus.state !== 'success') {
-          this._prStatusPromise = githubClient
-            .getOcto()
-            .then(({ repos }) =>
-              repos(this.repoOwner, this.repoName)
-                .commits(this.pr.head.sha)
-                .status.fetch()
-            )
-            .then(status => {
-              const isSame =
-                this.prStatus &&
-                status &&
-                JSON.stringify(this.prStatus) === JSON.stringify(status)
-              this.prStatus = status
-              if (!isSame) {
-                Database.putCard(this)
-              }
-            })
+    return this.fetchPR(githubClient, shouldShowPullRequestData, isForced).then(
+      () => {
+        if (!this._prStatusPromise || isForced) {
+          // Stop fetching the status once it is success. Some failed tests might get re-run.
+          if (!this.prStatus || this.prStatus.state !== 'success') {
+            this._prStatusPromise = githubClient
+              .getOcto()
+              .then(({ repos }) =>
+                repos(this.repoOwner, this.repoName)
+                  .commits(this.pr.head.sha)
+                  .status.fetch()
+              )
+              .then(status => {
+                const isSame =
+                  this.prStatus &&
+                  status &&
+                  JSON.stringify(this.prStatus) === JSON.stringify(status)
+                this.prStatus = status
+                if (!isSame) {
+                  Database.putCard(this)
+                }
+              })
+          }
         }
       }
-    })
+    )
   }
   fetchIssue(githubClient, skipSavingToDb) {
     return githubClient
@@ -233,6 +235,12 @@ export default class Card {
         this.issue = issue
         if (!skipSavingToDb) {
           Database.putCard(this)
+        }
+        return issue
+      })
+      .then(issue => {
+        if (this.isPullRequest()) {
+          return this.fetchPRStatus().then(() => issue)
         }
         return issue
       })

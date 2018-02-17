@@ -1,22 +1,11 @@
 import React from 'react'
-import * as BS from 'react-bootstrap'
 import classnames from 'classnames'
-import {
-  ListUnorderedIcon,
-  GitPullRequestIcon,
-  IssueOpenedIcon,
-  IssueReopenedIcon,
-  IssueClosedIcon,
-  QuestionIcon,
-} from 'react-octicons'
-
-import GithubFlavoredMarkdown from './gfm'
-import ColoredIcon from './colored-icon'
+import { GitPullRequestIcon } from 'react-octicons'
 
 class IssueOrPullRequestBlurb extends React.Component {
   render() {
-    const { card, primaryRepoName, context, filters } = this.props
-    const { issue, repoOwner, repoName, number } = card
+    const { card, primaryRepoName, context } = this.props
+    const { issue, repoName } = card
 
     const multipleRepoName = primaryRepoName === repoName ? null : repoName
     let blurbContext
@@ -26,28 +15,6 @@ class IssueOrPullRequestBlurb extends React.Component {
 
     if (issue) {
       const isPullRequest = card.isPullRequest() || issue.base // use .base in case we are given the PR JSON (which does not contain labels)
-      const popoverTitle = (
-        <GithubFlavoredMarkdown
-          disableLinks={true}
-          inline={true}
-          text={issue.title}
-        />
-      )
-
-      const bodyPopover = (
-        <BS.Popover
-          id={`popover-${repoOwner}-${repoName}-${number}`}
-          className="issue-body"
-          title={popoverTitle}
-        >
-          <GithubFlavoredMarkdown
-            disableLinks={false}
-            repoOwner={repoOwner}
-            repoName={repoName}
-            text={issue.body}
-          />
-        </BS.Popover>
-      )
 
       let icon = null
       if (isPullRequest) {
@@ -65,25 +32,6 @@ class IssueOrPullRequestBlurb extends React.Component {
             data-state={state}
           />
         )
-      } else {
-        let IconType
-        if (issue.state === 'open' && !issue.closedBy) {
-          IconType = IssueOpenedIcon
-        } else if (issue.state === 'open' && issue.closedBy) {
-          IconType = IssueReopenedIcon
-        } else if (issue.state === 'closed') {
-          IconType = IssueClosedIcon
-        } else {
-          IconType = QuestionIcon
-        }
-        icon = (
-          <IconType
-            title="Click for Issue Details"
-            className="blurb-icon"
-            onClick={this.onClickIcon}
-            data-state={issue.state}
-          />
-        )
       }
 
       const classes = {
@@ -92,37 +40,14 @@ class IssueOrPullRequestBlurb extends React.Component {
         'is-merged': card.isPullRequestMerged(),
       }
 
-      let kanbanColumnIcon
-      const kanbanColumn = issue.labels.filter(label => {
-        return filters.getState().columnRegExp.test(label.name)
-      })[0]
-      if (kanbanColumn) {
-        const { color, name } = kanbanColumn
-        kanbanColumnIcon = (
-          <ColoredIcon color={color} name={name}>
-            <ListUnorderedIcon />
-          </ColoredIcon>
-        )
-      }
-
       return (
         <span className={classnames(classes)}>
-          {kanbanColumnIcon}
           <a className="blurb-number-link" target="_blank" href={issue.htmlUrl}>
+            {icon}
             <span className="blurb-number">{issue.number}</span>
           </a>
-          <BS.OverlayTrigger
-            rootClose
-            trigger={['click', 'focus']}
-            placement="bottom"
-            overlay={bodyPopover}
-          >
-            <span className="-just-for-overlay-trigger">
-              {icon}
-              <span className="blurb-secondary-repo">{multipleRepoName}</span>
-              {blurbContext}
-            </span>
-          </BS.OverlayTrigger>
+          <span className="blurb-secondary-repo">{multipleRepoName}</span>
+          {blurbContext}
         </span>
       )
     } else {

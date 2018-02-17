@@ -35,14 +35,6 @@ Timer.setMaxListeners(0)
 let timerTimeout = null
 const timerFn = () => {
   Timer.emit('tick')
-  if (window.ga) {
-    window.ga('send', 'event', {
-      eventCategory: 'visibility',
-      eventAction: 'poll',
-      eventValue: document.hidden ? 0 : 1,
-      eventLabel: document.hidden ? 'Hidden' : 'Visible',
-    })
-  }
 
   // const d = new Date();
   // console.log('tick', d.getMinutes(), d.getSeconds());
@@ -54,14 +46,6 @@ const handleVisibilityChange = () => {
   if (!document.hidden) {
     clearTimeout(timerTimeout)
     timerFn()
-  }
-  if (window.ga) {
-    window.ga('send', 'event', {
-      eventCategory: 'visibility',
-      eventAction: 'change',
-      eventValue: document.hidden ? 0 : 1,
-      eventLabel: document.hidden ? 'Hidden' : 'Visible',
-    })
   }
 }
 document.addEventListener('visibilitychange', handleVisibilityChange, false)

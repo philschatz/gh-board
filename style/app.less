@@ -46,25 +46,6 @@ body {
   /* Allow enough space on top of screen for fixed header */
   padding-top: 5rem;
 
-  // Styles for the whole app (no matter where they occur)
-  // TODO: Mixin?
-  .badge {
-    cursor: pointer;
-    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12); // From GH Issues
-    font-size: 1rem;
-    &.is-light {
-      color: black;
-    }
-    &:not(.is-light) {
-      color: white;
-    }
-    .x-font-and-emoji(1.25rem);
-  }
-
-  .badge {
-    margin-right: 0.3rem;
-  }
-
   .avatar-image {
     display: inline-block;
     overflow: hidden;
@@ -120,6 +101,25 @@ body {
       margin-bottom: -3px;
       width: 20rem;
     }
+  }
+}
+
+.badge {
+  cursor: pointer;
+  text-shadow: 0 1px 0 hsla(0, 0%, 100%, 0.4);
+  line-height: 20px;
+  display: inline-block;
+  font-size: 11px;
+  padding: 0 6px;
+  margin-right: 0.3rem;
+  border-radius: 2px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  &.is-light {
+    color: rgb(51, 51, 51);
+  }
+  &:not(.is-light) {
+    color: white;
   }
 }
 
@@ -186,15 +186,8 @@ body {
     }
 
     background-color: #666; // default (no state)
-    color: white;
-    display: inline-block;
     white-space: nowrap;
-    margin-left: 0.5rem;
-    padding: 1px 5px;
-    font-size: 12px;
-    border-radius: 3px;
-    text-align: center;
-    font-weight: bold;
+    margin-left: 0.3rem;
   }
 
   // only apply padding to the top-most task list
@@ -350,11 +343,6 @@ i.icon-spin {
 // so I had to insert a wrapper div around ListGroupItem
 // .list-group > .-drag-source + .-drag-source { border-top: 1px solid #eee; }
 
-.badge {
-  border-radius: 3px;
-  font-weight: normal;
-}
-
 .navbar {
   min-height: 20px;
 } // bootstrap
@@ -505,20 +493,10 @@ i.icon-spin {
 .issue-status-badges .issue-title {
   color: #666;
   background-color: #eee;
-  display: inline-block;
+  display: inline;
+  margin-left: 5px;
   cursor: default;
-
-  &:not(:hover) {
-    max-width: 30rem;
-    white-space: nowrap;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &::before {
-    content: '(';
-  }
-  &::after {
-    content: ')';
-  }
+  line-height: 20px;
+  display: inline-block;
+  padding: 0 3px;
 }

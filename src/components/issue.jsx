@@ -9,7 +9,6 @@ import { Link } from 'react-router'
 import {
   CalendarIcon,
   ChecklistIcon,
-  MilestoneIcon,
   CommentIcon,
   AlertIcon,
   CheckIcon,
@@ -173,13 +172,45 @@ class IssueSimple extends React.Component {
   }
 }
 
+class CardDetailsModal extends React.Component {
+  render() {
+    const { card, ...rest } = this.props
+    const { issue, repoOwner, repoName } = card
+    return (
+      <BS.Modal className="-add-filter-modal" {...rest}>
+        <BS.Modal.Header closeButton>
+          <BS.Modal.Title>
+            <a href={issue.htmlUrl}>
+              <span>#{issue.number} </span>
+              {issue.title}
+            </a>
+          </BS.Modal.Title>
+        </BS.Modal.Header>
+        <BS.Modal.Body>
+          <GithubFlavoredMarkdown
+            repoOwner={repoOwner}
+            repoName={repoName}
+            text={issue.body}
+          />
+        </BS.Modal.Body>
+      </BS.Modal>
+    )
+  }
+}
+
 class IssueCard extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      showDetails: false,
+    }
+  }
+
   render() {
     const { card, primaryRepoName, columnRegExp, filters } = this.props
     const { issue, repoOwner, repoName } = card
 
     const { taskFinishedCount, taskTotalCount } = card.getTaskCounts()
-    const issueDueAt = card.getDueAt()
 
     // Defined by the collector
     const { isDragging } = this.props
@@ -189,17 +220,21 @@ class IssueCard extends React.Component {
 
     const commentsCount = card.getCommentCount()
 
-    const user = issue.assignee ? issue.assignee : issue.user
-    const assignedAvatar = (
-      <Link to={filters.toggleUserName(user.login).url()}>
-        <img
-          key="avatar"
-          className="avatar-image"
-          title={'Click to filter on ' + user.login}
-          src={user.avatarUrl}
-        />
-      </Link>
-    )
+    const assignedAvatars = (
+      issue.assignees || (issue.assignee ? [issue.assignee] : [])
+    ).map(user => {
+      const link = filters.toggleUserName(user.login).url()
+      return (
+        <Link key={link} to={link} className="pull-right">
+          <img
+            className="avatar-image"
+            title={'Click to filter on ' + user.login}
+            src={user.avatarUrl}
+          />
+        </Link>
+      )
+    })
+
     const nonKanbanLabels = _.filter(issue.labels, label => {
       if (!columnRegExp || !columnRegExp.test(label.name)) {
         return label
@@ -224,40 +259,15 @@ class IssueCard extends React.Component {
     })
     let taskCounts = null
     if (taskTotalCount) {
-      const taskListPopover = (
-        <BS.Popover
-          key={`popover-${card.key()}-task-list`}
-          id={`popover-${card.key()}-task-list`}
-          className="task-list-details"
-          title="Task List"
-        >
-          <GithubFlavoredMarkdown
-            disableLinks={false}
-            repoOwner={repoOwner}
-            repoName={repoName}
-            text={issue.body}
-          />
-        </BS.Popover>
-      )
-
       const taskCountsClasses = {
         'task-list-overview': true,
-        'pull-right': true,
         'is-done': taskFinishedCount === taskTotalCount,
       }
       taskCounts = (
-        <BS.OverlayTrigger
-          key="task-list"
-          rootClose
-          trigger={['click', 'focus']}
-          placement="bottom"
-          overlay={taskListPopover}
-        >
-          <span className={classnames(taskCountsClasses)}>
-            <ChecklistIcon />
-            {`${taskFinishedCount}/${taskTotalCount}`}
-          </span>
-        </BS.OverlayTrigger>
+        <span className={classnames(taskCountsClasses)}>
+          <ChecklistIcon />
+          {`${taskFinishedCount}/${taskTotalCount}`}
+        </span>
       )
     }
     const shouldShowMilestone =
@@ -277,15 +287,13 @@ class IssueCard extends React.Component {
           title="Milestone Details"
         >
           <h4>
-            <a target="_blank" href={issue.milestone.htmlUrl}>
-              <GithubFlavoredMarkdown
-                inline
-                disableLinks={true}
-                repoOwner={repoOwner}
-                repoName={repoName}
-                text={issue.milestone.title}
-              />
-            </a>
+            <GithubFlavoredMarkdown
+              inline
+              disableLinks={true}
+              repoOwner={repoOwner}
+              repoName={repoName}
+              text={issue.milestone.title}
+            />
           </h4>
           <BS.ProgressBar
             bsStyle="success"
@@ -293,10 +301,10 @@ class IssueCard extends React.Component {
             max={totalCount}
           />
           <p>
-            {openCount} open {closedCount} closed
+            {openCount} Open / {closedCount} Closed
           </p>
           <GithubFlavoredMarkdown
-            disableLinks={false}
+            disableLinks={true}
             repoOwner={repoOwner}
             repoName={repoName}
             text={issue.milestone.description}
@@ -307,30 +315,26 @@ class IssueCard extends React.Component {
         <span className="issue-milestone badge is-light">
           <BS.OverlayTrigger
             rootClose
-            trigger={['click', 'focus']}
+            trigger={['hover', 'focus']}
             placement="bottom"
             overlay={milestonePopover}
           >
-            <MilestoneIcon className="milestone-icon" />
+            <Link
+              className="milestone-title"
+              to={filters.toggleMilestoneTitle(issue.milestone.title).url()}
+            >
+              <GithubFlavoredMarkdown
+                inline
+                disableLinks={true}
+                repoOwner={repoOwner}
+                repoName={repoName}
+                text={issue.milestone.title}
+              />
+            </Link>
           </BS.OverlayTrigger>
-          <Link
-            className="milestone-title"
-            to={filters.toggleMilestoneTitle(issue.milestone.title).url()}
-          >
-            <GithubFlavoredMarkdown
-              inline
-              disableLinks={true}
-              repoOwner={repoOwner}
-              repoName={repoName}
-              text={issue.milestone.title}
-            />
-          </Link>
         </span>
       )
     }
-
-    // stop highlighting after 5min
-    const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000
 
     const relatedCards = _.map(
       card.getRelated(),
@@ -347,7 +351,6 @@ class IssueCard extends React.Component {
         return (
           <div key={issueCard.key()} className="related-issue">
             <IssueOrPullRequestBlurb
-              filters={filters}
               card={issueCard}
               primaryRepoName={card.repoName}
               context={context}
@@ -368,6 +371,8 @@ class IssueCard extends React.Component {
       )
     }
 
+    // stop highlighting after 5min
+    const isUpdated = Date.now() - Date.parse(updatedAt) < 2 * 60 * 1000
     const classes = {
       issue: true,
       'is-dragging': isDragging,
@@ -444,6 +449,7 @@ class IssueCard extends React.Component {
     }
 
     let dueAt
+    const issueDueAt = card.getDueAt()
     if (issueDueAt) {
       const dueAtClasses = {
         'issue-due-at': true,
@@ -466,14 +472,13 @@ class IssueCard extends React.Component {
     const header = [
       <IssueOrPullRequestBlurb
         key="issue-blurb"
-        filters={filters}
         card={card}
         primaryRepoName={primaryRepoName}
       />,
       statusBlurb,
-      taskCounts,
-      mergeConflictBlurb,
     ]
+      .concat(assignedAvatars)
+      .concat([mergeConflictBlurb])
 
     let featuredImage
     if (card.getFeaturedImageSrc()) {
@@ -482,86 +487,79 @@ class IssueCard extends React.Component {
       )
     }
 
-    const bodyPopover = (
-      <BS.Popover
-        className="popover-issue-body"
-        id={`popover-${card.key()}-body`}
-        title={issue.title}
-      >
-        <GithubFlavoredMarkdown
-          repoOwner={repoOwner}
-          repoName={repoName}
-          text={issue.body}
-        />
-      </BS.Popover>
-    )
-
-    class TitleLink extends React.Component {
-      render() {
-        const { children } = this.props
-        return (
-          <BS.OverlayTrigger
-            delayShow={2000}
-            container={this}
-            trigger={['hover', 'focus']}
-            placement="bottom"
-            overlay={bodyPopover}
-          >
-            {children}
-          </BS.OverlayTrigger>
-        )
-      }
-    }
-
     return (
-      <div className="-card-and-related">
-        <BS.ListGroupItem
-          key={card.key()}
+      <BS.Panel className="issue-card" onClick={this.showDetails}>
+        <BS.Panel.Body
           data-status-state={
             card.isPullRequest() ? card.getPullRequestStatus() : null
           }
-          header={header}
           onDragStart={this.onDragStart}
           className={classnames(classes)}
           data-state={issue.state}
         >
-          <TitleLink>
-            <span className="-extra-span-for-inline-popover">
-              <a
-                key="link"
-                className="issue-title"
-                target="_blank"
-                href={issue.htmlUrl}
-              >
-                <GithubFlavoredMarkdown
-                  inline
-                  repoOwner={repoOwner}
-                  repoName={repoName}
-                  text={issue.title}
-                />
-              </a>
-              {featuredImage}
-            </span>
-          </TitleLink>
+          {header}
+          <span className="issue-title">
+            <GithubFlavoredMarkdown
+              inline
+              repoOwner={repoOwner}
+              repoName={repoName}
+              text={issue.title}
+            />
+          </span>
+          {featuredImage}
 
-          <span key="labels" className="issue-labels">
+          <div className="issue-footer">
             {milestone}
             {labels}
-          </span>
-          <span key="footer" className="issue-footer">
-            {dueAt}
-            <span key="right-footer" className="issue-time-and-user">
-              <Time key="time" className="updated-at" dateTime={updatedAt} />
-              {comments}
-              {assignedAvatar}
+            <span className="issue-meta">
+              {taskCounts}
+              {dueAt}
+              <span className="issue-time-and-user">{comments}</span>
             </span>
-          </span>
-        </BS.ListGroupItem>
-        <div key="related" className="related-issues">
-          {relatedCards}
-        </div>
-      </div>
+            <BS.Clearfix />
+          </div>
+        </BS.Panel.Body>
+        {relatedCards.length > 0 && (
+          <BS.Panel.Footer className="related-issues">
+            {relatedCards}
+          </BS.Panel.Footer>
+        )}
+        <CardDetailsModal
+          show={this.state.showDetails}
+          onHide={this.hideDetails}
+          card={card}
+        />
+      </BS.Panel>
     )
+  }
+
+  showDetails = e => {
+    let target = e.target
+    while (target) {
+      if (
+        target.attributes &&
+        target.attributes.role &&
+        target.attributes.role.textContent === 'dialog'
+      ) {
+        // if we click on the modal, bail out
+        return
+      }
+      if (target.nodeName === 'A') {
+        // if we click on a link, bail out
+        return
+      }
+      // otherwise climb up the tree
+      target = target.parentNode
+    }
+    this.setState({
+      showDetails: true,
+    })
+  }
+
+  hideDetails = () => {
+    this.setState({
+      showDetails: false,
+    })
   }
 }
 

@@ -100,7 +100,6 @@ class MoveModal extends React.Component {
           const checkLabel = (
             <span>
               <IssueOrPullRequestBlurb
-                filters={filters}
                 card={vertex}
                 primaryRepoName={movingIssue.primaryRepoName}
               />

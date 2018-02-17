@@ -61,12 +61,6 @@ export default ({ getState }) => next => action => {
         break
       }
 
-      const explicitlyListedRepos = {}
-      action.payload.repoInfos.forEach(({ repoOwner, repoName }) => {
-        if (repoName !== '*') {
-          explicitlyListedRepos[`${repoOwner}/${repoName}`] = true
-        }
-      })
       promise = fetchIssues(githubClient, filter, action.payload.repoInfos)
       break
     }

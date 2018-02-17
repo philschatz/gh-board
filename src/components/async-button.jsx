@@ -53,6 +53,9 @@ export default class extends React.Component {
       renderError,
       doneText,
       className,
+      action, // eslint-disable-line
+      onResolved, // eslint-disable-line
+      onRejected, // eslint-disable-line
       ...rest
     } = this.props
     let { disabled } = this.props

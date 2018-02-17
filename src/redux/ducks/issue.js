@@ -27,6 +27,7 @@ const initialState = {
   milestones: [],
   isPollingEnabled: false,
   movingIssue: null,
+  fetchingIssues: false,
 }
 
 const duck = new Duck('issues', initialState)
@@ -198,6 +199,7 @@ export const fetchIssues = duck.defineAction(FETCH_ISSUES, {
   reducer(state, { payload }) {
     return {
       ...state,
+      fetchingIssues: true,
       cacheCardsRepoInfos: JSON.stringify(payload.repoInfos),
     }
   },
@@ -216,13 +218,14 @@ export const fetchIssues = duck.defineAction(FETCH_ISSUES, {
     })
     return {
       ...state,
+      fetchingIssues: false,
       cards: sortCards(boundCards),
     }
   },
   reject(state) {
     return {
       ...state,
-      ready: true,
+      fetchingIssues: false,
     }
   },
 })

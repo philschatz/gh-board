@@ -1,5 +1,4 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
 import { connect } from 'react-redux'
 import _ from 'underscore'
 import ultramarked from 'ultramarked'
@@ -8,7 +7,10 @@ import classnames from 'classnames'
 
 import { selectors } from '../redux/ducks/issue'
 import { forEachRelatedIssue } from '../gfm-dom'
-import { isLight } from '../helpers'
+// import { isLight } from '../helpers'
+
+ultramarked.renderer.link = (href, title, text) =>
+  `<a target="_blank" href="${href}" title="${title}">${text}</a>`
 
 const insertAfter = (newNode, node) => {
   if (node.nextSibling) {
@@ -19,6 +21,8 @@ const insertAfter = (newNode, node) => {
 }
 
 const EMOJI_RE = /(:\+?-?[+a-z0-9_-]+:)/g
+const CHECKED_RE = /^\[x\] /
+const UNCHECKED_RE = /^\[ \] /
 
 // HACK: Octokat converts underscores to camelCase so for now we do too
 const camelize = string => {
@@ -33,18 +37,15 @@ const camelize = string => {
 
 // Construct the little [Open], [Closed], [Merged] badge next to a PR/Issue number
 // Done in the DOM instead of React because it is injected into arbitrary HTML.
-const buildStatusBadge = (card, columnRegExp) => {
+const buildStatusBadge = (card /* , columnRegExp */) => {
   const wrapNode = document.createElement('span')
   wrapNode.classList.add('issue-status-badges')
   const newNode = document.createElement('span')
+  newNode.classList.add('badge')
   newNode.classList.add('issue-status-badge')
   if (card.issue) {
     const isPullRequest = card.isPullRequest()
     const state = card.issue.state // open, closed, reopened
-
-    const kanbanLabel = card.issue.labels.filter(label => {
-      return columnRegExp.test(label.name)
-    })[0]
 
     // Add  the issue title
     const titleNode = document.createElement('span')
@@ -52,26 +53,29 @@ const buildStatusBadge = (card, columnRegExp) => {
     titleNode.appendChild(document.createTextNode(card.issue.title))
     wrapNode.appendChild(titleNode)
 
-    if (kanbanLabel) {
-      // TODO: Figure out something for these since we cannot easily inject SVG
-      const octicon = document.createElement('i')
-      octicon.classList.add('octicon')
-      octicon.classList.add('octicon-list-unordered')
-      const columnIcon = document.createElement('span')
-      columnIcon.classList.add('colored-icon')
-      if (isLight(kanbanLabel.color)) {
-        columnIcon.classList.add('is-light')
-      }
-      columnIcon.appendChild(octicon)
-      // TODO: add is-light class
-      columnIcon.style.backgroundColor = `#${kanbanLabel.color}`
-      columnIcon.setAttribute(
-        'title',
-        kanbanLabel.name.replace(columnRegExp, '')
-      )
-      columnIcon.appendChild(octicon)
-      wrapNode.appendChild(columnIcon)
-    }
+    // const kanbanLabel = card.issue.labels.filter(label => {
+    //   return columnRegExp.test(label.name)
+    // })[0]
+    // if (kanbanLabel) {
+    //   // TODO: Figure out something for these since we cannot easily inject SVG
+    //   const octicon = document.createElement('i')
+    //   octicon.classList.add('octicon')
+    //   octicon.classList.add('octicon-list-unordered')
+    //   const columnIcon = document.createElement('span')
+    //   columnIcon.classList.add('colored-icon')
+    //   if (isLight(kanbanLabel.color)) {
+    //     columnIcon.classList.add('is-light')
+    //   }
+    //   columnIcon.appendChild(octicon)
+    //   // TODO: add is-light class
+    //   columnIcon.style.backgroundColor = `#${kanbanLabel.color}`
+    //   columnIcon.setAttribute(
+    //     'title',
+    //     kanbanLabel.name.replace(columnRegExp, '')
+    //   )
+    //   columnIcon.appendChild(octicon)
+    //   wrapNode.appendChild(columnIcon)
+    // }
 
     const iconNode = document.createElement('i')
     iconNode.classList.add('octicon')
@@ -93,7 +97,7 @@ const buildStatusBadge = (card, columnRegExp) => {
         msg = 'Closed'
       } else if (state === 'reopened') {
         iconClassName = 'octicon-issue-reopened'
-        msg = 'Reopened'
+        msg = 'Open'
       } else {
         throw new Error('BUG! Invalid Issue state')
       }
@@ -104,38 +108,24 @@ const buildStatusBadge = (card, columnRegExp) => {
     newNode.setAttribute('data-state', state)
     newNode.appendChild(iconNode)
     newNode.appendChild(textNode)
-  } else {
-    newNode.textContent = 'Closed?'
   }
   wrapNode.appendChild(newNode)
   return wrapNode
 }
 
+function buildCheckbox(checked) {
+  const checkbox = document.createElement('input')
+  checkbox.type = 'checkbox'
+  checkbox.disabled = true
+  checkbox.checked = checked
+  checkbox.classList.add('task-list-item-checkbox')
+  return checkbox
+}
+
 class InnerMarkdown extends React.Component {
   updateLinks = () => {
-    const { disableLinks } = this.props
-
-    if (!disableLinks) {
-      const root = ReactDOM.findDOMNode(this)
-      // Wrap images with a link that opens them in a new tab
-      const images = root.querySelectorAll('img:not(.emoji)')
-      _.each(images, img => {
-        const parent = img.parentNode
-        // Do not re-wrap if the image already has a link around it
-        if (parent.tagName.toLowerCase() === 'a') {
-          return
-        }
-        const href = img.getAttribute('src')
-        const link = document.createElement('a')
-        parent.replaceChild(link, img)
-        link.appendChild(img)
-        link.setAttribute('href', href)
-      })
-
-      const links = root.querySelectorAll('a')
-      _.each(links, link => {
-        link.setAttribute('target', '_blank')
-      })
+    if (!this.props.disableLinks) {
+      const root = this._ref
 
       // Find links to Issues/PR's and add the title, open/closed state, and kanban column
       // First, remove all badges from the DOM
@@ -152,31 +142,13 @@ class InnerMarkdown extends React.Component {
   }
 
   updateCheckboxes = () => {
-    const div = ReactDOM.findDOMNode(this)
-    function buildCheckbox(checked) {
-      const checkbox = document.createElement('input')
-      checkbox.type = 'checkbox'
-      checkbox.disabled = true
-      checkbox.checked = checked
-      checkbox.classList.add('task-list-item-checkbox')
-      return checkbox
-    }
+    Array.from(this._ref.querySelectorAll('li')).forEach(listItem => {
+      let checked = CHECKED_RE.test(listItem.textContent)
+      let unchecked = !checked && UNCHECKED_RE.test(listItem.textContent)
 
-    _.each(div.querySelectorAll('li'), listItem => {
-      if (/^\[x\] /.test(listItem.textContent)) {
+      if (checked || unchecked) {
         const textChild = listItem.firstChild
-        const checkbox = buildCheckbox(true)
-
-        listItem.classList.add('task-list-item')
-        listItem.parentNode.classList.add('task-list')
-        if (textChild.nodeType === Node.TEXT_NODE) {
-          // remove the `[x] ` and replace it with a disabled input box
-          textChild.textContent = textChild.textContent.substring(3)
-          listItem.insertBefore(checkbox, textChild)
-        }
-      } else if (/^\[ \] /.test(listItem.textContent)) {
-        const textChild = listItem.firstChild
-        const checkbox = buildCheckbox(false)
+        const checkbox = buildCheckbox(checked)
 
         listItem.classList.add('task-list-item')
         listItem.parentNode.classList.add('task-list')
@@ -190,7 +162,7 @@ class InnerMarkdown extends React.Component {
   }
 
   updateDOM = () => {
-    if (!ReactDOM.findDOMNode(this)) {
+    if (!this._ref) {
       return
     }
     this.updateLinks()
@@ -242,13 +214,13 @@ class InnerMarkdown extends React.Component {
             className: classnames(['markdown-body', className]),
             dangerouslySetInnerHTML: { __html: inlineHtml },
           }
-          return <span {...props} />
+          return <span ref={c => (this._ref = c)} {...props} />
         } else {
           const props = {
             className: classnames(['markdown-body', className]),
             dangerouslySetInnerHTML: { __html: html },
           }
-          return <div {...props} />
+          return <div ref={c => (this._ref = c)} {...props} />
         }
       } else {
         return <div className="markdown-body is-empty" />

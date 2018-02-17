@@ -23,7 +23,7 @@ export const goTo = duck.defineAction(CALL_HISTORY_METHOD, {
     return {
       payload: {
         method: 'push',
-        args: buildRoute(pathname, filter, repoInfos),
+        args: [buildRoute(pathname, filter, repoInfos)],
       },
     }
   },

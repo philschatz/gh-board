@@ -94,14 +94,22 @@ const CLOSE_STRINGS = Object.keys(PULL_REQUEST_ISSUE_RELATION)
 const POSSIBLE_RELATED_ISSUE_SELECTOR = 'a[href^="https://github.com/"]'
 const RELATED_ISSUE_RE = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/(pull|issues)\/(\d+)$/
 
+export function isRelatedIssue(href) {
+  // match `https://github.com/[repoOwner]/[repoName]/issues/[number]`
+  const matches = href.match(RELATED_ISSUE_RE)
+  if (matches) {
+    const [, repoOwner, repoName, , number] = matches
+    return { repoOwner, repoName, number }
+  }
+  return false
+}
+
 export function forEachRelatedIssue(div, fn) {
   _.each(div.querySelectorAll(POSSIBLE_RELATED_ISSUE_SELECTOR), link => {
     const href = link.getAttribute('href')
-    // match `https://github.com/[repoOwner]/[repoName]/issues/[number]`
-    const matches = href.match(RELATED_ISSUE_RE)
-    if (matches) {
-      const [, repoOwner, repoName, , number] = matches
-      fn({ repoOwner, repoName, number }, link)
+    const relatedIssue = isRelatedIssue(href)
+    if (relatedIssue) {
+      fn(relatedIssue, link)
     }
   })
 }

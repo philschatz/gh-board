@@ -203,7 +203,8 @@ class IssueList extends React.Component {
 
     return connectDropTarget(
       <div className="-drop-target">
-        <BS.Panel className={classes} header={header}>
+        <BS.Panel className={classes}>
+          <BS.Panel.Heading>{header}</BS.Panel.Heading>
           <BS.ListGroup fill>
             <BS.ListGroupItem
               key="dnd-placeholder"

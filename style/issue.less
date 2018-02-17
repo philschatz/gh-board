@@ -1,14 +1,10 @@
+.issue-card {
+  margin: 1rem;
+}
+
 .issue {
   cursor: move;
-  padding-top: 0;
-  padding-right: 0;
-  padding-bottom: 0;
-  padding-left: 0; // don't leave room to show the CI and mergeable status
-
-  margin-top: 1rem;
-  margin-left: 1rem;
-  margin-right: 1rem;
-  border-radius: 3px !important;
+  padding: 1rem;
 
   // Inspired by http://the-echoplex.net/flexyboxes/
   &.is-simple-list {
@@ -55,18 +51,6 @@
   }
   &.is-pull-request-to-different-branch {
     background-color: #e9e9fc;
-  }
-
-  // The little `[4/5]` section
-  .task-list-overview {
-    cursor: pointer;
-    font-size: 1.2rem;
-    &.is-done {
-      color: #0c0;
-    }
-    &:not(.is-done) {
-      color: #ccc;
-    }
   }
 
   // Hide the Issue icon if it is an Issue
@@ -164,114 +148,58 @@
     }
   }
 
-  .list-group-item-text {
-    // background-color: white;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-bottom: 1rem;
+  .badge {
+    max-width: 15rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 
-    font-size: 2rem;
+  .issue-milestone {
+    border: 1px solid #666;
+    max-width: 15rem;
 
-    // Sometimes the non-primary repo name is long
-    // if so, add ellipses that expand when hovered
-    // .issue-blurb {
-    //   .blurb-number-link {
-    //     .blurb-secondary-repo,
-    //     .blurb-number {
-    //       // TODO: get the underline to show up again
-    //       display: inline-block;
-    //       white-space: nowrap;
-    //       vertical-align: middle;
-    //     }
-    //   }
-    //   &:not(:hover) .blurb-number-link .blurb-secondary-repo {
-    //     max-width: 11rem;
-    //     overflow-x: hidden;
-    //     text-overflow: ellipsis;
-    //   }
-    //   // Chrome only underlines links with display:inline
-    //   .blurb-number-link:hover * { text-decoration: underline; }
-    // }
-
-    .task-list-overview {
-      padding: 0 2rem;
+    // it's a link
+    background-color: inherit;
+    font-weight: normal;
+    text-decoration: none;
+    &:hover {
+      text-decoration: none;
     }
 
-    .issue-labels {
-      display: block;
+    .milestone-title {
+      color: inherit; // it's an <a> but don't make it blue
     }
+  }
+
+  .issue-footer {
+    padding-top: 3px;
 
     .badge {
-      max-width: 15rem;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      line-height: 1.2rem;
-      padding: 5px;
+      margin-top: 3px;
     }
+  }
 
-    .issue-milestone {
+  .issue-meta {
+    display: block;
+    float: right;
+    color: #999;
+    padding-top: 3px;
+    line-height: 20px;
+
+    .comments-count,
+    .task-list-overview {
+      padding-right: 1rem;
       display: inline-block;
-      border: 1px solid #666;
-      max-width: 15rem;
-
-      // text-overflow: ellipsis;
-      // overflow: hidden;
-      // white-space: nowrap;
-      // line-height: 1.2rem;
-      padding: 2px;
-
-      // it's a link
-      background-color: inherit;
-      font-weight: normal;
-      text-decoration: none;
-      &:hover {
-        text-decoration: none;
-      }
-
-      .x-font-and-emoji(1.2rem); // same as font size
-
-      .milestone-icon {
-        color: #ccc;
-      }
-      .milestone-title {
-        color: inherit; // it's an <a> but don't make it blue
-        padding-left: 0.5rem;
-      }
+      white-space: nowrap;
+      vertical-align: middle;
     }
 
-    .issue-footer {
-      // .x-clearfix();
-      display: block;
-      min-height: 2rem;
-
-      .issue-time-and-user {
-        display: block;
-        float: right;
-
-        time.updated-at,
-        .comments-count {
-          font-size: 1.2rem;
-          color: #999;
-          padding-right: 1rem;
-          display: inline-block;
-          white-space: nowrap;
-          vertical-align: middle;
-        }
-
-        .comments-count-number {
-          padding-right: 0.5rem;
-        }
-
-        time.updated-at {
-          max-width: 9rem;
-          overflow-x: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .avatar-image {
-          cursor: pointer;
-        }
+    // The little `[4/5]` section
+    .task-list-overview {
+      cursor: pointer;
+      &.is-done {
+        color: #0c0;
       }
     }
   }
@@ -325,16 +253,12 @@
 
 .related-issues {
   background-color: #e6e6e6;
-  margin-top: 0;
-  margin-left: 1rem;
-  margin-right: 1rem;
-  margin-bottom: 1rem;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
 
-  padding-left: 1rem;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 
-  box-shadow: inset 0 2px 7px -5px #333;
+  padding: 0 1rem;
 
   .related-issue {
     overflow: hidden;
