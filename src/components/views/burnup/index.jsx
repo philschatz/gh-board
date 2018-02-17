@@ -1,17 +1,21 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import _ from 'underscore'
 import { GraphIcon } from 'react-octicons'
 
 import Chart from './chart'
 import moment from 'moment'
 
+function getDay(dateStr) {
+  return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24)
+}
+
+function sortByDate(dateKey) {
+  return (a, b) =>
+    getDay(a.issue[dateKey]) > getDay(b.issue[dateKey]) ? 1 : -1
+}
+
 class BurnupShell extends React.Component {
   renderLoaded = cards => {
-    function getDay(dateStr) {
-      return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24)
-    }
-
     let chunkType = null
     function getChunk(dateStr) {
       if (chunkType === 'day') {
@@ -71,15 +75,16 @@ class BurnupShell extends React.Component {
       return <span>Not showing a chart because there are 0 cards to show</span>
     }
 
-    cards = _.sortBy(cards, card => getDay(card.issue.createdAt))
+    cards = cards.sort(sortByDate('createdAt'))
     // Get the oldest Issue and the newest Issue Date
     const startDate = cards[0].issue.createdAt
 
     let openedCards = cards
 
     // From this point, we only care about closed Issues
-    let closedCards = cards.filter(card => card.issue.closedAt)
-    closedCards = _.sortBy(closedCards, card => getDay(card.issue.closedAt))
+    let closedCards = cards
+      .filter(card => card.issue.closedAt)
+      .sort(sortByDate('closedAt'))
     let endDate
     if (closedCards.length && openedCards.length) {
       const lastOpened = openedCards[openedCards.length - 1].issue.createdAt

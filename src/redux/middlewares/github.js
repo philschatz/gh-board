@@ -7,7 +7,7 @@ import moveIssues from './utils/moveIssues'
 
 const githubClient = new GithubClient()
 
-export default ({ getState }) => next => action => {
+export default ({ getState, dispatch }) => next => action => {
   if (!action || !action.meta || !action.meta.github) {
     return next(action)
   }
@@ -61,7 +61,12 @@ export default ({ getState }) => next => action => {
         break
       }
 
-      promise = fetchIssues(githubClient, filter, action.payload.repoInfos)
+      promise = fetchIssues(
+        githubClient,
+        filter,
+        action.payload.repoInfos,
+        dispatch
+      )
       break
     }
     case 'fetchLabels':

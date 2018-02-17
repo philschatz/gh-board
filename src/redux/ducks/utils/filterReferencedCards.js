@@ -1,8 +1,6 @@
-import _ from 'underscore'
-
 export default function filterReferencedCards(cards, isFilteringPullRequests) {
   const allPossiblyRelatedCards = {}
-  _.each(cards, card => {
+  cards.forEach(card => {
     // XOR
     if (
       isFilteringPullRequests ? !card.isPullRequest() : card.isPullRequest()
@@ -10,7 +8,7 @@ export default function filterReferencedCards(cards, isFilteringPullRequests) {
       allPossiblyRelatedCards[card.key()] = true
     }
   })
-  return _.filter(cards, card => {
+  return cards.filter(card => {
     // XOR
     if (
       isFilteringPullRequests ? card.isPullRequest() : !card.isPullRequest()
@@ -26,15 +24,12 @@ export default function filterReferencedCards(cards, isFilteringPullRequests) {
           return vertex.isPullRequest()
         })
       }
-      const hasVisiblePullRequest = _.filter(
-        related,
-        ({ vertex: otherCard }) => {
-          if (allPossiblyRelatedCards[otherCard.key()]) {
-            return true
-          }
-          return false
+      const hasVisiblePullRequest = related.filter(({ vertex: otherCard }) => {
+        if (allPossiblyRelatedCards[otherCard.key()]) {
+          return true
         }
-      )
+        return false
+      })
       return !hasVisiblePullRequest.length
     } else {
       return true

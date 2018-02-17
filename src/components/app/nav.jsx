@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
@@ -92,7 +91,7 @@ class AppNav extends React.Component {
         <HomeIcon />
       </Link>
     )
-    const filtering = _.map(tagNames, tagName => {
+    const filtering = tagNames.map(tagName => {
       // TODO: HACK. Find a better way to update the color of labels
       const label = LABEL_CACHE[tagName] || { name: tagName, color: 'ffffff' }
       return (
@@ -174,7 +173,7 @@ class AppNav extends React.Component {
           </Link>
         )
       } else {
-        repoNameItems = _.map(repoInfos, ({ repoOwner, repoName }, index) => {
+        repoNameItems = repoInfos.map(({ repoOwner, repoName }, index) => {
           const currentRepoInfos = [{ repoOwner, repoName }]
 
           const repoLink = new selectors.FilterBuilder(

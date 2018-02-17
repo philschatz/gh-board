@@ -1,10 +1,9 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import _ from 'underscore'
 
 import { fetchMilestones, fetchIssues } from '../../../redux/ducks/issue'
 import { selectors } from '../../../redux/ducks/filter'
-import { getCardColumn, UNCATEGORIZED_NAME } from '../../../helpers'
+import { getCardColumn, sortByColumnName } from '../../../helpers'
 import LabelBadge from '../../label-badge'
 
 import d3 from 'd3' // eslint-disable-line
@@ -34,7 +33,11 @@ const filterByMilestoneAndKanbanColumn = cards => {
   cards.forEach(card => {
     add(card)
   })
-  return { data, columns: _.values(columns), columnCounts }
+  return {
+    data,
+    columns: Object.keys(columns).map(k => columns[k]),
+    columnCounts,
+  }
 }
 
 class GanttChart extends React.Component {
@@ -87,7 +90,7 @@ class GanttChart extends React.Component {
         })
       }
       let accountedForCount = 0
-      _.each(columns, ({ name, color }) => {
+      columns.forEach(({ name, color }) => {
         if (data[milestone.title]) {
           const count = data[milestone.title][name] || 0
           if (count) {
@@ -139,32 +142,32 @@ class GanttChart extends React.Component {
     chart(tasks)
 
     function changeTimeDomain(timeDomainString) {
-      let format
+      let tickFormat
       switch (timeDomainString) {
         case '1hr':
-          format = '%H:%M:%S'
+          tickFormat = '%H:%M:%S'
           chart.timeDomain([d3.time.hour.offset(maxDate, -1), maxDate])
           break
         case '3hr':
-          format = '%H:%M'
+          tickFormat = '%H:%M'
           chart.timeDomain([d3.time.hour.offset(maxDate, -3), maxDate])
           break
         case '6hr':
-          format = '%H:%M'
+          tickFormat = '%H:%M'
           chart.timeDomain([d3.time.hour.offset(maxDate, -6), maxDate])
           break
         case '1day':
-          format = '%H:%M'
+          tickFormat = '%H:%M'
           chart.timeDomain([d3.time.day.offset(maxDate, -1), maxDate])
           break
         case '1week':
-          format = '%m/%d'
+          tickFormat = '%m/%d'
           chart.timeDomain([d3.time.day.offset(maxDate, -7), maxDate])
           break
         default:
-          format = '%H:%M'
+          tickFormat = '%H:%M'
       }
-      chart.tickFormat(format)
+      chart.tickFormat(tickFormat)
       chart.redraw(tasks)
     }
 
@@ -215,16 +218,7 @@ export default connect((state, ownProps) => {
     state.issues.cards
   )
 
-  columns = _.sortBy(columns, ({ name }) => {
-    if (name === UNCATEGORIZED_NAME) {
-      // make sure Uncategorized is the left-most column
-      return -1
-    } else {
-      const result = /^(\d+)/.exec(name)
-      return (result && result[1]) || name
-    }
-  })
-  columns = columns.reverse()
+  columns = columns.sort(sortByColumnName(true))
 
   // Remove milestones that are not in the URL filter
   let milestones

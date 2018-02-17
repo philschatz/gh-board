@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import * as Database from '../../middlewares/utils/indexedDB'
 import { getDataFromHtml } from '../../../gfm-dom'
 
@@ -6,12 +5,16 @@ export const toIssueKey = (repoOwner, repoName, number) => {
   return `${repoOwner}/${repoName}#${number}`
 }
 
+export const getCard = (CARD_CACHE, { repoOwner, repoName, number }) => {
+  const key = toIssueKey(repoOwner, repoName, number)
+  return CARD_CACHE[key]
+}
+
 export const cardFactory = (CARD_CACHE, GRAPH_CACHE) => (
   { repoOwner, repoName, number, issue, pr = null, prStatuses = null },
   cast
 ) => {
-  const key = toIssueKey(repoOwner, repoName, number)
-  let card = CARD_CACHE[key]
+  let card = getCard(CARD_CACHE, { repoOwner, repoName, number })
   if (card && issue) {
     card.resetPromisesAndState(issue, pr, prStatuses)
     return card
@@ -28,8 +31,9 @@ export const cardFactory = (CARD_CACHE, GRAPH_CACHE) => (
       prStatuses
     )
     if (!cast) {
-      GRAPH_CACHE.addCards([card], cardFactory(CARD_CACHE, GRAPH_CACHE))
+      GRAPH_CACHE.addCards([card], getCard.bind(this, CARD_CACHE))
     }
+    const key = toIssueKey(repoOwner, repoName, number)
     CARD_CACHE[key] = card
     return card
   }
@@ -85,9 +89,9 @@ export default class Card {
     // Pull out the 1st status which matches the overall status of the commit.
     // That way we get the targetURL and message.
     // When 'pending', there might not be entries in statuses
-    const theStatus = _.filter(statuses, status => {
+    const theStatus = statuses.find(status => {
       return status.state === state
-    })[0]
+    })
     if (!theStatus) {
       return {}
     }

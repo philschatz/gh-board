@@ -263,10 +263,6 @@ body {
     .select-related-issue {
       margin-left: -20px;
     }
-
-    .issue-blurb .colored-icon {
-      display: none;
-    }
   }
 }
 
@@ -368,95 +364,77 @@ i.icon-spin {
   > .dropdown-menu {
     width: 32rem; // this matches the ellipses for milestones
 
-    .filter-panel {
-      margin-bottom: 0; // override bootstrap
-
-      > .panel-body {
-        // padding: 0; //override bootstrap
+    .filter-category {
+      .panel-body {
+        padding: 0; //override bootstrap
       }
-      .filter-category {
-        .panel-body {
-          padding: 0; //override bootstrap
-        }
 
-        .form-group,
-        .list-group {
-          margin-bottom: 0; // override bootstrap
-        }
+      .form-group,
+      .list-group {
+        margin-bottom: 0; // override bootstrap
+      }
 
-        //...
-        .list-group {
-          // allow vertical scrolling
-          max-height: 380px; // TODO: have this be calculated by the page height
-          overflow-y: auto;
+      //...
+      .list-group {
+        // allow vertical scrolling
+        max-height: 380px; // TODO: have this be calculated by the page height
+        overflow-y: auto;
 
-          .list-group-item {
-            padding: 5px 10px; // make it narrower than bootstrap's default
+        .list-group-item {
+          padding: 5px 10px; // make it narrower than bootstrap's default
 
-            &:hover {
-              background-color: #eee;
-            }
+          &:hover {
+            background-color: #eee;
+          }
 
-            // padd just enough for the missing octicon-check
-            &:not(.is-selected) {
-              padding-left: 3.1rem;
-            }
+          // padd just enough for the missing octicon-check
+          &:not(.is-selected) {
+            padding-left: 3.1rem;
+          }
 
-            // Hide the exclude button unless hovering over the item
-            &:not(.is-excluded):not(:hover) .item-toggle-exclude {
-              display: none;
-            }
+          // Hide the exclude button unless hovering over the item
+          &:not(.is-excluded):not(:hover) .item-toggle-exclude {
+            display: none;
+          }
 
-            // Make selected (or excluded) items bold
-            &.is-selected,
-            &.is-excluded {
-              .item-text {
-                font-weight: bold;
-              }
-            }
-
-            .item-checkmark {
-              margin-right: 1rem;
-            }
-
+          // Make selected (or excluded) items bold
+          &.is-selected,
+          &.is-excluded {
             .item-text {
-              display: inline-block;
-              margin-left: 1rem;
-
-              color: inherit; // override the blue link color
-
-              // milestones are long; truncate them
-              max-width: 21rem;
-              white-space: nowrap;
-              overflow-x: hidden;
-              text-overflow: ellipsis;
+              font-weight: bold;
             }
+          }
 
-            .item-toggle-exclude {
-              float: right;
-            }
+          .item-checkmark {
+            margin-right: 1rem;
+          }
 
-            .item-icon {
-              width: 1em;
-              height: 1em;
-              display: inline-block;
-              border-radius: 3px;
-            }
+          .item-text {
+            display: inline-block;
+            margin-left: 1rem;
+
+            color: inherit; // override the blue link color
+
+            // milestones are long; truncate them
+            max-width: 21rem;
+            white-space: nowrap;
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .item-toggle-exclude {
+            float: right;
+          }
+
+          .item-icon {
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            border-radius: 3px;
           }
         }
       }
     }
-  }
-}
-
-.colored-icon {
-  display: inline-block;
-  // padding: 3px 8px;
-  padding: 1px 6px;
-  margin: 2px;
-  border-radius: 3px;
-  &:not(.is-light) {
-    color: white;
   }
 }
 

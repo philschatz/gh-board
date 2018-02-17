@@ -4,6 +4,7 @@ import { KANBAN_LABEL } from '../../../helpers'
 import * as Database from './indexedDB'
 import fetchLabels from './fetchLabels'
 import { filterCard } from './filterCards'
+import { _gotIssuesFromDB } from '../../ducks/issue'
 
 function emptyFilter() {
   return {
@@ -144,10 +145,10 @@ function _fetchUpdatesForRepo(githubClient, repo) {
       })
       .then(() => {
         // FINALLY, actually fetch the updates
-        return Database.getRepoOrNull(repoOwner, repoName).then(repo => {
+        return Database.getRepoOrNull(repoOwner, repoName).then(_repo => {
           let lastSeenAt
-          if (repo && repo.lastSeenAt) {
-            lastSeenAt = repo.lastSeenAt
+          if (_repo && _repo.lastSeenAt) {
+            lastSeenAt = _repo.lastSeenAt
           }
           return _fetchLastSeenUpdatesForRepo(
             githubClient,
@@ -162,7 +163,7 @@ function _fetchUpdatesForRepo(githubClient, repo) {
   })
 }
 
-export default function fetchIssues(githubClient, filter, repoInfos) {
+export default function fetchIssues(githubClient, filter, repoInfos, dispatch) {
   const explicitlyListedRepos = {}
   repoInfos.forEach(({ repoOwner, repoName }) => {
     if (repoName !== '*') {
@@ -170,9 +171,19 @@ export default function fetchIssues(githubClient, filter, repoInfos) {
     }
   })
 
+  let fetched = false
+
+  Database.fetchCards(filter, repoInfos)
+    .then(cards => {
+      if (!fetched) {
+        dispatch(_gotIssuesFromDB(cards))
+      }
+    })
+    .catch(() => {})
+
   return githubClient
     .getOcto()
-    .then(({ users, orgs, repos }) => {
+    .then(client => {
       return Promise.all(
         repoInfos.map(({ repoOwner, repoName }) => {
           if (repoName === '*') {
@@ -184,26 +195,27 @@ export default function fetchIssues(githubClient, filter, repoInfos) {
               // First, we have to determine if the repoOwner is an Organization or a User
               // so we can call .orgs or .users to get the list of repositories
               // .orgs returns Private+Public repos but .users only returns private repos
-              fetchAllRepos = users(repoOwner)
+              fetchAllRepos = client
+                .users(repoOwner)
                 .fetch()
                 .then(({ type }) => {
                   if ('Organization' === type) {
-                    return orgs(repoOwner).repos.fetchAll()
+                    return client.orgs(repoOwner).repos.fetchAll()
                   } else {
-                    return users(repoOwner).repos.fetchAll()
+                    return client.users(repoOwner).repos.fetchAll()
                   }
                 })
             } else {
               // only get the 1st page of results if not logged in
               // since it's anonymous we only need to get public repos (.users only yields public repos)
-              fetchAllRepos = users(repoOwner).repos.fetchOne()
+              fetchAllRepos = client.users(repoOwner).repos.fetchOne()
             }
             return fetchAllRepos
               .then(repos => {
                 // progress.tick(`Fetched list of all repositories for ${repoOwner}`);
                 // Filter repos to only include ones that have been pushed in the last year
                 // to avoid excessive polling
-                repos = _.filter(repos, repo => {
+                repos = repos.filter(repo => {
                   const ret =
                     Date.now() - Date.parse(repo.updatedAt) <
                     1000 * 60 * 60 * 24 * 365
@@ -230,13 +242,16 @@ export default function fetchIssues(githubClient, filter, repoInfos) {
               })
               .then(issuesByRepo => {
                 // exclude the null repos (ones that were explicitly listed in the URL)
-                return _.flatten(
-                  _.filter(issuesByRepo, v => !!v),
-                  true /*shallow*/
-                )
+                return Object.keys(issuesByRepo).reduce((prev, v) => {
+                  if (!v) {
+                    return prev
+                  }
+                  return prev.concat(v)
+                }, [])
               })
           } else {
-            return repos(repoOwner, repoName)
+            return client
+              .repos(repoOwner, repoName)
               .fetch()
               .then(repo => {
                 return _fetchUpdatesForRepo(githubClient, repo)
@@ -247,18 +262,15 @@ export default function fetchIssues(githubClient, filter, repoInfos) {
     })
     .then(repoAndCardsUpdate => {
       const repoAndCards = _.flatten(repoAndCardsUpdate, true /*shallow*/) // the asterisks in the URL become an array of repoAndCards so we need to flatten
-      const repos = _.filter(
-        repoAndCards.map(({ repository }) => repository),
-        v => !!v
-      ) // if the lastSeenAt did not change then repository field will be missing
-      const cards = _.flatten(
-        repoAndCards.map(({ cards }) => cards),
-        true /*shallow*/
-      )
+      const repos = repoAndCards
+        .map(({ repository }) => repository)
+        .filter(v => !!v)
+      // if the lastSeenAt did not change then repository field will be missing
+      const cards = _.flatten(repoAndCards.map(x => x.cards), true /*shallow*/)
       // didLabelsChange is true if at least one of the repos labels changed
       const didLabelsChange =
         _.flatten(
-          repoAndCards.map(({ didLabelsChange }) => didLabelsChange),
+          repoAndCards.map(x => x.didLabelsChange),
           true /*shallow*/
         ).indexOf(true) >= 0
 
@@ -275,6 +287,7 @@ export default function fetchIssues(githubClient, filter, repoInfos) {
       return putCardsAndRepos.then(() => ({ repos, cards, didLabelsChange }))
     })
     .then(() => {
+      fetched = true
       return Database.fetchCards(filter, repoInfos)
     })
 }

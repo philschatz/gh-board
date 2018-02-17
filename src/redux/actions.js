@@ -21,6 +21,7 @@ export const RESET_DATABASES = duck + 'RESET_DATABASES'
 duck = 'issues.'
 
 export const FETCH_ISSUES = duck + 'FETCH_ISSUES'
+export const GOT_ISSUES_FROM_DB = duck + 'GOT_ISSUES_FROM_DB'
 export const CLEAR_CACHE = duck + 'CLEAR_CACHE'
 export const FETCH_LABELS = duck + 'FETCH_LABELS'
 export const FETCH_MILESTONES = duck + 'FETCH_MILESTONES'

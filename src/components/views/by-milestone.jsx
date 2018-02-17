@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import _ from 'underscore'
 import { Link } from 'react-router'
 import { MilestoneIcon } from 'react-octicons'
 
@@ -20,7 +19,7 @@ class KanbanColumn extends React.Component {
       filters,
     } = this.props
 
-    const issueComponents = _.map(cards, card => {
+    const issueComponents = cards.map(card => {
       return (
         <Issue
           key={card.key()}
@@ -83,7 +82,7 @@ class ByMilestoneView extends React.Component {
     // Get the primary repo
     const [primaryRepo] = repoInfos
 
-    const uncategorizedCards = _.filter(cards, card => {
+    const uncategorizedCards = cards.filter(card => {
       return !card.issue.milestone
     })
 
@@ -107,7 +106,7 @@ class ByMilestoneView extends React.Component {
 
       // If we are filtering by a kanban column then only show that column
       // Otherwise show all columns
-      const columnCards = _.filter(cards, card => {
+      const columnCards = cards.filter(card => {
         return (
           card.issue.milestone && card.issue.milestone.title === milestone.title
         )

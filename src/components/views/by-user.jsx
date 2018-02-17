@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import _ from 'underscore'
 import { PersonIcon } from 'react-octicons'
 
 import { selectors } from '../../redux/ducks/filter'
@@ -12,7 +11,7 @@ class KanbanColumn extends React.Component {
   render() {
     const { login, cards, primaryRepoName, columnRegExp, filters } = this.props
 
-    const issueComponents = _.map(cards, card => {
+    const issueComponents = cards.map(card => {
       return (
         <Issue
           key={card.key()}
@@ -61,10 +60,10 @@ class UsersView extends React.Component {
     }
     loginsArray.sort()
 
-    const kanbanColumns = _.map(loginsArray, login => {
+    const kanbanColumns = loginsArray.map(login => {
       // If we are filtering by a kanban column then only show that column
       // Otherwise show all columns
-      const columnCards = _.filter(cards, card => {
+      const columnCards = cards.filter(card => {
         return (
           (card.issue.owner && card.issue.owner.login === login) ||
           card.issue.user.login === login

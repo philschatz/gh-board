@@ -1,5 +1,3 @@
-import _ from 'underscore'
-
 class BipartiteGraph {
   constructor() {
     this.edgesA = {}
@@ -11,14 +9,13 @@ class BipartiteGraph {
     return card.repoOwner + '/' + card.repoName + '#' + card.number
   }
   addCards(cards, getCard) {
-    _.each(cards, card => {
-      card = getCard(card, true)
+    cards.forEach(card => {
       const cardPath = this.cardToKey(card)
       if (card.issue) {
         // If an issue refers to some random repo then card.issue might be null
         const relatedIssues = card.getRelatedIssuesFromBody()
         // Show **all** related Issues/PR's (the graph is no longer bipartite)
-        _.each(relatedIssues, ({ repoOwner, repoName, number, fixes }) => {
+        relatedIssues.forEach(({ repoOwner, repoName, number, fixes }) => {
           const otherCardPath = this.cardToKey({
             repoOwner,
             repoName,
@@ -62,10 +59,12 @@ class BipartiteGraph {
   //   delete this.edgesB[b];
   // }
   getA(a) {
-    return _.values(this.edgesA[a])
+    const edge = this.edgesA[a] || {}
+    return Object.keys(edge).map(k => edge[k])
   }
   getB(b) {
-    return _.values(this.edgesB[b])
+    const edge = this.edgesB[b] || {}
+    return Object.keys(edge).map(k => edge[k])
   }
 }
 

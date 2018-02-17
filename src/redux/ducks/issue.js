@@ -1,12 +1,13 @@
 import Duck from 'reduck'
 
 import BipartiteGraph from './utils/bipartite-graph'
-import { cardFactory, toIssueKey } from './utils/card'
+import { cardFactory, toIssueKey, getCard } from './utils/card'
 
 import {
   LOGOUT,
   CLEAR_CACHE,
   FETCH_ISSUES,
+  GOT_ISSUES_FROM_DB,
   FETCH_LABELS,
   FETCH_MILESTONES,
   UPDATE_LABEL,
@@ -147,9 +148,9 @@ export const fetchMilestones = duck.defineAction(FETCH_MILESTONES, {
 })
 
 export const tryToMoveIssue = duck.defineAction(TRY_MOVE_ISSUE, {
-  creator({ card, primaryRepoName, label, milestone }) {
+  creator({ card, label, milestone }) {
     return {
-      payload: { card, primaryRepoName, label, milestone },
+      payload: { card, label, milestone },
     }
   },
   reducer(state, { payload }) {
@@ -187,6 +188,29 @@ function sortCards(cards) {
   })
 }
 
+export const _gotIssuesFromDB = duck.defineAction(GOT_ISSUES_FROM_DB, {
+  creator(cards) {
+    return {
+      payload: cards,
+    }
+  },
+  reducer(state, { payload: cards }) {
+    const boundCards = cards.map(c =>
+      cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true)
+    )
+    state.GRAPH_CACHE.addCards(boundCards, getCard.bind(this, state.CARD_CACHE)) // mutating the state, that's bad
+    boundCards.forEach(({ issue }) => {
+      issue.labels.forEach(label => {
+        state.LABEL_CACHE[label.name] = label // mutating the state, that's bad
+      })
+    })
+    return {
+      ...state,
+      cards: sortCards(boundCards),
+    }
+  },
+})
+
 export const fetchIssues = duck.defineAction(FETCH_ISSUES, {
   creator(repoInfos, forced) {
     return {
@@ -207,10 +231,7 @@ export const fetchIssues = duck.defineAction(FETCH_ISSUES, {
     const boundCards = cards.map(c =>
       cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true)
     )
-    state.GRAPH_CACHE.addCards(
-      boundCards,
-      cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)
-    ) // mutating the state, that's bad
+    state.GRAPH_CACHE.addCards(boundCards, getCard.bind(this, state.CARD_CACHE)) // mutating the state, that's bad
     boundCards.forEach(({ issue }) => {
       issue.labels.forEach(label => {
         state.LABEL_CACHE[label.name] = label // mutating the state, that's bad
@@ -294,9 +315,7 @@ export const moveIssues = duck.defineAction(MOVE_ISSUES, {
 })
 
 export const selectors = {
-  getCard(state, c) {
-    return cardFactory(state.CARD_CACHE, state.GRAPH_CACHE)(c, true)
-  },
+  getCard,
 }
 
 export default duck.reducer

@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import { KANBAN_LABEL, UNCATEGORIZED_NAME } from '../../../helpers'
 
 export default function moveIssues(githubClient, cards, { label, milestone }) {
@@ -8,13 +7,13 @@ export default function moveIssues(githubClient, cards, { label, milestone }) {
         if (label) {
           // Find all the labels, remove the kanbanLabel, and add the new label
           // Exclude Kanban labels
-          const labels = _.filter(card.issue.labels, _label => {
+          const labels = card.issue.labels.filter(_label => {
             return (
               UNCATEGORIZED_NAME !== _label.name &&
               !KANBAN_LABEL.test(_label.name)
             )
           })
-          const labelNames = _.map(labels)
+          const labelNames = labels.map(x => x.name)
           // When moving back to uncategorized do not add a new label
           if (UNCATEGORIZED_NAME !== label.name) {
             labelNames.push(label.name)
@@ -27,9 +26,9 @@ export default function moveIssues(githubClient, cards, { label, milestone }) {
             .milestones.fetchAll()
             .then(milestones => {
               // Find the milestone with a matching Title
-              const matchingMilestone = _.filter(milestones, _milestone => {
+              const matchingMilestone = milestones.find(_milestone => {
                 return _milestone.title === milestone.title
-              })[0]
+              })
 
               if (matchingMilestone) {
                 return repos(card.repoOwner, card.repoName)

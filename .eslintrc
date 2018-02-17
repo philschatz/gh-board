@@ -23,6 +23,7 @@
     "new-cap": 0,
     "no-console": 1,
     "no-undef": 2,
+    "no-shadow": 2,
     "duck/meta-validation": [
       2,
       [

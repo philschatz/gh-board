@@ -4,10 +4,20 @@ import { GitPullRequestIcon } from 'react-octicons'
 
 class IssueOrPullRequestBlurb extends React.Component {
   render() {
-    const { card, primaryRepoName, context } = this.props
-    const { issue, repoName } = card
+    const {
+      card,
+      primaryRepoName,
+      primaryRepoOwner,
+      context,
+      href,
+    } = this.props
+    const { issue, repoName, repoOwner } = card
 
-    const multipleRepoName = primaryRepoName === repoName ? null : repoName
+    const multipleRepoName =
+      primaryRepoOwner !== repoOwner
+        ? `${repoOwner}/${repoName}`
+        : primaryRepoName !== repoName ? repoName : null
+
     let blurbContext
     if (context) {
       blurbContext = <span className="blurb-context">{context}</span>
@@ -42,11 +52,15 @@ class IssueOrPullRequestBlurb extends React.Component {
 
       return (
         <span className={classnames(classes)}>
-          <a className="blurb-number-link" target="_blank" href={issue.htmlUrl}>
+          <a
+            className="blurb-number-link"
+            target="_blank"
+            href={href || issue.htmlUrl}
+          >
             {icon}
-            <span className="blurb-number">{issue.number}</span>
+            <span className="blurb-secondary-repo">{multipleRepoName}</span>
+            <span className="blurb-number">#{card.number}</span>
           </a>
-          <span className="blurb-secondary-repo">{multipleRepoName}</span>
           {blurbContext}
         </span>
       )
@@ -54,8 +68,10 @@ class IssueOrPullRequestBlurb extends React.Component {
       // no Issue found
       return (
         <span className="issue-blurb">
-          <span className="blurb-number">{card.number}</span>
-          <span className="blurb-secondary-repo">{multipleRepoName}</span>
+          <a className="blurb-number-link" target="_blank" href={href}>
+            <span className="blurb-secondary-repo">{multipleRepoName}</span>
+            <span className="blurb-number">#{card.number}</span>
+          </a>
           {blurbContext}
         </span>
       )

@@ -1,11 +1,15 @@
 import React from 'react'
-import _ from 'underscore'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import { ListUnorderedIcon } from 'react-octicons'
+import isDeepEqual from 'fast-deep-equal'
 
 import { selectors } from '../../redux/ducks/filter'
-import { KANBAN_LABEL, UNCATEGORIZED_NAME } from '../../helpers'
+import {
+  KANBAN_LABEL,
+  UNCATEGORIZED_NAME,
+  sortByColumnName,
+} from '../../helpers'
 import { fetchLabels, fetchIssues } from '../../redux/ducks/issue'
 import IssueList from '../issue-list'
 import Issue from '../issue'
@@ -33,7 +37,7 @@ function filterCards(cards, labels) {
   }
   for (const i in labels) {
     const label = labels[i]
-    filtered = _.filter(filtered, filterFn(label))
+    filtered = filtered.filter(filterFn(label))
     if (filtered.length === 0) {
       return []
     }
@@ -42,17 +46,9 @@ function filterCards(cards, labels) {
 }
 
 const filterKanbanLabels = (labels, columnRegExp) => {
-  const kanbanLabels = _.filter(labels, label => columnRegExp.test(label.name))
-  // TODO: Handle more than 10 workflow states
-  return _.sortBy(kanbanLabels, ({ name }) => {
-    if (name === UNCATEGORIZED_NAME) {
-      // make sure Uncategorized is the left-most column
-      return -1
-    } else {
-      const result = /^(\d+)/.exec(name)
-      return (result && result[1]) || name
-    }
-  })
+  return labels
+    .filter(label => columnRegExp.test(label.name))
+    .sort(sortByColumnName())
 }
 
 class KanbanColumn extends React.Component {
@@ -66,7 +62,7 @@ class KanbanColumn extends React.Component {
       filters,
     } = this.props
 
-    const issueComponents = _.map(cards, card => {
+    const issueComponents = cards.map(card => {
       return (
         <Issue
           key={card.issue.id}
@@ -118,7 +114,20 @@ class KanbanColumn extends React.Component {
 
 class KanbanRepo extends React.Component {
   componentWillMount() {
-    const { repoInfos, dispatch } = this.props
+    this.fetchStuff(this.props)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      !isDeepEqual(nextProps.repoInfos, this.props.repoInfos) ||
+      !isDeepEqual(nextProps.filter, this.props.filter)
+    ) {
+      this.fetchStuff(nextProps)
+    }
+  }
+
+  fetchStuff(props) {
+    const { repoInfos, dispatch } = props
     // Get the "Primary" repo for milestones and labels
     const [{ repoOwner, repoName }] = repoInfos
     dispatch(fetchLabels(repoOwner, repoName))
@@ -150,7 +159,7 @@ class KanbanRepo extends React.Component {
 
     const isFilteringByColumn = false
 
-    const kanbanColumns = _.map(kanbanLabels, label => {
+    const kanbanColumns = kanbanLabels.map(label => {
       // If we are filtering by a kanban column then only show that column
       // Otherwise show all columns
       const columnCards = filterCards(cards, [label])
@@ -196,6 +205,7 @@ export default connect((state, ownProps) => {
   const repoInfos = selectors.getReposFromParams(ownProps.params)
   return {
     repoInfos,
+    filter: state.filter,
     filters: new selectors.FilterBuilder(state.filter, repoInfos),
     settings: state.settings,
     columnRegExp: state.filter.columnRegExp,

@@ -1,5 +1,4 @@
 import React from 'react'
-import _ from 'underscore'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import * as BS from 'react-bootstrap'
@@ -143,12 +142,9 @@ class RepoGroup extends React.Component {
   render() {
     let { repoOwner, repos, index } = this.props
     const { selectedRepos } = this.state
-    repos = _.sortBy(repos, ({ pushedAt: repoUpdatedAt }) => {
-      return repoUpdatedAt
-    })
-    repos.reverse()
+    repos = repos.sort((a, b) => (a.pushedAt > b.pushedAt ? -1 : 1))
 
-    const sortedRepoNodes = _.map(repos, repo => {
+    const sortedRepoNodes = repos.map(repo => {
       const repoName = repo.name
 
       return (
@@ -214,7 +210,7 @@ class Dashboard extends React.Component {
     const repoOwnersUpdatedAt = {}
     const reposByOwner = {}
 
-    _.each(repos, repo => {
+    repos.forEach(repo => {
       const repoOwner = repo.owner.login
       const updatedAt = repo.pushedAt
 
@@ -230,19 +226,13 @@ class Dashboard extends React.Component {
       reposByOwner[repoOwner].push(repo)
     })
 
-    let sortedRepoOwners = _.map(
-      repoOwnersUpdatedAt,
-      (updatedAt, repoOwner) => {
-        return { repoOwner, updatedAt }
-      }
-    )
-    sortedRepoOwners = _.sortBy(sortedRepoOwners, ({ updatedAt }) => {
-      return updatedAt
-    })
-    sortedRepoOwners.reverse()
+    let sortedRepoOwners = Object.keys(repoOwnersUpdatedAt)
+      .map(repoOwner => {
+        return { repoOwner, updatedAt: repoOwnersUpdatedAt[repoOwner] }
+      })
+      .sort((a, b) => (a.updatedAt > b.updatedAt ? -1 : 1))
 
-    const repoOwnersNodes = _.map(
-      sortedRepoOwners,
+    const repoOwnersNodes = sortedRepoOwners.map(
       ({ repoOwner /*,updatedAt*/ }, index) => {
         const groupRepos = reposByOwner[repoOwner]
         return (
@@ -336,7 +326,7 @@ class ExamplesPanel extends React.Component {
       <BS.Panel>
         <BS.Panel.Heading>{examplesHeader}</BS.Panel.Heading>
         <BS.ListGroup>
-          {_.map(SAMPLE_REPOS, props => (
+          {SAMPLE_REPOS.map(props => (
             <RepoItem key={JSON.stringify(props)} {...props} />
           ))}
           <BS.ListGroupItem className="repo-item" onClick={this.onClickMore}>

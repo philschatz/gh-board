@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import moment from 'moment'
 import ultramarked from 'ultramarked'
 import linkify from 'gfm-linkify'
@@ -29,7 +28,7 @@ function getElement(text, repoOwner, repoName) {
 function getTaskCounts(div) {
   let taskFinishedCount = 0
   let taskUnfinishedCount = 0
-  _.each(div.querySelectorAll('li'), listItem => {
+  Array.from(div.querySelectorAll('li')).forEach(listItem => {
     if (/^\[x\] /.test(listItem.textContent)) {
       taskFinishedCount++
     } else if (/^\[ \] /.test(listItem.textContent)) {
@@ -105,13 +104,15 @@ export function isRelatedIssue(href) {
 }
 
 export function forEachRelatedIssue(div, fn) {
-  _.each(div.querySelectorAll(POSSIBLE_RELATED_ISSUE_SELECTOR), link => {
-    const href = link.getAttribute('href')
-    const relatedIssue = isRelatedIssue(href)
-    if (relatedIssue) {
-      fn(relatedIssue, link)
+  Array.from(div.querySelectorAll(POSSIBLE_RELATED_ISSUE_SELECTOR)).forEach(
+    link => {
+      const href = link.getAttribute('href')
+      const relatedIssue = isRelatedIssue(href)
+      if (relatedIssue) {
+        fn(relatedIssue, link)
+      }
     }
-  })
+  )
 }
 
 // Find all links in the Issue body to other issues or Pull Requests

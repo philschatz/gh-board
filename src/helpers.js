@@ -31,3 +31,20 @@ export function getCardColumn(card) {
   // not found. Must be uncategorized
   return { name: UNCATEGORIZED_NAME, color: 'cccccc' }
 }
+
+function getColumnRank({ name }) {
+  if (name === UNCATEGORIZED_NAME) {
+    // make sure Uncategorized is the left-most column
+    return -1
+  } else {
+    const result = /^(\d+)/.exec(name)
+    return (result && result[1]) || name
+  }
+}
+
+export function sortByColumnName(decrease) {
+  if (decrease) {
+    return (a, b) => (getColumnRank(a) > getColumnRank(b) ? -1 : 1)
+  }
+  return (a, b) => (getColumnRank(a) > getColumnRank(b) ? 1 : -1)
+}

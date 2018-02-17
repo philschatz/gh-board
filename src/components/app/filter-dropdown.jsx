@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
@@ -10,6 +9,10 @@ import SavedFiltersButton from './saved-filters'
 import { UNCATEGORIZED_NAME } from '../../helpers'
 
 import GithubFlavoredMarkdown from '../gfm'
+
+function sortByText(a, b) {
+  return a.text > b.test ? 1 : -1
+}
 
 class FilterCategory extends React.Component {
   state = { filterStr: null }
@@ -151,10 +154,11 @@ class FilterDropdown extends React.Component {
     })
 
     // Remove the columns from the set of tagNames
-    items = _.filter(items, ({ text }) => {
-      return !state.columnRegExp.test(text)
-    })
-    items = _.sortBy(items, 'text')
+    items = items
+      .filter(({ text }) => {
+        return !state.columnRegExp.test(text)
+      })
+      .sort(sortByText)
 
     return <FilterCategory items={items} name="labels" />
   }
@@ -206,24 +210,32 @@ class FilterDropdown extends React.Component {
     })
 
     // Remove the non-columns
-    items = _.filter(items, ({ text }) => {
-      return state.columnRegExp.test(text)
-    })
-    // sort **BEFORE** stripping off the column index
-    items = _.sortBy(items, 'text')
-    items = items.map(
-      ({ text, isSelected, isExcluded, iconNode, toggleHref, excludeHref }) => {
-        text = text.replace(state.columnRegExp, '')
-        return {
+    items = items
+      .filter(({ text }) => {
+        return state.columnRegExp.test(text)
+      })
+      // sort **BEFORE** stripping off the column index
+      .sort(sortByText)
+      .map(
+        ({
           text,
           isSelected,
           isExcluded,
           iconNode,
           toggleHref,
           excludeHref,
+        }) => {
+          text = text.replace(state.columnRegExp, '')
+          return {
+            text,
+            isSelected,
+            isExcluded,
+            iconNode,
+            toggleHref,
+            excludeHref,
+          }
         }
-      }
-    )
+      )
 
     return <FilterCategory items={items} name="columns" />
   }
@@ -271,7 +283,7 @@ class FilterDropdown extends React.Component {
     // items = _.filter(items, ({text}) => {
     //   return !state.columnRegExp.test(text);
     // });
-    items = _.sortBy(items, 'text')
+    items = items.sort(sortByText)
 
     return <FilterCategory items={items} name="milestones" />
   }

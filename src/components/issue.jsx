@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import * as BS from 'react-bootstrap'
-import _ from 'underscore'
 import { connect } from 'react-redux'
 import { DragSource } from 'react-dnd'
 import classnames from 'classnames'
@@ -42,18 +41,15 @@ const issueSource = {
     }
 
     // When dropped on a compatible target, do something
-    const { card, primaryRepoName } = monitor.getItem()
+    const { card } = monitor.getItem()
     const dropResult = monitor.getDropResult()
 
     if (dropResult.label) {
-      props.dispatch(
-        tryToMoveIssue({ card, primaryRepoName, label: dropResult.label })
-      )
+      props.dispatch(tryToMoveIssue({ card, label: dropResult.label }))
     } else if (dropResult.milestone) {
       props.dispatch(
         tryToMoveIssue({
           card,
-          primaryRepoName,
           milestone: dropResult.milestone,
         })
       )
@@ -235,12 +231,12 @@ class IssueCard extends React.Component {
       )
     })
 
-    const nonKanbanLabels = _.filter(issue.labels, label => {
+    const nonKanbanLabels = (issue.labels || []).filter(label => {
       if (!columnRegExp || !columnRegExp.test(label.name)) {
         return label
       }
     })
-    const labels = _.map(nonKanbanLabels, label => {
+    const labels = nonKanbanLabels.map(label => {
       const tooltip = (
         <BS.Tooltip id={`tooltip-${card.key()}-${label.name}`}>
           {label.name}. Click to filter
@@ -336,8 +332,7 @@ class IssueCard extends React.Component {
       )
     }
 
-    const relatedCards = _.map(
-      card.getRelated(),
+    const relatedCards = (card.getRelated() || []).map(
       ({ vertex: issueCard, edgeValue }) => {
         const context = issueCard.isPullRequest()
           ? PULL_REQUEST_ISSUE_RELATION[edgeValue]
@@ -353,8 +348,9 @@ class IssueCard extends React.Component {
             <IssueOrPullRequestBlurb
               card={issueCard}
               primaryRepoName={card.repoName}
+              primaryRepoOwner={card.repoOwner}
               context={context}
-            />
+            />{' '}
             {title}
           </div>
         )
@@ -474,6 +470,7 @@ class IssueCard extends React.Component {
         key="issue-blurb"
         card={card}
         primaryRepoName={primaryRepoName}
+        primaryRepoOwner={repoOwner}
       />,
       statusBlurb,
     ]

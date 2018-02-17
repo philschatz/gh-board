@@ -23,28 +23,11 @@ class MoveModal extends React.Component {
       if (nextProps.movingIssue.label || nextProps.movingIssue.milestone) {
         this.moveIssue(nextProps)
       }
-    } else {
+    } else if (this.props.movingIssue && !nextProps.movingIssue) {
       this.setState({ unCheckedCards: {} })
     }
   }
 
-  // performMoveOrShowModal(card, primaryRepoName, label, milestone) {
-  //   // If this card has related cards then show the modal.
-  //   // Otherwise, just perform the move
-  //   if (card.getRelated().length === 0) {
-  //     // FIXME : The code to move the label/milestone should be pulled out and just done here instead of setting the state
-  //     this.setState({showModal: false, card, primaryRepoName, label, milestone, unCheckedCards: {}});
-  //     if (label) {
-  //       this.onClickMoveLabel();
-  //     }
-  //     if (milestone) {
-  //       this.onClickMoveMilestone();
-  //     }
-  //   } else {
-  //     this.setState({showModal: true, card, primaryRepoName, label, milestone, unCheckedCards: {}});
-  //   }
-  //
-  // },
   onToggleCheckbox = card => {
     return () => {
       const { unCheckedCards } = this.state
@@ -62,10 +45,10 @@ class MoveModal extends React.Component {
   moveIssue = props => {
     const { card, label, milestone } = props.movingIssue
     const { unCheckedCards } = this.state
-    const allOtherCards = _.map(card.getRelated(), ({ vertex }) => vertex)
+    const allOtherCards = (card.getRelated() || []).map(({ vertex }) => vertex)
     const otherCardsToMove = _.difference(
       allOtherCards,
-      _.values(unCheckedCards)
+      Object.keys(unCheckedCards).map(k => unCheckedCards[k])
     )
 
     props.dispatch(
@@ -101,7 +84,8 @@ class MoveModal extends React.Component {
             <span>
               <IssueOrPullRequestBlurb
                 card={vertex}
-                primaryRepoName={movingIssue.primaryRepoName}
+                primaryRepoName={movingIssue.card.repoName}
+                primaryRepoOwner={movingIssue.card.repoOwner}
               />
               <span className="issue-title">
                 {': '}
@@ -123,7 +107,7 @@ class MoveModal extends React.Component {
           )
         }
 
-        const relatedIssues = _.map(related, makeRelated)
+        const relatedIssues = related.map(makeRelated)
 
         body = (
           <BS.Modal.Body>

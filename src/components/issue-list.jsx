@@ -7,18 +7,20 @@ import { DesktopDownloadIcon, PlusIcon } from 'react-octicons'
 import { selectors } from '../redux/ducks/issue'
 import { UNCATEGORIZED_NAME } from '../helpers'
 
-import ColoredIcon from './colored-icon'
-
 const MIN_CHILDREN_TO_SHOW = 10
 
 const ItemTypes = {
   CARD: 'card',
 }
 
-function generateCSV(state, cards) {
+function generateCSV(cardsCache, cards) {
   // merged-since does not have the actual card object yet, so we look it up
   const data = cards.map(({ repoOwner, repoName, number }) => {
-    const card = selectors.getCard(state, { repoOwner, repoName, number })
+    const card = selectors.getCard(cardsCache, {
+      repoOwner,
+      repoName,
+      number,
+    })
     if (card.issue) {
       const ret = [
         repoOwner,
@@ -57,9 +59,9 @@ const cardListTarget = {
   },
 }
 
-function collect(connect, monitor) {
+function collect(_connect, monitor) {
   return {
-    connectDropTarget: connect.dropTarget(),
+    connectDropTarget: _connect.dropTarget(),
     isOver: monitor.isOver(),
   }
 }
@@ -98,33 +100,13 @@ class IssueList extends React.Component {
   }
 
   render() {
-    const {
-      icon,
-      title,
-      backgroundColor,
-      children,
-      cards,
-      primaryRepo,
-      label,
-    } = this.props
+    const { title, children, cards, primaryRepo, label, issues } = this.props
     const { connectDropTarget } = this.props
     const { isOver } = this.props // from the collector
     const { showAllIssues, morePressedCount, showCSVModal } = this.state
     const multiple = 25 // Add 25 results at a time
 
     let className = 'column-title'
-    if (icon) {
-      className += ' has-icon'
-    }
-
-    let iconEl
-    if (icon) {
-      iconEl = (
-        <ColoredIcon className="column-icon" color={backgroundColor}>
-          {icon}
-        </ColoredIcon>
-      )
-    }
 
     let countOrDownloadLink
     if (cards) {
@@ -140,7 +122,7 @@ class IssueList extends React.Component {
               <BS.Modal.Title>CSV Data</BS.Modal.Title>
             </BS.Modal.Header>
             <BS.Modal.Body>
-              <textarea>{generateCSV(this.props.issues, cards)}</textarea>
+              <textarea>{generateCSV(issues, cards)}</textarea>
             </BS.Modal.Body>
           </BS.Modal>
         </BS.Button>
@@ -162,8 +144,7 @@ class IssueList extends React.Component {
 
     const header = (
       <h2 className={className}>
-        {iconEl}
-        {title} ({countOrDownloadLink})
+        {title} {countOrDownloadLink}
         {primaryRepo && (
           <a
             className="add-issue"
@@ -224,7 +205,7 @@ export default DropTarget(ItemTypes.CARD, cardListTarget, collect)(
   connect(state => {
     return {
       rootURL: state.user.rootURL,
-      issues: state.issues,
+      issues: state.issues.CARD_CACHE,
     }
   })(IssueList)
 )

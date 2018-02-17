@@ -1,4 +1,3 @@
-import _ from 'underscore'
 import Dexie from 'dexie'
 
 //
@@ -63,9 +62,9 @@ export default class CacheHandler {
     const ret = this.cachedETags[method + ' ' + path]
     if (ret) {
       const { data, linkRelations } = ret
-      _.each(linkRelations, (value, key) => {
-        if (value) {
-          data[key] = value
+      Object.keys(linkRelations || {}).forEach(key => {
+        if (linkRelations[key]) {
+          data[key] = linkRelations[key]
         }
       })
     }
@@ -74,8 +73,8 @@ export default class CacheHandler {
   add(method, path, eTag, data, status) {
     const linkRelations = {}
     // if data is an array, it contains additional link relations (to other pages)
-    if (_.isArray(data)) {
-      _.each(['next', 'previous', 'first', 'last'], name => {
+    if (Array.isArray(data)) {
+      ;['next', 'previous', 'first', 'last'].forEach(name => {
         const key = name + '_page_url'
         if (data[key]) {
           linkRelations[key] = data[key]
