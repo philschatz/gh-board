@@ -37,7 +37,7 @@
     "node-libs-browser": "^2.0.0",
     "parallelshell": "^2.0.0",
     "react-hot-loader": "^3.0.0-beta.6",
-    "url-loader": "^0.5.6",
+    "url-loader": "^1.0.1",
     "webdriver-manager": "^11.1.0",
     "webdriverio": "^4.5.2",
     "webpack": "^1.9.10",
