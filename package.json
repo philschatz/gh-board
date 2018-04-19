@@ -74,6 +74,6 @@
     "react-router": "^3.0.0",
     "recordo": "^0.0.6",
     "ultramarked": "^1.7.0",
-    "underscore": "^1.8.3"
+    "underscore": "1.8.3"
   }
 }
