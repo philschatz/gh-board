@@ -1,4 +1,4 @@
-import React from 'react';
+import {Component} from 'react';
 import * as BS from 'react-bootstrap';
 import {GearIcon} from 'react-octicons';
 
@@ -6,12 +6,13 @@ import CurrentUserStore from '../user-store';
 
 let hasAlreadyShownAnonymousModal = false;
 
-const AnonymousModal = React.createClass({
+class AnonymousModal extends Component {
+  onHide = () => {
+    hasAlreadyShownAnonymousModal = true;
+    this.setState({ showModal: false});
+  };
+
   render() {
-    const onHide = () => {
-      hasAlreadyShownAnonymousModal = true;
-      this.setState({ showModal: false});
-    };
     let showModal;
     if (CurrentUserStore.getUser()) {
       showModal = false;
@@ -20,7 +21,7 @@ const AnonymousModal = React.createClass({
     }
 
     return (
-      <BS.Modal show={showModal} container={this} onHide={onHide}>
+      <BS.Modal show={showModal} container={this} onHide={this.onHide}>
         <BS.Modal.Header closeButton>Viewing a Board Anonymously</BS.Modal.Header>
         <BS.Modal.Body className='anonymous-instructions-body'>
           <p>You are currently <strong>not signed in</strong>. GitHub's API only allows <em>60</em> requests per hour for non-authenticated users.</p>
@@ -35,11 +36,11 @@ const AnonymousModal = React.createClass({
           <p>You can enable it by clicking the <BS.Button disabled bsSize='xs'><GearIcon/>{' '}<span className='caret'/></BS.Button> on the top-right corner next to <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button> and selecting "Show More Pull Request Info" or by clicking the <BS.Button disabled bsStyle='success' bsSize='xs'>Sign In</BS.Button>.</p>
         </BS.Modal.Body>
         <BS.Modal.Footer className='anonymous-instructions-footer'>
-          <BS.Button bsStyle='primary' onClick={onHide}>Ok, I'll find it if I need it</BS.Button>
+          <BS.Button bsStyle='primary' onClick={this.onHide}>Ok, I'll find it if I need it</BS.Button>
         </BS.Modal.Footer>
       </BS.Modal>
     );
   }
-});
+}
 
 export default AnonymousModal;

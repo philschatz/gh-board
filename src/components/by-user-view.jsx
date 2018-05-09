@@ -1,4 +1,4 @@
-import React from 'react';
+import {Component} from 'react';
 import _ from 'underscore';
 import {UserIcon} from 'react-octicons';
 
@@ -11,95 +11,87 @@ import IssueList from './issue-list';
 import Issue from './issue';
 import Board from './board';
 
-/* Copy-pasta from MilestonesView */
+function KanbanColumn(props) {
+  const {login, cards, primaryRepoName, columnRegExp} = props;
 
-const KanbanColumn = React.createClass({
-  render() {
-    const {login, cards, primaryRepoName, columnRegExp} = this.props;
-
-    const issueComponents = _.map(cards, (card) => {
-      return (
-        <Issue
-          key={card.key()}
-          primaryRepoName={primaryRepoName}
-          card={card}
-          columnRegExp={columnRegExp}
-          />
-      );
-    });
-
-    const heading = (
-      <span className='user-title'>
-        <UserIcon/>
-        {login}
-      </span>
-    );
-
+  const issueComponents = _.map(cards, (card) => {
     return (
-      <div key={login} className='kanban-board-column'>
-        <IssueList title={heading}>
-          {issueComponents}
-        </IssueList>
-      </div>
-    );
-
-  }
-});
-
-
-const UsersView = React.createClass({
-  render() {
-    const {repoInfos, columnData, cards, columnRegExp} = this.props;
-    const [{repoName}] = repoInfos; // primaryRepoName
-
-    let sortedCards = FilterStore.filterAndSort(cards, true);
-
-    let kanbanColumnCount = 0; // Count the number of actual columns displayed
-
-    const kanbanColumns = _.map(columnData, (login) => {
-      // If we are filtering by a kanban column then only show that column
-      // Otherwise show all columns
-      const columnCards = _.filter(sortedCards, (card) => {
-        return card.issue.owner && card.issue.owner.login === login || card.issue.user.login === login;
-      });
-
-
-      // Show the column when:
-      // isFilteringByColumn = label (the current column we are filtering on)
-      // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
-
-      kanbanColumnCount++; // Count the number of actual columns displayed
-      /*HACK: Column should handle milestones */
-      return (
-        <KanbanColumn
-          key={kanbanColumnCount}
-          login={login}
-          cards={columnCards}
-          primaryRepoName={repoName}
-          columnRegExp={columnRegExp}
+      <Issue
+        key={card.key()}
+        primaryRepoName={primaryRepoName}
+        card={card}
+        columnRegExp={columnRegExp}
         />
-      );
+    );
+  });
+
+  const heading = (
+    <span className='user-title'>
+      <UserIcon/>
+      {login}
+    </span>
+  );
+
+  return (
+    <div key={login} className='kanban-board-column'>
+      <IssueList title={heading}>
+        {issueComponents}
+      </IssueList>
+    </div>
+  );
+
+}
+
+function UsersView(props) {
+  const {repoInfos, columnData, cards, columnRegExp} = props;
+  const [{repoName}] = repoInfos; // primaryRepoName
+
+  let sortedCards = FilterStore.filterAndSort(cards, true);
+
+  let kanbanColumnCount = 0; // Count the number of actual columns displayed
+
+  const kanbanColumns = _.map(columnData, (login) => {
+    // If we are filtering by a kanban column then only show that column
+    // Otherwise show all columns
+    const columnCards = _.filter(sortedCards, (card) => {
+      return card.issue.owner && card.issue.owner.login === login || card.issue.user.login === login;
     });
 
+
+    // Show the column when:
+    // isFilteringByColumn = label (the current column we are filtering on)
+    // !isFilteringByColumn && (!getShowEmptyColumns || columnCards.length)
+
+    kanbanColumnCount++; // Count the number of actual columns displayed
     return (
-      <div className='kanban-board'>
-        {kanbanColumns}
-      </div>
+      <KanbanColumn
+        key={kanbanColumnCount}
+        login={login}
+        cards={columnCards}
+        primaryRepoName={repoName}
+        columnRegExp={columnRegExp}
+      />
     );
-  }
-});
+  });
 
+  return (
+    <div className='kanban-board'>
+      {kanbanColumns}
+    </div>
+  );
+}
 
-const RepoKanbanShell = React.createClass({
-  displayName: 'RepoKanbanShell',
-  componentWillMount() {
+class RepoKanbanShell extends Component {
+  UNSAFE_componentWillMount() {
     // Needs to be called before `render()`
     IssueStore.startPolling();
-  },
+  }
+
   componentWillUnmount() {
     IssueStore.stopPolling();
-  },
-  renderLoaded() {
+  }
+
+  renderLoaded = () => {
     const {repoInfos, columnRegExp} = getFilters().getState();
 
     const columnDataPromise =
@@ -125,7 +117,8 @@ const RepoKanbanShell = React.createClass({
         columnDataPromise={columnDataPromise}
       />
     );
-  },
+  };
+
   render() {
 
     return (
@@ -135,6 +128,6 @@ const RepoKanbanShell = React.createClass({
       />
     );
   }
-});
+}
 
 export default RepoKanbanShell;

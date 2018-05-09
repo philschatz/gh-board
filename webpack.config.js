@@ -21,11 +21,21 @@ module.exports = {
     loaders: [
       {
         test: /\.jsx?$/,
-        loader: 'babel-loader',
         exclude: [/node_modules/, /puzzle-script/, /octokat\.js/],
-        query: {
-          presets: ['react', 'es2017-node7']
-        }
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              'react',
+              'env'
+            ],
+            plugins: [
+              'react-require',
+              'transform-object-rest-spread',
+              'transform-class-properties'
+            ],
+          }
+        },
       },
       { test: /\.json$/, loader: 'json-loader'}, 
       { test: /\.less$/,  loader: ['style-loader', 'css-loader', 'less-loader'] },

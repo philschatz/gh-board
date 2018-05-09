@@ -1,4 +1,4 @@
-import React from 'react';
+import {Component} from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import ultramarked from 'ultramarked';
@@ -116,9 +116,8 @@ const buildStatusBadge = (card) => {
   return wrapNode;
 };
 
-const InnerMarkdown = React.createClass({
-  displayName: 'InnerMarkdown',
-  updateLinks() {
+class InnerMarkdown extends Component {
+  updateLinks = () => {
     const {disableLinks} = this.props;
 
     if (!disableLinks) {
@@ -153,8 +152,9 @@ const InnerMarkdown = React.createClass({
         insertAfter(newNode, link);
       });
     }
-  },
-  updateCheckboxes() {
+  };
+
+  updateCheckboxes = () => {
     const div = ReactDOM.findDOMNode(this);
     function buildCheckbox(checked) {
       const checkbox = document.createElement('input');
@@ -190,8 +190,9 @@ const InnerMarkdown = React.createClass({
         }
       }
     });
-  },
-  updateMermaid() {
+  };
+
+  updateMermaid = () => {
     this._mermaidCount = this._mermaidCount || 0;
     const root = ReactDOM.findDOMNode(this);
     _.each(root.querySelectorAll('pre > code.lang-mermaid'), (code) => {
@@ -214,20 +215,24 @@ const InnerMarkdown = React.createClass({
         }, div);
       });
     });
-  },
-  updateDOM() {
+  };
+
+  updateDOM = () => {
     if (!ReactDOM.findDOMNode(this)) { return; }
     this.updateLinks();
     this.updateCheckboxes();
     this.updateMermaid();
-  },
+  };
+
   componentDidMount() {
     this.updateDOM();
-  },
+  }
+
   componentDidUpdate() {
     this.updateDOM();
-  },
-  replaceEmojis(text) {
+  }
+
+  replaceEmojis = (text) => {
     const emojisMap = CurrentUserStore.getEmojis() || {};
     return text.replace(EMOJI_RE, (m, p1) => {
       const emojiName = p1.substring(1, p1.length-1); // Strip off the leading and trailing `:`
@@ -238,7 +243,8 @@ const InnerMarkdown = React.createClass({
         return p1;
       }
     });
-  },
+  };
+
   render() {
     const {text, repoOwner, repoName, inline, className} = this.props;
     if (!text) { return null; }
@@ -276,7 +282,6 @@ const InnerMarkdown = React.createClass({
       }
     }
   }
-
-});
+}
 
 export default InnerMarkdown;

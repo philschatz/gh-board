@@ -1,11 +1,11 @@
-import React from 'react';
+import {Component} from 'react';
 
 import Client from '../github-client';
 
 import Etherpad from './etherpad';
 
 
-const EtherpadIssueShell = React.createClass({
+class EtherpadIssueShell extends Component {
   render() {
     const {repoOwner, repoName, branch, splat} = this.props.params;
     const path = splat;
@@ -37,6 +37,6 @@ const EtherpadIssueShell = React.createClass({
       <Etherpad promise={promise} title={title} padName={padName} getBody={getBody} saveBody={saveBody} loadBody={loadBody} repoOwner={repoOwner} repoName={repoName}/>
     );
   }
-});
+}
 
 export default EtherpadIssueShell;

@@ -1,10 +1,10 @@
-import React from 'react';
+import {Component} from 'react';
 import _ from 'underscore';
 import Client from '../github-client';
 import * as BS from 'react-bootstrap';
 import {CheckIcon, GiftIcon} from 'react-octicons';
 
-const GameModalInner = React.createClass({
+class GameModalInner extends Component {
   render() {
     const {dropDown} = this.props;
 
@@ -21,7 +21,7 @@ const GameModalInner = React.createClass({
       </BS.Modal>
     );
   }
-});
+}
 
 // Gist search: `puzzlescript filename:'script.txt' anon:true`
 const ALL_GAMES = [
@@ -48,25 +48,27 @@ const ALL_GAMES = [
 ];
 
 
-const GameModal = React.createClass({
-  getInitialState() {
-    return {isPlaying: false};
-  },
+class GameModal extends Component {
+  state = {isPlaying: false};
+
   componentDidMount() {
     if (this.props.show) {
       this.startupGame();
     }
-  },
+  }
+
   componentDidUpdate(oldProps) {
     if (this.props.show && !oldProps.show) {
       this.startupGame();
     }
-  },
-  setLastPlayed(gistId) {
+  }
+
+  setLastPlayed = (gistId) => {
     const now = (new Date()).toISOString();
     window.localStorage.setItem('game-' + gistId + '-last-played', now);
-  },
-  getGamesWon() {
+  };
+
+  getGamesWon = () => {
     const gamesWonStr = window.localStorage.getItem('games-won');
     let gamesWon;
     if (gamesWonStr) {
@@ -75,13 +77,15 @@ const GameModal = React.createClass({
       gamesWon = {};
     }
     return gamesWon;
-  },
-  addGamesWon(gistId) {
+  };
+
+  addGamesWon = (gistId) => {
     const gamesWon = this.getGamesWon();
     gamesWon[gistId] = (new Date()).toISOString();
     window.localStorage.setItem('games-won', JSON.stringify(gamesWon));
-  },
-  startupGame(game) {
+  };
+
+  startupGame = (game) => {
     // Fetch the gist and then async load the GameEngine
 
     // If no game is provided, find the 1st one that has not been won
@@ -108,8 +112,9 @@ const GameModal = React.createClass({
         this.asyncStartEngine(gistId, gameData);
       });
     }
-  },
-  asyncStartEngine(gistId, gameData) {
+  };
+
+  asyncStartEngine = (gistId, gameData) => {
     // Load the game engine from a separate bundle
     const that = this;
     /*eslint-disable no-undef */
@@ -117,8 +122,9 @@ const GameModal = React.createClass({
       const GameEngine = require('puzzle-script');
       that._startEngine(GameEngine, gistId, gameData);
     });
-  },
-  onHide() {
+  };
+
+  onHide = () => {
     // Load the game engine from a separate bundle
     const that = this;
     /*eslint-disable no-undef */
@@ -127,11 +133,12 @@ const GameModal = React.createClass({
       /*eslint-enable no-undef */
       that._stopEngine(GameEngine);
     });
-  },
+  };
+
   // GameEngine is passed in as an additional argument because it loaded
   // from a separate bundle to reduce the size of the javascript file
   // (if you are not using the code, do not bother loading it)
-  _startEngine(GameEngine, gistId, gameData) {
+  _startEngine = (GameEngine, gistId, gameData) => {
     /*eslint-enable no-undef */
     const canvasNode = this._gameCanvas;
     const {isPlaying} = this.state;
@@ -150,15 +157,17 @@ const GameModal = React.createClass({
     GameEngine.start(canvasNode, gameData);
     this.setLastPlayed(gistId);
     this.setState({isPlaying: true});
-  },
-  _stopEngine(GameEngine) {
+  };
+
+  _stopEngine = (GameEngine) => {
     const {isPlaying} = this.state;
     if (isPlaying) {
       GameEngine.stop();
     }
     this.setState({isPlaying: false});
     this.props.onHide();
-  },
+  };
+
   render() {
     const {isPlaying} = this.state;
     const gamesWon = this.getGamesWon();
@@ -209,6 +218,6 @@ const GameModal = React.createClass({
       </GameModalInner>
     );
   }
-});
+}
 
 export default GameModal;

@@ -1,6 +1,6 @@
-import React from 'react';
+import {Component} from 'react';
 import * as BS from 'react-bootstrap';
-import {CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
+import {GiftIcon, CloudDownloadIcon, MarkGithubIcon} from 'react-octicons';
 
 import Client from '../../github-client';
 import NewVersionChecker from '../../new-version-checker';
@@ -10,36 +10,41 @@ import GameModal from '../game-modal';
 import GithubFlavoredMarkdown from '../gfm';
 import SavedFiltersButton from './saved-filters';
 
-const KarmaWarning = React.createClass({
-  getInitialState() {
-    return {timer: null, limit: null, remaining: null, newestVersion: null, isConnected: true};
-  },
+class KarmaWarning extends Component {
+  state = {timer: null, limit: null, remaining: null, newestVersion: null, isConnected: true};
+
   componentDidMount() {
     NewVersionChecker.on('change', this.updateNewestVersion);
     Client.on('end', this.updateRateLimit);
-  },
+  }
+
   componentWillUnmount() {
     NewVersionChecker.off('change', this.updateNewestVersion);
     Client.off('request', this.updateRateLimit);
-  },
+  }
+
   // ('end', eventId, {method, path, data, options}, jqXHR.status, emitterRate)
-  updateRateLimit(eventId, config, status, rate) {
+  updateRateLimit = (eventId, config, status, rate) => {
     if (status !== 0 && rate) {
       const {remaining, limit, reset} = rate;
       this.setState({remaining, limit, reset: new Date(reset * 1000), isConnected: true});
     } else {
       this.setState({remaining:0, isConnected: false});
     }
-  },
-  updateNewestVersion(newestVersion) {
+  };
+
+  updateNewestVersion = (newestVersion) => {
     this.setState({newestVersion});
-  },
-  showGameModal() {
+  };
+
+  showGameModal = () => {
     this.setState({isGameOpen: true});
-  },
-  onHideGameModal() {
+  };
+
+  onHideGameModal = () => {
     this.setState({isGameOpen: false});
-  },
+  };
+
   render() {
     const {remaining, limit, reset, newestVersion, isGameOpen, isConnected} = this.state;
     let karmaText;
@@ -107,6 +112,6 @@ const KarmaWarning = React.createClass({
       </BS.Navbar>
     );
   }
-});
+}
 
 export default KarmaWarning;

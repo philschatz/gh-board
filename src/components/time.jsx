@@ -1,5 +1,5 @@
 import {EventEmitter} from 'events';
-import React from 'react';
+import {Component} from 'react';
 import Moment from 'moment';
 
 const RELOAD_TIME_SHORT = 30 * 1000;
@@ -62,18 +62,17 @@ const handleVisibilityChange = () => {
 };
 document.addEventListener('visibilitychange', handleVisibilityChange, false);
 
-export default React.createClass({
-  getInitialState() {
-    // `this.forceUpdate` is not always bound to `this` react component
-    // so keep one around for the `tick` handler.
-    return {forceUpdate: this.forceUpdate.bind(this)};
-  },
-  componentWillMount() {
+class Time extends Component {
+  state = {forceUpdate: this.forceUpdate.bind(this)};
+
+  UNSAFE_componentWillMount() {
     Timer.onTick(this.state.forceUpdate);
-  },
+  }
+
   componentWillUnmount() {
     Timer.offTick(this.state.forceUpdate);
-  },
+  }
+
   render() {
     const {dateTime, className} = this.props;
     const humanized = Moment(dateTime).fromNow();
@@ -81,4 +80,6 @@ export default React.createClass({
       <time {...this.props} dateTime={dateTime} className={className} title={dateTime}>{humanized}</time>
     );
   }
-});
+}
+
+export default Time;

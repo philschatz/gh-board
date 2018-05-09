@@ -1,4 +1,5 @@
-import React from 'react';
+import PropTypes from 'prop-types';
+import React, {Component} from 'react';
 import * as BS from 'react-bootstrap';
 import {SyncIcon} from 'react-octicons';
 
@@ -10,28 +11,38 @@ import Loadable from './loadable';
 import Progress from '../progress';
 import Database from '../database';
 
-const ProgressView = React.createClass({
-  getInitialState() {
-    return {message: null, ticks: 0, max: 0};
-  },
+class ProgressView extends Component {
+  state = {message: null, ticks: 0, max: 0};
+
   componentDidMount() {
     const {progress} = this.props;
     progress.on('start', this.onStart);
     progress.on('tick', this.onTick);
     progress.on('stop', this.onStop);
-  },
+  }
+
   componentWillUnmount() {
     const {progress} = this.props;
     progress.off('start', this.onStart);
     progress.off('tick', this.onTick);
     progress.off('stop', this.onStop);
-  },
-  onStart(context) { this.setState({max: this.props.progress.max, message: 'Start: ' + context}); },
-  onTick(context, ticks, max) {
+  }
+
+  onStart = (context) => { this.setState({max: this.props.progress.max, message: 'Start: ' + context}); };
+
+  onTick = (context, ticks, max) => {
     this.setState({ticks: ticks, max: max, message: context});
     this.forceUpdate();
-  },
-  onStop(context) { this.setState({ticks: this.props.progress.ticks, max: this.props.progress.max, message: 'Finished: ' + context}); },
+  };
+
+  onStop = (context) => {
+    this.setState({
+      ticks: this.props.progress.ticks,
+      max: this.props.progress.max,
+      message: 'Finished: ' + context
+    });
+  };
+
   render() {
     const {ticks, max} = this.state;
     const {message} = this.state;
@@ -45,39 +56,44 @@ const ProgressView = React.createClass({
       </div>
     );
   }
-});
+}
 
+class Board extends Component {
+  static propTypes = {
+    type: PropTypes.func.isRequired, // A React Component
+    repoInfos: PropTypes.array.isRequired,
+    columnDataPromise: PropTypes.object.isRequired
+  };
 
-const Board = React.createClass({
-  propTypes: {
-    type: React.PropTypes.func.isRequired, // A React Component
-    repoInfos: React.PropTypes.array.isRequired,
-    columnDataPromise: React.PropTypes.object.isRequired
-  },
   componentDidMount() {
     IssueStore.on('change', this.onChange);
     FilterStore.on('change', this.onChange);
     SettingsStore.on('change', this.onChange);
     SettingsStore.on('change:showPullRequestData', this.onChangeAndRefetch);
-  },
+  }
+
   componentWillUnmount() {
     IssueStore.off('change', this.onChange);
     FilterStore.off('change', this.onChange);
     SettingsStore.off('change', this.onChange);
     SettingsStore.off('change:showPullRequestData', this.onChangeAndRefetch);
-  },
-  onChangeAndRefetch() {
+  }
+
+  onChangeAndRefetch = () => {
     IssueStore.clearCacheCards();
     this.forceUpdate();
-  },
-  onChange() {
+  };
+
+  onChange = () => {
     this.setState({});
-  },
-  onLabelsChanged() {
+  };
+
+  onLabelsChanged = () => {
     this.setState({});
-  },
+  };
+
   // Curried func to squirrell the primaryRepoName var
-  renderKanbanRepos(repoInfos) {
+  renderKanbanRepos = (repoInfos) => {
     const {type} = this.props;
 
     return ([columnData, cards]) => {
@@ -94,8 +110,9 @@ const Board = React.createClass({
       }
 
     };
-  },
-  renderError(err) {
+  };
+
+  renderError = (err) => {
     console.error(err);
     if (err.name === 'InvalidStateError') {
       return (
@@ -110,7 +127,8 @@ const Board = React.createClass({
         </span>
       );
     }
-  },
+  };
+
   render() {
     const {repoInfos, columnDataPromise} = this.props;
     const progress = new Progress();
@@ -127,6 +145,6 @@ const Board = React.createClass({
       />
     );
   }
-});
+}
 
 export default Board;

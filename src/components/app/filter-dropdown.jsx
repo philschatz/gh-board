@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import React from 'react';
+import {Component} from 'react';
 import {Link} from 'react-router';
 import * as BS from 'react-bootstrap';
 import classnames from 'classnames';
@@ -12,11 +12,10 @@ import {UNCATEGORIZED_NAME} from '../../helpers';
 import Loadable from '../loadable';
 import GithubFlavoredMarkdown from '../gfm';
 
-const FilterCategory = React.createClass({
-  getInitialState() {
-    return {filterStr: null};
-  },
-  filterItems() {
+class FilterCategory extends Component {
+  state = {filterStr: null};
+
+  filterItems = () => {
     const {items} = this.props;
     const {filterStr} = this.state;
     return items.filter(({text}) => {
@@ -26,11 +25,13 @@ const FilterCategory = React.createClass({
       }
       return true;
     });
-  },
-  onFilterInputChange(e) {
+  };
+
+  onFilterInputChange = (e) => {
     this.setState({filterStr: e.currentTarget.value});
-  },
-  renderItem(item) {
+  };
+
+  renderItem = (item) => {
     const {isSelected, isExcluded, text, iconNode} = item;
     const {toggleHref, excludeHref} = item;
 
@@ -65,7 +66,8 @@ const FilterCategory = React.createClass({
         {excludeLink}
       </BS.ListGroupItem>
     );
-  },
+  };
+
   render() {
     const {noSearch} = this.props;
     const items = this.filterItems();
@@ -85,20 +87,18 @@ const FilterCategory = React.createClass({
       </form>
     );
   }
-});
+}
 
-const FilterDropdown = React.createClass({
+class FilterDropdown extends Component {
+  state = {
+    activeKey: null
+  };
 
-  getInitialState() {
-    return {
-      activeKey: null
-    };
-  },
-
-  handleSelect(activeKey) {
+  handleSelect = (activeKey) => {
     this.setState({ activeKey });
-  },
-  renderTagNames(items) {
+  };
+
+  renderTagNames = (items) => {
     const filters = getFilters();
     const state = filters.getState();
     items = items.map((item) => {
@@ -134,8 +134,9 @@ const FilterDropdown = React.createClass({
     return (
       <FilterCategory items={items}/>
     );
-  },
-  renderColumnNames(items) {
+  };
+
+  renderColumnNames = (items) => {
     const filters = getFilters();
     const state = filters.getState();
 
@@ -180,10 +181,10 @@ const FilterDropdown = React.createClass({
     return (
       <FilterCategory items={items}/>
     );
-  },
+  };
 
   // copy/pasta from renderTagNames
-  renderMilestones(items) {
+  renderMilestones = (items) => {
     const filters = getFilters();
     const state = filters.getState();
     items = items.map((item) => {
@@ -218,8 +219,9 @@ const FilterDropdown = React.createClass({
     return (
       <FilterCategory items={items}/>
     );
-  },
-  renderStates() {
+  };
+
+  renderStates = () => {
     const filters = getFilters();
     const {states} = filters.getState();
 
@@ -228,8 +230,9 @@ const FilterDropdown = React.createClass({
     });
 
     return (<FilterCategory noSearch items={items}/>);
-  },
-  renderTypes() {
+  };
+
+  renderTypes = () => {
     const filters = getFilters();
     const {types} = filters.getState();
 
@@ -238,7 +241,7 @@ const FilterDropdown = React.createClass({
     });
 
     return (<FilterCategory noSearch items={items}/>);
-  },
+  };
 
   render() {
     const {milestones, labels} = this.props;
@@ -334,30 +337,26 @@ const FilterDropdown = React.createClass({
       </BS.NavDropdown>
     );
   }
+}
 
-});
+function FilterDropdownShell(props) {
+  const {repoInfos} = props;
 
+  if (repoInfos.length) {
+    const [{repoOwner, repoName}] = repoInfos;
 
-const FilterDropdownShell = React.createClass({
-  render() {
-    const {repoInfos} = this.props;
-
-    if (repoInfos.length) {
-      const [{repoOwner, repoName}] = repoInfos;
-
-      // TODO: Poll all of these so we get updates
-      // TODO: Include *all* labels, not just the ones in the primary repo
-      const milestones = IssueStore.fetchMilestones(repoOwner, repoName);
-      const labels = IssueStore.fetchLabels(repoOwner, repoName);
-      const promise = Promise.all([milestones, labels]);
-      return (
-        <Loadable promise={promise} renderLoaded={([milestones, labels]) => <FilterDropdown milestones={milestones} labels={labels}/>} />
-      );
-    } else {
-      return null;
-    }
-
+    // TODO: Poll all of these so we get updates
+    // TODO: Include *all* labels, not just the ones in the primary repo
+    const milestones = IssueStore.fetchMilestones(repoOwner, repoName);
+    const labels = IssueStore.fetchLabels(repoOwner, repoName);
+    const promise = Promise.all([milestones, labels]);
+    return (
+      <Loadable promise={promise} renderLoaded={([milestones, labels]) => <FilterDropdown milestones={milestones} labels={labels}/>} />
+    );
+  } else {
+    return null;
   }
-});
+
+}
 
 export default FilterDropdownShell;
