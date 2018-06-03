@@ -1,10 +1,3 @@
 #!/bin/bash
-$(npm bin)/parallelshell --verbose "npm run-script start-webdriver" "http-server ." "./script/run-build-and-then-test.sh"
-
-statusCode=$?
-if [[ ${statusCode} -eq 42 ]]
-then
-  exit 0
-else
-  exit ${statusCode}
-fi
+# Set the flag `--race` to kill all tasks when a task finished with zero.
+$(npm bin)/run-p --race "start-selenium" "serve" "build-and-test"

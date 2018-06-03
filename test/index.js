@@ -47,8 +47,8 @@ test('shows a repo', async t => {
   await waitUntilDoneLoading(browser)
   // Close the "Anonymous Browsing" modal
   if (!GITHUB_TOKEN) {
-    await browser.waitForExist('.modal-dialog button.close')
-    await browser.click('.modal-dialog button.close')
+    await browser.waitForExist('.modal-dialog button.close', 20 * 1000);
+    await browser.click('.modal-dialog button.close');
   }
   // Verify that an Issue exists
   // FIXME: When loading is done then the issues should be listed (now it has to wait for 10 seconds)
@@ -64,7 +64,6 @@ test('checks that the games load up', async t => {
   await browser.click('.nav-secret-game')
   await browser.waitForExist('.secret-game-is-playing', 30 * 1000) // It may take some time to fetch the game from the Gist
 })
-
 
 // test('shows the label-editing screen', async t => {
 //   await browser.click('.list-group > .repo-item > a')
