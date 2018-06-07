@@ -4,7 +4,7 @@
   "description": "kanban board using just GitHub",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint src --ext .js --ext .jsx",
+    "lint": "eslint src test --ext .js --ext .jsx",
     "start": "webpack-dev-server --host 0.0.0.0 --port 8080 --hot --progress",
     "serve": "http-server .",
     "build-and-test": "./script/run-build-and-then-test.sh",
