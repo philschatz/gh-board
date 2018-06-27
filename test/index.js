@@ -59,10 +59,10 @@ test('shows a repo', async t => {
   t.true(agoRegExp.test(await browser.getText('time.updated-at')));
 });
 
-test('checks that the games load up', async () => {
+test('checks that the games load up', async t => {
   await browser.waitForExist('.nav-secret-game');
   await browser.click('.nav-secret-game');
-  await browser.waitForExist('.secret-game-is-playing', 30 * 1000); // It may take some time to fetch the game from the Gist
+  t.true(await browser.waitForExist('.secret-game-is-playing', 30 * 1000)); // It may take some time to fetch the game from the Gist
 });
 
 // test('shows the label-editing screen', async t => {
