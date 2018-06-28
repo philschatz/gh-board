@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import React from 'react';
+import {Component} from 'react';
 import * as BS from 'react-bootstrap';
 
 import {getCardColumn} from '../helpers';
@@ -8,30 +8,33 @@ import CurrentUserStore from '../user-store';
 import IssueOrPullRequestBlurb from './issue-blurb';
 import LabelBadge from './label-badge';
 
-const MoveModal = React.createClass({
-  getInitialState() {
-    return {
-      showModal: false,
-      card: null,
-      primaryRepoName: null,
-      label: null,
-      unCheckedCards: {}
-    };
-  },
+class MoveModal extends Component {
+  state = {
+    showModal: false,
+    card: null,
+    primaryRepoName: null,
+    label: null,
+    unCheckedCards: {}
+  };
+
   componentDidMount() {
     IssueStore.on('tryToMoveLabel', this.onTryToMoveLabel);
     IssueStore.on('tryToMoveMilestone', this.onTryToMoveMilestone);
-  },
+  }
+
   componentWillUnmount() {
     IssueStore.off('tryToMoveMilestone', this.onTryToMoveMilestone);
-  },
-  onTryToMoveLabel(card, primaryRepoName, label) {
+  }
+
+  onTryToMoveLabel = (card, primaryRepoName, label) => {
     this.performMoveOrShowModal(card, primaryRepoName, label, null);
-  },
-  onTryToMoveMilestone(card, primaryRepoName, milestone) {
+  };
+
+  onTryToMoveMilestone = (card, primaryRepoName, milestone) => {
     this.performMoveOrShowModal(card, primaryRepoName, null, milestone);
-  },
-  performMoveOrShowModal(card, primaryRepoName, label, milestone) {
+  };
+
+  performMoveOrShowModal = (card, primaryRepoName, label, milestone) => {
     // If this card has related cards then show the modal.
     // Otherwise, just perform the move
     if (card.getRelated().length === 0) {
@@ -47,8 +50,9 @@ const MoveModal = React.createClass({
       this.setState({showModal: true, card, primaryRepoName, label, milestone, unCheckedCards: {}});
     }
 
-  },
-  onToggleCheckbox(card) {
+  };
+
+  onToggleCheckbox = (card) => {
     return () => {
       const {unCheckedCards} = this.state;
       const key = card.key();
@@ -59,8 +63,9 @@ const MoveModal = React.createClass({
       }
       this.setState({unCheckedCards});
     };
-  },
-  onClickMoveLabel() {
+  };
+
+  onClickMoveLabel = () => {
     const {card, label, unCheckedCards} = this.state;
     const allOtherCards = _.map(card.getRelated(), ({vertex}) => vertex);
     const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
@@ -71,9 +76,10 @@ const MoveModal = React.createClass({
     });
     promises.push(IssueStore.moveLabel(card.repoOwner, card.repoName, card.issue, label));
     Promise.all(promises).then(() => this.setState({showModal: false}));
-  },
+  };
+
   // TODO: Copy/pasta from above
-  onClickMoveMilestone() {
+  onClickMoveMilestone = () => {
     const {card, milestone, unCheckedCards} = this.state;
     const allOtherCards = _.map(card.getRelated(), ({vertex}) => vertex);
     const otherCardsToMove = _.difference(allOtherCards, _.values(unCheckedCards));
@@ -84,7 +90,8 @@ const MoveModal = React.createClass({
     });
     promises.push(IssueStore.moveMilestone(card.repoOwner, card.repoName, card.issue, milestone));
     Promise.all(promises).then(() => this.setState({showModal: false}));
-  },
+  };
+
   render() {
     const {container} = this.props;
     const {showModal, card, primaryRepoName, label, milestone, unCheckedCards} = this.state;
@@ -186,7 +193,7 @@ const MoveModal = React.createClass({
       return null;
     }
   }
-});
+}
 
 
 export default MoveModal;

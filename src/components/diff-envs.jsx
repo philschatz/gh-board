@@ -1,12 +1,12 @@
-import React from 'react';
+import {Component} from 'react';
 
 import Client from '../github-client';
 import Loadable from './loadable';
 import {MergedSinceInner} from './merged-since';
 
 
-const DiffEnvs = React.createClass({
-  requestRev(hostName) {
+class DiffEnvs extends Component {
+  requestRev = (hostName) => {
     return Client.getAnonymousOcto().fromUrl(`https://${hostName}/rev.txt`).read().then((textFile) => {
       const shaInfos = {};
       textFile.split('\n').forEach((line) => {
@@ -24,7 +24,8 @@ const DiffEnvs = React.createClass({
       });
       return shaInfos;
     });
-  },
+  };
+
   render() {
     let {startHost, endHost} = this.props.params;
 
@@ -71,7 +72,7 @@ const DiffEnvs = React.createClass({
       />
     );
   }
-});
+}
 
 
 export default DiffEnvs;

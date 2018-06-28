@@ -1,9 +1,8 @@
-import React from 'react';
+import {Component} from 'react';
 import _ from 'underscore';
 
 import {getFilters} from '../route-utils';
 import IssueStore from '../issue-store';
-import Client from '../github-client';
 import {getCardColumn, UNCATEGORIZED_NAME} from '../helpers';
 import Loadable from './loadable';
 import LabelBadge from './label-badge';
@@ -40,14 +39,16 @@ const filterByMilestoneAndKanbanColumn = (cards) => {
 };
 
 
-const GanttChart = React.createClass({
+class GanttChart extends Component {
   componentDidMount() {
     this.renderChart();
-  },
+  }
+
   componentDidUpdate() {
     this.renderChart();
-  },
-  renderChart() {
+  }
+
+  renderChart = () => {
     const {milestones, data, columns} = this.props;
     const now = new Date();
 
@@ -147,7 +148,8 @@ const GanttChart = React.createClass({
 
     changeTimeDomain('1week');
 
-  },
+  };
+
   render() {
     const {columns, columnCounts, milestones} = this.props;
 
@@ -172,18 +174,19 @@ const GanttChart = React.createClass({
       </div>
     );
   }
+}
 
-});
-
-const RepoKanbanShell = React.createClass({
-  componentWillMount() {
+class RepoKanbanShell extends Component {
+  UNSAFE_componentWillMount() {
     // Needs to be called before `render()`
     IssueStore.startPolling();
-  },
+  }
+
   componentWillUnmount() {
     IssueStore.stopPolling();
-  },
-  renderLoaded([allMilestones, cards]) {
+  }
+
+  renderLoaded = ([allMilestones, cards]) => {
     const {milestoneTitles} = getFilters().getState();
 
     let {data, columns, columnCounts} = filterByMilestoneAndKanbanColumn(cards);
@@ -212,7 +215,8 @@ const RepoKanbanShell = React.createClass({
     return (
       <GanttChart milestones={milestones} data={data} columns={columns} columnCounts={columnCounts}/>
     );
-  },
+  };
+
   render() {
     const {repoInfos} = getFilters().getState();
     // Get the "Primary" repo for milestones and labels
@@ -228,6 +232,6 @@ const RepoKanbanShell = React.createClass({
       />
     );
   }
-});
+}
 
 export default RepoKanbanShell;

@@ -20,32 +20,33 @@
 //   - otherwise, rename&recolor the label
 
 import _ from 'underscore';
-import React from 'react';
+import {Component} from 'react';
 import * as BS from 'react-bootstrap';
 import {PencilIcon, TrashcanIcon} from 'react-octicons';
 
 import IssueStore from '../issue-store';
-import Database from '../database';
 import Client from '../github-client';
 import {getFilters} from '../route-utils';
 
 import Loadable from './loadable';
 import LabelBadge from './label-badge';
 
-const LabelViewEdit = React.createClass({
-  getInitialState() {
-    return {isEditing: false, name: (this.props.label || {}).name};
-  },
-  onChangeName(e) {
+class LabelViewEdit extends Component {
+  state = {isEditing: false, name: (this.props.label || {}).name};
+
+  onChangeName = (e) => {
     this.setState({name: e.currentTarget.value});
-  },
-  onClickEdit() {
+  };
+
+  onClickEdit = () => {
     this.setState({isEditing: true});
-  },
-  onClickCancel() {
+  };
+
+  onClickCancel = () => {
     this.setState({isEditing: false, name: (this.props.label || {}).name});
-  },
-  onClickSave() {
+  };
+
+  onClickSave = () => {
     const {repoInfos, label} = this.props;
     const {name} = this.state;
     let message;
@@ -64,8 +65,9 @@ const LabelViewEdit = React.createClass({
       })
       .catch((err) => { console.error('Problem Changing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
-  },
-  onClickRemove() {
+  };
+
+  onClickRemove = () => {
     const {repoInfos, label} = this.props;
     let message;
     if (repoInfos.length > 2) {
@@ -83,7 +85,8 @@ const LabelViewEdit = React.createClass({
       })
       .catch((err) => { console.error('Problem Removing label in repos'); console.error(err); alert('There was a problem\n' + err.message); });
     }
-  },
+  };
+
   render() {
     const {label, skipPrimaryRepo} = this.props;
     let {repoInfos} = this.props;
@@ -174,29 +177,32 @@ const LabelViewEdit = React.createClass({
       );
     }
   }
-});
+}
 
-const BatchLabelsShell = React.createClass({
+class BatchLabelsShell extends Component {
   componentDidMount() {
     IssueStore.on('change', this.onChange);
     IssueStore.startPolling();
     IssueStore.fetchIssues(); // TODO: start up the polling in a better way
-  },
+  }
+
   componentWillUnmount() {
     IssueStore.off('change', this.onChange);
-  },
-  onChange() {
-    this.setState({});
-  },
+  }
 
-  renderLabels(labels, skipPrimaryRepo) {
+  onChange = () => {
+    this.setState({});
+  };
+
+  renderLabels = (labels, skipPrimaryRepo) => {
     return _.sortBy(labels, ({name}) => name).map(({label, repoInfos}) => {
       return (
         <LabelViewEdit key={label.name} label={label} repoInfos={repoInfos} skipPrimaryRepo={skipPrimaryRepo}/>
       );
     });
-  },
-  renderLoaded(repoInfosWithLabels) {
+  };
+
+  renderLoaded = (repoInfosWithLabels) => {
     const {repoOwner: primaryRepoOwner, repoName: primaryRepoName} = repoInfosWithLabels[0];
 
     const labelCounts = {};
@@ -309,7 +315,8 @@ const BatchLabelsShell = React.createClass({
         </BS.Row>
       </BS.Grid>
     );
-  },
+  };
+
   render() {
     const {repoInfos} = getFilters().getState();
     const promise = IssueStore.fetchConcreteRepoInfos(repoInfos)
@@ -325,6 +332,6 @@ const BatchLabelsShell = React.createClass({
       />
     );
   }
-});
+}
 
 export default BatchLabelsShell;

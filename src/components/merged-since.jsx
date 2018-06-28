@@ -1,4 +1,4 @@
-import React from 'react';
+import {Component} from 'react';
 import _ from 'underscore';
 import {Link} from 'react-router';
 
@@ -12,8 +12,8 @@ import Issue from './issue';
 
 const MERGE_PULL_REQUEST_MESSAGE_REGEXP = /^Merge\ pull\ request #(\d+)/;
 
-const MergedSince = React.createClass({
-  renderPullRequest(repoOwner, repoName, pr) {
+class MergedSince extends Component {
+  renderPullRequest = (repoOwner, repoName, pr) => {
     // TODO: Show the related issue for testing to see
     // const relatedIssues = getRelatedIssues(pr.body, repoOwner, repoName);
     // if (relatedIssues.length) {
@@ -35,7 +35,8 @@ const MergedSince = React.createClass({
       <Issue card={card}/>
     );
     // }
-  },
+  };
+
   render() {
     const {comparisons, repoInfos, startShas, endShas} = this.props;
 
@@ -83,70 +84,66 @@ const MergedSince = React.createClass({
       </IssueList>
     );
   }
-});
+}
 
-export const MergedSinceInner = React.createClass({
-  render() {
-    let {startShas, endShas, repoInfos} = this.props;
+export function MergedSinceInner(props) {
+  let {startShas, endShas, repoInfos} = props;
 
-    if (startShas.length !== repoInfos.length || endShas.length !== repoInfos.length) {
-      /*eslint-disable no-alert */
-      alert('The number of shas to compare does not match the number of repositories');
-      /*eslint-enable no-alert */
-    }
+  if (startShas.length !== repoInfos.length || endShas.length !== repoInfos.length) {
+    /*eslint-disable no-alert */
+    alert('The number of shas to compare does not match the number of repositories');
+    /*eslint-enable no-alert */
+  }
 
-    const allPromise = Promise.all(_.map(repoInfos, ({repoOwner, repoName}, i) => {
-      const startSha = startShas[i];
-      const endSha = endShas[i];
-      return Client.dbPromise().then(() => {
-        return new Promise((resolve, reject) => {
-          Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch()
-          .then(resolve)
-          .catch((err) => {
-            // Some repositories are private so don't error, just silently fail
-            resolve({_UNABLE_TO_COMPARE:true, commits:[]});
-          });
+  const allPromise = Promise.all(_.map(repoInfos, ({repoOwner, repoName}, i) => {
+    const startSha = startShas[i];
+    const endSha = endShas[i];
+    return Client.dbPromise().then(() => {
+      return new Promise((resolve) => {
+        Client.getOcto().repos(repoOwner, repoName).compare(startSha, endSha).fetch()
+        .then(resolve)
+        .catch(() => {
+          // Some repositories are private so don't error, just silently fail
+          resolve({_UNABLE_TO_COMPARE:true, commits:[]});
         });
-
       });
-    }));
 
-    return (
-      <Loadable
-        promise={allPromise}
-        renderLoaded={(comparisons) => <MergedSince comparisons={comparisons} repoInfos={repoInfos} startShas={startShas} endShas={endShas}/>}
-      />
-    );
+    });
+  }));
 
+  return (
+    <Loadable
+      promise={allPromise}
+      renderLoaded={(comparisons) => <MergedSince comparisons={comparisons} repoInfos={repoInfos} startShas={startShas} endShas={endShas}/>}
+    />
+  );
+
+}
+
+function MergedSinceShell({params}) {
+  let {startShas, endShas} = params;
+
+  startShas = startShas.split('|');
+  if (endShas) {
+    endShas = endShas.split('|');
+  } else {
+    endShas = [];
+    repoInfos.forEach(() => {
+      endShas.push('master');
+    });
   }
-});
-
-const MergedSinceShell = React.createClass({
-  render() {
-    let {startShas, endShas} = this.props.params;
-    const {repoInfos} = getFilters().getState();
-
-    startShas = startShas.split('|');
-    if (endShas) {
-      endShas = endShas.split('|');
-    } else {
-      endShas = [];
-      repoInfos.forEach(() => {
-        endShas.push('master');
-      });
-    }
-    return (
-      <MergedSinceInner startShas={startShas} endShas={endShas} repoInfos={repoInfos}/>
-    );
-  }
-});
+  return (
+    <MergedSinceInner startShas={startShas} endShas={endShas} repoInfos={repoInfos}/>
+  );
+}
 
 
-export const MergedSinceFormShell = React.createClass({
-  onChangeInput() {
+export class MergedSinceFormShell extends Component {
+  onChangeInput = () => {
     this.forceUpdate();
-  },
-  isValid() {
+  };
+
+  isValid = () => {
     const filters = getFilters();
     const {repoInfos} = filters.getState();
     let isValid = true;
@@ -155,8 +152,9 @@ export const MergedSinceFormShell = React.createClass({
       if (!node || !/[0-9a-f]+/.test(node.value)) { isValid = false; }
     });
     return isValid;
-  },
-  buildHref() {
+  };
+
+  buildHref = () => {
     const filters = getFilters();
     const {repoInfos} = filters.getState();
     const starts = repoInfos.map((repoInfo, i) => {
@@ -168,8 +166,9 @@ export const MergedSinceFormShell = React.createClass({
       return node.value;
     });
     return `${filters.url()}/${starts.join('|')}/${ends.join('|')}`;
-  },
-  renderRow({repoName}, i) {
+  };
+
+  renderRow = ({repoName}, i) => {
     return (
       <tr key={repoName}>
         <td>{repoName}</td>
@@ -177,7 +176,8 @@ export const MergedSinceFormShell = React.createClass({
         <td>To: <input ref={`end-${i}`} onChange={this.onChangeInput}/></td>
       </tr>
     );
-  },
+  };
+
   render() {
     const {repoInfos} = getFilters().getState();
     let showDiffsButton;
@@ -206,6 +206,6 @@ export const MergedSinceFormShell = React.createClass({
       </div>
     );
   }
-});
+}
 
 export default MergedSinceShell;

@@ -68,7 +68,7 @@ const cacheHandler = new class CacheHandler {
           let {methodAndPath, eTag, data, status} = entry;
           this.cachedETags[methodAndPath] = {eTag, data, status};
         })
-        .on('stats', (stats) => {
+        .on('stats', () => {
           this._db = db;
           resolve();
         });

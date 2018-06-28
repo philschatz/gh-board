@@ -7,7 +7,7 @@ import d3 from 'd3';
 
 export default function(milestoneCount) {
   const FIT_TIME_DOMAIN_MODE = 'fit';
-  const FIXED_TIME_DOMAIN_MODE = 'fixed';
+  const FIXED_TIME_DOMAIN_MODE = 'fixed'; // eslint-disable-line
 
   let margin = {
     top : 20,
@@ -31,6 +31,7 @@ export default function(milestoneCount) {
     return d.startDate + d.taskName + d.endDate;
   };
 
+  /* eslint-disable no-unused-vars */
   function rectTransform(d) {
     return 'translate(' + x(d.startDate) + ',' + y(d.taskName) + ')';
   };
@@ -44,6 +45,7 @@ export default function(milestoneCount) {
     const percent = prev / total;
     return 'translate(' + (x(task.startDate) + percent * (x(task.endDate)-x(task.startDate))) + ',' + y(task.taskName) + ')';
   };
+  /* eslint-enable no-unused-vars */
 
   let x = d3.time.scale().domain([ timeDomainStart, timeDomainEnd ]).range([ 0, width ]).clamp(true);
 
@@ -121,9 +123,9 @@ export default function(milestoneCount) {
       .selectAll('rect').data((task) => {task.segments.map((segment) => ({task, segment}));}).enter()
       .append('rect')
       .attr('class', 'milestone-segment')
-      .style(({task, segment}) => ({fill: segment.color}))
+      .style(({segment}) => ({fill: segment.color}))
       .attr('transform', rectTransformSegment)
-      .attr('height', (d) => y.rangeBand())
+      .attr('height', () => y.rangeBand())
       .attr('width', ({task, total, segment}) => {
         const percent = segment.count / total;
         return percent * (x(task.endDate) - x(task.startDate));
@@ -189,11 +191,11 @@ export default function(milestoneCount) {
       }).enter()
      .append('rect')
           //  .attr('class', 'milestone-segment')
-      .style('fill', ({task, segment}) => `#${segment.color}`)
+      .style('fill', ({segment}) => `#${segment.color}`)
           // .attr('class', ({task, segment}) => {return {fill: segment.color}; })
            // .transform()
       .attr('transform', rectTransformSegment)
-      .attr('height', (d) => y.rangeBand())
+      .attr('height', () => y.rangeBand())
       .attr('width', ({task, total, segment}) => {
         const percent = segment.count / total;
         return percent * (x(task.endDate) - x(task.startDate));

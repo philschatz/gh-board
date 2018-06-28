@@ -1,4 +1,4 @@
-import React from 'react';
+import {Component} from 'react';
 import _ from 'underscore';
 import {GraphIcon} from 'react-octicons';
 
@@ -9,15 +9,17 @@ import IssueStore from '../issue-store';
 import Loadable from './loadable';
 import moment from 'moment';
 
-const BurnupShell = React.createClass({
-  componentWillMount() {
+class BurnupShell extends Component {
+  UNSAFE_componentWillMount() {
     // Needs to be called before `render()`
     IssueStore.startPolling();
-  },
+  }
+
   componentWillUnmount() {
     IssueStore.stopPolling();
-  },
-  renderLoaded(cards) {
+  }
+
+  renderLoaded = (cards) => {
     function getDay(dateStr) {
       return Math.floor(Date.parse(dateStr) / 1000 / 60 / 60 / 24);
     }
@@ -80,7 +82,7 @@ const BurnupShell = React.createClass({
     // Get the total number of Issues
     const total = cards.length;
 
-    if (!cards.length) {
+    if (!total) {
       return (
         <span>Not showing a chart because there are 0 cards to show</span>
       );
@@ -230,7 +232,8 @@ const BurnupShell = React.createClass({
     return (
       <Chart className='burnup-chart' data={chartData} options={options} element='burnup'/>
     );
-  },
+  };
+
   render() {
     // TODO: send the current filter as an arg to `Database.fetchCards()` so it can smartly (using Indexes) fetch the cards
     const promise = Database.fetchCards(getFilters());
@@ -247,6 +250,6 @@ const BurnupShell = React.createClass({
       </div>
     );
   }
-});
+}
 
 export default BurnupShell;

@@ -1,4 +1,4 @@
-import React from 'react';
+import {Component} from 'react';
 import * as BS from 'react-bootstrap';
 import EtherpadClient from 'etherpad-lite-client';
 import {Link} from 'react-router';
@@ -7,29 +7,32 @@ import history from '../history';
 import Client from '../github-client';
 import IssueStore from '../issue-store';
 import UserStore from '../user-store';
-import Database from '../database';
 import {getFilters} from '../route-utils';
 
 import Loadable from './loadable';
 import GithubFlavoredMarkdown from './gfm';
 
-const EtherpadInner = React.createClass({
-  getDefaultProps() {
-    return {
-      hostName: 'https://openstax-pad.herokuapp.com',
-      secret: 'openstax'
-    };
-  },
-  getInitialState() {
-    return {isSaving: false, text: 'Please wait, it may take 30sec for the free Heroku site to spin up. See [Heroku Free Dynos](https://blog.heroku.com/archives/2015/5/7/heroku-free-dynos)'};
-  },
+class EtherpadInner extends Component {
+  static defaultProps = {
+    hostName: 'https://openstax-pad.herokuapp.com',
+    secret: 'openstax'
+  };
+
+  state = {
+    isSaving: false,
+    text: `Please wait, it may take 30sec for the free Heroku site to spin up.
+           See [Heroku Free Dynos](https://blog.heroku.com/archives/2015/5/7/heroku-free-dynos)`
+  };
+
   componentDidMount() {
     this.poll();
-  },
+  }
+
   componentWillUnmount() {
     clearTimeout(this.__timeout); // stop polling for the new markdown to generate the preview
-  },
-  poll() {
+  }
+
+  poll = () => {
     // Start polling
     Client.getAnonymousOcto().fromUrl(`${this.getUrl()}/export/txt`).read().then((text) => {
       this.setState({text});
@@ -43,17 +46,20 @@ const EtherpadInner = React.createClass({
         this.__timeout = setTimeout(this.poll, 2000);
       }
     });
-  },
-  getPadName() {
+  };
+
+  getPadName = () => {
     const {repoOwner, repoName, number} = this.props;
     return `github.com_${repoOwner}_${repoName}_${number}`;
-  },
-  getUrl() {
+  };
+
+  getUrl = () => {
     const {hostName, padName} = this.props;
     // from https://github.com/ether/etherpad-lite-jquery-plugin/blob/master/js/etherpad.js
     return `${hostName}/p/${padName}`;
-  },
-  loadIssueBody() {
+  };
+
+  loadIssueBody = () => {
     const {loadBody} = this.props;
 
     return loadBody().then((text) => {
@@ -74,8 +80,9 @@ const EtherpadInner = React.createClass({
       return text; // just in case someone uses this promise
 
     });
-  },
-  saveIssueBody() {
+  };
+
+  saveIssueBody = () => {
     const {text} = this.state;
     const {saveBody} = this.props;
     this.setState({isSaving: true});
@@ -86,12 +93,14 @@ const EtherpadInner = React.createClass({
     .catch((err) => {
       alert('There was an error saving.\n' + JSON.stringify(err));
     });
-  },
-  promptLoadIssueBody() {
+  };
+
+  promptLoadIssueBody = () => {
     if (confirm('Are you sure you want to discard the current collaborative edits and replace it with what is currently in GitHub?')) {
       this.loadIssueBody();
     }
-  },
+  };
+
   render() {
     const {title, repoOwner, repoName, getBody} = this.props;
     const {text, isSaving} = this.state;
@@ -133,15 +142,16 @@ const EtherpadInner = React.createClass({
       </div>
     );
   }
-});
+}
 
-const Etherpad = React.createClass({
-  renderLoaded() {
+class Etherpad extends Component {
+  renderLoaded = () => {
     const {title, padName, getBody, saveBody, loadBody, repoOwner, repoName} = this.props;
     return (
       <EtherpadInner title={title} padName={padName} getBody={getBody} saveBody={saveBody} loadBody={loadBody} repoOwner={repoOwner} repoName={repoName}/>
     );
-  },
+  };
+
   render() {
     let promise = IssueStore.loadCardsFromDatabase();
     if (this.props.promise) {
@@ -155,6 +165,6 @@ const Etherpad = React.createClass({
       </div>
     );
   }
-});
+}
 
 export default Etherpad;
