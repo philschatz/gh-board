@@ -40,7 +40,7 @@
     "url-loader": "^0.5.6",
     "webdriver-manager": "^11.1.0",
     "webdriverio": "^4.5.2",
-    "webpack": "^1.9.10",
+    "webpack": "^4.23.0",
     "webpack-dev-server": "^1.9.0"
   },
   "dependencies": {
