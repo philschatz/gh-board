@@ -71,7 +71,7 @@
     "react-dnd-html5-backend": "^2.1.2",
     "react-dom": "^15.3.2",
     "react-octicons": "0.0.5",
-    "react-router": "^3.0.0",
+    "react-router": "^4.4.0",
     "recordo": "^0.0.6",
     "ultramarked": "^1.7.0",
     "underscore": "^1.8.3"
