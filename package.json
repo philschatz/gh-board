@@ -36,7 +36,7 @@
     "less-loader": "^4.0.4",
     "node-libs-browser": "^2.0.0",
     "parallelshell": "^2.0.0",
-    "react-hot-loader": "^3.0.0-beta.6",
+    "react-hot-loader": "^4.12.8",
     "url-loader": "^0.5.6",
     "webdriver-manager": "^11.1.0",
     "webdriverio": "^4.5.2",
